@@ -14,7 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 const crypto = require('crypto');
-const { discoverPlugins, protocolOrder, CANONICAL_CLUSTERS } = require('./load-protocols');
+const { discoverPlugins, protocolOrder } = require('./load-protocols');
 const projectRoot = path.resolve(__dirname, '..');
 
 // ============================================================
@@ -95,25 +95,15 @@ function validateProtocolTables() {
 }
 
 // Curated first-release highlights (Phase A: no previous tag / empty-changelog fallback).
-// Drift-proof: the protocol count derives from PROTOCOL_ORDER and the cluster bullets are
-// parsed from CANONICAL_CLUSTERS (the single source also enforced against README by
-// static-checks). Per-protocol deficit → resolution lives in the Protocols table below,
-// so it is intentionally not duplicated in the cluster bullets here.
+// Drift-proof: the protocol count derives from PROTOCOL_ORDER. Per-protocol
+// deficit → resolution lives in the Protocols table below, so it is
+// intentionally not duplicated here.
 const FIRST_RELEASE_PROTOCOL_COUNT = PROTOCOL_ORDER.filter(key => PROTOCOL_METADATA[key]).length;
-const FIRST_RELEASE_CLUSTER_BULLETS = CANONICAL_CLUSTERS
-  .split(' · ')
-  .map(seg => {
-    const m = seg.match(/^(.+?) \((.+)\)$/);
-    return m ? `- **${m[1]}**: ${m[2]}` : `- ${seg}`;
-  })
-  .join('\n');
 const FIRST_RELEASE_HIGHLIGHTS = `## Highlights
 
 ### ${FIRST_RELEASE_PROTOCOL_COUNT} Epistemic Protocols
 
-Structure human-AI interaction quality at every decision point. Each protocol resolves a typed deficit:
-
-${FIRST_RELEASE_CLUSTER_BULLETS}
+Structure human-AI interaction quality at every decision point. Each protocol resolves a typed deficit, listed with its resolution in the Protocols table below. They are not a fixed sequence or grouping: reach for the one whose deficit you are in, and combine them as the situation calls for.
 
 ### Typed Deficit-Resolution System
 

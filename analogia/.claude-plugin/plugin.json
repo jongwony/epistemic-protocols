@@ -1,7 +1,7 @@
 {
   "name": "analogia",
-  "description": "Check what an analogy, framework, or earlier design carried to a case actually supports — /ground (ἀναλογία: a proportion)",
-  "version": "4.9.0",
+  "description": "See what a framework, analogy, or earlier design carried to a case supports — each conclusion's grounds, checks, defeaters, and verdict — /ground (ἀναλογία: a proportion)",
+  "version": "4.10.0",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

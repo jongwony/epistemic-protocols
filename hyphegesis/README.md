@@ -1,6 +1,6 @@
 # Hyphegesis — /conduct (ὑφήγησις)
 
-Conduct the method of a session's epistemic work before object-level cognition begins (ὑφήγησις: a leading-the-way)
+Take as yours how several lines of work run — order, combination, stopping points, where results go, what you entrusted and kept (ὑφήγησις: a leading-the-way)
 
 > [한국어](./README_ko.md)
 

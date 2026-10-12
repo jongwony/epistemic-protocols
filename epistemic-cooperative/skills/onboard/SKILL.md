@@ -47,21 +47,21 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 
 Compact mapping for inline use.
 
-| Protocol | Cluster | When to Use | Key Patterns |
-|----------|---------|-------------|-------------|
-| Aitesis `/inquire` | Planning | A task rests on missing context or unchecked assumptions — collect what the AI can reach on its own, hand back what it cannot as the user's own unknown | Hand-off or execution about to start on context nobody gathered; implicit requirements, environment dependencies, prior decisions (for prior-session recall → use `/recollect`) |
-| Euporia `/elicit` | Planning | Intent articulated but the decisions it turns on not yet named | Multi-axis intent without single axis-specific protocol fit; coordinates surface from the user's material, words, and the domain's usual decisions |
-| Heuresis `/ideate` | Planning | Object-level candidate field is empty or has prematurely converged — widen it before any selection is made | Zero entry questions (seed vs. blank inferred from the utterance), frame-first mode on a blank entry, no elimination or ranking during generation, every candidate tagged `origin ∈ {User, AI}` |
-| Proplasma `/preview` | Planning | Right before a direction commitment when the candidates cannot be judged from descriptions — contrast cheap discard-committed placeholder probes on AI-drafted axes relayed with their basis | Principle-delegation at direction gates ("go with the recommended direction"), option-set reconstruction instead of choosing, "I'd have to see it" decision stalls |
-| Hypotyposis `/sketch` | Planning | A form has to be made, intent cannot yet be settled from descriptions, and the user would recognize it on sight — relay what the next versions try, show each version before the standing, revise from the versions the user's words point to, end when they recognize one they met | "I'd know it when I see it", a plan stalled at its first draft, a description rewritten repeatedly instead of made |
-| Analogia `/ground` | Analysis | Auditing what a mapping being relied on licenses about a case, reading any account it can reach as evidence | Intended conclusions whose structural evidence or limits remain uncertain |
-| Periagoge `/induce` | Analysis | Concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction | 2+ concrete cases with essence intuition but no located abstraction — the question is what abstraction the given cases share, where `/ground` asks what carrying a given structure to a target supports, or tests an abstraction against its own cases |
-| Merismos `/apportion` | Execution | An autonomous goal is stated but its unit plan is uncompiled — cut it into coarse units at cited seams and close each unit before the run begins — a derived completion condition where one compiles, a recorded acceptance or a recorded reservation where none does — then hand the taken plan to the run | An unattended-run directive ("work through", "go through all", "run until done"), a goal that plainly exceeds one execution horizon, or a stop-hook being configured — each only shows an autonomous interval is *intended*, so the deciding check is whether the goal already carries units whose completion conditions are settled — closed by a determinate predicate, by a recorded acceptance, or by a recorded reservation; where one already does, `/apportion` shows that plan on its first sheet with that reading as a contrary ground |
-| Epharmoge `/contextualize` | Verification | A result — this session's or another's — is correct but may not fit where it lands or may leave out an intent the conversation stated | Misfits and omissions against everywhere the result lands and the session-built constraints, shown on one sheet |
-| Horismos `/bound` | Cross-cutting | Deciding what to delegate to AI | Provisional whole map, progressive examination, source-bound settlement and residual |
-| Anamnesis `/recollect` | Cross-cutting | Resolving vague recall of prior sessions or discussions — one session, or a line of work, topic, or settled concept spread across several | Cross-session state recovery via narrative recognition (Recognition over Retrieval); a unit above one session is composed from its deposits at read time |
-| Katalepsis `/grasp` | Cross-cutting | Something in play you can't follow yet, or nod along to unsure — a map of understanding over your purpose, each aspect saying what it rests on | User-intent grasp for a target present in context and quotable, whoever produced it — reviews, plans, papers, docs, or code changes |
-| Hyphegesis `/conduct` | Cross-cutting | Conducting the method of a multi-move work prospect before object-level cognition — order, independence, combination, stopping, where results go | Multi-move work with non-trivial conduct (migrations, staged investigations, entangled adversarial/parallel/synthesis); "how should I approach this whole thing?" meta-questions |
+| Protocol | When to Use | Key Patterns |
+|----------|-------------|-------------|
+| Aitesis `/inquire` | A task rests on missing context or unchecked assumptions — collect what the AI can reach on its own, hand back what it cannot as the user's own unknown | Hand-off or execution about to start on context nobody gathered; implicit requirements, environment dependencies, prior decisions (for prior-session recall → use `/recollect`) |
+| Euporia `/elicit` | Intent articulated but the decisions it turns on not yet named | Multi-axis intent without single axis-specific protocol fit; coordinates surface from the user's material, words, and the domain's usual decisions |
+| Heuresis `/ideate` | Object-level candidate field is empty or has prematurely converged — widen it before any selection is made | Zero entry questions (seed vs. blank inferred from the utterance), frame-first mode on a blank entry, no elimination or ranking during generation, every candidate tagged `origin ∈ {User, AI}` |
+| Proplasma `/preview` | Right before a direction commitment when the candidates cannot be judged from descriptions — contrast cheap discard-committed placeholder probes on AI-drafted axes relayed with their basis | Principle-delegation at direction gates ("go with the recommended direction"), option-set reconstruction instead of choosing, "I'd have to see it" decision stalls |
+| Hypotyposis `/sketch` | A form has to be made, intent cannot yet be settled from descriptions, and the user would recognize it on sight — relay what the next versions try, show each version before the standing, revise from the versions the user's words point to, end when they recognize one they met | "I'd know it when I see it", a plan stalled at its first draft, a description rewritten repeatedly instead of made |
+| Analogia `/ground` | Auditing what a mapping being relied on licenses about a case, reading any account it can reach as evidence | Intended conclusions whose structural evidence or limits remain uncertain |
+| Periagoge `/induce` | Concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction | 2+ concrete cases with essence intuition but no located abstraction — the question is what abstraction the given cases share, where `/ground` asks what carrying a given structure to a target supports, or tests an abstraction against its own cases |
+| Merismos `/apportion` | An autonomous goal is stated but its unit plan is uncompiled — cut it into coarse units at cited seams and close each unit before the run begins — a derived completion condition where one compiles, a recorded acceptance or a recorded reservation where none does — then hand the taken plan to the run | An unattended-run directive ("work through", "go through all", "run until done"), a goal that plainly exceeds one execution horizon, or a stop-hook being configured — each only shows an autonomous interval is *intended*, so the deciding check is whether the goal already carries units whose completion conditions are settled — closed by a determinate predicate, by a recorded acceptance, or by a recorded reservation; where one already does, `/apportion` shows that plan on its first sheet with that reading as a contrary ground |
+| Epharmoge `/contextualize` | A result — this session's or another's — is correct but may not fit where it lands or may leave out an intent the conversation stated | Misfits and omissions against everywhere the result lands and the session-built constraints, shown on one sheet |
+| Horismos `/bound` | Deciding what to delegate to AI | Provisional whole map, progressive examination, source-bound settlement and residual |
+| Anamnesis `/recollect` | Resolving vague recall of prior sessions or discussions — one session, or a line of work, topic, or settled concept spread across several | Cross-session state recovery via narrative recognition (Recognition over Retrieval); a unit above one session is composed from its deposits at read time |
+| Katalepsis `/grasp` | Something in play you can't follow yet, or nod along to unsure — a map of understanding over your purpose, each aspect saying what it rests on | User-intent grasp for a target present in context and quotable, whoever produced it — reviews, plans, papers, docs, or code changes |
+| Hyphegesis `/conduct` | Conducting the method of a multi-move work prospect before object-level cognition — order, independence, combination, stopping, where results go | Multi-move work with non-trivial conduct (migrations, staged investigations, entangled adversarial/parallel/synthesis); "how should I approach this whole thing?" meta-questions |
 
 ## Phase Execution
 
@@ -80,7 +80,7 @@ Begin with a concise welcome and path selection, reserving the full catalog for 
 
 **If Quick recommendation**: set `path = quick`, proceed to Phase 1.
 
-**If Browse all**: Present the protocol catalog (check installation status via Glob `{config_dir}/plugins/cache/epistemic-protocols/*/`, then render all core protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
+**If Browse all**: Present the protocol catalog (check installation status via Glob `{config_dir}/plugins/cache/epistemic-protocols/*/`, then render all core protocols from Data Sources as a numbered list with name + "When to Use" + installation badge). After catalog, present:
 - Text: Post-catalog path selection
 - Options:
   - Quick recommendation
@@ -92,14 +92,11 @@ Then proceed based on selection.
 
 **If Targeted + no protocol specified**:
 
-Present a condensed catalog as text output: render the Data Sources table grouped by Cluster, each protocol as `/command — When to Use description`.
+Present a condensed catalog as text output: render the Data Sources table as a numbered list, each protocol as `/command — When to Use description`.
 
 Then **Gate #2**:
 - Text: Protocol selection (type name or number in Other)
-- Options:
-  - Pre-execution (Planning) — /inquire, /elicit, /ideate, /preview, /sketch
-  - Analysis — /ground, /induce
-  - Execution / Verification / Cross-cutting — /apportion, /contextualize, /bound, /recollect, /conduct, /grasp
+- Options: one per Onboarding Pool protocol (`/elicit`, `/inquire`), each as `/command — When to Use`; any other protocol is chosen by name or number in Other
 
 **Gate #3** (Targeted only, session source):
 - Text: Session source selection
@@ -356,7 +353,7 @@ Immediate feedback after each question:
 
 ### Phase 6: Guide (Summary + Next Steps)
 
-Summarize the learning experience, connect it to the broader epistemic workflow, and provide actionable next steps.
+Summarize the learning experience, connect it to the rest of the protocol catalog, and provide actionable next steps.
 
 1. **Learning summary**:
    - Protocols experienced (trial) and tested (quiz)
@@ -365,9 +362,9 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 2. **Epistemic Map** (connect the dots):
 
-   Present the Epistemic Concern Clusters from `references/workflow.md`. Highlight protocols the user experienced with emphasis (e.g., bold or `★`).
+   Present the Data Sources catalog, each protocol as `/command — When to Use`, highlighting the protocols the user experienced with emphasis (e.g., bold or `★`). State that the protocols are not a fixed sequence or grouping: each is reached for when its deficit is the one in play, and they combine as the situation calls for.
 
-3. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore — preferring related protocols in the same cluster.
+3. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore — preferring one whose deficit, in the user's own sessions, arises next to the one just practised.
 
 4. **Advanced Usage** (bonus tips after main guide):
 

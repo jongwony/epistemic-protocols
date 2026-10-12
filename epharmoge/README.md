@@ -1,6 +1,6 @@
 # Epharmoge — /contextualize (ἐφαρμογή)
 
-Check a result against everywhere it lands, show every misfit on one sheet, and carry out the fixes you settle (ἐφαρμογή: application, fitting)
+See on one sheet where a result does not fit your situation, each misfit settled or withdrawn, the fixes carried out and reread (ἐφαρμογή: application, fitting)
 
 > [한국어](./README_ko.md)
 

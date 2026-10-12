@@ -1,6 +1,6 @@
 # Hypotyposis — /sketch (ὑποτύπωσις)
 
-Discover a form by marking what does not fit on concrete sketches until one is recognized (ὑποτύπωσις: an outline — the first sketch of a position, drawn before it can be stated)
+React to concrete versions until you can point at one you met and say: this is the form, for this purpose (ὑποτύπωσις: an outline — the first sketch of a position, drawn before it can be stated)
 
 > [한국어](./README_ko.md)
 

@@ -432,11 +432,12 @@ test("worker launch returns before detached work completes", async (t) => {
   assert.ok(pid > 0);
   assert.ok(Date.now() - started < 150);
 
+  const read = () => (fs.existsSync(marker) ? fs.readFileSync(marker, "utf8") : "");
   const deadline = Date.now() + 2_000;
-  while (!fs.existsSync(marker) && Date.now() < deadline) {
+  while (read() !== "done" && Date.now() < deadline) {
     await new Promise((resolve) => setTimeout(resolve, 20));
   }
-  assert.equal(fs.readFileSync(marker, "utf8"), "done");
+  assert.equal(read(), "done");
 });
 
 test("Codex outcome distinguishes legacy, unfinished, failure, retry, and retained success", (t) => {

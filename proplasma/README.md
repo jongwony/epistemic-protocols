@@ -1,6 +1,6 @@
 # Proplasma — /preview (πρόπλασμα)
 
-Expose direction unknowns through divergent-discard instantiation before commitment (πρόπλασμα: the preliminary clay model shaped before committing to marble)
+See what taking each candidate direction means for your purpose and on what ground, then settle the one you take (πρόπλασμα: the preliminary clay model shaped before committing to marble)
 
 > [한국어](./README_ko.md)
 

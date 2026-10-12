@@ -1,6 +1,6 @@
 ---
 name: sketch
-description: "Something has to be made that the user cannot describe but would recognize on sight: mark what does not fit on concrete sketches, revising until a form is recognized."
+description: "Something has to be made that the user cannot describe but would recognize on sight: they can then point at a version they met and say 'this is the form, for this purpose', seeing where each is."
 ---
 
 # Hypotyposis Protocol
@@ -371,7 +371,11 @@ axiom carriedOut : Context P → List (Evidence P)
 /-- The context with what `carriedOut` observed now appended. -/
 def settle (c : Context P) : Context P := c ++ (carriedOut c).map (·.val)
 
-/-- `RecognizedForm`: the version the person recognized, and the record built after what the
+/-- Once it has run, the person can say: for this purpose, this version — as I met it — is the
+    form; I see where it lives and where the versions I passed over are, what I asked done to any
+    of them that is not yet observed done, and which values rest on my own words, on the AI's
+    proposals I took, or on checked evidence.
+    `RecognizedForm`: the version the person recognized, and the record built after what the
     recognizing turn asked done was observed. It records their recognition of fit for the purpose
     as it stands, on what the version showed — a witness of what they recognized, not a
     specification of what to build. -/

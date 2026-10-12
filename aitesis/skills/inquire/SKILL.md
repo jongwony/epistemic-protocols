@@ -1,6 +1,6 @@
 ---
 name: inquire
-description: "A task rests on missing context or unchecked assumptions: collect every piece of context the AI can reach on its own, then hand back what it cannot reach as the user's own unknown."
+description: "A task rests on missing context or unchecked assumptions: the user can then recognize what was settled and from where, what rests on weak or unreached ground, and what only they decide."
 ---
 
 # Aitesis Protocol

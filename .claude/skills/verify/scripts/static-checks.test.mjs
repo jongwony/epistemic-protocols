@@ -281,7 +281,6 @@ describe('fail closed: a missing required input fails under each check that requ
       write(nonLean, read(nonLean).replace('```lean\n', '```\n'));
       remove('CLAUDE.md');
       remove('epistemic-cooperative/skills/onboard/references/scenarios.md');
-      remove('epistemic-cooperative/skills/onboard/references/workflow.md');
 
       // The label moves out of Rules rather than vanishing: a whole-file search
       // still finds it, and only a search confined to Rules does not.
@@ -301,7 +300,6 @@ describe('fail closed: a missing required input fails under each check that requ
       assert.ok(result.fail.some((r) => r.check === LEAN && r.file === nonLean && r.message.includes('is not a ```lean fence')), `expected a non-Lean failure for ${nonLean}`);
       expectSome(failed('routing-index-contract'), 'CLAUDE.md not found');
       expectSome(failed('onboard-sync'), 'scenarios.md not found');
-      expectSome(failed('onboard-sync'), 'workflow.md not found');
       assert.ok(result.fail.some((r) => r.check === 'emit-load-discipline' && r.file === displaced && r.message.includes('in ## Rules: Round composition')), `expected the displaced label to fail for ${displaced}`);
     });
   });

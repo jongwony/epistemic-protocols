@@ -1,6 +1,6 @@
 ---
 name: bound
-description: "The user cannot yet see what a task needs them to decide, or which decisions to keep or entrust: map the whole task first, then open each decision to the depth needed."
+description: "The user cannot yet see what a task needs decided, or what to keep or entrust: they can then see each decision, what rests on it, its cost if wrong, what settled it, and what stays open and with whom."
 ---
 
 # Horismos Protocol

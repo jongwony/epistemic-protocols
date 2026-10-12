@@ -1,7 +1,7 @@
 {
   "name": "horismos",
-  "version": "5.7.0",
-  "description": "See what a task needs decided, then choose what to keep or entrust — /bound (ὁρισμός: a bounding)",
+  "version": "5.8.0",
+  "description": "See the decisions a task rests on — what each costs if wrong, what settled it, what stays open and who settles it — /bound (ὁρισμός: a bounding)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Horismos",
-    "shortDescription": "See what a task needs decided, then choose what to keep or entrust — /bound (ὁρισμός: a bounding)",
-    "longDescription": "See what a task needs decided, then choose what to keep or entrust — /bound (ὁρισμός: a bounding)",
+    "shortDescription": "See the decisions a task rests on — what each costs if wrong, what settled it, what stays open and who settles it — /bound (ὁρισμός: a bounding)",
+    "longDescription": "See the decisions a task rests on — what each costs if wrong, what settled it, what stays open and who settles it — /bound (ὁρισμός: a bounding)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

@@ -2,7 +2,7 @@
 
 ## About This Project
 
-Epistemic Protocols is a Claude Code plugin marketplace for epistemic dialogue — protocols that structure specific decision points in human–AI interaction. The protocol table in `README.md` is the handbook (browse by cluster, command lookup); see `CLAUDE.md` for architecture.
+Epistemic Protocols is a Claude Code plugin marketplace for epistemic dialogue — protocols that structure specific decision points in human–AI interaction. The protocol table in `README.md` is the handbook (command lookup, each protocol's when-to-use); see `CLAUDE.md` for architecture.
 
 Contributors here design, refine, and verify the protocols themselves. This guide is for you.
 

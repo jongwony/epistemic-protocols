@@ -1,6 +1,6 @@
 ---
 name: contextualize
-description: "A result may not fit where it lands: check every place it reaches and every intent it was meant to carry, show every misfit and omission on one sheet, and carry out the fixes the user settles."
+description: "A result may not fit where it lands or may leave out what was asked: the user sees each misfit found, settled or withdrawn, and the fixes carried out and reread until nothing is open."
 ---
 
 # Epharmoge Protocol

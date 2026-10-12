@@ -1,6 +1,6 @@
 # Euporia (εὐπορία)
 
-Surface the decisions a rough intent turns on until you say it is aligned — `/elicit`.
+Reach an intent you can call yours, aligned enough — each recorded value on your own words, what you left open carried — `/elicit`.
 
 ## Overview
 

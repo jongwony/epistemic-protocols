@@ -1,6 +1,6 @@
 ---
 name: elicit
-description: "The user knows roughly what they want but not which decisions it turns on: trace them from their own material (code, rules, past sessions) and the domain's usual decisions; ask until it settles."
+description: "The user knows roughly what they want but not which decisions it turns on: they can then say 'this is my intent, aligned enough', each value on their own words, what they left open carried."
 ---
 
 # Euporia Protocol

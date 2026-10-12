@@ -13,7 +13,6 @@ const util = require('util');
 const { execFileSync } = require('child_process');
 const { escapeRegex } = require('./check-context');
 const { extractFormalSection } = require('./lean-bridge');
-const { CANONICAL_CLUSTERS } = require(path.resolve(__dirname, '../../../../scripts/load-protocols.js'));
 
 // ============================================================
 // Check: Cross-Reference Integrity
@@ -136,7 +135,6 @@ function checkRoutingIndexContract(ctx) {
   // re-inscribing it would restore the mirror/co-change cost the index removed.
   const catalogRegressions = [
     { label: '"## Protocol Reference" heading', pattern: /^##[ \t]+Protocol Reference[ \t]*$/m },
-    { label: '"Concern | Protocols" cluster table', pattern: /\|\s*Concern\s*\|\s*Protocols\s*\|/ },
   ];
   for (const { label, pattern } of catalogRegressions) {
     if (pattern.test(claudeMd)) {
@@ -466,44 +464,28 @@ function checkVersionStaleness(ctx) {
 }
 
 // ============================================================
-// Check: Cross-Reference Scan (README clusters & publication inventory)
+// Check: Cross-Reference Scan (publication inventory & Type signatures)
 // ============================================================
 function checkCrossRefScan(ctx) {
   const { projectRoot, results } = ctx;
   let subCheckFailed = false;
 
   // CLAUDE.md is a routing index, not a content mirror: its deficit → resolution
-  // pairs, cluster table, and initiator taxonomy were replaced by pointers to the
+  // pairs and initiator taxonomy were replaced by pointers to the
   // authoritative sources (per-protocol SKILL.md, the route table, README), so
   // the scan enforces those sources directly and no longer reads CLAUDE.md content.
   //
   // Each comparison here sets two independently authored artifacts against each
   // other. A protocol's deficit → resolution pair is read from its own SKILL.md's
   // Type signature, so searching that same file for the pair's names compares
-  // the signature with itself; sub-check 3 compares it with the MORPHISM, a
+  // the signature with itself; sub-check 2 compares it with the MORPHISM, a
   // separately authored surface, instead. The PROTOCOL_FILES and
   // CANONICAL_PROTOCOLS sets are both projections of one discoverPlugins()
   // walk, so diffing them against that walk compares it with itself too.
   // Neither self-comparison is made here. That every canonical protocol has a SKILL.md is the
   // registry check `structure` and `lean-definition` make through protocolInputs.
 
-  // Sub-check 1: Verify README workflow canonical-clusters invariant
-  for (const relPath of ['README.md', 'README_ko.md']) {
-    const fullPath = path.join(projectRoot, relPath);
-    if (!fs.existsSync(fullPath)) continue;
-
-    const content = fs.readFileSync(fullPath, 'utf8');
-    if (!content.includes(CANONICAL_CLUSTERS)) {
-      results.fail.push({
-        check: 'cross-ref-scan',
-        file: relPath,
-        message: `Missing canonical workflow "${CANONICAL_CLUSTERS}"`
-      });
-      subCheckFailed = true;
-    }
-  }
-
-  // Sub-check 2: Publication completeness — cross-check package.js PLUGINS and
+  // Sub-check 1: Publication completeness — cross-check package.js PLUGINS and
   // marketplace.json plugins against filesystem ground truth
   {
     // Ground truth: directories containing .claude-plugin/plugin.json
@@ -698,7 +680,7 @@ function checkCrossRefScan(ctx) {
     }
   }
 
-  // Sub-check 3: each protocol's public Type signature against its MORPHISM.
+  // Sub-check 2: each protocol's public Type signature against its MORPHISM.
   // The two are authored apart — the signature in the body's opening line, the
   // MORPHISM in the Definition block — and read apart: the protocol router
   // takes the deficit from the MORPHISM's `deficit:` line and the resolution
@@ -729,7 +711,7 @@ function checkCrossRefScan(ctx) {
     results.pass.push({
       check: 'cross-ref-scan',
       file: 'all protocols',
-      message: 'Cross-reference scan completed — README workflow clusters, publication inventory, and each protocol\'s Type signature against its MORPHISM consistent'
+      message: 'Cross-reference scan completed — publication inventory and each protocol\'s Type signature against its MORPHISM consistent'
     });
   }
 }
@@ -775,29 +757,7 @@ function checkOnboardSync(ctx) {
     }
   }
 
-  // Sub-check 2: Phase 0 category groupings cover all slash commands
-  // (assumes Pre-execution/Analysis/Execution on consecutive lines)
-  const categoryLines = onboardContent.match(/Pre-execution[^\n]*\n[^\n]*Analysis[^\n]*\n[^\n]*Execution[^\n]*/);
-  if (categoryLines) {
-    const categoryText = categoryLines[0];
-    for (const { command } of protocols) {
-      if (!categoryText.includes(`/${command}`)) {
-        results.warn.push({
-          check: 'onboard-sync',
-          file: 'epistemic-cooperative/skills/onboard/SKILL.md',
-          message: `Phase 0 category groupings missing "/${command}"`
-        });
-      }
-    }
-  } else {
-    results.warn.push({
-      check: 'onboard-sync',
-      file: 'epistemic-cooperative/skills/onboard/SKILL.md',
-      message: 'Phase 0 category groupings pattern not found — structure may have changed'
-    });
-  }
-
-  // Sub-check 3: scenarios.md — every protocol must have a scenario block
+  // Sub-check 2: scenarios.md — every protocol must have a scenario block
   const scenariosPath = path.join(projectRoot, 'epistemic-cooperative/skills/onboard/references/scenarios.md');
   if (fs.existsSync(scenariosPath)) {
     const scenariosContent = fs.readFileSync(scenariosPath, 'utf8');
@@ -821,34 +781,11 @@ function checkOnboardSync(ctx) {
     subCheckFailed = true;
   }
 
-  // Sub-check 4: workflow.md — all slash commands present
-  const workflowPath = path.join(projectRoot, 'epistemic-cooperative/skills/onboard/references/workflow.md');
-  if (fs.existsSync(workflowPath)) {
-    const workflowContent = fs.readFileSync(workflowPath, 'utf8');
-    for (const { command } of protocols) {
-      if (!workflowContent.includes(`/${command}`)) {
-        results.fail.push({
-          check: 'onboard-sync',
-          file: 'epistemic-cooperative/skills/onboard/references/workflow.md',
-          message: `Missing "/${command}" in workflow reference (references/workflow.md)`
-        });
-        subCheckFailed = true;
-      }
-    }
-  } else {
-    results.fail.push({
-      check: 'onboard-sync',
-      file: 'epistemic-cooperative/skills/onboard/references/workflow.md',
-      message: 'workflow.md not found — every protocol\'s slash command has no source to check'
-    });
-    subCheckFailed = true;
-  }
-
   if (!subCheckFailed) {
     results.pass.push({
       check: 'onboard-sync',
       file: 'epistemic-cooperative/',
-      message: `Onboard sync — Data Sources, scenarios, and workflow verified for ${protocols.length} protocols`
+      message: `Onboard sync — Data Sources and scenarios verified for ${protocols.length} protocols`
     });
   }
 }

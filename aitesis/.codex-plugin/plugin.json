@@ -1,7 +1,7 @@
 {
   "name": "aitesis",
-  "version": "8.8.0",
-  "description": "Collect what the AI can reach on its own, hand back the rest as the user's unknown — /inquire (αἴτησις: a requesting)",
+  "version": "8.9.0",
+  "description": "Recognize what the work rests on — what was settled and from where, what rests on weak or unreached ground, what only you decide — /inquire (αἴτησις: a requesting)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Aitesis",
-    "shortDescription": "Collect what the AI can reach on its own, hand back the rest as the user's unknown — /inquire (αἴτησις: a requesting)",
-    "longDescription": "Collect what the AI can reach on its own, hand back the rest as the user's unknown — /inquire (αἴτησις: a requesting)",
+    "shortDescription": "Recognize what the work rests on — what was settled and from where, what rests on weak or unreached ground, what only you decide — /inquire (αἴτησις: a requesting)",
+    "longDescription": "Recognize what the work rests on — what was settled and from where, what rests on weak or unreached ground, what only you decide — /inquire (αἴτησις: a requesting)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

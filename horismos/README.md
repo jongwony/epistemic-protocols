@@ -1,6 +1,6 @@
 # Horismos — /bound (ὁρισμός)
 
-Make the decisions in a task visible, then define what to retain, inspect, or entrust.
+See the decisions a task rests on — what each costs if wrong, what settled it, what stays open and who settles it.
 
 > [한국어](./README_ko.md)
 

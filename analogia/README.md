@@ -1,6 +1,6 @@
 # Analogia — /ground (ἀναλογία)
 
-Audit what an analogical mapping licenses (ἀναλογία: a proportion)
+See what a framework, analogy, or earlier design carried to a case supports — each conclusion's grounds, checks, defeaters, and verdict (ἀναλογία: a proportion)
 
 > [한국어](./README_ko.md)
 

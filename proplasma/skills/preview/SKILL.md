@@ -1,6 +1,6 @@
 ---
 name: preview
-description: "The user is about to commit to one of several directions that cannot be judged from their descriptions: build throwaway probes showing where they diverge, and decide on what is seen."
+description: "The user is about to commit to one of several directions they cannot judge from descriptions: they can then say what each means for their purpose, on what ground, and which one they take."
 ---
 
 # Proplasma Protocol

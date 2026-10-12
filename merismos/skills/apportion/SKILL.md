@@ -1,6 +1,6 @@
 ---
 name: apportion
-description: "One goal is about to be handed to an autonomous run: cut it into units that each fit one stretch of the run and carry their own conditions for when they are done."
+description: "One goal is about to be handed to an autonomous run: the user takes a plan of units with checks, accepted gaps and held judgments, seeing what needed settling first and what returns at the end."
 ---
 
 # Merismos Protocol

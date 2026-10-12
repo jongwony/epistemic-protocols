@@ -1,6 +1,6 @@
 ---
 name: grasp
-description: "Something in play — code, a document, a result, quotable in context — needs to be actually understood; the user can't follow it yet or nods along unsure: verify understanding step by step."
+description: "Something in play — code, a document, a result — the user can't follow yet or nods along to unsure: they can then say their understanding serves their purpose, on a map checked with them."
 ---
 
 # Katalepsis Protocol
