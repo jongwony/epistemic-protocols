@@ -424,9 +424,11 @@ structure Snapshot (P : Type) where
   dissent  : List String
 
 /-- Once it has run, the person can say: these are the decisions the task rests on, each with what
-    rests on it and what a wrong call costs; in my own words I settle this one, take candidates for
-    that one, entrust this one within these limits, and leave that one open — at the depth I find
-    sufficient, with what I have not settled shown as open. The resolution: the snapshot where the
+    rests on it and what a wrong call costs; I can see which are settled and on what grounds — my own
+    words, an earlier decision of mine, evidence, or a choice I entrusted within stated limits — and
+    what remains open, including who settles it where that too is open; the boundary stands either
+    on my acceptance at this depth or because nothing awaited my disposition, with no turn of mine
+    still owed and what was not reached named. The resolution: the snapshot where the
     boundary stands. -/
 structure DefinedBoundary (P : Type) where
   snapshot : Snapshot P

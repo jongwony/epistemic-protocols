@@ -282,9 +282,10 @@ axiom dissent : Context P → List String
 
 /-- Once it has run, the person can say: against everywhere this result lands and every intent it
     was meant to carry, I saw on one sheet every place it does not fit my situation, each with its
-    consequence for me, beside what fits and what could not be reached; what was open I answered
-    in one turn — fix it this way, leave it for this reason, stop using it, or it is not this
-    result's to fix — and I saw the fixes carried out and read again.
+    consequence for me, beside what fits and what could not be reached; each misfit was settled or
+    withdrawn — by my words (fix it this way, leave it for this reason, stop using it, or it is not
+    this result's to fix), by a grant of mine, or by evidence — and the fixes were carried out and
+    read again until nothing was left open.
     `ContextualizedExecution`: the context at closure, what the person is left with (`none` when a
     removal left nothing), the reach, and the dissent attached to the closure. -/
 structure ApplicabilityVerdict (P : Type) where
