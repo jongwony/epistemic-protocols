@@ -10,7 +10,7 @@ A modern reinterpretation of Greek ὑποτύπωσις (outline, sketch) — a
 
 ### The Core Problem
 
-Some forms cannot be specified before they are seen (`FitUnrecognized`): the plan stalls at its first draft, the description gets rewritten instead of made, and what you actually want only surfaces once something is in front of you. Good fit has no positive description of its own; each misfit is immediate and can be pointed at. The observable symptoms: "I'd know it when I see it", a first draft that never arrives, a description edited for the fourth time.
+Some forms cannot be specified before they are seen (`FitUnrecognized`): the plan stalls at its first draft, the description gets rewritten instead of made, and what you actually want only surfaces once something is in front of you. Good fit has no positive description of its own; each misfit can be pointed at. The observable symptoms: "I'd know it when I see it", a first draft that never arrives, a description edited for the fourth time.
 
 ### The Solution
 

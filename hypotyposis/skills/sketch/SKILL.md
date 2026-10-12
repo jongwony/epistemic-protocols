@@ -331,7 +331,7 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
 
 /-- **Your judgment**: the latest utterance, read whole on the context with it, calls for a version
     none shown embodies — a mark to revise, a bare rejection with no diagnosis among them; a
-    request; a fresh start; a combination to see; a change of medium; the means a held version was
+    request; a fresh start; a combination to see; a change of medium; the means a version was
     waiting on, supplied, or the person's word to go on in the medium at hand or without a
     reference that cannot be reached; or a value they set or replaced that no version shown
     embodies. A question about a version, answered as asked, and words that move nothing a version
