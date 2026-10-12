@@ -167,8 +167,8 @@ theorem standing_by_person (c : Context P) (e : Entry) (s : Standing)
     subst h
     exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
 
-/-- Every line a crystallized or withdrawn record carries is one the sheet it answered showed: the
-    record holds no line that sheet did not show. -/
+/-- Every provenance line of a crystallized or withdrawn record is a line the sheet the closing
+    turn followed showed. -/
 theorem record_lines_shown (declare : Context P → Response P) (c c' : Context P) (k : Candidate)
     (p : Provenance) :
     (p ∈ (crystallize declare c c' k).provenance → p.entry ∈ entries c) ∧
@@ -189,6 +189,18 @@ theorem record_standing_by_person (declare : Context P → Response P) (c c' : C
     ∃ src ok sup, standingOcc c' p.entry = .filled s src ok sup ∧
       (c'[src.idx]'src.lt).origin = .person := by
   simp only [crystallize, provenanceOf, List.mem_map] at hp
+  obtain ⟨e, _, rfl⟩ := hp
+  exact standing_by_person c' e s hs
+
+/-- Every line of a withdrawn record that carries a standing has it from a filled occurrence in the
+    context the ending turn was fused into, citing a turn the person sent: the record gives no line
+    a standing that no person's turn reached. -/
+theorem withdrawn_standing_by_person (declare : Context P → Response P) (c c' : Context P)
+    (p : Provenance) (hp : p ∈ (withdraw declare c c').provenance) (s : Standing)
+    (hs : p.standing = some s) :
+    ∃ src ok sup, standingOcc c' p.entry = .filled s src ok sup ∧
+      (c'[src.idx]'src.lt).origin = .person := by
+  simp only [withdraw, provenanceOf, List.mem_map] at hp
   obtain ⟨e, _, rfl⟩ := hp
   exact standing_by_person c' e s hs
 
