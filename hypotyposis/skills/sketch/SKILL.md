@@ -41,9 +41,9 @@ Hypotyposis(I) → start(c) → sketch(c, utterances), where c is the fused sess
     [does not bear on this run]   the session answers it; that answer stays in c; no gate of this run
     [the person recognizes v]     what their words ask done to the versions, observed → RecognizedForm
     [the person withdraws]        what their words ask done to the versions, observed → Withdrawn
-    [otherwise]                   what is gathered now enters c; what their words ask done to the
-                                  versions is done and observed; a production where their turn
-                                  calls for a version none shown embodies → round
+    [otherwise]                   what is gathered now enters c; a production where their turn
+                                  calls for a version none shown embodies; what their words ask
+                                  done to the versions is done and observed → round
   no utterance: the gate holds; nothing is recognized, written, or removed
 -/
 
@@ -188,11 +188,11 @@ structure Version where
 /-- **Your record**, read from the context: every version produced so far, cumulative. -/
 axiom versions : Context P → List Version
 
-/-- Where a version is. `places`: where observations show it now — empty for narration, which
-    lives in the session text, and for an artifact whose removal was observed. `pending`: what the
-    person's words asked done to it that no observation yet shows done — a destination to write it
-    to, a removal — each with the reason it failed where it was tried and failed. Agreement on a
-    home is not evidence that the move happened. -/
+/-- Where a version is. `places`: where observations show it now — not the session text a
+    narration lives in, so a narration has a place only where it was written and observed since;
+    none for an artifact whose removal was observed. `pending`: what the person's words asked done
+    to it that no observation yet shows done — a destination to write it to, a removal — each with
+    the reason where it failed. Agreement on a home is not evidence that the move happened. -/
 structure Whereabouts where
   places  : List Location
   pending : List String
@@ -280,12 +280,13 @@ def recordOf (c : Context P) : Record c :=
     dissent := dissent c }
 
 /-- **Your judgment**: the latest utterance bears on this run — a closing, a purpose, a mark or a
-    keep, a value set or taken, a request for a version or a change of medium, a question about a
-    version, a contrary ground answered — judged on what the whole utterance does, on the context
-    with it; other work in an utterance that bears on the run neither closes it nor answers its
-    judgments. An utterance about other work leaves the run as it stands: the session answers it,
-    saying briefly, where reading it as other work was unclear, that the run was left as it
-    stands; that answer stays in the context, and no gate of this run is raised. -/
+    keep, a value set or taken, a request for a version or a change of medium, a request to write,
+    move, or remove a version, a question about a version, a contrary ground answered — judged on
+    what the whole utterance does, on the context with it; other work in an utterance that bears
+    on the run neither closes it nor answers its judgments. An utterance about other work leaves
+    the run as it stands: the session answers it, saying briefly, where reading it as other work
+    was unclear, that the run was left as it stands; that answer stays in the context, and no gate
+    of this run is raised. -/
 axiom Reaches : Context P → Prop
 
 /-- How the person ends the run. -/
@@ -356,9 +357,11 @@ def consulted (c : Context P) : Context P := c ++ (gathered c).map (·.val)
 
 /-- **Your carrying out** of what the person's latest words ask done to existing versions — a
     version written to a home they named or took as the round showed it, a version removed at their
-    word — each done and observed; what was tried and failed stays pending in `whereabouts` with
-    its reason. No version is moved or removed without their words; one they said nothing about
-    stays where it is. Empty where their words ask nothing done. -/
+    word — each done and observed. A write that would replace an existing file fails, unwritten,
+    unless their words, or a round they took that showed the replacement, reach it. What failed
+    stays pending in `whereabouts` with its reason. No version is moved or removed without their
+    words; one they said nothing about stays where it is. Empty where their words ask nothing
+    done. -/
 axiom carriedOut : Context P → List (Evidence P)
 
 /-- The context with what `carriedOut` observed now appended. -/
@@ -418,8 +421,9 @@ structure AITurns (P : Type) where
 
 /-- **Your production** of the artifact versions under the relayed intent: each artifact as
     observed at creation, written to a scratch place outside the project tree unless the person's
-    words named a place for it, its location registered then; existing files stay unchanged. The
-    observation evidences that the artifact exists there, and nothing about whether it fits.
+    words named a place for it, its location registered then; existing files stay unchanged — where
+    the named place is one, the relay says so and where the version goes instead. The observation
+    evidences that the artifact exists there, and nothing about whether it fits.
     Guidance for every version a production makes, narration included, not steps it fixes: realize
     each in a medium in which the qualities the person's judgment concerns can be encountered;
     revise the retained versions the context calls for — a mark stays attached to what it marked,
@@ -439,9 +443,9 @@ def production (ai : AITurns P) (c : Context P) : Context P :=
 open Classical in
 /-- A turn about other work is answered by the session and leaves the run as it stands; a closing
     is read from the person's turn before anything is gathered, and its record is built after what
-    that turn asked done is observed; otherwise what is gathered now enters the context, what the
-    turn asks done to the versions is carried out, a production runs where the turn calls for a
-    version none shown embodies, and the round follows. -/
+    that turn asked done is observed; otherwise what is gathered now enters the context, a
+    production runs where the turn calls for a version none shown embodies, what the turn asks
+    done to the versions is carried out, and the round follows. -/
 def sketch (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
@@ -451,9 +455,10 @@ def sketch (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
     | some (.recognize v) => .recognized (recognizedOn f v)
     | some .withdraw      => .withdrawn (closedOn f)
     | none =>
-      let c₁ := settle (consulted f)
+      let c₁ := consulted f
       let c₂ := if ProductionRequested c₁ then production ai c₁ else c₁
-      sketch ai (c₂ ++ [(ai.respond c₂).val]) us
+      let c₃ := settle c₂
+      sketch ai (c₃ ++ [(ai.respond c₃).val]) us
 
 def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P :=
   let c₀ := consulted c
@@ -518,16 +523,16 @@ def grounding : Op → Annot × String
   | .detect            => (.sense, "Internal analysis: whether this is the protocol's case, as `notActivated` reads it")
   | .notActivatedRelay => (.interaction .extension, "before activation only: your `notActivated` reading, in plain words with its basis; not activated")
   | .gather            => (.observe, "artifact read, artifact search, record read, external fetch, environment run: what `gathered` reads or runs, now, as its doc states — at the start, after a production's relay and before any version is made, after its versions to check them, and on a turn that bears on the run and does not close it; what it returns enters the context as an evidence turn before the round that shows it")
-  | .intentRelay       => (.interaction .extension, "the production intent whole before any version is made — your reading of the purpose, marked as yours unless they said it, each part with what it rests on, a default marked as one; what the next versions try, and which retained versions each revises or that it starts fresh; how many and, where they will be offered as alternatives, how they differ; the medium each is realized in — one this session can realize — what it can show of the qualities the judgment concerns and what it cannot, and a better medium this session cannot supply named beside, with what it would show; where each will be — a scratch place outside the project tree unless the person's words named a place for it — and which of the two; and the reference a standard outside both parties' preference is checked against — each with the basis that chose it. On every later production the whole intent again with what changed since the last relay; marking a change by its cause is welcome, not required. It yields no turn and settles nothing; any of it can be sent back at the next round")
-  | .produce           => (.transform, "artifact write, environment run: each artifact version written at the place the relay named — a scratch place outside the project tree unless the person's words named one — its location registered at creation and observed there; existing files never modified; a narration version writes no file — it is your own turn (`narrate`), recorded on the version")
+  | .intentRelay       => (.interaction .extension, "the production intent whole before any version is made — your reading of the purpose, marked as yours unless they said it, each part with what it rests on, a default marked as one; what the next versions try, and which retained versions each revises or that it starts fresh; how many and, where they will be offered as alternatives, how they differ; the medium each is realized in — one this session can realize — what it can show of the qualities the judgment concerns and what it cannot, and a better medium this session cannot supply named beside, with what it would show; where each will be, as `produce` places it; and the reference a standard outside both parties' preference is checked against — each with the basis that chose it. On every later production the whole intent again with what changed since the last relay; marking a change by its cause is welcome, not required. It yields no turn and settles nothing; any of it can be sent back at the next round")
+  | .produce           => (.transform, "artifact write, environment run: what `produce` writes, as its doc states; a narration version writes no file — it is your own turn (`narrate`), recorded on the version")
   | .produceDelegate   => (.dispatch, "delegate (conditional, artifact versions): a version's write handed to execution, its location registered at creation; subordinate to the active runtime policy")
   | .assess            => (.sense, "Internal analysis: the purpose reading, what each version shows and does not, the standing, what stays unestablished, and your readings, over the whole fused context as it now stands")
-  | .present           => (.interaction .constitution, "the round, every round the first included. After a production, each new version first, as encountered in its medium — narration as written, an artifact shown or walked through at its location, saying what was observed there or that it was not observed and what was tried — and what this realization does not show of the qualities the person's judgment concerns; a realization that leaves the judged quality unexposed — a figure shown as its source, a still standing for motion — is said to be so. Then the standing: the purpose as the person said it, or else your reading of it, marked as yours, each part with what it rests on, and what it gained, lost, or changed since the last round and from which reaction, as `purpose` holds it; what the person's words set and on which version, and what of yours their turns took; what you propose not yet taken; what rests on a check or a read, with what it was checked against and what that leaves unchecked; what stays unestablished; what changed since the standing they last answered, the parts kept unchanged included; and where each version is — saying where a place will not outlive the session, as a scratch place will not — what the person asked done to it that is not observed done, with the reason where it failed, and the home a recognition would take where the context gives one. How the standing is drawn is the realization's; no invented completion measure or fixed sequence of phases is shown as where the run stands. Then your readings with their basis — a mark you read as about the rendering rather than the form, or a reading that the run has reached a case `notActivated` names — each closing nothing; and your contrary grounds, as `dissent` holds them. Where versions are offered as alternatives, how they differ and what each implies; where a pick was made side by side and the form will be used alone, consider showing it alone, and a reading that a difference only the side-by-side view made salient carried the pick is a contrary ground. Where a version the run needs calls for a capability this session cannot supply — a medium it cannot show, a reference it cannot reach — name that capability, and set side by side what the medium at hand already lets the person judge and what only the missing one would let them encounter; the run holds there until they supply it, change the medium, go on in the medium at hand, or end it. Where a consequential home the context leaves unresolved bears on a recognition, the round may ask it. Read the person's turn whole; where its intent was unclear, say in one line how you took it, asking nothing back where that settles nothing the person holds, and answer what they asked — a question about a version as asked. Every round ends on one opening the person can take, in their own words — mark or keep what they see, ask for a change, a combination, or another medium, take a version as the form, or end here")
+  | .present           => (.interaction .constitution, "the round, every round the first included. After a production, each new version first, as encountered in its medium — narration as written, an artifact shown or walked through at its location, saying what was observed there or that it was not observed and what was tried — and what this realization does not show of the qualities the person's judgment concerns; a realization that leaves the judged quality unexposed — a figure shown as its source, a still standing for motion — is said to be so. Then the standing: the purpose as the person said it, or else your reading of it, marked as yours, each part with what it rests on, and what it gained, lost, or changed since the last round and from which reaction, as `purpose` holds it; what the person's words set and on which version, and what of yours their turns took; what you propose not yet taken; what rests on a check or a read, with what it was checked against and what that leaves unchecked; what stays unestablished; what changed since the standing they last answered, the parts kept unchanged included; and where each version is — and whether a place will outlive the session, as far as what the session observes of it shows — what the person asked done to it that is not observed done, with the reason where it failed, and the home a recognition would take where the context gives one, and what writing there would replace. How the standing is drawn is the realization's; no invented completion measure or fixed sequence of phases is shown as where the run stands. Then your readings with their basis — a mark you read as about the rendering rather than the form, or a reading that the run has reached a case `notActivated` names — each closing nothing; and your contrary grounds, as `dissent` holds them. Where versions are offered as alternatives, how they differ and what each implies; where a pick was made side by side and the form will be used alone, consider showing it alone, and a reading that a difference only the side-by-side view made salient carried the pick is a contrary ground. Where a version the run needs calls for a capability this session cannot supply — a medium it cannot show, a reference it cannot reach — name that capability, and set side by side what the medium at hand already lets the person judge and what only the missing one would let them encounter; the run holds there until they supply it, change the medium, go on in the medium at hand, or end it. Where a consequential home the context leaves unresolved bears on a recognition, the round may ask it. Read the person's turn whole; where its intent was unclear, say in one line how you took it, asking nothing back where that settles nothing the person holds, and answer what they asked — a question about a version as asked. Every round ends on one opening the person can take, in their own words — mark or keep what they see, ask for a change, a combination, or another medium, take a version as the form, or end here")
   | .readTurn          => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there — a closing, a purpose, a mark or a keep, a value set or taken, a request for a version, a question — read whole against the fused context as it now stands, as `Reaches`, `ClosingSupported`, `StandingSupported`, and `ProductionRequested` read it")
-  | .carryOut          => (.transform, "artifact write, environment run: what `carriedOut` does, as its doc states — a version written to a home the person named or took as the round showed it, or removed at their word — each observed; what failed stays pending with its reason; nothing removed without their words")
+  | .carryOut          => (.transform, "artifact write, environment run: what `carriedOut` does, as its doc states; each write or removal observed")
   | .assemble          => (.sense, "Internal analysis: the terminal record, `recordOf`, built after what the closing turn asked done is observed, never before")
   | .converge          => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with RecognizedForm")
-  | .withdraw          => (.interaction .extension, "at the person's word, at any gate: what you took as withdrawn, and the partial record CONVERGENCE lists — every version with where it is and what is pending on it, what stays open, and the dissent")
+  | .withdraw          => (.interaction .extension, "at the person's word, at any gate: what you took as withdrawn, and the partial record CONVERGENCE lists")
   | .seam              => (.interaction .extension, "after a recognition or not activating, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; after a withdrawal, only to a next move the person declared with it; otherwise the record is handed on as session text, the dissent travelling in it; moving the form further into the work than the person named is their next move; every Constitution gate inside this protocol and the next fires unchanged")
 
 /-- The operations that write a version, by realization: an artifact through `.produce`, and

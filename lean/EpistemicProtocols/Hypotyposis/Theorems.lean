@@ -41,7 +41,7 @@ theorem unrelated_adds_no_gate (ai : AITurns P) (c : Context P) (u : Utterance P
 theorem unrequested_produces_nothing (ai : AITurns P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u))
     (hk : filledValue (closing (fuse c u)) = none)
-    (hp : ¬ ProductionRequested (settle (consulted (fuse c u)))) :
+    (hp : ¬ ProductionRequested (consulted (fuse c u))) :
     sketch ai c (u :: us) =
       sketch ai (settle (consulted (fuse c u)) ++
         [(ai.respond (settle (consulted (fuse c u)))).val]) us := by

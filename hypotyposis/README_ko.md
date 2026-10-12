@@ -47,9 +47,6 @@
 - Tohidi, M., Buxton, W., Baecker, R. & Sellen, A. (2006). Getting the right design and the design right. *CHI 2006* — *verified*. 안을 하나만 보여주면 평가가 부풀고 비판이 억제된다. 보일 버전 수가 기본값 1이 아니라 라운드마다 중계되고 다음 라운드에서 되돌려 보낼 수 있다는 결정.
 - Dow, S. et al. (2010). Parallel prototyping leads to better design results, more divergence, and increased self-efficacy. *ACM TOCHI* 17(4) — *verified*. 피드백 전에 만든 대안이 결과와 만드는 이의 몫을 모두 높인다. 대안이 라운드 일정에 고정되지 않고 라운드마다 중계되어 다음 라운드에서 되돌려 보낼 수 있다는 결정.
 - Wadinambiarachchi, S. et al. (2024). The effects of generative AI on design fixation and divergent thinking. *CHI 2024* — *verified*. 이른 구체물은 이후의 상상을 좁힌다. 무엇이든 만들기 전에 생산 의도를 근거와 함께 중계해 버전을 좁힌 것이 보이게 하고, 의도가 묻지 않은 반응도 받아들인다는 결정.
-- Sadler, D. R. (1989). Formative assessment and the design of instructional systems. *Instructional Science* 18(2) — *verified*. 품질은 기준 목록 없이도 판단되고, 간극을 좁히려면 참조에 대어 비교해야 한다. 진단 없는 맨 거절도 신호로 받고, 정답이 있는 성질은 보이기 전에 참조에 대어 확인한다는 결정.
-- Gentner, D. & Markman, A. B. (1997). Structure mapping in analogy and similarity. *American Psychologist* 52(1) — *verified*. 공유한 구조 안의 차이는 관련 없는 것들 사이의 차이보다 더 잘 눈에 띈다. 대안으로 내놓는 버전은 볼 수 있게 다르고, 지각적으로 다르지 않을 버전은 또 하나의 선택으로 내놓지 않는다는 결정.
-- Hsee, C. K., Loewenstein, G. F., Blount, S. & Bazerman, M. H. (1999). Preference reversals between joint and separate evaluations of options. *Psychological Bulletin* 125(5) — *verified*. 나란히 비교하면 고른 것을 홀로 쓸 때 사라지는 차이를 과대평가할 수 있다. 다른 것들 곁에서 골라 홀로 쓸 버전은 받기 전에 홀로 보일 수 있다는 결정.
 
 ## 설치
 
