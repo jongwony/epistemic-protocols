@@ -29,13 +29,14 @@ theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(collect c).map (·.val), rfl⟩
 
 /-- A crystallized abstraction comes only from a confirm — a person's turn, by `closed_by_person` —
-    and carries the goal and the candidate that confirm recognized. -/
+    fused onto the context it answered, and carries the goal and the candidate that confirm
+    recognized. -/
 theorem crystallized_on_confirm (respond declare : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : CrystallizedAbstraction P)
     (h : induce respond declare c us = .crystallized r) :
-    ∃ (c₁ : Context P) (g : String) (k : Candidate),
-      filledValue (closing c₁) = some (.confirm g k) ∧ r = crystallize declare c₁ g k ∧
-      r.goal = g ∧ r.candidate = k := by
+    ∃ (c₀ : Context P) (u : Utterance P) (g : String) (k : Candidate),
+      filledValue (closing (fuse c₀ u)) = some (.confirm g k) ∧
+      r = crystallize declare c₀ (fuse c₀ u) g k ∧ r.goal = g ∧ r.candidate = k := by
   induction us generalizing c with
   | nil => simp [induce] at h
   | cons u us ih =>
@@ -45,7 +46,7 @@ theorem crystallized_on_confirm (respond declare : Context P → Response P) (c 
     · split at h
       · rename_i g k hk
         cases h
-        exact ⟨_, g, k, hk, rfl, rfl, rfl⟩
+        exact ⟨c, u, g, k, hk, rfl, rfl, rfl⟩
       · cases h
       · exact ih _ h
 
@@ -125,6 +126,32 @@ theorem standing_by_person (c : Context P) (e : Entry) (h : standing c e ≠ .pr
   cases hc : standingOcc c e with
   | open_ _ => simp [hc, filledValue] at h
   | filled a src ok sup => exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
+
+/-- A value the crystallized record marks adopted was on a line the answered sheet showed, or a
+    person's turn had already taken it: the confirm adopts no line the answered sheet did not
+    show. -/
+theorem adopted_shown_or_taken (declare : Context P → Response P) (c c' : Context P) (g : String)
+    (k : Candidate) (p : Provenance) (hp : p ∈ (crystallize declare c c' g k).provenance)
+    (ha : p.standing = .adopted) :
+    p.entry ∈ entries c ∨
+      (standing c' p.entry = .adopted ∧
+        ∃ src ok sup, standingOcc c' p.entry = .filled (standing c' p.entry) src ok sup ∧
+          (c'[src.idx]'src.lt).origin = .person) := by
+  simp only [crystallize, provenance, List.map_map, List.mem_map, Function.comp_def] at hp
+  obtain ⟨e, _, rfl⟩ := hp
+  by_cases he : e ∈ entries c
+  · left
+    simp only [he, ite_true]
+    unfold adopt
+    split <;> exact he
+  · right
+    have heq : (if e ∈ entries c then adopt ⟨e, proposer c' e, standing c' e⟩
+        else ⟨e, proposer c' e, standing c' e⟩) = ⟨e, proposer c' e, standing c' e⟩ := by
+      simp [he]
+    rw [heq] at ha ⊢
+    dsimp only at ha
+    have hs : standing c' e ≠ .proposed := by rw [ha]; nofun
+    exact ⟨ha, standing_by_person c' e hs⟩
 
 /-- Words an open item carries in the open trace are a filled occurrence that cites a turn the
     person sent. -/
