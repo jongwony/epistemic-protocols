@@ -142,6 +142,8 @@ The `Qs` gate's formal correspondence to Horizontverschmelzung (horizon fusion) 
 
 ## Resolution Meta-Contract
 
+**Resolution type and solution sentence.** The resolution type is the codomain: the Lean type occupying the right-hand position of a protocol's Type line. It records the result a run yields without fixing what that result means — two resolutions can share a carrier and an admission while the person recognizes different things at each. That meaning is stated by the solution sentence, the first statement of the protocol's epistemic solution as `/rederive` derives it (`.claude/skills/rederive/SKILL.md`, step 3): one sentence of what the person can then say or recognize, whether or not completion takes a closing turn of theirs. In the contract the sentence lives in the doc comment of the judgment that supports the resolution, with no Lean structure added for it; a discovery surface — plugin description, README, route — carries the sentence itself rather than the term.
+
 Canonical protocol resolution names remain protocol-native: `MappingAssessment`, `DefinedBoundary`, `CrystallizedAbstraction`, `ResolvedEndpoint`, and peer names are not renamed to a generic terminal type. `DeficitResolved<D, R>` is a meta-contract that those canonical resolution types should satisfy when their formal surface is edited:
 
 ```
