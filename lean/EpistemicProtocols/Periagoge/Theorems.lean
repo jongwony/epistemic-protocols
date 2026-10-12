@@ -29,14 +29,15 @@ theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(collect c).map (·.val), rfl⟩
 
 /-- A crystallized abstraction comes only from a confirm — a person's turn, by `closed_by_person` —
-    fused onto the context it answered, whose sheet showed a candidate; the record is that sheet's,
-    with that candidate. -/
+    that cites the utterance just fused onto the context it answered, whose sheet showed a
+    candidate; the record is that sheet's, with that candidate. -/
 theorem crystallized_on_confirm (respond declare : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : CrystallizedAbstraction P)
     (h : induce respond declare c us = .crystallized r) :
-    ∃ (c₀ : Context P) (u : Utterance P) (k : Candidate),
-      filledValue (closing (fuse c₀ u)) = some .confirm ∧ shownCandidate c₀ = some k ∧
-      r = crystallize declare c₀ (fuse c₀ u) k := by
+    ∃ (c₀ : Context P) (u : Utterance P) (k : Candidate) (src : Cite (fuse c₀ u)),
+      (∃ ok sup, closing (fuse c₀ u) = .filled .confirm src ok sup) ∧
+      src.idx + 1 = (fuse c₀ u).length ∧
+      shownCandidate c₀ = some k ∧ r = crystallize declare c₀ (fuse c₀ u) k := by
   induction us generalizing c with
   | nil => simp [induce] at h
   | cons u us ih =>
@@ -44,16 +45,27 @@ theorem crystallized_on_confirm (respond declare : Context P → Response P) (c 
     split at h
     · exact ih _ h
     · split at h
-      · rename_i k hc hk
-        cases h
-        exact ⟨c, u, k, hc, hk, rfl⟩
+      · rename_i k hl hk
+        split at hl
+        · rename_i a src ok sup hc
+          split at hl
+          · rename_i hi
+            cases hl
+            cases h
+            exact ⟨c, u, k, src, ⟨ok, sup, hc⟩, hi, hk, rfl⟩
+          · cases hl
+        · cases hl
       · cases h
       · exact ih _ h
 
+/-- A withdrawn record comes only from a stop that cites the utterance just fused onto the context
+    it answered; the record is that context's sheet. -/
 theorem withdrawn_on_stop (respond declare : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : Withdrawn P) (h : induce respond declare c us = .withdrawn r) :
-    ∃ (c₀ : Context P) (u : Utterance P),
-      filledValue (closing (fuse c₀ u)) = some .stop ∧ r = withdraw declare c₀ (fuse c₀ u) := by
+    ∃ (c₀ : Context P) (u : Utterance P) (src : Cite (fuse c₀ u)),
+      (∃ ok sup, closing (fuse c₀ u) = .filled .stop src ok sup) ∧
+      src.idx + 1 = (fuse c₀ u).length ∧
+      r = withdraw declare c₀ (fuse c₀ u) := by
   induction us generalizing c with
   | nil => simp [induce] at h
   | cons u us ih =>
@@ -62,9 +74,16 @@ theorem withdrawn_on_stop (respond declare : Context P → Response P) (c : Cont
     · exact ih _ h
     · split at h
       · cases h
-      · rename_i hc
-        cases h
-        exact ⟨c, u, hc, rfl⟩
+      · rename_i hl
+        split at hl
+        · rename_i a src ok sup hc
+          split at hl
+          · rename_i hi
+            cases hl
+            cases h
+            exact ⟨c, u, src, ⟨ok, sup, hc⟩, hi, rfl⟩
+          · cases hl
+        · cases hl
       · exact ih _ h
 
 /-- A closing is a filled occurrence that cites a turn the person sent. -/
@@ -130,7 +149,7 @@ theorem crystallized_candidate_live (respond declare : Context P → Response P)
     (h : induce respond declare c us = .crystallized r) :
     ∃ c₀ : Context P, r.candidate.reading ∈ live c₀ ∧
       (r.candidate.reading, row c₀ r.candidate.reading) ∈ r.crossView := by
-  obtain ⟨c₀, u, k, _, hk, rfl⟩ := crystallized_on_confirm respond declare c us r h
+  obtain ⟨c₀, u, k, _, _, _, hk, rfl⟩ := crystallized_on_confirm respond declare c us r h
   have hl := shown_candidate_live c₀ k hk
   exact ⟨c₀, hl, live_reading_crossed c₀ k.reading hl⟩
 
