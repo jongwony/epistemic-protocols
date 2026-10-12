@@ -64,10 +64,13 @@ theorem each_step_continues_or_closes (ai : AITurns P) (c : Context P) (u : Utte
     · exact .inl ⟨_, h⟩
 
 theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
-    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
+    ∃ src ok sup, closing c = .filled k src ok sup ∧ (c[src.idx]'src.lt).origin = .person := by
   cases hc : closing c with
   | open_ _ => simp [hc, filledValue] at h
-  | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
+  | filled a src ok sup =>
+    simp only [hc, filledValue, Option.some.injEq] at h
+    subst h
+    exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
 
 /-- A recognized form comes only from a closing that recognizes a version — a person's turn, by
     `closed_by_person` — and its record is the one `recordOf` builds after what that turn asked
@@ -99,10 +102,13 @@ theorem withdrawn_on_withdraw (ai : AITurns P) (c : Context P) (us : List (Utter
 
 /-- A filled purpose stands on a turn the person sent. -/
 theorem purpose_by_person (c : Context P) (a : String) (h : filledValue (purpose c) = some a) :
-    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
+    ∃ src ok sup, purpose c = .filled a src ok sup ∧ (c[src.idx]'src.lt).origin = .person := by
   cases hc : purpose c with
   | open_ _ => simp [hc, filledValue] at h
-  | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
+  | filled b src ok sup =>
+    simp only [hc, filledValue, Option.some.injEq] at h
+    subst h
+    exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
 
 /-- Every value the person holds stands on a turn the person sent. -/
 theorem held_by_person (c : Context P) (h : Held c) :
