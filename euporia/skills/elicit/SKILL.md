@@ -262,7 +262,10 @@ structure Closed (P : Type) where
 def closed (c : Context P) : Closed P :=
   { context := c, record := record c, residual := residual c, dissent := dissent c }
 
-/-- `ResolvedEndpoint`: the intent the person recognized, as the record of the resolving turn. -/
+/-- Once it has run, the person can say: this is my intent, aligned enough — the decisions it
+    turns on were surfaced to me, each value in the record stands on my own words with who proposed
+    it and how it came to stand, and what I left open is carried as residual. `ResolvedEndpoint`:
+    the intent the person recognized, as the record of the resolving turn. -/
 structure ResolvedEndpoint (P : Type) where
   closure : Closed P
 
