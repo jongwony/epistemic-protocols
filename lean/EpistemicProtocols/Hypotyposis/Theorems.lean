@@ -20,7 +20,7 @@ variable {P : Type}
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 
-instance : Nonempty Whereabouts := ⟨⟨none, none⟩⟩
+instance : Nonempty Whereabouts := ⟨⟨[], []⟩⟩
 
 theorem silence (ai : AITurns P) (c : Context P) : sketch ai c [] = .holding c := by
   simp [sketch]
@@ -69,27 +69,25 @@ theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing
   | open_ _ => simp [hc, filledValue] at h
   | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
 
-/-- A recognized form comes only from a person's turn that recognizes a version, and its record is
-    the one `recordOf` builds after what that turn asked done was observed. -/
+/-- A recognized form comes only from a closing that recognizes a version — a person's turn, by
+    `closed_by_person` — and its record is the one `recordOf` builds after what that turn asked
+    done was observed. -/
 theorem recognized_on_person_closing (ai : AITurns P) (c : Context P) (us : List (Utterance P))
     (r : RecognizedForm P) (h : sketch ai c us = .recognized r) :
     ∃ (c₁ : Context P) (v : Nat), filledValue (closing c₁) = some (.recognize v) ∧
-      (∃ s : Cite c₁, (c₁[s.idx]'s.lt).origin = .person) ∧
-      r.version = v ∧ r.context = settle c₁ ∧ r = ⟨settle c₁, v, recordOf (settle c₁)⟩ := by
+      r = ⟨settle c₁, v, recordOf (settle c₁)⟩ := by
   induction us generalizing c with
   | nil => simp [sketch] at h
   | cons u us ih =>
     rcases each_step_continues_or_closes ai c u us _ h with ⟨c', h'⟩ | ⟨v, hk, h'⟩ | ⟨_, h'⟩
     · exact ih c' h'
     · cases h'
-      obtain ⟨s, _, hs⟩ := closed_by_person _ _ hk
-      exact ⟨_, v, hk, ⟨s, hs⟩, rfl, rfl, rfl⟩
+      exact ⟨_, v, hk, rfl⟩
     · cases h'
 
 theorem withdrawn_on_withdraw (ai : AITurns P) (c : Context P) (us : List (Utterance P))
     (r : Closed P) (h : sketch ai c us = .withdrawn r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .withdraw ∧
-      (∃ s : Cite c₁, (c₁[s.idx]'s.lt).origin = .person) ∧ r = closedOn c₁ := by
+    ∃ c₁ : Context P, filledValue (closing c₁) = some .withdraw ∧ r = closedOn c₁ := by
   induction us generalizing c with
   | nil => simp [sketch] at h
   | cons u us ih =>
@@ -97,11 +95,17 @@ theorem withdrawn_on_withdraw (ai : AITurns P) (c : Context P) (us : List (Utter
     · exact ih c' h'
     · cases h'
     · cases h'
-      obtain ⟨s, _, hs⟩ := closed_by_person _ _ hk
-      exact ⟨_, hk, ⟨s, hs⟩, rfl⟩
+      exact ⟨_, hk, rfl⟩
 
-/-- Every value on a record stands on a turn the person sent. -/
-theorem held_by_person (c : Context P) (h : Held c) (_ : h ∈ (recordOf c).values) :
+/-- A filled purpose stands on a turn the person sent. -/
+theorem purpose_by_person (c : Context P) (a : String) (h : filledValue (purpose c) = some a) :
+    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
+  cases hc : purpose c with
+  | open_ _ => simp [hc, filledValue] at h
+  | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
+
+/-- Every value the person holds stands on a turn the person sent. -/
+theorem held_by_person (c : Context P) (h : Held c) :
     (c[h.src.idx]'h.src.lt).origin = .person :=
   h.src.ok.trans h.byPerson
 
