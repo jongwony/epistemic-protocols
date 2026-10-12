@@ -309,9 +309,12 @@ def closed (c : Context P) : Closed P :=
   { context := c, record := record c, residual := residual c, dismissed := dismissed c,
     detections := detections c, dissent := dissent c }
 
-/-- `SufficientContext`: the collected context the work ahead reads — the facts settled with
-    their sources, what is still open with its reach, shown with the person's recognition not yet
-    established, the detections, and the dissent. What is open is not settled by it; work that
+/-- Once it has run, the person can recognize, for each thing the work ahead rests on, what the AI
+    settled and from which source, what it found only on ground it declares short or could not
+    reach, and what is theirs alone to decide — and can answer their share or correct that
+    reading. `SufficientContext`: the collected context the work ahead reads — the facts settled
+    with their sources, what is still open with its reach, shown with the person's recognition not
+    yet established, the detections, and the dissent. What is open is not settled by it; work that
     rests on an open item waits. -/
 structure SufficientContext (P : Type) where
   closure : Closed P

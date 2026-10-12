@@ -278,7 +278,10 @@ structure Closed (P : Type) where
 def closed (c : Context P) : Closed P :=
   { context := c, scope := scope c, map := map c, dissent := dissent c }
 
-/-- `VerifiedUnderstanding`: the person's closure over the map CONVERGENCE lists — what each
+/-- Once it has run, the person can say: what I now understand of this target serves my purpose —
+    I saw it on a map built with me and checked against the target's material and the results I
+    asked to see, and for what still waits on a check, I know what would settle it.
+    `VerifiedUnderstanding`: the person's closure over the map CONVERGENCE lists — what each
     aspect rests on, as they saw it when they closed. It records that closure, not a certificate
     of what was demonstrated, nor omniscient comprehension. -/
 structure VerifiedUnderstanding (P : Type) where

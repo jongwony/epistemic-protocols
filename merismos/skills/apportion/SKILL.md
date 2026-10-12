@@ -700,7 +700,11 @@ def emit (c : Context P) : Emission :=
 def handoffObligations : String :=
   "The run does what does not rest on the person without waiting for them and, when the plan has run, returns to them once with every unit's result; what rests on the person — a step that cannot be undone, where a doubt the plan carries, or one execution brings evidence for, bears on it, among them — comes back in that return with what did not proceed because of it, and nothing is decided for them."
 
-/-- `ConditionBearingUnitPlan`, with the authority the run will reach, the doubts the taking
+/-- Once it has run, the person can say: this goal runs in these units, each done when these checks
+    pass; what no check settles, what only I decide, and what the run may not do without me, I saw
+    on one sheet; I settled before leaving what had to be settled, and the rest comes back to me
+    once at the end with what did not proceed because of it; I took this plan as mine.
+    `ConditionBearingUnitPlan`, with the authority the run will reach, the doubts the taking
     carried, how each value came to stand, and the obligations every run of it carries. -/
 structure ConditionBearingUnitPlan where
   units             : List UnitEntry

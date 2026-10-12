@@ -331,7 +331,10 @@ structure TraceEntry where
 def discardTrace (c : Context P) : List TraceEntry :=
   (probes c).zipIdx.map fun (p, i) => ⟨i, p.direction, p.realized.location, disposition c i⟩
 
-/-- `DirectionalContrast`, assembled after cleanup from the harvest read before it: the purpose as
+/-- Once it has run, the person can say: for each candidate direction, this is what taking it
+    means for my purpose now, and whether that rests on a probe I saw, a description alone, my own
+    account, or evidence — and on this map I settled the direction I take.
+    `DirectionalContrast`, assembled after cleanup from the harvest read before it: the purpose as
     it stood, the harvest, the discard trace, and the dissent; `context` is what their readings
     point into, and probe detail stays session-local. -/
 structure DirectionalContrast (P : Type) where

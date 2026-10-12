@@ -423,7 +423,11 @@ structure Snapshot (P : Type) where
   limits   : String
   dissent  : List String
 
-/-- The resolution: the snapshot where the boundary stands. -/
+/-- Once it has run, the person can say: these are the decisions the task rests on, each with what
+    rests on it and what a wrong call costs; in my own words I settle this one, take candidates for
+    that one, entrust this one within these limits, and leave that one open — at the depth I find
+    sufficient, with what I have not settled shown as open. The resolution: the snapshot where the
+    boundary stands. -/
 structure DefinedBoundary (P : Type) where
   snapshot : Snapshot P
 

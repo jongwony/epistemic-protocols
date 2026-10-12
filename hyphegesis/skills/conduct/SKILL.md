@@ -399,7 +399,11 @@ def closed (c : Context P) : Closed P :=
     addressed. -/
 axiom source : Context P → Option NavigationBlock
 
-/-- `ConductedMethod`: the method handed off and what it carries — each field as the relayed map
+/-- Once it has run, the person can say: this work proceeds this way — these lines run in this
+    order or side by side, they combine like this, they stop here, and their results go there; I
+    recognize what I entrusted and what I kept, and I took this method as mine; what rests on me
+    goes no further without me and comes back to me at the end, while the rest runs on.
+    `ConductedMethod`: the method handed off and what it carries — each field as the relayed map
     showed it, `source` aside, which its producer supplies; the substrate reads what is uncertain against this record. `plan` is the method
     as the map the closing turn answered showed it, with what changed since that map, as the relayed
     map showed it — on a relay, the person's words for what they settled and your draft for the

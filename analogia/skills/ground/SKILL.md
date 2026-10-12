@@ -392,7 +392,12 @@ inductive Outcome (P : Type)
       an assessment; nothing more is collected while it waits, and evidence already collected
       stays. A run status, not a closure. -/
   | holding    (c : Context P) (relay : Response P)
-  /-- `MappingAssessment` over the collected context `c`, on which the question stands: every
+  /-- Once it has run, the person can say, for each conclusion they expect a framework, analogy,
+      earlier design, or abstraction to carry to the target: the source relation, or chain of
+      relations, that carries it; what was checked in the target and found, and where — on the
+      composite, for a chain; what difference would break it; and whether it holds and how far,
+      is blocked, or stays undetermined, with what is missing and who can reach it.
+      `MappingAssessment` over the collected context `c`, on which the question stands: every
       conclusion's verdict with its grounds and limits, every check with its warrant, scope,
       defeater and reach, the places reached and those not, and what is open as the person's own
       unknown. Not an endorsement of the mapping. -/
