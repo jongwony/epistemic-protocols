@@ -9,7 +9,7 @@ Discover what a form should be by encountering concrete versions and reacting to
 
 ## Definition
 
-**Hypotyposis** (ὑποτύπωσις): an outline or sketch — a first drawing of a position rather than its finished statement. A dialogical act for the moment when a form has to be made and the intent behind it cannot yet be settled from descriptions: the user can say what is wrong with a thing in front of them long before they can say what the thing should be, because good fit has no positive description of its own while each misfit can be pointed at (Alexander, 1964). So the user need not specify the form first. The AI relays what the next versions will try — what they revise, how many, the medium each is realized in and what that medium can and cannot show, and where each will be — each with its basis, and then makes them. Each round shows the new versions first, in a medium in which the qualities the user's judgment concerns can be encountered, and then the standing: what the user's words set and on which version, what of the AI's they took, what rests on a check, what stays unestablished, and what changed. The user reacts in their own words — a mark, a keep, a request, a value set — and the AI revises the versions those words point to into new versions, never regenerating one from a description of it. The AI's reading of the purpose grows from those reactions rather than being settled up front: what it brings in before any reaction is marked as a default, each later part names the reaction it came from, and each round shows how the reading widened. The run ends when the user takes one version they encountered as the form for their purpose, its home shown in the round or named in that same turn, or when they end it. Once it has run, the user can point at one version as they met it and say "this is the form, for this purpose", seeing where it lives, where the passed-over versions are, what they asked done to any of them that is not yet observed done, and which values rest on their own words, on the AI's proposals they took, or on checked evidence. The recognition establishes their judgment of fit for that purpose on what the version showed — not correctness against a standard outside preference, and not readiness for use.
+**Hypotyposis** (ὑποτύπωσις): an outline or sketch — a first drawing of a position rather than its finished statement. A dialogical act for the moment when a form has to be made and the intent behind it cannot yet be settled from descriptions: the user can say what is wrong with a thing in front of them long before they can say what the thing should be, because good fit has no positive description of its own while each misfit can be pointed at (Alexander, 1964). So the user need not specify the form first. The AI relays what the next versions will try — what they revise, how many, the medium each is realized in and what that medium can and cannot show, and where each will be — each with its basis, and then makes them. Each round shows the new versions first, in a medium in which the qualities the user's judgment concerns can be encountered, and then the standing: what the user's words set and on which version, what of the AI's they took, what rests on a check, what stays unestablished, and what changed. The user reacts in their own words — a mark, a keep, a request, a value set — and the AI revises the versions those words point to into new versions, never regenerating one from a description of it. The AI's reading of the purpose grows from those reactions rather than being settled up front: what it brings in before any reaction is marked as a default, each later part names the reaction or the gathered material it came from, and each round shows how the reading widened. The run ends when the user takes one version they encountered as the form for their purpose, its home shown in the round or named in that same turn, or when they end it. Once it has run, the user can point at one version as they met it and say "this is the form, for this purpose", seeing where it lives, where the passed-over versions are, what they asked done to any of them that is not yet observed done, and which values rest on their own words, on the AI's proposals they took, or on checked evidence. The recognition establishes their judgment of fit for that purpose on what the version showed — not correctness against a standard outside preference, and not readiness for use.
 
 ```lean
 /-!
@@ -174,8 +174,9 @@ axiom purpose : (c : Context P) → Occ (purposeCoord (P := P)) c
 abbrev Location := String
 
 /-- How a version is realized, carried on the version itself: narration in session text,
-    re-presented as written; or an artifact at the location registered when it was made. The medium it is met in, and what that medium can and cannot show of the
-    qualities the judgment concerns, are your reading of it. -/
+    re-presented as written; or an artifact at the location registered when it was made. The medium
+    it is met in, and what that medium can and cannot show of the qualities the judgment concerns,
+    are your reading of it. -/
 inductive Realization
   | narration (text : String)
   | artifact (location : Location)
@@ -258,14 +259,14 @@ axiom unestablished : Context P → List String
     check, a medium, a premise every version shares, a comparison, what a closing reaches, or the
     run as a whole — and what it rests on, and the person's answer to it where they gave one;
     shown before the person's turn it bears on, as `present` says, and raised again only on new
-    evidence. New evidence about a version they already judged, a defect in its rendering among
-    it, is shown as such in the next round. A closing over a contrary ground carries it. Empty
-    when there were none. -/
+    evidence. New evidence about a version they already judged — a defect in its rendering
+    included — is shown as such in the next round. A closing over a contrary ground carries it.
+    Empty when there were none. -/
 axiom dissent : Context P → List String
 
 /-- What the run has made and where it stands, read from one context: every version with where it
-    is and what is pending on it, the purpose, the values the person holds, the findings, what stays open, and the
-    dissent. -/
+    is and what is pending on it, the purpose, the values the person holds, the findings, what
+    stays open, and the dissent. -/
 structure Record (c : Context P) where
   versions      : List (Version × Whereabouts)
   purpose       : Occ (purposeCoord (P := P)) c
@@ -355,13 +356,13 @@ axiom gathered : Context P → List (Evidence P)
 /-- The context with what `gathered` read now appended. -/
 def consulted (c : Context P) : Context P := c ++ (gathered c).map (·.val)
 
-/-- **Your carrying out** of what the person's latest words ask done to existing versions — a
-    version written to a home they named or took as the round showed it, a version removed at their
-    word — each done and observed. A write that would replace an existing file fails, unwritten,
-    unless their words, or a round they took that showed the replacement, reach it. What failed
-    stays pending in `whereabouts` with its reason. No version is moved or removed without their
-    words; one they said nothing about stays where it is. Empty where their words ask nothing
-    done. -/
+/-- **Your carrying out** of what the person's latest words ask done to the versions shown before
+    that turn — a version written to a home they named or took as the round showed it, a version
+    removed at their word — each done and observed. A write that would replace an existing file
+    fails, unwritten, unless their words, or a round they took that showed the replacement, reach
+    it. What failed stays pending in `whereabouts` with its reason. No version is moved or removed
+    without their words; one they said nothing about stays where it is. Empty where their words ask
+    nothing done. -/
 axiom carriedOut : Context P → List (Evidence P)
 
 /-- The context with what `carriedOut` observed now appended. -/
@@ -493,10 +494,10 @@ RecognizedForm, the recognized version as it was encountered and where it is; at
 the purpose as it stands, marked as yours where you read it, each part with what it rests on; every
 version with where it is and what the person asked done to it that is not observed done, each
 failure with its reason; the values the person holds, each with who proposed it and whether their
-words set it or their turn took it; the findings with their sources; what stays unestablished; and the dissent, each item with
-what it bears on, what it rests on, and the person's answer where they gave one — a contrary ground
-first visible at the closing turn is shown here and attached, and the closure stands. Demonstrated,
-not asserted.
+words set it or their turn took it; the findings with their sources; what stays unestablished; and
+the dissent, each item with what it bears on, what it rests on, and the person's answer where they
+gave one — a contrary ground first visible at the closing turn is shown here and attached, and the
+closure stands. Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──

@@ -12,4 +12,4 @@ Each user-facing round bundles the current judgment, its nearest material (the v
 
 ## When whether text belongs before or inside the gate is in question
 
-Analysis, evidence, the versions, the standing, and any contrary ground the AI holds — a reading that no further encounter is owed included — are text output before each gate; the gate carries the opening and the implications needed to distinguish what the user can take. A production relay lays out the intent and yields no turn, so nothing after it asks for one.
+Analysis, evidence, the versions, the standing, and any contrary ground the AI holds — a reading that no further encounter is owed included — are text output before each gate; the gate carries the opening and the implications needed to distinguish what the user can take.
