@@ -55,7 +55,7 @@ FormIntentSeed
   → present         -- new versions first, as encountered; then the standing (focus)
   → fuse(u)         -- the person's turn joins the context whole
   → recognize       -- the person's closing on a version they encountered (`ClosingSupported`)
-  → carry_out       -- what their words ask done to existing versions, done and observed
+  → carry_out       -- what their words ask done to the versions shown before that turn, done and observed
   → assemble        -- the record, `recordOf`, built after what the closing turn asked done is observed
   → RecognizedForm
 requires: form_to_make(I)               -- read before activation (`notActivated`)
