@@ -441,13 +441,13 @@ def pass (c : Context P) : Context P := c ++ (collect c).map (·.val)
 /-- The crystallized abstraction: `c` is the context the confirm answered, its latest sheet the one
     the confirm followed, `k` the candidate that sheet showed, and `c'` that context with the
     confirm fused. Every view is that sheet's, read on `c`; the confirm's words reach the standing
-    of the lines it showed and the words on its open items, read on `c'`. The context ends in the
-    declaration. -/
+    of the lines it showed, the words on its open items, and the answers to its doubts, read on
+    `c'`. The context ends in the declaration. -/
 def crystallize (declare : Context P → Response P) (c c' : Context P) (k : Candidate) :
     CrystallizedAbstraction P :=
   { context := c' ++ [(declare c').val], goal := goal c, candidate := k,
     crossView := crossView c, cases := casesSection c, setAside := setAsideReadings c,
-    openTrace := openTrace c c' (some k.reading), dissent := dissent c,
+    openTrace := openTrace c c' (some k.reading), dissent := dissent c',
     provenance := provenanceOf c c' }
 
 /-- What the run hands on, split as `crystallize` splits it; no candidate was taken, so every live
@@ -455,7 +455,7 @@ def crystallize (declare : Context P → Response P) (c c' : Context P) (k : Can
 def withdraw (declare : Context P → Response P) (c c' : Context P) : Withdrawn P :=
   { context := c' ++ [(declare c').val], goal := goal c, candidate := shownCandidate c,
     crossView := crossView c, cases := casesSection c, setAside := setAsideReadings c,
-    openTrace := openTrace c c' none, dissent := dissent c, provenance := provenanceOf c c' }
+    openTrace := openTrace c c' none, dissent := dissent c', provenance := provenanceOf c c' }
 
 open Classical in
 /-- `respond` presents the sheet the Protocol section describes under "The sheet": the candidate
