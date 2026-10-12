@@ -1,15 +1,15 @@
 ---
 name: induce
-description: "Several concrete cases at hand seem to share something no one has named yet: pin down what they have in common, checked against the goal the name serves."
+description: "Several concrete cases at hand seem to share something no one has named yet: the user can then name it, say which cases it takes in and leaves out, and recognize it as serving their goal."
 ---
 
 # Periagoge Protocol
 
-Crystallize in-process abstraction by reading the goal it serves across the live readings of the cases, through examples, with a working candidate moved until it fits the user's intent. Type: `(AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction`.
+Name what several concrete cases share by crossing a working candidate with the goal it serves and with every live reading of the cases, until the user recognizes the abstraction as serving their goal. Type: `(AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction`.
 
 ## Definition
 
-**Periagoge** (περιαγωγή): A dialogical act of turning an in-process abstraction toward its crystallized form: AI states the goal the abstraction serves and a working candidate, crosses every live reading of what the cases share with that goal through examples, and moves goal and candidate with the user until the abstraction matches the user's intent. The user reaches the abstraction by reading goal and readings against each other, with every alternative in view (the Greek dialectical vocabulary supplies the source terms).
+**Periagoge** (περιαγωγή): a turning-around — a dialogical act for the moment when several concrete cases seem to share something no one has named yet. From the first sheet the AI states the goal the abstraction serves and a working candidate — a name and a rule — each marked as the user's words or its own reading, and crosses every live reading of what the cases share with that goal: which cases each reading takes in and which it leaves out, every case unfolded where it is judged. The user answers in their own words: they move the goal or the candidate, take what the AI showed, set a reading aside, recognize the abstraction, or end the run. Once it has run, the user can name what their cases share, say which cases it takes in and which it leaves out, and recognize it as serving their goal — their settlement for that goal, not proof that the reading is correct (the Greek dialectical vocabulary supplies the source terms).
 
 ```lean
 /-!
@@ -20,22 +20,28 @@ the material in front of you; its doc comment says what you judge there, and not
 block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract.
 -/
 
+
 /-! ── FLOW ──
 Periagoge(A) → start(c) → induce(c, utterances), where c is the fused session context:
-  start: scan where fewer than two cases or no essence → [not in process: not activated] → pass → sheet → Stop
-  each utterance: [bears on nothing in the run: the sheet holds] pass → [stop: withdrawn | route: routed |
-    confirm ∧ candidate live ∧ covered: crystallized | otherwise: the sheet again → Stop]
+  start: what bears on the cases is collected; then your reading, on it, that this is not this
+    protocol's case (`notActivated`), in plain words with its basis → not activated; otherwise
+    → sheet → Stop
+  next utterance u, read on fuse(c, u):
+    [does not bear on this run]                  the sheet holds
+    [the person recognizes goal g, candidate k]  crystallized
+    [the person ends the run]                    withdrawn
+    [otherwise]                                  what is collected now enters c → the sheet again → Stop
   no utterance: the sheet holds
 -/
 
 /-! ── MORPHISM ──
 A
   → CrystallizedAbstraction
-requires: in_process(A)                     -- judged at activation
+requires: in_process(A)                     -- read before activation (`notActivated`)
 deficit:  AbstractionInProcess              -- activation precondition
 preserves: instance_set(A)                  -- the cases are read, never rewritten; a case you found is shown as yours
 invariant: Goal Crossed with Readings through Examples, with Alternatives Maintained, over Single-Candidate Steering
-invariant: setting a reading aside, an open item's disposition, and every closing are the person's; your readings settle none of them
+invariant: setting a reading aside, taking a value you showed, an open item's words, and every closing are the person's; your readings settle none of them
 -/
 
 namespace Periagoge
@@ -102,9 +108,9 @@ noncomputable section
 variable {P : Type}
 
 /-- `A`, `AbstractionSeed`: the in-process state, read from the context — the cases, read and never
-    rewritten; the essence intuition, which a routed colimit-shaped signal seeds only as that
-    detection's reading; and any provisional name the person gave, which grounds the candidate's
-    name without fixing it. -/
+    rewritten; the essence intuition; and any provisional name the person gave, which grounds the
+    candidate's name without fixing it. What earlier work produced is context like any other; an
+    essence it suggests is your reading. -/
 abbrev AbstractionSeed (P : Type) := Context P
 
 /-- A concrete case: what it is, and where it sits. -/
@@ -113,11 +119,16 @@ structure Instance where
   context : String
   deriving DecidableEq  -- elab: lets the sheet gather each case once
 
-/-- **Your judgment**: an essence is sensed whose name, scope, or position is still unsettled, and
-    at least two concrete cases can be read together. An abstraction already located — one awaiting
-    comparison or validation — is not in process, and a set of cases and essence this session
-    already crystallized or withdrew stays inactive. -/
-axiom inProcess : Context P → Prop
+/-- **Your reading**, before any sheet: why this is not this protocol's case, in plain words with
+    its basis. The case is this protocol's where an essence is sensed whose name, rule, or reach is
+    still unsettled for the person and at least two concrete cases can be read together: a named
+    abstraction whose meaning is being reconsidered from its cases is in process; applying a fixed
+    meaning to a disputed case is not; a set of cases this session already crystallized or
+    withdrew stays inactive unless the person reopens it. Where no essence is sensed or no second
+    case was found, say what was searched and what would settle it. `none` where the case is this
+    protocol's. During a run, a reading that the case is no longer this protocol's is shown with
+    its basis among your doubts and closes nothing. -/
+axiom notActivated : Context P → Option String
 
 /-- **Your record**: the cases you found that the person's words have not yet taken up. The next
     sheet opens with them, marked as found by you, so the person sees them before their next turn;
@@ -143,15 +154,15 @@ structure Candidate where
   labelBasis : Option String
 
 /-- **Your proposal**, from the first sheet on: the working candidate, with every move the person
-    made since — a rename, a rule correction, a move to another reading, a merge. -/
-axiom candidate : Context P → Candidate
+    made since — a rename, a rule correction, a move to another reading, a merge. `none` where no
+    candidate is grounded yet; the sheet then says what is missing. -/
+axiom candidate : Context P → Option Candidate
 
 /-- **Your judgment**, made afresh on every pass: every reading of what the cases share drawn in this
     activation, the readings the person added included. A reading you would no longer hold stays
-    here: dropping it is your proposal, shown in the ledger and among your contrary grounds, until
-    the person sets it aside. A merge the person makes is a reading; a reading you judge the same
-    across passes keeps its name. A reading the person set aside comes back within the activation
-    only through their own words (`Reopened`), never as your proposal. -/
+    here: dropping it is your proposal, shown among what changed and among your doubts, until the
+    person sets it aside. A merge the person makes is a reading; a reading you judge the same
+    across passes keeps its name. A reading the person set aside stays here too, out of play. -/
 axiom readings : Context P → List Reading
 
 /-- **Your judgment**: the cited turn sets reading `r` aside, on this ground — their reason, carried
@@ -162,21 +173,19 @@ axiom SetAsideSupported : Reading → Context P → Turn P → String → Prop
 def setAsideCoord (r : Reading) : Coord P String :=
   { admits := (·.val = .person), supports := SetAsideSupported r }
 
-/-- **Your reading**: the person's setting-aside of `r`; `open_` until one reaches it. -/
+/-- **Your reading**, on the context as it now stands: the person's setting-aside of `r`; `open_`
+    until one reaches it, and again once their later words bring `r` back — never on your proposal
+    alone. Their earlier ground stays in the context and is shown beside the reading that came
+    back. -/
 axiom setAside : (c : Context P) → (r : Reading) → Occ (setAsideCoord (P := P) r) c
 
 def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option A
   | .open_ _     => none
   | .filled a .. => some a
 
-/-- **Your judgment**: the person's later words name reading `r` again after setting it aside; it
-    returns with their ground shown beside it. -/
-axiom Reopened : Context P → Reading → Bool
-
-/-- The readings still in play: a reading leaves only by the person's setting-aside, and returns
-    only by their words. -/
+/-- The readings still in play: a reading leaves only by the person's setting-aside. -/
 def live (c : Context P) : List Reading :=
-  (readings c).filter (fun r => (filledValue (setAside c r)).isNone || Reopened c r)
+  (readings c).filter (fun r => (filledValue (setAside c r)).isNone)
 
 /-- Every reading the person set aside, with their ground. -/
 def setAsideReadings (c : Context P) : List (Reading × String) :=
@@ -187,59 +196,52 @@ structure Example where
   phrase : String
   source : Instance
 
-/-- One row of the cross view: what the reading becomes against the goal — the check it yields —
-    an example it catches and one it misses, and where the working candidate sits on it. -/
+/-- One row of the cross view: what the reading becomes against the goal — the check it yields —,
+    the cases shown that it takes in and those it leaves out, and where the working candidate sits
+    on it. Either list may be empty where no grounded example exists. The row of the candidate's
+    own reading is what the candidate takes in and leaves out. -/
 structure Row where
   againstGoal   : String
-  catches       : Example
-  misses        : Example
+  catches       : List Example
+  misses        : List Example
   candidateHere : String
 
 /-- **Your judgment**: the row for reading `r`. Choose examples that separate the goal and the
     readings rather than ones every reading treats alike, drawn from the person's own domain: pair
     the cases that align most readily, not the most distant, since distance is what a separating
-    example is for; align what they carry slot by slot from the cases themselves; and draw a case
-    that tells readings apart. A row's examples stay as the last sheet showed them until a move of
-    the person's reaches them — a swap, a move of the goal, the candidate, or the reading they cross,
-    a correction, a case they brought; an example you would change otherwise is your proposal in the
-    ledger, not a swap. -/
+    example is for; align what they carry from the cases themselves; and draw a case that tells
+    readings apart. A row's examples stay as the last sheet showed them until a move of the
+    person's reaches them — a swap, a move of the goal, the candidate, or the reading they cross, a
+    correction, a case they brought; an example you would change otherwise is your proposal, shown
+    among what changed, not a swap. -/
 axiom row : Context P → Reading → Row
 
 /-- The cross view: every live reading with its row. -/
 def crossView (c : Context P) : List (Reading × Row) := (live c).map (fun r => (r, row c r))
 
-/-- A case unfolded on the sheet, a few lines: what happened, what was seen and what was not, how
-    it surfaced, and who brought it. -/
-structure CaseUnfolding where
-  happened  : String
-  seen      : String
-  unseen    : String
-  surfaced  : String
-  broughtBy : String
-
-/-- **Your reading** of case `i`, unfolded. -/
-axiom unfoldCase : Context P → Instance → CaseUnfolding
+/-- **Your reading** of case `i`, unfolded on the sheet in a few lines: what happened, what in it
+    bears on the goal and the readings, how it surfaced, and who brought it. -/
+axiom unfoldCase : Context P → Instance → String
 
 /-- Every case the cross view uses, once each. -/
 def rowCases (c : Context P) : List Instance :=
-  ((crossView c).flatMap (fun x => [x.2.catches.source, x.2.misses.source])).eraseDups
+  ((crossView c).flatMap (fun x => (x.2.catches ++ x.2.misses).map (·.source))).eraseDups
 
 /-- The cases section of the sheet: every case the cross view uses, unfolded, so the person never
     leaves the sheet to see one. -/
-def casesSection (c : Context P) : List (Instance × CaseUnfolding) :=
+def casesSection (c : Context P) : List (Instance × String) :=
   (rowCases c).map (fun i => (i, unfoldCase c i))
 
-/-- The candidate is read off a reading still in play. -/
-def CandidateLive (c : Context P) : Prop := (candidate c).reading ∈ live c
-
-open Classical in
 /-- The candidate the sheet shows: only while its reading is in play. Where the person set that
-    reading aside, you propose a candidate on a live reading; where none is live, the sheet shows
-    none. -/
+    reading aside, you propose a candidate on a live reading; where none stands on a live reading,
+    the sheet shows none and says what is missing. -/
 def shownCandidate (c : Context P) : Option Candidate :=
-  if CandidateLive c then some (candidate c) else none
+  match candidate c with
+  | some k => if k.reading ∈ live c then some k else none
+  | none   => none
 
-/-- **Your reading**: what the person said is still missing, each point in their words. -/
+/-- **Your reading**: the points still open, each in the words of whoever raised it — the person's
+    quoted, yours marked as yours. -/
 axiom missing : Context P → List String
 
 /-- What a run can still owe at its end, tagged by what it is. -/
@@ -247,26 +249,28 @@ inductive OpenItem
   | reading (r : Reading)
   | question (q : String)
 
-/-- The live readings the candidate does not take, and what the person said is still missing. -/
+/-- The live readings the candidate does not take, and the points still open. -/
 def openItems (c : Context P) (taken : Option Reading) : List OpenItem :=
   ((live c).filter (fun r => decide (some r ≠ taken))).map .reading ++ (missing c).map .question
 
-inductive OpenDisposition
-  | nonblocking
-  | deferred
+/-- **Your judgment**: the cited turn says how open item `i` stands for the person — for later work,
+    not blocking, still to settle, whatever it says — and these are its words about it, carried
+    verbatim; read against the context as it now stands, whatever form the turn takes. A turn
+    that says nothing of the item says nothing here. -/
+axiom OpenSupported : OpenItem → Context P → Turn P → String → Prop
 
-/-- **Your judgment**: the cited turn disposes of item `i` this way — not blocking where the closing
-    turn takes the run with the item shown open, deferred where it routes the item to later work
-    by name or unambiguous reference beside deferral words. Ambiguous deferral words defer
-    nothing. -/
-axiom DispositionSupported : OpenItem → Context P → Turn P → OpenDisposition → Prop
+/-- Only the person's turn speaks for an open item. -/
+def openCoord (i : OpenItem) : Coord P String :=
+  { admits := (·.val = .person), supports := OpenSupported i }
 
-/-- An open item is disposed of only by the person's turn. -/
-def dispositionCoord (i : OpenItem) : Coord P OpenDisposition :=
-  { admits := (·.val = .person), supports := DispositionSupported i }
+/-- **Your reading**: the person's words about item `i` from a turn of theirs that still reaches it;
+    `open_` where none does, and the item is shown as undisposed. -/
+axiom openWords : (c : Context P) → (i : OpenItem) → Occ (openCoord (P := P) i) c
 
-/-- **Your reading**: how item `i` stands; `open_` where no turn of the person's covers it. -/
-axiom disposition : (c : Context P) → (i : OpenItem) → Occ (dispositionCoord (P := P) i) c
+/-- The open trace: every open item, with the person's words about it, or `none` where no turn of
+    theirs reaches it. -/
+def openTrace (c : Context P) (taken : Option Reading) : List (OpenItem × Option String) :=
+  (openItems c taken).map (fun i => (i, filledValue (openWords c i)))
 
 /-- A line of the sheet, named as the sheet shows it. -/
 abbrev Entry := String
@@ -274,25 +278,41 @@ abbrev Entry := String
 /-- **Your reading**: the lines the sheet shows as the context now stands. -/
 axiom entries : Context P → List Entry
 
-/-- Who first put a value forward, kept apart from how it came to stand. -/
-inductive Proposer | ai | person
+/-- Who first put a value forward, kept apart from how it came to stand: the person, you, or a
+    source outside the conversation — what a tool returned, a peer's report, text of no known
+    sender. -/
+inductive Proposer | ai | person | source
 
 /-- **Your reading**: the position of the turn that first put forward what `e` holds now. -/
 axiom introducedAt : Context P → Entry → Nat
 
 def proposer (c : Context P) (e : Entry) : Proposer :=
   match c[introducedAt c e]? with
-  | some ⟨.person, _⟩ => .person
-  | _                 => .ai
+  | some ⟨.person, _⟩    => .person
+  | some ⟨.assistant, _⟩ => .ai
+  | _                    => .source
 
-/-- How a value came to stand: the person's turn set it; it is yours and still proposed; or a
-    confirm adopted yours. -/
+/-- How a value came to stand: the person's turn gave it in its own words; it is yours and still
+    proposed; or the person's turn took it as a sheet showed it. -/
 inductive Standing | set | proposed | adopted
 
-/-- **Your reading**: the person's turn set what `e` holds now, on the scope their words reach. -/
-axiom setByPerson : Context P → Entry → Bool
+/-- **Your judgment**, the record rule: the cited turn makes what `e` holds now stand, read against
+    the context as it now stands, on the scope its words reach — the turn gave it in its own words
+    (`set`), or took the value a sheet showed before that turn (`adopted`). A narrow answer stays
+    narrow: taking one correspondence takes that correspondence, not the sheet around it. A
+    question, a request to see something, or a bare mention makes nothing stand; a value no turn
+    of the person's reached stays your proposal, however long it has gone unchallenged. -/
+axiom StandingSupported : Entry → Context P → Turn P → Standing → Prop
 
-def standing (c : Context P) (e : Entry) : Standing := if setByPerson c e then .set else .proposed
+/-- Only the person's turn makes a value stand. -/
+def standingCoord (e : Entry) : Coord P Standing :=
+  { admits := (·.val = .person), supports := StandingSupported e }
+
+/-- **Your reading**: the person's turn that makes what `e` holds now stand; `open_` while none
+    reaches it. -/
+axiom standingOcc : (c : Context P) → (e : Entry) → Occ (standingCoord (P := P) e) c
+
+def standing (c : Context P) (e : Entry) : Standing := (filledValue (standingOcc c e)).getD .proposed
 
 structure Provenance where
   entry    : Entry
@@ -302,74 +322,35 @@ structure Provenance where
 def provenance (c : Context P) : List Provenance :=
   (entries c).map (fun e => ⟨e, proposer c e, standing c e⟩)
 
-/-- A confirm adopts what was still proposed. -/
+/-- A confirm adopts every value the sheet it answered showed that was still proposed; the closing
+    turn is what it stands on. -/
 def adopt (p : Provenance) : Provenance :=
   match p.standing with
   | .proposed => { p with standing := .adopted }
   | _         => p
 
-/-- What a ledger line records. -/
-inductive LedgerKind
-  /-- the person's own move -/
-  | personEdit
-  /-- a value you re-drew because a move forces it -/
-  | necessary
-  /-- a value you re-drew, a case you found, or a reading you dropped, because you propose it -/
-  | proposal
-
-/-- One change since the last sheet. -/
-structure LedgerLine where
-  change : String
-  cause  : Option Entry
-  kind   : LedgerKind
-
-/-- **Your record**: what the latest turn changed, the person's moves first. -/
-axiom ledger : Context P → List LedgerLine
-
-/-- The one move a sheet asks about; stopping and going elsewhere stay open on every sheet. -/
-inductive Move
-  | narrowGoal
-  | widenGoal
-  /-- move the candidate onto another reading -/
-  | moveCandidate (to : Reading)
-  /-- merge two readings into one -/
-  | merge (a b : Reading)
-  /-- swap an example on a reading's row for one that separates better -/
-  | swapExample (r : Reading)
-  | confirm
-  /-- every reading drawn so far was set aside: name a distinction the readings missed, read
-      another set of cases, or move the goal -/
-  | exhausted
-
-/-- **Your selection** of the move to ask about: the one whose answer would most change how goal and
-    readings cross. Ask for a confirm only where the candidate fits the goal on every example shown;
-    where an example could still separate it, that example comes first. -/
-axiom selectMove : Context P → Move
-
-open Classical in
-/-- The move the sheet asks about. -/
-def focus (c : Context P) : Move := if live c = [] then .exhausted else selectMove c
-
-/-- **Your record**: the contrary grounds you showed before the person's answers — a reading the
-    examples back better than the candidate's, a goal the candidate misses on an example shown, a
-    case you would weigh otherwise — attached to the closing when the person closes over them;
-    empty when there were none. Your reading never refuses a confirm: a confirm over it carries it
-    as dissent. -/
+/-- **Your record**: your doubts, each with what it touches and what it rests on, shown before the
+    person's turn it bears on, with the person's answer to it where they gave one; one raised
+    before is raised again only on new evidence. Your reading never refuses a closing: a close over
+    a doubt carries it — accepted, evidentially disputed. Empty when there were none. -/
 axiom dissent : Context P → List String
 
 /-- How the person ends the run. -/
 inductive Closing
-  /-- confirm the goal and the candidate as the sheet shows them -/
-  | confirm
-  /-- stop here -/
+  /-- recognize this goal and this candidate as what they mean -/
+  | confirm (goal : String) (candidate : Candidate)
+  /-- end here with no abstraction recognized -/
   | stop
-  /-- go on to the protocol the person names -/
-  | route (target : String)
 
-/-- **Your judgment**: the cited turn closes the run this way, read against the context as it now
-    stands, the order of its turns included: a closing said before a later sheet was presented was
-    answered by that sheet, so a confirm reaches only the sheet it followed. Whatever form the turn
-    takes, a move, a correction, or a rename closes nothing; "not yet" keeps the run open. -/
+/-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest sheet closes
+    nothing — closes the run this way, read whole against the context as it now stands and the
+    sheet it followed, whatever form it takes. `confirm g k`: the turn recognizes goal `g` and
+    candidate `k` as what the person means — the sheet's, or as the same turn renamed or corrected
+    them — on the scope its words reach; it takes what that sheet showed, with no second
+    permission. `stop`: the turn ends the run without recognizing an abstraction, for whatever
+    reason, given or not. "Not yet", a move, or a question closes nothing; silence, other work, and
+    your own reading that the candidate fits close nothing. Where the turn's intent is unclear, it
+    closes nothing. -/
 axiom ClosingSupported : Context P → Turn P → Closing → Prop
 
 /-- Only the person closes. -/
@@ -379,49 +360,47 @@ def closeCoord : Coord P Closing :=
 /-- **Your reading**: the person's closing; `open_` until one reaches it. -/
 axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
 
-/-- **Your judgment**, the adoption condition: everything a confirm would take was shown on the sheet
-    the confirm answered — the goal with who set it, the candidate, every live reading's row, every
-    case the rows use unfolded, the readings set aside with their grounds, every case with who
-    brought it — together with your
-    contrary grounds. A confirm adopts the goal as shown. Where anything would be taken unseen, the
-    sheet is drawn again with the whole basis. -/
-axiom Covered : Context P → Prop
-
 /-- **Your judgment**: the latest utterance bears on this run — a move, a correction, a case, a
-    rename, a closing, a question about the sheet. An utterance about other work leaves the run as
-    it stands. -/
+    rename, a value taken, a closing, a question about the sheet. An utterance about other work
+    leaves the run as it stands. -/
 axiom Reaches : Context P → Prop
 
-/-- `CrystallizedAbstraction`: the person's confirm over a covered sheet whose candidate is read off
-    a live reading. -/
+/-- Once it has run, the person can name what their cases share, say which cases it takes in and
+    which it leaves out, and recognize it as serving their goal.
+    `CrystallizedAbstraction`: the goal and the candidate the person's confirm recognized, with the
+    cross view, the cases unfolded, the readings set aside, the open trace, the doubts, and every
+    value with who proposed it and how it stands. It records the person's settlement for their
+    goal, not proof that the reading is correct. -/
 structure CrystallizedAbstraction (P : Type) where
   context    : Context P
   goal       : String
   candidate  : Candidate
   crossView  : List (Reading × Row)
-  cases      : List (Instance × CaseUnfolding)
+  cases      : List (Instance × String)
   setAside   : List (Reading × String)
-  openTrace  : List OpenItem
+  openTrace  : List (OpenItem × Option String)
   dissent    : List String
   provenance : List Provenance
 
-/-- What a run established when the person stops it or goes elsewhere, so a later run resumes from
-    it; the goal, the candidate, and the readings stand as your reading. -/
+/-- What a run hands on when the person ends it: the run declares no completed abstraction; what
+    the person's turns set or took stands as recorded, and the rest — the candidate, and the goal
+    and readings where they did not say them — stands as your reading. -/
 structure Withdrawn (P : Type) where
-  context   : Context P
-  goal      : String
-  candidate : Candidate
-  setAside  : List (Reading × String)
-  openTrace : List OpenItem
-  dissent   : List String
+  context    : Context P
+  goal       : String
+  candidate  : Option Candidate
+  crossView  : List (Reading × Row)
+  cases      : List (Instance × String)
+  setAside   : List (Reading × String)
+  openTrace  : List (OpenItem × Option String)
+  dissent    : List String
+  provenance : List Provenance
 
 inductive Outcome (P : Type)
-  | notActivated (c : Context P)
+  | notActivated (c : Context P) (why : String)
   | crystallized (r : CrystallizedAbstraction P)
-  /-- the person stopped -/
+  /-- the person ended the run -/
   | withdrawn    (r : Withdrawn P)
-  /-- the person named another protocol: proceed to it, citing their words -/
-  | routed       (target : String) (r : Withdrawn P)
   | holding      (c : Context P)
 
 /-! ── MODE STATE ──
@@ -433,44 +412,44 @@ abbrev Mode (P : Type) := Context P
 
 /-! ── PHASE TRANSITIONS ──
 A step is one arm of a structural recursion over the person's utterances. A pass is the silent
-work: the reads the run needs enter the context, then the pass's record — the run judged afresh.
-`respond` presents the sheet; `declare` is the closing declaration of the trace.
+work: what is collected enters the context. A closing is read from the person's turn before
+anything is collected. `respond` presents the sheet; `declare` is the closing declaration of the
+trace.
 -/
 
-/-- **Your reads** at activation: where fewer than two cases are in hand or no essence is sensed,
-    the session context and the person's artifacts scanned for cases that could be read
-    together. -/
-axiom scan : Context P → List (Evidence P)
-
-/-- **Your reads** for a pass: the cases' own context by artifact read and search, examples from the
-    person's domain, and an external fetch where that domain lies outside their artifacts. -/
+/-- **Your reads**, at the start and on each pass, as far as the session can reach without changing
+    existing state: cases and examples in the person's own material — the cases' own context by
+    artifact read and search, examples from the person's domain, and an external fetch where that
+    domain lies outside their artifacts. What you say you read, you read whole. What was reached
+    and what was not, with what each unreached source would need, are named; where collected
+    material conflicts, what conflicts with what; what stays open is shown as the person's
+    unknown. A case collection turns up enters as found by you (`found`). The sheet carries what
+    the current judgment needs, and a case that would decide it against the candidate is never left
+    off. -/
 axiom collect : Context P → List (Evidence P)
 
-/-- **Your record** of a pass, once its reads have entered the context: the run as judged — the goal,
-    the candidate, the readings and their rows, the readings set aside, provenance, the ledger, your
-    contrary grounds, and the move. A record grounds nothing. -/
-axiom passRecord : Context P → List (Response P)
+def pass (c : Context P) : Context P := c ++ (collect c).map (·.val)
 
-def pass (c : Context P) : Context P :=
-  let c₁ := c ++ (collect c).map (·.val)
-  c₁ ++ (passRecord c₁).map (·.val)
-
-/-- The crystallized abstraction; the context ends in the declaration. -/
-def crystallize (declare : Context P → Response P) (c : Context P) : CrystallizedAbstraction P :=
-  { context := c ++ [(declare c).val], goal := goal c, candidate := candidate c,
+/-- The crystallized abstraction, built from the goal and the candidate the confirm recognized; the
+    context ends in the declaration. -/
+def crystallize (declare : Context P → Response P) (c : Context P) (g : String) (k : Candidate) :
+    CrystallizedAbstraction P :=
+  { context := c ++ [(declare c).val], goal := g, candidate := k,
     crossView := crossView c, cases := casesSection c, setAside := setAsideReadings c,
-    openTrace := openItems c (some (candidate c).reading), dissent := dissent c,
+    openTrace := openTrace c (some k.reading), dissent := dissent c,
     provenance := (provenance c).map adopt }
 
-/-- What the run established; no candidate was taken, so every live reading stays open. -/
+/-- What the run hands on; no candidate was taken, so every live reading stays open, and nothing
+    is adopted by the ending. -/
 def withdraw (declare : Context P → Response P) (c : Context P) : Withdrawn P :=
   { context := c ++ [(declare c).val], goal := goal c, candidate := candidate c,
-    setAside := setAsideReadings c, openTrace := openItems c none, dissent := dissent c }
+    crossView := crossView c, cases := casesSection c, setAside := setAsideReadings c,
+    openTrace := openTrace c none, dissent := dissent c, provenance := provenance c }
 
 open Classical in
-/-- `respond` presents the sheet the Protocol section describes under "The sheet": the
-    candidate as `shownCandidate` gives it, the cross view (`crossView`), the cases as `casesSection`
-    unfolds them, ending at the one move (`focus`). -/
+/-- `respond` presents the sheet the Protocol section describes under "The sheet": the candidate
+    as `shownCandidate` gives it, the cross view (`crossView`), the cases as `casesSection` unfolds
+    them, ending at one move in words. -/
 def induce (respond declare : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
@@ -478,27 +457,27 @@ def induce (respond declare : Context P → Response P) :
     let c' := fuse c u
     if ¬ Reaches c' then induce respond declare c' us
     else
-      let c₁ := pass c'
-      match filledValue (closing c₁) with
-      | some .stop      => .withdrawn (withdraw declare c₁)
-      | some (.route t) => .routed t (withdraw declare c₁)
-      | some .confirm   =>
-        if CandidateLive c₁ ∧ Covered c₁ then .crystallized (crystallize declare c₁)
-        else induce respond declare (c₁ ++ [(respond c₁).val]) us
-      | none => induce respond declare (c₁ ++ [(respond c₁).val]) us
+      match filledValue (closing c') with
+      | some (.confirm g k) => .crystallized (crystallize declare c' g k)
+      | some .stop          => .withdrawn (withdraw declare c')
+      | none =>
+        let c₁ := pass c'
+        induce respond declare (c₁ ++ [(respond c₁).val]) us
 
-open Classical in
 def start (respond declare : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
-  let c₁ := c ++ (scan c).map (·.val)
-  if ¬ inProcess c₁ then .notActivated c₁
-  else
-    let c₂ := pass c₁
-    induce respond declare (c₂ ++ [(respond c₂).val]) us
+  let c₁ := pass c
+  match notActivated c₁ with
+  | some why => .notActivated c₁ why
+  | none     => induce respond declare (c₁ ++ [(respond c₁).val]) us
 
 /-! ── CONVERGENCE ──
-crystallized, withdrawn, routed — the three closings of `Outcome`, each the person's; the trace each
-carries is its structure's fields, and at a withdrawal they stand as your reading.
+crystallized, withdrawn — the two closings of `Outcome`, each the person's; the trace each carries
+is its structure's fields. notActivated and holding are not closings: the first is your reading
+before any sheet, the second a sheet no turn of the person's has answered. The convergence
+evidence: the turn read as the closing, quoted, with the goal and the candidate it recognized; at
+a withdrawal, the record as it stands, what the person's turns set or took marked as theirs and
+the rest as your reading.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -518,21 +497,18 @@ def Interaction.realization : Interaction → Continuation
   | .constitution => .stop
   | .extension    => .proceed
 
-inductive Op | detect | scan | absorb | collect | judge | record | sheet | readTurn | declare
-             | converge | seam
+
+inductive Op | detect | collect | judge | sheet | readTurn | declare | converge | seam
 
 def grounding : Op → Annot × String
-  | .detect   => (.sense, "Internal analysis: the deficit over the utterance and the context")
-  | .scan     => (.observe, "artifact read, artifact search (conditional: fewer than two cases, or no essence)")
-  | .absorb   => (.interaction .extension, "a routed colimit-shaped signal as activation ground, its cited essence and locator shown as the detection's reading")
-  | .collect  => (.observe, "artifact read, artifact search; external fetch (conditional: the domain lies outside the person's artifacts), its URL cited where used")
+  | .detect   => (.sense, "Internal analysis: whether this is the protocol's case, as `notActivated` reads it, over the utterance and the context")
+  | .collect  => (.observe, "artifact read, artifact search; external fetch (conditional: the domain lies outside the person's artifacts), its URL cited where used: what `collect` reads, as its doc states — at the start, and on a turn that bears on the run and does not close it")
   | .judge    => (.sense, "Internal analysis: the whole run afresh against the whole context")
-  | .record   => (.track, "record: the pass's record")
-  | .sheet    => (.interaction .constitution, "the sheet, then one move (mandatory)")
-  | .readTurn => (.sense, "Internal analysis: the new turn read against the fused context as it now stands")
-  | .declare  => (.interaction .extension, "at a withdrawal or a route, the trace as your reading")
-  | .converge => (.interaction .extension, "at a crystallization, the trace and the dissent")
-  | .seam     => (.interaction .extension, "at a chain the person declared, proceed to the named protocol citing that turn")
+  | .sheet    => (.interaction .constitution, "the sheet, every turn that bears on the run and does not close it, the first included: any case you found, marked as yours; the goal and the candidate where one is available, each with who set it and how it stands — where no candidate is grounded or none stands on a live reading, what is missing; the cross view, each live reading with the cases it takes in and leaves out against the goal; the cases those rows use, unfolded; what changed since the sheet the person answered — their moves first, then what you re-drew, each marked as forced by a move or as your proposal; your doubts; then one move in words, with what each way of answering does to the goal and the candidate, recognizing the abstraction and ending the run open on every sheet")
+  | .readTurn => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there — a move, a value taken, a reading set aside or brought back, words about an open item, a closing — read whole against the fused context as it now stands, as `Reaches`, `ClosingSupported`, `SetAsideSupported`, `StandingSupported`, and `OpenSupported` read it")
+  | .declare  => (.interaction .extension, "before activation only, your `notActivated` reading in plain words with its basis, and what was searched; at a withdrawal, the record as it stands, what the person's turns set or took marked as theirs and the rest as your reading")
+  | .converge => (.interaction .extension, "at a crystallization, the convergence evidence CONVERGENCE names: the closing turn quoted, the trace, and the dissent")
+  | .seam     => (.interaction .extension, "after a crystallization or not activating, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; after a withdrawal, only to a next move the person declared with it; every Constitution gate inside this protocol and the next fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
@@ -545,33 +521,33 @@ end Periagoge
 
 ## Mode Activation
 
-`/induce` remains directly invocable; AI-guided activation stays silent and follows `inProcess`. An abstraction already located — one awaiting comparison or validation — belongs to other work.
+`/induce` remains directly invocable, and an invocation is read through `notActivated` before any sheet; AI-guided activation stays silent and follows the same reading. A named abstraction whose meaning is being reconsidered from its cases is in process; applying a fixed meaning to a disputed case is not.
 
-Bind the seed from an explicit argument first, then the most recent cluster of cases, then a surfaced essence. Where no essence is sensed, show the scan result and invite the user to name what feels in process; where the scan finds no second case, say what was searched and invite one. Prior-session recall may seed examples or neighbouring abstractions but never settles crystallization.
+Bind the seed from an explicit argument first, then the most recent cluster of cases, then a surfaced essence. Where no essence is sensed, show what was searched and invite the user to name what feels in process; where no second case is found, say what was searched and invite one. Prior-session recall may seed examples or neighbouring abstractions but never settles crystallization.
 
 ## Protocol
 
 ### The sheet
 
-Every turn shows one sheet, in everyday language. It opens with any case you found since the last sheet, marked as found by you, so the user meets it before their next turn; a found case stays yours until the user's words take it up, and a confirm that covers it adopts it as yours.
+Every sheet is in everyday language. It opens with any case you found since the last sheet, marked as found by you, so the user meets it before their next turn; a found case stays yours until the user's words take it up.
 
-Then the goal: what the abstraction is for. Where the user has said it, quote their words; otherwise give your reading and mark it as yours. Under it, the working candidate — a name and a rule — from the first sheet on, always on a reading still in play: where the user sets that reading aside, propose a candidate on a live one. Both move: the run's work is moving the goal and the candidate until the abstraction matches what the user means.
+Then the goal: what the abstraction is for. Where the user has said it, quote their words; otherwise give your reading and mark it as yours. Under it, the working candidate — a name and a rule — always on a reading still in play: where the user sets that reading aside, propose one on a live reading; where no candidate is grounded yet or none stands on a live reading, say what is missing. Mark each value as set by the user's words, taken by them from what you showed, or still your proposal. Both move: the run's work is moving the goal and the candidate until the abstraction matches what the user means.
 
-Then the cross view, one row per live reading. Each row says what the reading becomes against the goal — the check it would give you — an example it catches and an example it misses, and where the candidate sits on that reading. Name every case by a short phrase that carries the feature being judged. Then a cases section: every case the rows use, unfolded in a few lines — what happened, what was seen and what was not, how it surfaced, who brought it — so every case is read on the sheet itself. Unfold a new or changed case again; an unchanged one may be folded as the same as the last sheet; unfold them all on the sheet a confirm would answer. The full list of cases with who brought each, and the readings the user set aside beside the user's own words, appear when they change, when reconsidering needs them, and on the sheet a confirm would answer. Mark every value as the user's or yours. Label each field with the question it answers, in the user's words, and say each term this file uses as the concrete question it stands for in the user's material. Draw the fields with the structure the host renders — headings, tables, lists.
+Then the cross view, one row per live reading. Each row says what the reading becomes against the goal — the check it would give you — which of the cases shown it takes in and which it leaves out, and where the candidate sits on that reading; the row of the candidate's own reading is what the candidate takes in and leaves out. Name every case by a short phrase that carries the feature being judged. Then a cases section: every case the rows use, unfolded in a few lines — what happened, what in it bears on the goal and the readings, how it surfaced, who brought it — so every case is read on the sheet itself. Unfold a new or changed case again; an unchanged one may be folded as the same as the last sheet. Collect as widely as the judgment needs; the sheet carries what the current judgment needs, and a case that would decide it against the candidate is never left off. The readings the user set aside appear beside their own words when they change and when reconsidering needs them. Label each field with the question it answers, in the user's words, and say each term this file uses as the concrete question it stands for in the user's material. Draw the fields with the structure the host renders — headings, tables, lists.
 
-Under the sheet, the ledger of what the last turn changed: the user's moves first, then what you re-drew because of them, each marked as forced by that move or as your proposal. A reading you would no longer hold stays in the cross view until the user sets it aside; dropping it is your proposal, shown in the ledger. A row's examples stay as the last sheet showed them until a move of the user's reaches them; an example you would change otherwise is likewise a proposal in the ledger. Then your contrary grounds, each beside the value it bears on.
+Under the sheet, what changed since the sheet the user last answered: the user's moves first, then what you re-drew because of them, each marked as forced by that move or as your proposal. A reading you would no longer hold stays in the cross view until the user sets it aside; dropping it is your proposal, shown here. A row's examples stay as the last sheet showed them until a move of the user's reaches them; an example you would change otherwise is likewise a proposal here. Then your doubts, each beside what it bears on, with what it rests on and the user's answer where they gave one; a doubt is raised again only on new evidence. A reading that the cases are no longer this protocol's to settle is shown the same way, with its basis, and closes nothing.
 
-Then one move to ask about: narrow or widen the goal, move the candidate onto another reading or merge two readings, swap an example for one that separates better, or confirm. Say what each way of answering does to the goal and the candidate. Where every reading was set aside, say that every reading drawn so far was set aside on the grounds shown, and ask whether to name a distinction the readings missed, read another set of cases, or move the goal. Stopping, and going on to a protocol the user names, stay open on every sheet.
+Then one move to ask about, in words — the one whose answer would most change how goal and readings cross — and what each way of answering does to the goal and the candidate. Recognizing the abstraction and ending the run stay open on every sheet.
 
-The user may answer in their own words, and one answer may reach several parts of the sheet. A move reaches what its words reach. An utterance about other work leaves the sheet as it stands; the sheet returns when the user comes back to the run. A reading leaves the cross view only by the user's words setting it aside, and returns when the user names it again, with their earlier ground shown beside it. Only the user closes the run: confirming, stopping, or going on to a protocol they name. A confirm takes the goal and the candidate as the sheet it followed showed them, with the whole basis in view, and only while the candidate's reading is still in play; where something it would take was never shown, draw the sheet again with the whole basis, and a confirm said before that later sheet does not reach it.
+The user may answer in their own words, and one answer may reach several parts of the sheet: read it whole, apply it as far as its words reach, leave what it does not reach as it stood, and show what a correction disturbs. A turn that takes something you showed — a correspondence, the goal, the rule — makes it theirs then, on the scope its words reach; a narrow answer stays narrow. An utterance about other work leaves the run as it stands; the sheet returns when the user comes back to it. A reading leaves the cross view only by the user's words setting it aside, and comes back when their words bring it back, with their earlier ground shown beside it. Only the user closes the run: recognizing the goal and the candidate — as the sheet showed them, or as the same turn renamed or corrected them — or ending it. A recognition takes what the sheet it answered showed, with no second permission; your doubts never refuse it and ride along with it.
 
-At the close, declare the trace before proceeding: the goal and who set it, the candidate, the cross view with its cases unfolded, the readings set aside with their grounds, every case with who brought it, and the open trace. The open items are the live readings the candidate does not take and what the user said is still missing. Each open item takes its disposition from the user's closing turn: not blocking where the turn takes the run with the item shown open, deferred where it names the item for later work beside deferral words. An item no turn covered is shown as undisposed. At a withdrawal, show the goal, the candidate, and the readings as your reading, not as established.
+At a recognition, declare the trace before proceeding: the goal and who set it, the candidate, the cross view with its cases unfolded, the readings set aside with the user's grounds, every case with who brought it, every value with who proposed it and how it stands — a value still your proposal is adopted by the recognition that took the sheet showing it —, the doubts with the user's answers, and the open trace. The open items are the live readings the candidate does not take and the points still open; each carries the user's own words about it from a turn of theirs that still reaches it, and an item no such turn reaches is shown as undisposed. At an ending, the run declares no completed abstraction: what the user's turns set or took stands as recorded, and the rest — the candidate, and the goal and readings where they did not say them — is shown as your reading. After a recognition, go on only to a next move the user declared, a routing policy they adopted, or their grant, citing it; after an ending, only to a next move they declared with it.
 
 Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or the order of the sheet bears on where a sentence sits.
 
 ## Rules
 
 - **Recognition over Recall**: Present the sheet and one move with anticipatable consequences, and yield for the user's judgment.
-- **Goal and candidate first, tested against each other**: Open every sheet with the goal and a working candidate, and test the candidate against the goal through examples on every row. The goal and the alternatives beside the candidate are what keep the user's judgment their own.
+- **Goal and candidate first, tested against each other**: Open every sheet with the goal and the working candidate where one is available — otherwise with what is missing — and test the candidate against the goal through the cases each row takes in and leaves out. The goal and the alternatives beside the candidate are what keep the user's judgment their own.
 - **Round composition**: Compose each round in everyday language, keep each judgment beside its evidence and next-move implication, and place analysis before the move.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.

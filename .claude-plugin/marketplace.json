@@ -23,7 +23,7 @@
     {
       "name": "periagoge",
       "source": "./periagoge",
-      "description": "Align concrete cases first, then name what they share — /induce (περιαγωγή: turning-around)"
+      "description": "Name what your cases share, say which cases it takes in and leaves out, and recognize it as serving your goal — /induce (περιαγωγή: turning-around)"
     },
     {
       "name": "euporia",
