@@ -13,7 +13,7 @@ A utility plugin spanning epistemic protocol onboarding, work orchestration, and
 | Skill | Purpose | Output |
 |-------|---------|--------|
 | `/onboard` | Quick recommendation + protocol learning | Terminal-based guided experience |
-| `/probe` | Deficit recognition fit review — multiple deficit hypotheses with reverse-evidence conditions, routed by user recognition | Protocol route |
+| `/probe` | Something feels off and you cannot name what is stuck — grounded candidates side by side, each with what it rests on and what would rule it out | The situation you recognize: a shown candidate, your own words, or none shown |
 | `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
 | `/gate-check` | Advisor-checked decision gates — an independent adjudicator judges the drafted option set itself, and its cited grounds are verified before either reaches you | The gate as drafted, a settled option presented as relay, a rebuilt option set, or — where the check could not close — the repair space, the contested reading, or both sets with neither presented as the answer |
 | `/white-bear` | Prose audit — unnecessary competing-target mentions (prohibition framing, superseded-path mention, negated anchoring) | JSON findings (read-only) |
@@ -72,7 +72,7 @@ epistemic-cooperative/
 ├── .claude-plugin/plugin.json
 └── skills/
     ├── onboard/SKILL.md          # /onboard quest-based protocol learning
-    ├── probe/SKILL.md            # /probe deficit recognition fit review
+    ├── probe/SKILL.md            # /probe recognition of what is stuck
     ├── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
     ├── gate-check/SKILL.md       # /gate-check advisor-checked decision gates
     ├── white-bear/SKILL.md       # /white-bear competing-target prose audit
@@ -88,7 +88,7 @@ epistemic-cooperative/
 | Want hands-on protocol learning | `/onboard` |
 | Re-evaluating protocol fit after workflow changes | `/onboard` |
 | Validating an uncertain proposition in a bounded stand-in space | `/reduced-space-test` |
-| Something feels off but the deficit is not yet named | `/probe` |
+| Something feels off but what is stuck is not yet named | `/probe` |
 | Checking a drafted option set before it reaches the user | `/gate-check` |
 | Auditing prose for prohibition framing or anchoring examples | `/white-bear`, `/zero-shot` |
 | Re-deriving the project guide's direction line | `/realign` |

@@ -13,7 +13,7 @@
 | 스킬 | 목적 | 출력 |
 |------|------|------|
 | `/onboard` | 빠른 추천 + 프로토콜 학습 | 터미널 기반 가이드 경험 |
-| `/probe` | 결핍 인식 fit review — 역증거 조건이 붙은 복수의 결핍 가설을 제시하고 사용자 인식으로 라우팅 | 프로토콜 route |
+| `/probe` | 뭔가 어긋났는데 무엇이 막혀 있는지 이름 붙이지 못할 때 — 근거를 인용한 후보를 나란히, 각각 무엇에 기대는지와 무엇이 그것을 배제하는지와 함께 | 당신이 알아본 상황: 보인 후보 하나, 당신의 말, 또는 보인 것 가운데 없음 |
 | `/reduced-space-test` | bounded 대리 공간에서의 scoped 실증 검증 | scoped resolution + carried residual |
 | `/gate-check` | 자문 검증 결정 게이트 — 독립 판정자가 작업이 아니라 초안 옵션 집합 자체를 판정하고, 그 인용 근거를 검증한 뒤에야 사용자에게 도달 | 초안대로의 게이트, 릴레이로 제시되는 확정 옵션, 재구성된 옵션 집합, 또는 검사가 닫지 못한 경우 수리 공간·다툼 있는 읽기·어느 쪽도 답이 아닌 두 집합 |
 | `/white-bear` | 프로즈 감사 — 불필요한 경쟁-대상 언급 (금지 프레이밍, 대체된-경로 언급, 부정 앵커링) | JSON findings (읽기 전용) |
@@ -72,7 +72,7 @@ epistemic-cooperative/
 ├── .claude-plugin/plugin.json
 └── skills/
     ├── onboard/SKILL.md          # /onboard 퀘스트 기반 프로토콜 학습
-    ├── probe/SKILL.md            # /probe 결핍 인식 fit review
+    ├── probe/SKILL.md            # /probe 무엇이 막혀 있는지의 알아봄
     ├── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
     ├── gate-check/SKILL.md       # /gate-check 자문 검증 결정 게이트
     ├── white-bear/SKILL.md       # /white-bear 경쟁-대상 언급 프로즈 감사
@@ -88,7 +88,7 @@ epistemic-cooperative/
 | 체험을 통한 프로토콜 학습 | `/onboard` |
 | 워크플로우 변경 후 재평가할 때 | `/onboard` |
 | 불확실한 명제를 bounded 대리 공간에서 검증할 때 | `/reduced-space-test` |
-| 뭔가 어긋났는데 어떤 결핍인지 아직 이름 붙이지 못할 때 | `/probe` |
+| 뭔가 어긋났는데 무엇이 막혀 있는지 아직 이름 붙이지 못할 때 | `/probe` |
 | 초안된 옵션 집합이 사용자에게 닿기 전에 검사할 때 | `/gate-check` |
 | 프로즈의 금지 프레이밍·앵커링 예시를 감사할 때 | `/white-bear`, `/zero-shot` |
 | 프로젝트 가이드 direction line 을 다시 도출할 때 | `/realign` |

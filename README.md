@@ -100,7 +100,7 @@ Skills that act at their own decision points — around the protocols, on the wo
 |---------|-------------|
 | **Finding the protocol** | |
 | `/onboard` | New here — get one recommendation from your recent sessions, then optionally learn by scenario, trial, and quiz |
-| `/probe` | Something feels off but you cannot name which deficit it is — several hypotheses, routed by your recognition |
+| `/probe` | Something feels off and you cannot name what is stuck — you can then say what it is: a shown candidate, your own words, or none shown, having seen what each rests on and what rules it out |
 | **Shaping the work** | |
 | `/reduced-space-test` | A claim that a stand-in behaves like the real target — test it in a bounded space and carry the untested remainder forward explicitly |
 | `/gate-check` | An option set is about to be presented to you — an independent advisor rules it genuine, collapsed, or malformed, and its cited grounds are verified first |

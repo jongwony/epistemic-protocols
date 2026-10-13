@@ -116,7 +116,7 @@ Static checks validate protocol integrity before every commit. Run \`node .claud
 ### Utility Skills
 
 - \`/onboard\` — quest-based protocol learning (quick recommendation + targeted scenarios)
-- \`/probe\` — deficit recognition fit review (multi-hypothesis surfacing before protocol commitment)`;
+- \`/probe\` — recognize what is stuck from grounded candidates shown side by side (a shown candidate, your own words, or none shown)`;
 
 const DESCRIPTION_LIMIT = 200;
 // LINE_GUIDELINE is informational — emits a packaging warning but does not fail the build.
