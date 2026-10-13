@@ -85,6 +85,46 @@ theorem identified_by_person (c : Context P) (v : RecalledContext P)
         subst h
         exact ⟨s, rfl, s.ok.trans ok, sup⟩
 
+private theorem settle_not_identified (c : Context P) (v : RecalledContext P) :
+    settle c ≠ some (.identified v) := by
+  unfold settle
+  split <;> simp
+
+private theorem recollect_identified (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (v : RecalledContext P)
+    (h : recollect respond c us = .identified v) :
+    ∃ c₀ : Context P, closing c₀ = some (.identified v) := by
+  induction us generalizing c with
+  | nil => simp [recollect] at h
+  | cons u us ih =>
+    simp only [recollect] at h
+    split at h
+    · next o ho => subst h; exact ⟨_, ho⟩
+    · split at h
+      · next o ho => subst h; exact absurd ho (settle_not_identified _ v)
+      · exact ih _ h
+
+/-- Every recall a run identifies closes on the person's answer: an identified outcome comes only
+    from a closing, never from your own close after a pass, and the answer it rests on cites a
+    turn the person sent that identifies the presented recognizable. The story beside it rests on
+    opened records, which are not the person's (`claim_is_evidence`). -/
+theorem identified_only_by_person (respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (v : RecalledContext P) (h : start respond c us = .identified v) :
+    ∃ (c₀ : Context P) (s : Cite c₀), closing c₀ = some (.identified v) ∧
+      s.idx = v.identifiedAt ∧ (c₀[s.idx]'s.lt).origin = .person ∧
+      AnswerSupported c₀ (c₀[s.idx]'s.lt) .identified := by
+  have hc : ∃ c₀ : Context P, closing c₀ = some (.identified v) := by
+    unfold start at h
+    split at h
+    · simp only at h
+      split at h
+      · next o ho => subst h; exact absurd ho (settle_not_identified _ v)
+      · exact recollect_identified respond _ us v h
+    · cases h
+  obtain ⟨c₀, hc₀⟩ := hc
+  obtain ⟨s, hs⟩ := identified_by_person c₀ v hc₀
+  exact ⟨c₀, s, hc₀, hs⟩
+
 theorem answer_by_person {c : Context P} {s : Cite c}
     (ok : (answerCoord (P := P)).admits s.src) : s.src.val = .person := ok
 

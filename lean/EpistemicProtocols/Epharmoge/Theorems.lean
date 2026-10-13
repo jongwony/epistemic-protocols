@@ -114,6 +114,55 @@ theorem relayed_not_person (c : Context P) (m : Mismatch c) (r : Resolution)
 theorem evidence_not_person {c : Context P} {m : Mismatch c} {s : Cite c}
     (ok : (evidenceCoord m).admits s.src) : s.src.val ≠ .person := ok
 
+private theorem evidence_origin (g : Grounding) (h : g.val ≠ .person) :
+    g.val = .external ∨ g.val = .peer := by
+  obtain ⟨o, ha, hi, hu⟩ := g
+  cases o <;> first | exact absurd rfl ha | exact absurd rfl hi | exact absurd rfl hu | simp_all
+
+/-- What closes each mismatch at completion, and its source. A completed pass leaves every
+    mismatch it found either resolved on the person's turn, which supports that resolution, or
+    settled by evidence — its resolution relayed, or your own flag withdrawn — citing a turn the
+    environment returned or a peer reported, never the person's say-so. A pass that found no
+    mismatch completes with no coordinate to close, and a pass adds no person turn
+    (`pass_adds_no_person_turn`); where a resolution is the person's, its source is their turn,
+    whether or not that turn came in this run. -/
+theorem completed_closing_source (respond : Context P → Response P) (c : Context P)
+    (v : ApplicabilityVerdict P) (h : settle respond c = .completed v) :
+    ∀ m ∈ mismatches c,
+      (∃ (r : Resolution) (how : How) (s : Cite c), standing c m = .resolved r how ∧
+        s.src.val = .person ∧ ResolutionSupported m c (c[s.idx]'s.lt) (r, how)) ∨
+      (∃ (k : Settled) (s : Cite c),
+        (standing c m = .withdrawn ∧ k = .withdraw ∨
+          ∃ r, standing c m = .relayed r ∧ k = .resolves r) ∧
+        (s.src.val = .external ∨ s.src.val = .peer) ∧
+        SettledSupported m c (c[s.idx]'s.lt) k) := by
+  intro m hm
+  have hopen := completed_nothing_open respond c v h m hm
+  cases hr : resolution c m with
+  | filled a src ok sup =>
+    obtain ⟨r, how⟩ := a
+    have hst : standing c m = if r.asksWrite then .open_ else .resolved r how := by
+      simp [standing, hr, filledValue]
+    by_cases hw : r.asksWrite
+    · simp [hw] at hst; exact absurd hst hopen
+    · simp [hw] at hst
+      exact .inl ⟨r, how, src, hst, ok, sup⟩
+  | open_ _ =>
+    cases he : byEvidence c m with
+    | open_ _ =>
+      exact absurd (by simp [standing, hr, he, filledValue]) hopen
+    | filled k src ok sup =>
+      refine .inr ⟨k, src, ?_, evidence_origin src.src ok, sup⟩
+      cases k with
+      | withdraw => exact .inl ⟨by simp [standing, hr, he, filledValue], rfl⟩
+      | resolves r =>
+        have hst : standing c m = if r.asksWrite then .open_ else .relayed r := by
+          simp [standing, hr, he, filledValue]
+        by_cases hw : r.asksWrite
+        · simp [hw] at hst; exact absurd hst hopen
+        · simp [hw] at hst
+          exact .inr ⟨r, hst, rfl⟩
+
 private theorem returned_not_person {Q : Turn P → Prop} (h : ∀ e, Q e → e.origin ≠ .person)
     (xs : List {e : Turn P // Q e}) : ∀ e ∈ xs.map (·.val), e.origin ≠ .person := by
   intro e he
