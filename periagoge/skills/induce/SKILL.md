@@ -262,8 +262,8 @@ inductive OpenItem
   | question (q : String)
 
 /-- The live readings the candidate does not take, and the points still open. -/
-def openItems (c : Context P) (taken : Option Reading) : List OpenItem :=
-  ((live c).filter (fun r => decide (some r ≠ taken))).map .reading ++ (missing c).map .question
+def openItems (c : Context P) (taken : Reading) : List OpenItem :=
+  ((live c).filter (fun r => decide (r ≠ taken))).map .reading ++ (missing c).map .question
 
 /-- **Your judgment**: the cited turn says how open item `i` stands for the person — for later work,
     not blocking, still to settle, whatever it says — and these are its words about it, carried
@@ -281,7 +281,7 @@ axiom openWords : (c : Context P) → (i : OpenItem) → Occ (openCoord (P := P)
 
 /-- The open trace: every open item the sheet `c` showed, with the person's words about it as
     `c'` stands, or `none` where no turn of theirs reaches it. -/
-def openTrace (c c' : Context P) (taken : Option Reading) : List (OpenItem × Option String) :=
+def openTrace (c c' : Context P) (taken : Reading) : List (OpenItem × Option String) :=
   (openItems c taken).map (fun i => (i, filledValue (openWords c' i)))
 
 /-- A line of the sheet as the sheet shows it, its value included; a value that changes makes a new
@@ -378,8 +378,8 @@ axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
 /-- **Your judgment**: the latest utterance bears on this run — a move, a correction, a case, a
     rename, a value taken, words about an open item, an answer to a doubt, a closing, a question
     about the sheet. An utterance about other work leaves the run as it stands. Words that end the
-    run do not bear on it: the session answers them, no sheet is drawn, the run holds, and later
-    turns bear on it only where they come back to it. -/
+    run without recognizing the abstraction do not bear on it: the session answers them, no sheet
+    is drawn, the run holds, and later turns bear on it only where they come back to it. -/
 axiom Reaches : Context P → Prop
 
 /-- Once it has run, the person can name what their cases share, say which cases it takes in and
@@ -446,7 +446,7 @@ def crystallize (declare : Context P → Response P) (c c' : Context P) (k : Can
     CrystallizedAbstraction P :=
   { context := c' ++ [(declare c').val], goal := goal c, candidate := k,
     crossView := crossView c, cases := casesSection c, setAside := setAsideReadings c,
-    openTrace := openTrace c c' (some k.reading), dissent := dissent c,
+    openTrace := openTrace c c' k.reading, dissent := dissent c,
     provenance := provenanceOf c c' }
 
 open Classical in

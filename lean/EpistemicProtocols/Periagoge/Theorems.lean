@@ -166,7 +166,7 @@ theorem record_standing_by_person (declare : Context P → Response P) (c c' : C
 
 /-- Words an open item carries in the open trace are a filled occurrence, on the context the
     words are read on, that cites a turn the person sent. -/
-theorem open_words_by_person (c c' : Context P) (t : Option Reading) (i : OpenItem) (w : String)
+theorem open_words_by_person (c c' : Context P) (t : Reading) (i : OpenItem) (w : String)
     (h : (i, some w) ∈ openTrace c c' t) :
     ∃ src ok sup, openWords c' i = .filled w src ok sup ∧
       (c'[src.idx]'src.lt).origin = .person := by
