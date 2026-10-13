@@ -65,6 +65,17 @@ theorem crystallized_on_recognition (respond session converge : Context P → Re
         · simp [hc, hi] at h
           exact ih _ h
 
+/-- A recognition citing the utterance just fused, on a turn that bears on the run, crystallizes
+    the record `crystallize` reads on the context before it and the context with it. -/
+theorem recognition_crystallizes (respond session converge : Context P → Response P)
+    (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
+    (src : Cite (fuse c u)) (hc : ∃ ok sup, closing (fuse c u) = .filled () src ok sup)
+    (hi : src.idx + 1 = (fuse c u).length) :
+    induce respond session converge c (u :: us) =
+      .crystallized (crystallize converge c (fuse c u)) := by
+  obtain ⟨ok, sup, hc⟩ := hc
+  simp [induce, hre, hc, hi]
+
 /-- A closing is a filled occurrence that cites a turn the person sent. -/
 theorem closed_by_person (c : Context P) (h : filledValue (closing c) = some ()) :
     ∃ src ok sup, closing c = .filled () src ok sup ∧ (c[src.idx]'src.lt).origin = .person := by
@@ -150,13 +161,13 @@ theorem record_standing_by_person (converge : Context P → Response P) (c c' : 
 
 /-- Words an open item carries in the open trace are a filled occurrence, on the context the
     words are read on, that cites a turn the person sent. -/
-theorem open_words_by_person (c c' : Context P) (t : List Reading) (i : OpenItem) (w : String)
-    (h : (i, some w) ∈ openTrace c c' t) :
-    ∃ src ok sup, openWords c' i = .filled w src ok sup ∧
-      (c'[src.idx]'src.lt).origin = .person := by
+theorem open_words_by_person (c : Context P) (t : List Reading) (i : OpenItem) (w : String)
+    (h : (i, some w) ∈ openTrace c t) :
+    ∃ src ok sup, openWords c i = .filled w src ok sup ∧
+      (c[src.idx]'src.lt).origin = .person := by
   simp only [openTrace, List.mem_map, Prod.mk.injEq] at h
   obtain ⟨j, _, rfl, hw⟩ := h
-  cases hc : openWords c' j with
+  cases hc : openWords c j with
   | open_ _ => simp [hc, filledValue] at hw
   | filled a src ok sup =>
     simp only [hc, filledValue, Option.some.injEq] at hw
