@@ -230,7 +230,8 @@ structure Row where
     the cases that align most readily, not the most distant, since distance is what a separating
     example is for; align what they carry from the cases themselves; and draw a case that tells
     readings apart. A case you draw into a row from the person's domain enters as found by you
-    (`found`), shown as yours before their next turn. The examples the last sheet showed stay as it
+    (`found`), shown as yours before their next turn; a case the person withdrew, or a found case
+    they turned down, is not drawn into a row. The examples the last sheet showed stay as it
     showed them until a move of the person's reaches them — a swap, a move of the goal, the
     candidate, or the reading they cross, a correction, a case they brought; an example you would
     change otherwise is your proposal, shown among what changed, not a swap. A case new to the sheet
