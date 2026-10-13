@@ -287,6 +287,7 @@ test("an arm patch fails closed when its anchor has moved", () => {
   assert.throws(() => patchSource("function other() {}", "no-lead"), /anchor/);
   assert.equal(patchSource("x", "as-shipped"), "x");
   assert.match(patchSource("a\nfunction readLead(file, e) {\n  try {", "no-lead"), /readLead\(file, e\) \{\n {2}return "";/);
+  assert.match(patchSource("function line(root, e) {\n  const file", "lead-only"), /line\(root, e\) \{\n {2}return quoted\(path\.join\(root, e\.file\), e\)\.trim\(\);/);
   assert.throws(() => withoutSessionStart(JSON.stringify({ hooks: {} })), /no SessionStart/);
   const h = JSON.parse(withoutSessionStart(JSON.stringify({ description: "d", hooks: { SessionStart: [], PreToolUse: [] } })));
   assert.deepEqual(Object.keys(h.hooks), ["PreToolUse"]);

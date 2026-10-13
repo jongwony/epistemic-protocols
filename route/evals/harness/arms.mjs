@@ -19,6 +19,13 @@
  *              clauseBlock). Diagnostic: it separates a delivery that did not
  *              reach the moment from an application that failed once it did.
  *
+ * An ablation of the shipped delivery:
+ *
+ *   lead-only — each index line is the quoted lead alone, without the
+ *               document's path and moments; the header line and the tool
+ *               lines stay as shipped, so the session line's form is the one
+ *               thing that differs.
+ *
  * The session-start context is not delivered by the copy's hook at run time.
  * A cell seeds it at the head of a stored conversation and resumes that
  * conversation, and the host fires SessionStart again on resume and attaches
@@ -46,6 +53,7 @@ const ARMS = {
   paths: { patch: "no-lead", clause: false },
   shipped: { patch: "as-shipped", clause: false },
   clause: { patch: "as-shipped", clause: true, diagnostic: true },
+  "lead-only": { patch: "lead-only", clause: false },
 };
 
 // Each patch is one early return inserted at an anchor the source must hold
@@ -55,6 +63,7 @@ const PATCHES = {
   "as-shipped": [],
   "no-premise": [{ anchor: "function premiseRoot(env = {}) {", insert: "\n  return null; // premise eval arm: no premise index" }],
   "no-lead": [{ anchor: "function readLead(file, e) {", insert: "\n  return \"\"; // premise eval arm: no lead clause" }],
+  "lead-only": [{ anchor: "function line(root, e) {", insert: "\n  return quoted(path.join(root, e.file), e).trim(); // premise eval arm: lead only" }],
 };
 
 /** `text` with each patch applied; throws where an anchor is not found exactly once. */
@@ -179,6 +188,16 @@ function leadsIn(premiseDir) {
   });
 }
 
+/**
+ * Whether two copies render the same, reading each copy's own premise path
+ * as one placeholder: every copy resolves its premise root to its own
+ * directory, so the absolute paths differ even where nothing else does.
+ */
+function sameAs(a, pa, b, pb) {
+  const norm = (v, p) => JSON.stringify(v).split(p.premiseDir).join("<premise>");
+  return norm(a, pa) === norm(b, pb);
+}
+
 /** The deficit table: whatever a session context carries above the premise header. */
 function tablePart(session) {
   const at = session.indexOf(PREMISE_HEADER);
@@ -226,6 +245,16 @@ function checkVariants({ arms, rendered, plugins, expectTable = true }) {
       check(r.tool.delegation !== shipped.tool.delegation && r.tool.delegation.startsWith(TOOL_HEADER) && !hasLead(r.tool.delegation), "paths: delegation tool line names the document without its lead");
       check(r.tool.instruction !== shipped.tool.instruction && r.tool.instruction.startsWith(TOOL_HEADER) && !hasLead(r.tool.instruction), "paths: instruction-surface tool line names the document without its lead");
       check(r.subagent !== shipped.subagent && !hasLead(r.subagent), "paths: subagent index without leads");
+    } else if (arm === "lead-only") {
+      const p = plugins["lead-only"];
+      check(r.session !== shipped.session, "lead-only: session context differs from shipped");
+      check(r.session.includes(PREMISE_HEADER), "lead-only: session context carries the premise index header");
+      check(leads.every((l) => r.session.includes(l.lead)), "lead-only: session context quotes every lead");
+      check(!r.session.includes(p.premiseDir), "lead-only: session context names no document path");
+      check(PREMISE_INDEX.every((e) => !r.session.includes(e.moments)), "lead-only: session context lists no moments");
+      check(tablePart(r.session) === tablePart(shipped.session), "lead-only: deficit table identical to shipped");
+      check(sameAs(r.tool, p, shipped.tool, plugins["as-shipped"]), "lead-only: tool lines as shipped");
+      check(!r.subagent.includes(p.premiseDir) && leads.every((l) => r.subagent.includes(l.lead)), "lead-only: subagent index is leads alone");
     } else if (arm === "shipped" || arm === "clause") {
       check(r === shipped, `${arm}: renders as shipped`);
     }
