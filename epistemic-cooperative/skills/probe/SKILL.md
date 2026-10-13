@@ -56,6 +56,7 @@ Scan the user's situation against the full catalog of epistemic deficits. For ea
 - The `protocol: ProtocolId` that addresses that deficit
 - `evidence: Evidence` — the situation signal supporting the match
 - `reverse_evidence: Evidence` — the observation that would shrink the coverage to exclude this entry
+- `end: Optional(String)` — the protocol's declared end: what the user can then say or recognize once it has run, read from that protocol's own description at scan time. Absent where the description states none; an absent end leaves the entry's candidacy unchanged.
 
 A hypothesis with `|coverage| = 1` is a single-protocol projection (preserves prior single-protocol behavior). A hypothesis with `|coverage| ≥ 2` is a set-valued coverage — multi-protocol projection within one hypothesis. This intra-hypothesis multi-protocol projection is structurally distinct from the inter-protocol composition defined in the `── COMPOSITION ──` block; do not conflate the two.
 
@@ -69,7 +70,7 @@ Construct the candidate set. Keep at minimum two candidates with non-overlapping
 
 ### Phase 2: Hypothesis Presentation
 
-Present the candidate hypotheses as text output before the Constitution interaction. Each rendered line under `Coverage:` corresponds to one `CoverageEntry` (deficit, protocol, evidence, reverse_evidence). Format per hypothesis:
+Present the candidate hypotheses as text output before the Constitution interaction. Each protocol block under `Coverage:` renders one `CoverageEntry` (deficit, protocol, evidence, reverse_evidence, optional end), applying Rule 19's omission and once-per-protocol display. Format per hypothesis:
 
 ```
 Hypothesis N — N interpretations possible / decision point is X
@@ -77,11 +78,16 @@ Hypothesis N — N interpretations possible / decision point is X
     /<protocol_a> (<DeficitName>):
       Evidence: <quote or paraphrase>
       Reverse-evidence: <observation that would shrink coverage to exclude this entry>
+      Afterward: <the protocol's declared end, as its description states it>
     /<protocol_b> (<DeficitName>):
       Evidence: <...>
       Reverse-evidence: <...>
+      Afterward: <...>
   (Singleton |coverage|=1: render the single CoverageEntry as one protocol line, equivalent to prior single-protocol format)
+  (No declared end: omit the Afterward line. A protocol already shown with its end: "Afterward: as above")
 ```
+
+**Declared end follows the evidence** (Rule 19): the `Afterward` line comes after Evidence and Reverse-evidence, so the user reads whether the situation fits before reading what the protocol would leave them with. The end is the protocol's own statement of its resolution — it is not evidence that the deficit fits, and an attractive end does not outweigh reverse-evidence.
 
 **Coverage option-set minimality**: When `|coverage| ≥ 2`, coverage subsets are NOT enumerated as additional options — the per-entry Evidence and Reverse-evidence within the Coverage block serve as the short descriptions that guide singleton selection. The user invokes a singleton through free response or `Narrow(CoverageSubset)`. This preserves option-set minimality and induces the Hermeneutic circle through iterative user-initiated dialogue rather than AI-side menu expansion. (This contextual rule informs the gate decision and therefore precedes the gate options.)
 
@@ -150,10 +156,14 @@ invariant: Recognition over Resolution
 U                = UserSituation { utterance: String, session_slice: Optional(Slice) }
 Catalog          = Set(DeficitEntry)               -- all named deficits + Emergent
 DeficitEntry     = { deficit: DeficitName, protocol: ProtocolId,
-                     trigger_signal: String, reverse_evidence_template: String }
+                     trigger_signal: String, reverse_evidence_template: String,
+                     end: Optional(String) }
+                   -- end: populated from the protocol's own declared description when Catalog is built for this scan;
+                   --   absent where none is declared; Scan leaves Catalog unchanged
 Evidence         = String                           -- quoted or paraphrased situation evidence
 CoverageEntry    = { deficit: DeficitName, protocol: ProtocolId,
-                     evidence: Evidence, reverse_evidence: Evidence }
+                     evidence: Evidence, reverse_evidence: Evidence,
+                     end: Optional(String) }       -- copied from the DeficitEntry; presented after the evidence
                    -- per-protocol unit; deficit label is co-located with its protocol (no top-level deficit set)
 Hypothesis       = { coverage: Set(CoverageEntry) } -- |coverage| ≥ 1
                    -- |coverage|=1: singleton hypothesis (single-protocol projection)
@@ -164,7 +174,8 @@ Scan             = (UserSituation, Catalog, Optional(Set(ProtocolId))) → H[]
                    --   whose coverage protocol set intersects with the constraint
 CoverageSubset   = Set(ProtocolId)                  -- 0 < |CoverageSubset| < |selected.coverage|
                    -- non-empty proper subset of a selected hypothesis's coverage protocols
-Qc               = present hypothesis set with evidence and reverse-evidence;
+Qc               = present each entry's evidence and reverse-evidence, followed by its declared end when present
+                   and not yet shown for that protocol in this presentation;
                    free-response Constitution interaction (Phase 3 parses utterance into R)
 R                = Recognition ∈ {Recognize(Hypothesis),                  -- adopts entire coverage
                                   Redirect(DeficitName | ProtocolId),
@@ -193,7 +204,8 @@ Phase 1: U → Scan(U, Catalog, Λ.coverage_constraint) → H[]          -- cata
            Λ.coverage_constraint set → filter H[] to {h : π_protocol(h.coverage) ∩ Λ.coverage_constraint ≠ ∅}
            |H[]| < 2 → enrich(U) → Phase 1                          -- multi-hypothesis invariant
            |H[]| ≥ 2 → Phase 2
-Phase 2: H[] → present(H[], evidence, reverse_evidence) → Qc(H[]) → Stop → utterance → parse → R   -- free-response Constitution interaction [Tool]
+Phase 2: H[] → present(H[], evidence, reverse_evidence, end) → Qc(H[]) → Stop → utterance → parse → R   -- free-response Constitution interaction [Tool]
+           -- omit absent ends; show each protocol's end once per presentation
 Phase 3: R → integrate(R, U) →
            Recognize(h)            → emit(ProtocolRoute(h.coverage)) → converge   -- target_coverage : Set(CoverageEntry)
            Redirect(d)             → emit(ProtocolRoute(d)) → converge            -- user-named alternative
@@ -269,13 +281,14 @@ The hypomnesis sibling `misfit.md` sub-index (under `{config_dir}/projects/{slug
     - **Type-level realization**: type-level realization of an already-inscribed `── COMPOSITION ──` product within an existing protocol's operational scope. Internal iteration; deferral framing does not apply.
     The distinction informs `evidence` / `reverse_evidence` formulation when structural-change extent (line count, file count, scope size) is the apparent signal — extent alone does not determine architectural status. Maps approximately onto the downstream-remediation axis a candidate is also classified on — *surgical* (a deterministic 1–2 line edit) versus *design* (a decision-bearing structural change): type-level realization ≈ surgical, architectural inscription ≈ design (`≈` denotes approximate analogical mapping between vocabulary axes; not formal type-isomorphism — `≅` is reserved for the latter).
 18. **Intent-decoding disambiguation** — When constructing Phase 1 candidates, a missing-information framing (ContextInsufficient/`/inquire`) must not crowd out AbstractAporia/`/elicit` by default: include `/elicit` in the candidate set when the user has not fixed which decisions their direction turns on, per Euporia's own deficit (`aporia`, `euporia/skills/elicit/SKILL.md`) — whether that shows in the utterance, in evidence within Probe's scope (Rule 3 default scope; cross-session recall stays opt-in per Rule 4), or in the decision structure of the domain the intent sits in.
+19. **Declared end, after the evidence** — Each coverage entry shows its protocol's declared end — what the user can then say or recognize once that protocol has run — so the user can recognize the end they want as well as the deficit they are in. At each scan, the end is read from the protocol's own declared description; Probe maintains no separate authored copy, and the values carried in this scan's entries come from that runtime read. It is presented after the entry's evidence and reverse-evidence and is never offered as evidence of fit: an attractive end does not outweigh reverse-evidence. A protocol whose description states no end keeps equal candidacy and is presented without one. The end sentence is shown once per protocol in each presentation; later occurrences read "Afterward: as above".
 
 ## UX Safeguards
 
 - **Session immunity for dismissed hypotheses** — A hypothesis dismissed in the current session is not re-presented in the same session unless the user explicitly re-probes the same scope. Re-presenting a dismissed hypothesis without user-driven re-scope erodes the user's disposition authority (Rule 6 reinforcement). Realized via `Λ.dismissed_in_session`: Phase 3 Dismiss adds presented hypotheses to this set; Phase 1 Scan filters out members of this set. Clearing rules: `Narrow(Slice)` clears the set (new situation scope justifies fresh dismissals); `Narrow(CoverageSubset)` preserves the set (situation unchanged, only coverage filter applied).
 - **Progress opacity** — No progress counter, no "X of Y hypotheses considered" framing. Such counters reintroduce a quasi-score (Rule 7 reinforcement).
 - **Ephemeral recognition** — Each probe disposition is a present-tense fit review, not a permanent record. The user's disposition does not bind future probes (Rule 7 reinforcement).
-- **Pre-gate evidence visibility** — All hypothesis evidence and reverse-evidence is laid out before the disposition gate so the user reads context before deciding (evidence stays out of the disposition question itself; structural).
+- **Pre-gate evidence visibility** — All hypothesis evidence, reverse-evidence, and declared ends are laid out before the disposition gate so the user reads context before deciding (evidence stays out of the disposition question itself; structural).
 - **Vocabulary discipline** — Probe output uses "hypothesis", "fit review", "evidence", "reverse-evidence", "disposition", "route". The skill never speaks of mistakes, errors, or misuse (Rule 9 + Rule 10 reinforcement).
 
 ## Trigger Signals
