@@ -331,14 +331,12 @@ theorem override_blocks_prior_grant {c : Context P} (e : BoundaryEntry c) (v : S
     (hd : e.disposition = .filled d s al su) : stands e = false := by
   simp [stands, hc, hd, governing, hf]
 
-/-- Where nothing awaits the person — the one ground on which the boundary stands at the start, and
-    the ground besides their acceptance later — every item on the map rests on one of four things,
-    each with its source: their disposition in this run, on a turn they sent; an earlier decision
-    of theirs fixing who settles it, cited from a record that is not their turn in this context; a
-    fact, on a turn of any grounding origin; or a value they hold, on a turn they sent. Your choice
-    inside a grant is none of these on its own: it stands only under an arrangement that governs
-    the item, which is one of the first two. Such a boundary can stand with no new turn of the
-    person's; what settles each item is still named by its source. -/
+/-- Where nothing awaits the person, every item on the map has one of four sources: their
+    disposition in this run, cited from a turn they sent; an earlier decision of theirs fixing who
+    settles it, cited from a record that is not their turn in this context; a fact, on a turn of any
+    grounding origin; or a value they hold, on a turn they sent. This classifies what governs or
+    fills each item; whether a choice inside a grant stands under the governing arrangement is a
+    separate guarantee (`granted_choice_stands_iff`). -/
 theorem nothing_awaiting_sources {c : Context P} (r : BoundaryEssence c) (h : awaits r = false) :
     ∀ e ∈ r.map,
       (∃ d s al su, e.disposition = .filled d s al su ∧ s.src.val = .person) ∨
