@@ -35,6 +35,9 @@ const TOOL_GROUNDING_THEOREMS = path.join('lean', 'EpistemicProtocols', 'ToolGro
 // The checked-in Lean tooling: the audit and its fixtures. Not part of any contract.
 const LEAN_TOOLING_DIRS = Object.freeze([path.join('lean', 'Audit'), path.join('lean', 'Tests')]);
 
+// A line opening a ```lean fence, read apart from whether a block extracts.
+const LEAN_FENCE_OPEN = /^```lean(?:\s|$)/m;
+
 // The Lean Definition block's source, without its fence.
 function extractLeanBlock(content) {
   const m = /^```lean\n([\s\S]*?)^```$/m.exec(content);
@@ -164,7 +167,8 @@ function writeContracts(root, plan) {
 // its CANONICAL_PROTOCOL_SET. `files` are the listed utilities' SKILL.md paths,
 // each then held to the rules a protocol's block meets; `problems`
 // ([{ relPath, reason }]) are the entries that cannot be enrolled and every
-// utility SKILL.md carrying a ```lean fence the list leaves out.
+// utility SKILL.md the list leaves out that has a line opening a ```lean
+// fence, whether or not the fence closes.
 function utilityEnrollment(root, { records, listed, core }) {
   const coreIds = new Set(core);
   const utilities = new Map(records.filter((r) => r.isUtility).map((r) => [
@@ -187,7 +191,7 @@ function utilityEnrollment(root, { records, listed, core }) {
   }
   for (const [dir, relPath] of utilities) {
     if (enrolled.has(dir)) continue;
-    if (extractLeanBlock(fs.readFileSync(path.join(root, relPath), 'utf8')) !== null) {
+    if (LEAN_FENCE_OPEN.test(fs.readFileSync(path.join(root, relPath), 'utf8'))) {
       problems.push({ relPath, reason: 'carries a ```lean fence but is not listed in LEAN_CONTRACT_UTILITIES — a Lean block outside the list is neither elaborated nor audited' });
     }
   }

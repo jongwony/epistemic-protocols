@@ -125,9 +125,10 @@ const beforeEnd = (text) => `${theorems.slice(0, endNs)}\n${text}\n${theorems.sl
 const expectSome = (messages, needle) => assert.ok(messages.some((m) => m.includes(needle)), `expected "${needle}" in:\n${messages.join('\n')}`);
 
 // A utility plugin for enrollment fixtures: `enrolled` carries the target's
-// Lean block under its own namespace, `blockless` a bare ``` block, and
-// `unlisted` a Lean block of yet another namespace. `listUtilities` rewrites a
-// tree's registry to enroll exactly `dirs`.
+// Lean block under its own namespace, `blockless` a bare ``` block,
+// `unlisted` a Lean block of yet another namespace, and `unclosed` a ```lean
+// fence that never closes. `listUtilities` rewrites a tree's registry to
+// enroll the utilities the live registry lists plus `dirs`.
 const UTILITY = 'fixture-utility';
 const UTILITY_NS = 'FixtureUtility';
 const utilitySkill = (name) => `${UTILITY}/skills/${name}`;
@@ -139,13 +140,23 @@ const utilityFiles = {
   [`${utilitySkill('enrolled')}/SKILL.md`]: withBlock(renameNs(block, UTILITY_NS)),
   [`${utilitySkill('blockless')}/SKILL.md`]: '---\nname: blockless\ndescription: A fixture utility.\n---\n\n## Definition\n\n```\nFLOW: none\n```\n',
   [`${utilitySkill('unlisted')}/SKILL.md`]: withBlock(renameNs(block, `${UTILITY_NS}Unlisted`)),
+  [`${utilitySkill('unclosed')}/SKILL.md`]: `---\nname: unclosed\ndescription: A fixture utility.\n---\n\n## Definition\n\n\`\`\`lean\nnamespace ${UTILITY_NS}Unclosed\n`,
 };
 const REGISTRY = 'scripts/load-protocols.js';
-const EMPTY_LIST = 'const LEAN_CONTRACT_UTILITIES = Object.freeze([]);';
+const LIST_DECLARATION = /^const LEAN_CONTRACT_UTILITIES = Object\.freeze\(\[[^\]]*\]\);$/m;
 const listUtilities = (registry, dirs) => {
-  assert.ok(registry.includes(EMPTY_LIST), `precondition: ${REGISTRY} declares LEAN_CONTRACT_UTILITIES empty`);
-  return registry.replace(EMPTY_LIST, `const LEAN_CONTRACT_UTILITIES = Object.freeze(${JSON.stringify(dirs)});`);
+  assert.equal((registry.match(new RegExp(LIST_DECLARATION.source, 'gm')) || []).length, 1, `precondition: ${REGISTRY} declares LEAN_CONTRACT_UTILITIES once`);
+  return registry.replace(LIST_DECLARATION, () => `const LEAN_CONTRACT_UTILITIES = Object.freeze(${JSON.stringify([...LEAN_CONTRACT_UTILITIES, ...dirs])});`);
 };
+// A copy of the tree lean-contract.js reads: the registry, the canonical
+// shared modules, every protocol plugin, and every utility plugin the live
+// registry lists.
+function copyLeanInputs(root) {
+  const plugins = [...protocolFiles({ projectRoot }), ...LEAN_CONTRACT_UTILITIES].map((p) => p.split('/')[0]);
+  for (const relative of ['scripts', 'lean/EpistemicProtocols', ...new Set(plugins)]) {
+    cpSync(path.join(projectRoot, relative), path.join(root, relative), { recursive: true });
+  }
+}
 
 describe('lean bridge: lean-definition', () => {
   it('reaches every protocol whose Definition block is Lean, with no failure', () => {
@@ -298,7 +309,7 @@ describe('lean bridge: lean-definition', () => {
 });
 
 describe('lean bridge: lean-definition enrolls the utilities LEAN_CONTRACT_UTILITIES lists', () => {
-  it('holds a listed utility to the protocol rules, and fails an unlisted utility Lean block, a listed skill without one, and a listed canonical protocol', () => {
+  it('holds a listed utility to the protocol rules, and fails an unlisted utility Lean fence (closed or not), a listed skill without one, and a listed canonical protocol', () => {
     const coreDir = path.dirname(target);
     withCopy(({ read, write, verdict }) => {
       for (const [relative, text] of Object.entries(utilityFiles)) write(relative, text);
@@ -307,10 +318,13 @@ describe('lean bridge: lean-definition enrolls the utilities LEAN_CONTRACT_UTILI
       const result = verdict();
       const failed = result.fail.filter((r) => r.check === LEAN);
       const failedFor = (file) => failed.filter((r) => r.file === file).map((r) => r.message);
-      expectSome(failedFor(`${utilitySkill('unlisted')}/SKILL.md`), 'carries a ```lean fence but is not listed in LEAN_CONTRACT_UTILITIES');
+      for (const name of ['unlisted', 'unclosed']) {
+        expectSome(failedFor(`${utilitySkill(name)}/SKILL.md`), 'carries a ```lean fence but is not listed in LEAN_CONTRACT_UTILITIES');
+      }
       expectSome(failedFor(`${utilitySkill('blockless')}/SKILL.md`), 'is not a ```lean fence');
       expectSome(failedFor(target), 'is a canonical protocol (CANONICAL_PROTOCOL_SET)');
-      assert.deepEqual(failed.map((r) => r.file).filter((file) => ![`${utilitySkill('unlisted')}/SKILL.md`, `${utilitySkill('blockless')}/SKILL.md`, target].includes(file)), [], 'no other Lean failure');
+      const expected = [...['unlisted', 'unclosed', 'blockless'].map((name) => `${utilitySkill(name)}/SKILL.md`), target];
+      assert.deepEqual(failed.map((r) => r.file).filter((file) => !expected.includes(file)), [], 'no other Lean failure');
 
       // The listed utility is reached like a protocol: a pass once elaborated, the toolchain warn otherwise.
       const enrolled = `${utilitySkill('enrolled')}/SKILL.md`;
@@ -503,11 +517,7 @@ describe('lean bridge: the standalone lean-contract.js command enrolls every pro
     const target = protocolFiles({ projectRoot })[0];
     const root = mkdtempSync(path.join(tmpdir(), 'lean-contract-cli-'));
     try {
-      // A copy of the tree the command reads: the registry, the canonical
-      // shared modules, and every protocol SKILL.md.
-      for (const relative of ['scripts', 'lean/EpistemicProtocols', ...new Set(protocolFiles({ projectRoot }).map((p) => p.split('/')[0]))]) {
-        cpSync(path.join(projectRoot, relative), path.join(root, relative), { recursive: true });
-      }
+      copyLeanInputs(root);
       for (const file of ['.claude-plugin']) {
         if (existsSync(path.join(projectRoot, file))) cpSync(path.join(projectRoot, file), path.join(root, file), { recursive: true });
       }
@@ -532,12 +542,10 @@ describe('lean bridge: the standalone lean-contract.js command enrolls every pro
 });
 
 describe('lean bridge: the standalone lean-contract.js command enrolls the listed utilities', () => {
-  it('generates a listed utility\'s contract, and fails an unlisted utility Lean block, a listed skill without one, and a listed canonical protocol', () => {
+  it('generates a listed utility\'s contract, and fails an unlisted utility Lean fence (closed or not), a listed skill without one, and a listed canonical protocol', () => {
     const root = mkdtempSync(path.join(tmpdir(), 'lean-contract-utility-'));
     try {
-      for (const relative of ['scripts', 'lean/EpistemicProtocols', ...new Set(protocolFiles({ projectRoot }).map((p) => p.split('/')[0]))]) {
-        cpSync(path.join(projectRoot, relative), path.join(root, relative), { recursive: true });
-      }
+      copyLeanInputs(root);
       const put = (relative, text) => {
         mkdirSync(path.dirname(path.join(root, relative)), { recursive: true });
         writeFileSync(path.join(root, relative), text);
@@ -563,6 +571,15 @@ describe('lean bridge: the standalone lean-contract.js command enrolls the liste
       const unlisted = generate();
       assert.equal(unlisted.status, 1);
       assert.match(unlisted.stderr, new RegExp(`not enrolled: ${escape(enrolled)} — carries a \`\`\`lean fence but is not listed`));
+
+      // A fence that never closes extracts no block, and still fails unlisted.
+      const unclosed = `${utilitySkill('unclosed')}/SKILL.md`;
+      put(unclosed, utilityFiles[unclosed]);
+      enroll([utilitySkill('enrolled')]);
+      const open = generate();
+      assert.equal(open.status, 1);
+      assert.match(open.stderr, new RegExp(`not enrolled: ${escape(unclosed)} — carries a \`\`\`lean fence but is not listed`));
+      rmSync(path.join(root, unclosed));
 
       enroll([utilitySkill('enrolled')]);
       put(enrolled, utilityFiles[enrolled].replace('```lean\n', '```\n'));
