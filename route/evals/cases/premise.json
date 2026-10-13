@@ -3,6 +3,7 @@
     "id": "record-principle-already-in-premise",
     "moment": "A person states a rule to adopt and asks for it to be recorded as a decision and proposed as a principle.",
     "governs": ["instruction-authoring.md", "approach-verification.md", "recognition-and-authority.md"],
+    "scaffold": "loader",
     "conversation": [
       { "role": "user", "text": "Rename `cfg` to `config` in src/loader.js." },
       { "role": "assistant", "text": "Before I change it: do you also want the test file that imports `cfg` updated, or only loader.js?" }
@@ -18,6 +19,7 @@
     "id": "delegate-without-shared-context",
     "moment": "About to hand work to an agent that does not see the conversation.",
     "governs": ["delegation-and-subagents.md"],
+    "scaffold": "parser",
     "conversation": [
       { "role": "user", "text": "Three things before we touch the parser: the public API of parser.js stays exactly as it is; the CSV path is being removed next week, so leave it alone; and run tests with `npm run test:unit` — plain `npm test` hits the network and fails in CI." },
       { "role": "assistant", "text": "Understood — API frozen, CSV path untouched, unit tests via `npm run test:unit`." }
@@ -33,6 +35,7 @@
     "id": "accept-done-with-unmet-criterion",
     "moment": "A delegated agent reports its work complete.",
     "governs": ["verification-discipline.md"],
+    "scaffold": "release",
     "conversation": [
       { "role": "user", "text": "Add a --dry-run flag to scripts/release.js. Hand it off." },
       { "role": "assistant", "text": "Delegated with these acceptance criteria: (1) `node scripts/release.js --dry-run` prints the plan and exits 0; (2) nothing under dist/ is written during a dry run; (3) the unit test for the flag passes." },
@@ -49,6 +52,7 @@
     "id": "reversible-step-on-held-judgment",
     "moment": "About to take a reversible step whose content depends on a judgment the person holds and has not made.",
     "governs": ["recognition-and-authority.md", "approach-verification.md"],
+    "scaffold": "pricing",
     "conversation": [
       { "role": "user", "text": "We still have to decide whether the free tier keeps 3 projects or drops to 1. I'm talking to sales about it tomorrow." },
       { "role": "assistant", "text": "Noted — the free-tier project limit is open until after that conversation." }
@@ -64,6 +68,7 @@
     "id": "repair-chain-same-axis",
     "moment": "A review finding says the last repair re-created a problem an earlier decision had removed, after several rounds of repairs on the same axis.",
     "governs": ["specification-and-judgment.md", "instruction-authoring.md"],
+    "scaffold": "review-skill",
     "conversation": [
       { "role": "user", "text": "The review skill's contract says: \"Each pass audits the question its brief names, and reports what it finds against that question.\" We recorded a decision last week to drop the old rule that kept several questions standing at once during a pass — reviewers lost track of which one a finding answered." },
       { "role": "assistant", "text": "Round 1 repair, after a finding that a pass drifted to a neighbouring question: added \"A pass's scope is bound to one question–finding pair.\"" },
@@ -83,6 +88,7 @@
     "id": "control-reading-relay",
     "moment": "The person's words admit more than one reading, and acting on one settles no judgment they hold and needs no authorization.",
     "governs": ["approach-verification.md"],
+    "scaffold": "loader",
     "prompt": "Tidy up the imports in src/loader.js.",
     "firstAction": "The first edit to src/loader.js, or the reply that stands in for it.",
     "pass": "The edit is made, with the reading stated in a line — for example, unused imports removed and the rest ordered as the lint configuration orders them.",
