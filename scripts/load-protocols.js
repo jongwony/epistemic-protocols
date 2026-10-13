@@ -11,7 +11,9 @@
  * classification and display order both read CANONICAL_PROTOCOL_SET below,
  * intersected with the discovered plugin dirs. Protocol identity is a
  * curated fact — a directory carrying a plugin.json does not thereby become
- * a protocol — so it is stated where it can be reviewed.
+ * a protocol — so it is stated where it can be reviewed. Which utility skills
+ * carry their contract as a Lean block is declared here too
+ * (LEAN_CONTRACT_UTILITIES), for the Lean verification path alone.
  *
  * Active set = the above minus plugins whose plugin.json carries
  * "deprecated": true. Deprecation lives in per-plugin self-description per
@@ -43,6 +45,15 @@ const CANONICAL_PROTOCOL_SET = [
   ...CANONICAL_PRECEDENCE.map(s => s.toLowerCase()),
   'katalepsis',
 ];
+
+// Utility skills whose contract is a Lean block, as skill directories relative
+// to the project root (`<plugin>/skills/<skill>`). The Lean verification path
+// (lean-contract.js, the lean-definition check) enrolls each one under the
+// rules a canonical protocol's block meets, and only these: a utility SKILL.md
+// with a ```lean fence enters the path by being listed here. Listing a skill
+// changes nothing else — it stays a utility to every other consumer of this
+// module.
+const LEAN_CONTRACT_UTILITIES = Object.freeze([]);
 
 // Per-call memoization cache. discoverPlugins() instantiates a fresh cache
 // so callers within a single process pay one read per plugin.json regardless
@@ -219,6 +230,7 @@ function protocolFiles(options) {
 module.exports = {
   CANONICAL_PRECEDENCE,
   CANONICAL_PROTOCOL_SET,
+  LEAN_CONTRACT_UTILITIES,
   discoverPlugins,
   protocolOrder,
   protocolFiles,

@@ -169,7 +169,7 @@ function leanFilesUnder(dir, rel = '') {
 }
 
 function checkLeanDefinition(ctx) {
-  const { projectRoot, results, protocolInputs } = ctx;
+  const { projectRoot, results, protocolInputs, records, LEAN_CONTRACT_UTILITIES, CANONICAL_PROTOCOL_SET } = ctx;
   const CHECK = 'lean-definition';
   const fail = (file, message) => results.fail.push({ check: CHECK, file, message });
   const canonical = (rel, extract) => {
@@ -188,13 +188,18 @@ function checkLeanDefinition(ctx) {
   const namespaces = new Map();
   const expectedLean = new Set(SHARED.flatMap(({ module, theorems }) => [module, theorems]));
 
-  // Enrollment: every canonical protocol hands its Definition block to Lean.
-  // A protocol with no SKILL.md, or whose block is not a ```lean fence, fails
-  // here rather than dropping out of what gets elaborated and audited.
-  for (const relPath of protocolInputs(CHECK)) {
+  // Enrollment: every canonical protocol, and every utility listed in
+  // LEAN_CONTRACT_UTILITIES, hands its Definition block to Lean under the same
+  // rules. A protocol with no SKILL.md, an enrolled block that is not a
+  // ```lean fence, a list entry that cannot be enrolled, and a utility Lean
+  // block the list leaves out each fail here rather than dropping out of what
+  // gets elaborated and audited.
+  const utilities = leanContract.utilityEnrollment(projectRoot, { records, listed: LEAN_CONTRACT_UTILITIES, core: CANONICAL_PROTOCOL_SET });
+  for (const { relPath, reason } of utilities.problems) fail(relPath, `Not enrolled in the Lean path: ${reason}`);
+  for (const relPath of [...protocolInputs(CHECK), ...utilities.files]) {
     const content = fs.readFileSync(path.join(projectRoot, relPath), 'utf8');
     if (!isLeanDefinition(content)) {
-      fail(relPath, 'Definition block is not a ```lean fence — every canonical protocol hands its contract to Lean, and a block outside it is neither elaborated nor audited');
+      fail(relPath, 'Definition block is not a ```lean fence — every canonical protocol and every utility listed in LEAN_CONTRACT_UTILITIES hands its contract to Lean, and a block outside it is neither elaborated nor audited');
       failedFiles.add(relPath);
       continue;
     }
@@ -269,7 +274,7 @@ function checkLeanDefinition(ctx) {
   // fixtures are tooling, not contract.
   const tooling = (rel) => leanContract.LEAN_TOOLING_DIRS.some((dir) => rel.startsWith(dir + path.sep));
   for (const rel of leanFilesUnder(path.join(projectRoot, 'lean'))) {
-    if (!expectedLean.has(rel) && !tooling(rel)) fail(rel, 'Lean file is neither a canonical shared section (GROUND, TOOL GROUNDING) or its Theorems module, a Theorems module of a protocol Lean block, nor the audit tooling under lean/Audit or lean/Tests');
+    if (!expectedLean.has(rel) && !tooling(rel)) fail(rel, 'Lean file is neither a canonical shared section (GROUND, TOOL GROUNDING) or its Theorems module, a Theorems module of an enrolled Lean block, nor the audit tooling under lean/Audit or lean/Tests');
   }
 
   if (blocks.length === 0) return;

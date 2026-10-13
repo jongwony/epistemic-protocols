@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 /**
- * Lean contract build: turns each protocol SKILL.md Lean block into the Lake
- * package's `Contract.<NS>` module under `lean/.contract/`, which is
- * gitignored — the SKILL.md block stays the single source, and a generated
- * file is never edited by hand. Each contract's guarantees are stated and
+ * Lean contract build: turns each enrolled SKILL.md Lean block — every
+ * canonical protocol's, and each utility's that `scripts/load-protocols.js`
+ * LEAN_CONTRACT_UTILITIES lists — into the Lake package's `Contract.<NS>`
+ * module under `lean/.contract/`, which is gitignored — the SKILL.md block
+ * stays the single source, and a generated file is never edited by hand.
+ * Each contract's guarantees are stated and
  * proved together in `lean/EpistemicProtocols/<NS>/Theorems.lean`; the audit
  * that judges them is checked in (`lean/Audit/`) and runs as `lake lint`.
  *
@@ -32,6 +34,9 @@ const CANONICAL_TOOL_GROUNDING = path.join('lean', 'EpistemicProtocols', 'ToolGr
 const TOOL_GROUNDING_THEOREMS = path.join('lean', 'EpistemicProtocols', 'ToolGrounding', 'Theorems.lean');
 // The checked-in Lean tooling: the audit and its fixtures. Not part of any contract.
 const LEAN_TOOLING_DIRS = Object.freeze([path.join('lean', 'Audit'), path.join('lean', 'Tests')]);
+
+// A line opening a ```lean fence, read apart from whether a block extracts.
+const LEAN_FENCE_OPEN = /^```lean(?:\s|$)/m;
 
 // The Lean Definition block's source, without its fence.
 function extractLeanBlock(content) {
@@ -157,6 +162,42 @@ function writeContracts(root, plan) {
   }
 }
 
+// The utility SKILL.md files the Lean path enrolls. `listed` is the registry's
+// LEAN_CONTRACT_UTILITIES, `records` its discoverPlugins() records, and `core`
+// its CANONICAL_PROTOCOL_SET. `files` are the listed utilities' SKILL.md paths,
+// each then held to the rules a protocol's block meets; `problems`
+// ([{ relPath, reason }]) are the entries that cannot be enrolled and every
+// utility SKILL.md the list leaves out that has a line opening a ```lean
+// fence, whether or not the fence closes.
+function utilityEnrollment(root, { records, listed, core }) {
+  const coreIds = new Set(core);
+  const utilities = new Map(records.filter((r) => r.isUtility).map((r) => [
+    path.relative(root, path.dirname(r.skillMdPath)).split(path.sep).join('/'),
+    path.relative(root, r.skillMdPath),
+  ]));
+  const files = [];
+  const problems = [];
+  const enrolled = new Set();
+  for (const entry of listed) {
+    const relPath = utilities.get(entry) || path.join(entry, 'SKILL.md');
+    if (coreIds.has(entry.split('/')[0])) {
+      problems.push({ relPath, reason: 'listed in LEAN_CONTRACT_UTILITIES but is a canonical protocol (CANONICAL_PROTOCOL_SET), whose block is enrolled as a protocol' });
+    } else if (!utilities.has(entry)) {
+      problems.push({ relPath, reason: 'listed in LEAN_CONTRACT_UTILITIES but no active utility plugin carries this SKILL.md' });
+    } else if (!enrolled.has(entry)) {
+      enrolled.add(entry);
+      files.push(relPath);
+    }
+  }
+  for (const [dir, relPath] of utilities) {
+    if (enrolled.has(dir)) continue;
+    if (LEAN_FENCE_OPEN.test(fs.readFileSync(path.join(root, relPath), 'utf8'))) {
+      problems.push({ relPath, reason: 'carries a ```lean fence but is not listed in LEAN_CONTRACT_UTILITIES — a Lean block outside the list is neither elaborated nor audited' });
+    }
+  }
+  return { files, problems };
+}
+
 function leanBlocksFrom(root, relPaths) {
   const blocks = [];
   for (const relPath of relPaths) {
@@ -236,6 +277,7 @@ module.exports = {
   run,
   theoremsModulePath,
   toolGroundingSpan,
+  utilityEnrollment,
   writeContracts,
 };
 
@@ -246,14 +288,20 @@ if (require.main === module) {
     process.exit(2);
   }
   const root = path.resolve(rootArg || '.');
-  const { protocolFiles } = require(path.join(root, 'scripts/load-protocols.js'));
-  const relPaths = protocolFiles({ projectRoot: root });
+  const registry = require(path.join(root, 'scripts/load-protocols.js'));
+  const utilities = utilityEnrollment(root, {
+    records: registry.discoverPlugins({ projectRoot: root }),
+    listed: registry.LEAN_CONTRACT_UTILITIES,
+    core: registry.CANONICAL_PROTOCOL_SET,
+  });
+  const relPaths = [...registry.protocolFiles({ projectRoot: root }), ...utilities.files];
   const blocks = leanBlocksFrom(root, relPaths);
-  // Every protocol is enrolled or the command fails: a block left out of the
-  // plan is a block nothing audits.
+  // Every protocol and every listed utility is enrolled or the command fails:
+  // a block left out of the plan is a block nothing audits.
   const plan = planContracts(root, blocks);
   const withBlock = new Set(blocks.map((b) => b.relPath));
   const unenrolled = [
+    ...utilities.problems,
     ...relPaths.filter((p) => !withBlock.has(p)).map((relPath) => ({ relPath, reason: 'no Lean Definition block' })),
     ...plan.skipped,
   ];
