@@ -55,35 +55,6 @@ theorem crystallized_on_confirm (respond declare : Context P → Response P) (c 
             exact ⟨c, u, k, src, ⟨ok, sup, hc⟩, hi, hk, rfl⟩
           · cases hl
         · cases hl
-      · cases h
-      · exact ih _ h
-
-/-- A withdrawn record comes only from a stop that cites the utterance just fused onto the context
-    it answered; the record is that context's sheet. -/
-theorem withdrawn_on_stop (respond declare : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : Withdrawn P) (h : induce respond declare c us = .withdrawn r) :
-    ∃ (c₀ : Context P) (u : Utterance P) (src : Cite (fuse c₀ u)),
-      (∃ ok sup, closing (fuse c₀ u) = .filled .stop src ok sup) ∧
-      src.idx + 1 = (fuse c₀ u).length ∧
-      r = withdraw declare c₀ (fuse c₀ u) := by
-  induction us generalizing c with
-  | nil => simp [induce] at h
-  | cons u us ih =>
-    simp only [induce] at h
-    split at h
-    · exact ih _ h
-    · split at h
-      · cases h
-      · rename_i hl
-        split at hl
-        · rename_i a src ok sup hc
-          split at hl
-          · rename_i hi
-            cases hl
-            cases h
-            exact ⟨c, u, src, ⟨ok, sup, hc⟩, hi, rfl⟩
-          · cases hl
-        · cases hl
       · exact ih _ h
 
 /-- A closing is a filled occurrence that cites a turn the person sent. -/
@@ -92,8 +63,8 @@ theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing
   cases hc : closing c with
   | open_ _ => simp [hc, filledValue] at h
   | filled a src ok sup =>
-    simp only [hc, filledValue, Option.some.injEq] at h
-    subst h
+    cases a
+    cases k
     exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
 
 /-- A reading's setting-aside is a filled occurrence that cites a turn the person sent. -/
@@ -172,17 +143,13 @@ theorem standing_by_person (c : Context P) (e : Entry) (s : Standing)
     subst h
     exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
 
-/-- Every provenance line of a crystallized or withdrawn record is a line the sheet the closing
-    turn followed showed. -/
+/-- Every provenance line of a crystallized record is a line the sheet the closing turn followed
+    showed. -/
 theorem record_lines_shown (declare : Context P → Response P) (c c' : Context P) (k : Candidate)
-    (p : Provenance) :
-    (p ∈ (crystallize declare c c' k).provenance → p.entry ∈ entries c) ∧
-    (p ∈ (withdraw declare c c').provenance → p.entry ∈ entries c) := by
-  constructor <;>
-  · intro hp
-    simp only [crystallize, withdraw, provenanceOf, List.mem_map] at hp
-    obtain ⟨e, he, rfl⟩ := hp
-    exact he
+    (p : Provenance) (hp : p ∈ (crystallize declare c c' k).provenance) : p.entry ∈ entries c := by
+  simp only [crystallize, provenanceOf, List.mem_map] at hp
+  obtain ⟨e, he, rfl⟩ := hp
+  exact he
 
 /-- Every line of a crystallized record that carries a standing has it from a filled occurrence in
     the context the closing turn was fused into, citing a turn the person sent: the record gives no
@@ -194,18 +161,6 @@ theorem record_standing_by_person (declare : Context P → Response P) (c c' : C
     ∃ src ok sup, standingOcc c' p.entry = .filled s src ok sup ∧
       (c'[src.idx]'src.lt).origin = .person := by
   simp only [crystallize, provenanceOf, List.mem_map] at hp
-  obtain ⟨e, _, rfl⟩ := hp
-  exact standing_by_person c' e s hs
-
-/-- Every line of a withdrawn record that carries a standing has it from a filled occurrence in the
-    context the ending turn was fused into, citing a turn the person sent: the record gives no line
-    a standing that no person's turn reached. -/
-theorem withdrawn_standing_by_person (declare : Context P → Response P) (c c' : Context P)
-    (p : Provenance) (hp : p ∈ (withdraw declare c c').provenance) (s : Standing)
-    (hs : p.standing = some s) :
-    ∃ src ok sup, standingOcc c' p.entry = .filled s src ok sup ∧
-      (c'[src.idx]'src.lt).origin = .person := by
-  simp only [withdraw, provenanceOf, List.mem_map] at hp
   obtain ⟨e, _, rfl⟩ := hp
   exact standing_by_person c' e s hs
 
