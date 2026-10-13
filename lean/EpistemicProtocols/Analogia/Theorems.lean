@@ -34,6 +34,20 @@ theorem held_gate_collects_nothing (respond : Context P → Response P) (c : Con
 theorem question_by_person {c : Context P} {s : Cite c}
     (ok : (questionCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
+/-- The question an assessment answers stands on a person's turn: every assessment carries
+    `QuestionStands` of its context, and a standing question is one a person's turn set or took,
+    with the conclusions that turn supports. That turn may come before the run opens, so an
+    assessment can close the run without a new turn of theirs; its source is the person all the
+    same. The checks beneath its verdicts admit a turn of any grounding origin, read through what
+    it reports observing, and an assessment does not wait for them to be filled. -/
+theorem standing_question_by_person (c : Context P) (h : QuestionStands c) :
+    ∃ (q : Question) (s : Cite c), s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person ∧
+      QuestionSupported c (c[s.idx]'s.lt) q ∧ inferences c = q.conclusions := by
+  unfold QuestionStands inferences at h
+  cases hq : question c with
+  | open_ _ => simp [hq] at h
+  | filled q s ok sup => exact ⟨q, s, ok, s.ok.trans ok, sup, by simp [inferences, hq]⟩
+
 /-- An assessment is made only over the collected context: the pass's question stood before
     collection, and the question that stands over the collected context is the one `hs`
     witnesses. -/

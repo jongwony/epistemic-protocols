@@ -331,6 +331,41 @@ theorem override_blocks_prior_grant {c : Context P} (e : BoundaryEntry c) (v : S
     (hd : e.disposition = .filled d s al su) : stands e = false := by
   simp [stands, hc, hd, governing, hf]
 
+/-- Where nothing awaits the person — the one ground on which the boundary stands at the start, and
+    the ground besides their acceptance later — every item on the map rests on one of four things,
+    each with its source: their disposition in this run, on a turn they sent; an earlier decision
+    of theirs fixing who settles it, cited from a record that is not their turn in this context; a
+    fact, on a turn of any grounding origin; or a value they hold, on a turn they sent. Your choice
+    inside a grant is none of these on its own: it stands only under an arrangement that governs
+    the item, which is one of the first two. Such a boundary can stand with no new turn of the
+    person's; what settles each item is still named by its source. -/
+theorem nothing_awaiting_sources {c : Context P} (r : BoundaryEssence c) (h : awaits r = false) :
+    ∀ e ∈ r.map,
+      (∃ d s al su, e.disposition = .filled d s al su ∧ s.src.val = .person) ∨
+      (∃ a s al su, e.priorDisposition = .filled a s al su ∧ s.src.val ≠ .person) ∨
+      (∃ v s al su, e.content = .filled (.fact v) s al su) ∨
+      (∃ v p st s al su, e.content = .filled (.held v p st) s al su ∧ s.src.val = .person) := by
+  intro e he
+  have hn : awaitsEntry e = false := by
+    simp only [awaits, List.any_eq_false] at h
+    simpa using h e he
+  cases hd : e.disposition with
+  | filled d s al su => exact .inl ⟨d, s, al, su, rfl, al⟩
+  | open_ x =>
+    cases hp : e.priorDisposition with
+    | filled a s al su => exact .inr (.inl ⟨a, s, al, su, rfl, al⟩)
+    | open_ y =>
+      have hg : governing e = none := by simp [governing, hd, hp]
+      have hs : stands e = true := by simpa [awaitsEntry, hg] using hn
+      cases hc : e.content with
+      | open_ _ => simp [stands, hc] at hs
+      | filled k s al su =>
+        cases k with
+        | fact v => exact .inr (.inr (.inl ⟨v, s, al, su, rfl⟩))
+        | held v p st =>
+          exact .inr (.inr (.inr ⟨v, p, st, s, al, su, rfl, by simpa [stands, hc] using hs⟩))
+        | granted v => simp [stands, hc, hg] at hs
+
 private theorem mem_residualOf {c : Context P} (m : BoundaryMap c) (e : BoundaryEntry c)
     (hm : e ∈ m) (hs : stands e = false) : openItemOf e ∈ residualOf m := by
   simp only [residualOf, List.mem_map, List.mem_filter]
