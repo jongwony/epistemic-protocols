@@ -21,7 +21,7 @@ variable {P : Type}
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 instance : Nonempty Row := ⟨⟨"", [], [], ""⟩⟩
 
-instance : Nonempty Candidate := ⟨⟨"", "", "", none⟩⟩
+instance : Nonempty Candidate := ⟨⟨"", "", "", [], none⟩⟩
 
 theorem silence (respond session converge : Context P → Response P) (c : Context P) :
     induce respond session converge c [] = .holding c := by
@@ -142,7 +142,7 @@ theorem record_standing_by_person (converge : Context P → Response P) (c c' : 
 
 /-- Words an open item carries in the open trace are a filled occurrence, on the context the
     words are read on, that cites a turn the person sent. -/
-theorem open_words_by_person (c c' : Context P) (t : Reading) (i : OpenItem) (w : String)
+theorem open_words_by_person (c c' : Context P) (t : List Reading) (i : OpenItem) (w : String)
     (h : (i, some w) ∈ openTrace c c' t) :
     ∃ src ok sup, openWords c' i = .filled w src ok sup ∧
       (c'[src.idx]'src.lt).origin = .person := by
