@@ -48,6 +48,66 @@ theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing
   | open_ _ => simp [hc, filledValue] at h
   | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
 
+private theorem stop_by_person (c : Context P) (h : filledValue (closing c) = some .stop) :
+    ∃ s : Cite c, s.src.val = .person ∧ ClosingSupported c (c[s.idx]'s.lt) .stop := by
+  cases hc : closing c with
+  | open_ _ => simp [hc, filledValue] at h
+  | filled a src ok sup =>
+    simp only [hc, filledValue, Option.some.injEq] at h
+    subst h
+    exact ⟨src, ok, sup⟩
+
+private theorem ideate_assembles (generate respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (o : Outcome P) (h : ideate generate respond c us = o)
+    (ho : (∃ f, o = .field f) ∨ (∃ e, o = .early e)) :
+    ∃ c₁ : Context P, filledValue (closing c₁) = some .stop ∧ assemble c₁ = o := by
+  induction us generalizing c with
+  | nil => simp [ideate] at h; subst h; rcases ho with ⟨_, h⟩ | ⟨_, h⟩ <;> cases h
+  | cons u us ih =>
+    simp only [ideate] at h
+    split at h
+    · next hk => exact ⟨_, hk, h⟩
+    · subst h; rcases ho with ⟨_, h⟩ | ⟨_, h⟩ <;> cases h
+    · subst h; rcases ho with ⟨_, h⟩ | ⟨_, h⟩ <;> cases h
+    · split at h
+      · exact ih _ h
+      · exact ih _ h
+
+private theorem start_assembles (relay generate respond : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (o : Outcome P) (h : start relay generate respond c us = o)
+    (ho : (∃ f, o = .field f) ∨ (∃ e, o = .early e)) :
+    ∃ c₁ : Context P, filledValue (closing c₁) = some .stop ∧ assemble c₁ = o := by
+  unfold start at h
+  simp only at h
+  split at h
+  · exact ideate_assembles generate respond _ us o h ho
+  · exact ideate_assembles generate respond _ us o h ho
+
+/-- Every field a run assembles — a candidate field, or an early exit with none — closes on the
+    person's Stop: the context it closes on cites a turn they sent that says it of the field. Your
+    reading that the field is wide enough closes nothing. -/
+theorem assembled_on_person_stop (relay generate respond : Context P → Response P)
+    (c : Context P) (us : List (Utterance P)) :
+    (∀ f, start relay generate respond c us = .field f →
+      ∃ s : Cite f.context, s.src.val = .person ∧
+        ClosingSupported f.context (f.context[s.idx]'s.lt) .stop) ∧
+    (∀ e, start relay generate respond c us = .early e →
+      ∃ s : Cite e.context, s.src.val = .person ∧
+        ClosingSupported e.context (e.context[s.idx]'s.lt) .stop) := by
+  constructor
+  · intro f h
+    obtain ⟨c₁, hk, ha⟩ := start_assembles relay generate respond c us _ h (.inl ⟨f, rfl⟩)
+    unfold assemble at ha
+    split at ha
+    · cases ha
+    · cases ha; exact stop_by_person c₁ hk
+  · intro e h
+    obtain ⟨c₁, hk, ha⟩ := start_assembles relay generate respond c us _ h (.inr ⟨e, rfl⟩)
+    unfold assemble at ha
+    split at ha
+    · cases ha; exact stop_by_person c₁ hk
+    · cases ha
+
 theorem parked_by_person (c : Context P) (p : ParkedFollowUp c) :
     (c[p.request.idx]'p.request.lt).origin = .person :=
   p.request.ok.trans p.byPerson

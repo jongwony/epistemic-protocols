@@ -1084,6 +1084,43 @@ describe('generate-changelog.js CLI', () => {
     assert.ok('groups' in result);
     assert.ok('ungrouped' in result);
   });
+
+  it('lists a PR merged with a merge commit as one entry, not its branch commits', () => {
+    const repo = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'changelog-first-parent-'));
+    const env = {
+      ...process.env,
+      GIT_AUTHOR_NAME: 'test', GIT_AUTHOR_EMAIL: 'test@example.com',
+      GIT_COMMITTER_NAME: 'test', GIT_COMMITTER_EMAIL: 'test@example.com',
+    };
+    const git = (...args) => execFileSync('git', ['-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', ...args], {
+      cwd: repo, env, encoding: 'utf8',
+    });
+    try {
+      git('init', '-q', '-b', 'main');
+      git('config', 'core.abbrev', '12'); // %h longer than 7, as in this repository
+      git('commit', '-q', '--allow-empty', '-m', 'chore: base');
+      git('tag', 'v2026.01.01');
+      git('checkout', '-q', '-b', 'feature');
+      git('commit', '-q', '--allow-empty', '-m', 'feat(x): inner one');
+      git('commit', '-q', '--allow-empty', '-m', 'fix(x): inner two');
+      git('checkout', '-q', 'main');
+      git('merge', '-q', '--no-ff', '-m', 'feat(x): title (#1)', 'feature');
+      git('checkout', '-q', '-b', 'other');
+      git('commit', '-q', '--allow-empty', '-m', 'chore: inner three');
+      git('checkout', '-q', 'main');
+      git('merge', '-q', '--no-ff', '-m', 'Merge pull request #2 from x', 'other');
+
+      const output = execFileSync(process.execPath, [path.join(__dirname, 'generate-changelog.js')], {
+        cwd: repo, env, encoding: 'utf8',
+      });
+      const result = JSON.parse(output);
+      assert.deepEqual(result.groups.x.map(entry => entry.message), ['title (#1)']);
+      assert.deepEqual(result.ungrouped.map(entry => entry.message), ['Merge pull request #2 from x']);
+      assert.equal(result.ungrouped[0].hash.length, 12);
+    } finally {
+      fs.rmSync(repo, { recursive: true, force: true });
+    }
+  });
 });
 
 // ============================================================

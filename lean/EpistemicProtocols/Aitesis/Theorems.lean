@@ -60,6 +60,20 @@ theorem completes_after_collection (respond : Context P → Response P) (c : Con
     (collectAndSettle respond c).closure.context =
       collected c ++ [(respond (collected c)).val] := rfl
 
+/-- What closes a completion is collection, not a coordinate: the context it stands on is the one
+    collection started from, extended by what collection returned — each turn from the environment
+    or a peer — and then the relay, your own turn. The suffix the run appends carries no turn of the
+    person's; the context it started from may. -/
+theorem completion_rests_on_collection (respond : Context P → Response P) (c : Context P) :
+    ∃ (ev : List (Turn P)) (r : Turn P),
+      (collectAndSettle respond c).closure.context = c ++ ev ++ [r] ∧
+      (∀ e ∈ ev, e.origin = .external ∨ e.origin = .peer) ∧ r.origin = .assistant := by
+  refine ⟨(collect c).map (·.val), (respond (collected c)).val, rfl, ?_,
+    (respond (collected c)).property⟩
+  intro e he
+  obtain ⟨x, -, rfl⟩ := List.mem_map.mp he
+  exact x.property
+
 /-- Collection only adds to the context, over this contract's own operations. -/
 theorem collected_extends (c : Context P) : ∃ t, collected c = c ++ t := ⟨_, rfl⟩
 
