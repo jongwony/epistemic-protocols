@@ -14,7 +14,7 @@ One skill per run, whose formal block is Lean or becomes Lean in the run: a core
 
 1. **Trigger** — a contributor names the protocol. Resolve its chart; where the protocol's earlier chart is Done, open a new chart linked to it and to ROO-67 (ROO-67 decide 5e64392d). The order across protocols is the contributor's and session-local; nothing here fixes it.
 2. **Gather the pre-understanding** — afresh every run, since what it holds moves between runs:
-   - Ground: the Northstar, the premise axiom above, `Ground.lean`, and the protocol's declared deficit and resolution type — its Type line and, where present, its Definition only, not the formal block; the fusion gate may revise them.
+   - Ground: the Northstar, the premise axiom above, `Ground.lean`, and the protocol's declared deficit and resolution type — its Type line and Definition only, not the formal block; the fusion gate may revise them.
    - Decide coordinates: both charts' decide comments, the protocol chart's Open questions and its related issues; a later decide that supersedes an earlier one says so (ROO-67 decide 78e615b4).
    - Literature: delegate to a subagent — primary sources on the cognitive deficit this protocol takes and the resolution it yields; where a source's setting differs from the one the protocol runs in, the claim names that transfer. Every claim carries its verification strength and names the weakest link (`AGENTS.md` §Settled Directions, Academic grounding).
    - Real use: `~/.claude/projects/*/*.jsonl` sessions where the skill ran — typed by the contributor or invoked through its delivery path (exclude `-private-tmp*`); what the deficit looked like there, and where the run went wrong or right.
