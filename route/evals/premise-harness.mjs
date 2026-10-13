@@ -55,7 +55,7 @@ import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
 import { ARMS, buildArmPlugins, checkVariants, clauseBlock, evaluatorKeyEnv, renderPlugin, scrubbedEnv } from "./harness/arms.mjs";
-import { firstAction, parseStream } from "./harness/first-action.mjs";
+import { dirtyAfter, firstAction, parseStream } from "./harness/first-action.mjs";
 import { judgePrompt, parseVerdict } from "./harness/judge.mjs";
 import { estimateTokens, syntheticPrefix } from "./harness/prefix.mjs";
 import { renderReport } from "./harness/report.mjs";
@@ -96,6 +96,23 @@ const DENY_DELEGATION = {
     }],
   },
 };
+
+// After every shell call, record whether the cell's tree differs from its
+// scaffold (harness/tree-probe.mjs): a shell write is a dependent action that
+// only the tree, not the command text, can show.
+const TREE_PROBE = path.join(HERE, "harness", "tree-probe.mjs");
+
+function cellSettings(treeLog) {
+  return {
+    hooks: {
+      ...DENY_DELEGATION.hooks,
+      PostToolUse: [{
+        matcher: "^Bash$",
+        hooks: [{ type: "command", command: `node ${JSON.stringify(TREE_PROBE)} ${JSON.stringify(treeLog)}` }],
+      }],
+    },
+  };
+}
 
 const HOST_FACTS = [
   "Children run with an empty CLAUDE_CONFIG_DIR still receive the hosting cloud session's remote context (remote system prompt, user email, credential_org, remote_session_change attachments) when run inside one; it is not stripped. hostAttachments in each result lists what the host added on resume.",
@@ -271,8 +288,9 @@ function layOutCell(workRoot, runId, key, scaffold) {
     spawnSync("git", ["-c", "user.name=dev", "-c", "user.email=dev@example.invalid", "commit", "-qm", "initial"], { cwd: repoDir, env });
   }
   const settings = path.join(cellDir, "settings.json");
-  fs.writeFileSync(settings, JSON.stringify(DENY_DELEGATION, null, 2));
-  return { cellDir, cwd: fs.realpathSync(repoDir), configDir, settings };
+  const treeLog = path.join(cellDir, "tree.jsonl");
+  fs.writeFileSync(settings, JSON.stringify(cellSettings(treeLog), null, 2));
+  return { cellDir, cwd: fs.realpathSync(repoDir), configDir, settings, treeLog };
 }
 
 /** Launches one resumed session; returns the trace, the seed and what the resume left. */
@@ -358,7 +376,8 @@ function run(o) {
     fs.writeFileSync(`${base}.trace.jsonl`, r.stdout || "");
     if (r.stderr) fs.writeFileSync(`${base}.stderr.txt`, r.stderr);
     fs.writeFileSync(`${base}.transcript.jsonl`, after.map((e) => JSON.stringify(e)).join("\n") + "\n");
-    const ext = firstAction(parseStream(r.stdout), { ignore: seededMessageIds(seed) });
+    const dirty = dirtyAfter(fs.existsSync(laid.treeLog) ? fs.readFileSync(laid.treeLog, "utf8") : "");
+    const ext = firstAction(parseStream(r.stdout), { ignore: seededMessageIds(seed), dirtyAfter: dirty });
     const cost = ext.result?.total_cost_usd;
     const result = {
       cell: cell.key, case: cell.case.id, arm: cell.arm, length: cell.length, rep: cell.rep, model: o.model, sessionId,
@@ -416,6 +435,7 @@ function seedCheck(o) {
   const version = cliVersion();
   if (!version) throw new Error("`claude --version` failed; is the CLI on PATH?");
   const manifest = { ...baseManifest(o, runId, prepared, version), kind: "seed-check", tokens };
+  fs.mkdirSync(resultsDir, { recursive: true });
   let pass = true;
   for (const cell of cells) {
     const remaining = o.maxCostUsd - manifest.spentUsd;

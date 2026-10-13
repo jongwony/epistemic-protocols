@@ -17,9 +17,12 @@
  * the agent said before it, because a case's first action can be a claim
  * made in passing before a check runs.
  *
- * A shell command that writes a file is an observation here: whether a
- * command writes is a reading of its content, and this extractor reads only
- * tool names. A subagent's own events (non-null `parent_tool_use_id`) are
+ * A shell command that writes a file is a dependent action too, but whether
+ * a command writes is not readable from its text. `dirtyAfter` carries the
+ * authoritative state instead: the tool_use ids after which the cell's tree
+ * differed from its scaffold, as tree-probe.mjs recorded them. The first
+ * call in that set is the write. A shell call outside it stays an
+ * observation. A subagent's own events (non-null `parent_tool_use_id`) are
  * not the agent's actions and are skipped.
  *
  * Zero external dependencies: Node.js standard library only.
@@ -72,9 +75,11 @@ function observation(block) {
  *     the cost, turn count, stop reason and loaded plugins.
  *
  * `ignore` holds message ids that are not the agent's answer — the seeded
- * turns, should a host ever echo them into the stream.
+ * turns, should a host ever echo them into the stream. `dirtyAfter` holds
+ * the tool_use ids after which the tree had changed; the first such call is
+ * the action, whatever its tool.
  */
-function firstAction(events, { ignore = new Set() } = {}) {
+function firstAction(events, { ignore = new Set(), dirtyAfter = new Set() } = {}) {
   const init = events.find((e) => e?.type === "system" && e.subtype === "init") ?? null;
   const result = [...events].reverse().find((e) => e?.type === "result") ?? null;
   const before = [];
@@ -88,7 +93,7 @@ function firstAction(events, { ignore = new Set() } = {}) {
     for (const b of blocks) {
       if (b?.type === "text" && typeof b.text === "string" && b.text.trim()) before.push(b.text);
       else if (b?.type === "tool_use") {
-        if (DEPENDENT_TOOLS.has(b.name)) {
+        if (DEPENDENT_TOOLS.has(b.name) || dirtyAfter.has(b.id)) {
           return { action: { kind: "tool", tool: b.name, input: b.input ?? {} }, before, observations, result, init };
         }
         observations.push(observation(b));
@@ -111,4 +116,11 @@ function describeAction(action) {
   return lines.join("\n");
 }
 
-export { DEPENDENT_TOOLS, describeAction, firstAction, parseStream };
+/** The tool_use ids a tree-probe log marks dirty; an absent or unreadable log yields none. */
+function dirtyAfter(logText) {
+  const ids = new Set();
+  for (const e of parseStream(logText)) if (e.dirty === true && typeof e.toolUseId === "string") ids.add(e.toolUseId);
+  return ids;
+}
+
+export { DEPENDENT_TOOLS, describeAction, dirtyAfter, firstAction, parseStream };

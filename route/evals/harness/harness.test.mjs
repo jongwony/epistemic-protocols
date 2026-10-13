@@ -10,10 +10,11 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import { ARMS, checkVariants, evaluatorKeyEnv, patchSource, scrubbedEnv, withoutSessionStart } from "./arms.mjs";
-import { DEPENDENT_TOOLS, describeAction, firstAction, parseStream } from "./first-action.mjs";
+import { DEPENDENT_TOOLS, describeAction, dirtyAfter, firstAction, parseStream } from "./first-action.mjs";
 import { finalVerdict, judgePrompt, parseVerdict } from "./judge.mjs";
 import { estimateTokens, syntheticPrefix } from "./prefix.mjs";
 import { renderReport, tally } from "./report.mjs";
@@ -124,7 +125,7 @@ test("blocks of one message split across events are read as one message", () => 
   assert.deepEqual(r.before, ["Recording the decision."]);
 });
 
-test("a subagent's events, seeded turns, and a shell write are not the agent's action", () => {
+test("a subagent's events, seeded turns, and a shell call the tree probe did not mark are not the agent's action", () => {
   const events = [
     asst("msg_seed_1", text("seeded reply")),
     { type: "assistant", parent_tool_use_id: "t-Agent", message: { id: "sub", content: [toolUse("Edit", { file_path: "y" })] } },
@@ -135,6 +136,38 @@ test("a subagent's events, seeded turns, and a shell write are not the agent's a
   assert.deepEqual(r.action, { kind: "none" });
   assert.deepEqual(r.observations, [{ tool: "Bash", target: "echo 1 > config/limits.json" }]);
   assert.equal(r.result.subtype, "error_max_turns");
+});
+
+test("the first shell call after which the tree was dirty is the action; reads naming the same file stay observations", () => {
+  const read = { ...toolUse("Bash", { command: "cat config/limits.json" }), id: "t-read" };
+  const write = { ...toolUse("Bash", { command: "sed -i 's/3/1/' config/limits.json" }), id: "t-write" };
+  const log = [JSON.stringify({ toolUseId: "t-read", dirty: false }), "not json", JSON.stringify({ toolUseId: "t-write", dirty: true })].join("\n");
+  const dirty = dirtyAfter(log);
+  assert.deepEqual([...dirty], ["t-write"]);
+  const r = firstAction([asst("m1", read), asst("m2", write), asst("m3", text("Drafted at 1.")), result()], { dirtyAfter: dirty });
+  assert.deepEqual(r.action, { kind: "tool", tool: "Bash", input: { command: "sed -i 's/3/1/' config/limits.json" } });
+  assert.deepEqual(r.observations, [{ tool: "Bash", target: "cat config/limits.json" }]);
+  assert.deepEqual([...dirtyAfter("")], []);
+});
+
+test("the tree probe logs whether the cell's tree differs from its commit after a call", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "probe-"));
+  try {
+    const git = (...a) => spawnSync("git", a, { cwd: dir, encoding: "utf8" });
+    git("init", "-q");
+    fs.writeFileSync(path.join(dir, "a.txt"), "3\n");
+    git("add", "-A");
+    git("-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-qm", "i");
+    const log = path.join(dir, "..", `${path.basename(dir)}.tree.jsonl`);
+    const probe = (id) => spawnSync(process.execPath, [path.join(HERE, "tree-probe.mjs"), log], { input: JSON.stringify({ tool_use_id: id, cwd: dir }), encoding: "utf8" });
+    assert.equal(probe("t1").stdout, "");
+    fs.writeFileSync(path.join(dir, "a.txt"), "1\n");
+    probe("t2");
+    assert.deepEqual([...dirtyAfter(fs.readFileSync(log, "utf8"))], ["t2"]);
+    fs.rmSync(log, { force: true });
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("a stream is parsed line by line, skipping what does not parse", () => {
