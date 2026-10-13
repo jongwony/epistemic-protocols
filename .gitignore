@@ -43,6 +43,11 @@ docs/audit-delta-*.md
 route/evals/recorded/
 route/evals/smoke-recorded/
 
+# The premise application harness's results: each cell's trace, the session it
+# resumed, its extracted action and verdicts. A recorded observation of one run,
+# for the reason the recordings above are; work trees live under the system temp dir.
+route/evals/premise-results/
+
 # Lean: Lake build output, and the Contract/Audit modules lean-contract.js
 # generates from each SKILL.md Lean block (the block is the source).
 .lake/
