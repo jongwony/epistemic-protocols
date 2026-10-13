@@ -30,10 +30,10 @@ theorem silence (respond session converge : Context P → Response P) (c : Conte
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(collect c).map (·.val), rfl⟩
 
-/-- A crystallized abstraction comes only from a recognition — a person's turn, by
-    `closed_by_person` — that cites the utterance just fused onto the context `c₀` it answered;
-    the record is read on `c₀`, whose latest sheet is the one the recognition followed. -/
-theorem crystallized_on_confirm (respond session converge : Context P → Response P)
+/-- A crystallized abstraction comes only from a filled closing — a person's turn, by
+    `closed_by_person` — that cites the utterance just fused onto a context `c₀`; the record is
+    `crystallize` on `c₀` and that fused context. -/
+theorem crystallized_on_recognition (respond session converge : Context P → Response P)
     (c : Context P) (us : List (Utterance P)) (r : CrystallizedAbstraction P)
     (h : induce respond session converge c us = .crystallized r) :
     ∃ (c₀ : Context P) (u : Utterance P) (src : Cite (fuse c₀ u)),

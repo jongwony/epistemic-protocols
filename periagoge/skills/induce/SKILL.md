@@ -274,7 +274,8 @@ def openCoord (i : OpenItem) : Coord P String :=
   { admits := (·.val = .person), supports := OpenSupported i }
 
 /-- **Your reading**: the person's words about item `i` from a turn of theirs that still reaches it;
-    `open_` where none does, and the item is shown as undisposed. -/
+    `open_` where none does, and the item is shown as open — at a recognition, as taken in view and
+    not blocking it, which is your reading and the person's to correct. -/
 axiom openWords : (c : Context P) → (i : OpenItem) → Occ (openCoord (P := P) i) c
 
 /-- The open trace: every open item the sheet `c` showed, with the person's words about it as
@@ -355,8 +356,10 @@ axiom dissent : Context P → List String
     back — not taking it, without saying it is wrong — leaves it as it stood, a proposal where no
     turn of the person's took it. Holding back a line other than the goal or the candidate, words
     about an open item, or an answer to a doubt change nothing the sheet shows and leave a
-    recognition standing; holding back the goal, the candidate's name, or its rule recognizes
-    nothing.
+    recognition standing, an answer to a doubt only where it corrects nothing the sheet shows: one
+    that corrects a value it shows — a case's order, a placement, any value — is a change, and the
+    sheet is drawn again with it; holding back the goal, the candidate's name, or its rule
+    recognizes nothing.
     "Not yet" or a question closes nothing; silence, other work, and your own reading that the
     candidate fits close nothing. Where the turn's intent is unclear, it closes nothing. -/
 axiom ClosingSupported : Context P → Turn P → Unit → Prop
@@ -538,7 +541,7 @@ Then one move to ask about, in words — the one whose answer would most change 
 
 The user may answer in their own words, and one answer may reach several parts of the sheet: read it whole, apply it as far as its words reach, leave what it does not reach as it stood, and show what a correction disturbs. A turn that takes something you showed — a case's place, the goal, the rule — makes it theirs then, on the scope its words reach; a narrow answer stays narrow. An utterance about other work leaves the run as it stands, and words that end the run without recognizing the abstraction leave it holding, whatever else the turn says; neither draws a sheet, and the sheet returns when the user comes back to it. A reading leaves the cross view only by the user's words setting it aside, and comes back when their words bring it back, with their earlier ground shown beside it. Only the user closes the run, by recognizing the goal and the candidate as the sheet they answered showed them, with no second permission and your doubts riding along without refusing it; where a turn that bears on the run recognizes nothing by the closing judgment in the block above (`ClosingSupported`), draw the sheet again with every change no sheet has shown yet.
 
-At a recognition, before proceeding, quote the recognizing turn and declare the trace beside it — the sheet the recognition answered, with the user's standing on its lines: the goal and who set it; the candidate, with what its reading's row takes in and leaves out; the cross view; every case unfolded, folded on that sheet or not, with who brought it; the readings set aside with the user's grounds; every line with who proposed it and, where a turn of the user's reached it, how it stood; the doubts, the user's answers to them standing in their own turns, quoted; and the open trace. The open items are the live readings the candidate does not take and the points still open; each carries the user's own words about it from a turn of theirs that still reaches it, and an item no such turn reaches is shown as undisposed. After a recognition, go on only to a next move the user declared, a routing policy they adopted, or their grant, citing it.
+At a recognition, before proceeding, quote the recognizing turn and declare the trace beside it — the sheet the recognition answered, with the user's standing on its lines: the goal and who set it; the candidate, with what its reading's row takes in and leaves out; the cross view; every case unfolded, folded on that sheet or not, with who brought it; the readings set aside with the user's grounds; every line with who proposed it and, where a turn of the user's reached it, how it stood; the doubts, the user's answers to them standing in their own turns, quoted; and the open trace. The open items are the live readings the candidate does not take and the points still open; each carries the user's own words about it from a turn of theirs that still reaches it, and an item no such turn reaches is shown as taken in view and not blocking the recognition — your reading, which the user may correct. After a recognition, go on only to a next move the user declared, a routing policy they adopted, or their grant, citing it.
 
 Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or the order of the sheet bears on where a sentence sits.
 
@@ -546,5 +549,6 @@ Read `references/round-composition.md` before composing when terminology must re
 
 - **Recognition over Recall**: Present the sheet and one move with anticipatable consequences, and yield for the user's judgment.
 - **Goal and candidate first, tested against each other**: Lead every sheet, after any case you found, with the goal and the working candidate, any shortfall in its ground shown beside it, and test the candidate against the goal through the cases each row takes in and leaves out. The goal and the alternatives beside the candidate are what keep the user's judgment their own.
+- **Only the user closes**: The run closes only on the user's recognition of the sheet they followed; where a turn changes something no sheet has shown yet, draw the sheet again with it first. Words that end the run without recognizing the abstraction leave it holding. Mark every value as set by the user's words, taken by them from what you showed, or still a proposal, marked with who put it forward.
 - **Round composition**: Compose each round in everyday language, keep each judgment beside its evidence and next-move implication, and place analysis before the move.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
