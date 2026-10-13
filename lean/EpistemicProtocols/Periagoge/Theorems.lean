@@ -23,33 +23,55 @@ instance : Nonempty Row := ⟨⟨"", [], [], ""⟩⟩
 
 instance : Nonempty Candidate := ⟨⟨"", "", "", none⟩⟩
 
-theorem silence (respond declare : Context P → Response P) (s c : Context P) :
-    induce respond declare s c [] = .holding c := by
+theorem silence (respond session converge : Context P → Response P) (s c : Context P) :
+    induce respond session converge s c [] = .holding s c := by
   simp [induce]
 
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(collect c).map (·.val), rfl⟩
 
 /-- A crystallized abstraction comes only from a confirm — a person's turn, by `closed_by_person` —
-    that cites the utterance just fused onto the context as it stood; the record is that of the
-    sheet the confirm followed, read on the context `s₀` that ends in that sheet — the one the run
-    was handed, or one a sheet drawn during the run ends —, with the candidate that sheet showed,
-    on a reading live there. -/
-theorem crystallized_on_confirm (respond declare : Context P → Response P) (s c : Context P)
-    (us : List (Utterance P)) (r : CrystallizedAbstraction P)
-    (h : induce respond declare s c us = .crystallized r) :
+    that cites the utterance just fused onto the context `c₀` as it stood; the record is that of
+    the sheet the confirm followed, read on the context `s₀` that ends in that sheet, with the
+    candidate that sheet showed, on a reading live there. Either `s₀` is the sheet context the run
+    was handed and `c₀` extends the context handed with it, or `s₀` ends in a sheet drawn during
+    the run and `c₀` extends `s₀`. -/
+theorem crystallized_on_confirm (respond session converge : Context P → Response P)
+    (s c : Context P) (us : List (Utterance P)) (r : CrystallizedAbstraction P)
+    (h : induce respond session converge s c us = .crystallized r) :
     ∃ (s₀ c₀ : Context P) (u : Utterance P) (src : Cite (fuse c₀ u)),
-      (s₀ = s ∨ ∃ c₁, s₀ = c₁ ++ [(respond c₁).val]) ∧
+      ((s₀ = s ∧ ∃ t, c₀ = c ++ t) ∨
+        ((∃ c₁, s₀ = c₁ ++ [(respond c₁).val]) ∧ ∃ t, c₀ = s₀ ++ t)) ∧
       (∃ ok sup, closing (fuse c₀ u) = .filled .confirm src ok sup) ∧
       src.idx + 1 = (fuse c₀ u).length ∧
-      (shownCandidate s₀).reading ∈ live s₀ ∧
-      r = crystallize declare s₀ (fuse c₀ u) (shownCandidate s₀) := by
+      (candidate s₀).reading ∈ live s₀ ∧
+      r = crystallize converge s₀ (fuse c₀ u) (candidate s₀) := by
   induction us generalizing s c with
   | nil => simp [induce] at h
   | cons u us ih =>
+    -- a sheet drawn during the run: the handed pair is that sheet's context twice
+    have drawn : ∀ s' : Context P, (∃ c₁, s' = c₁ ++ [(respond c₁).val]) →
+        induce respond session converge s' s' us = .crystallized r →
+        ∃ (s₀ c₀ : Context P) (u : Utterance P) (src : Cite (fuse c₀ u)),
+          ((s₀ = s ∧ ∃ t, c₀ = c ++ t) ∨
+            ((∃ c₁, s₀ = c₁ ++ [(respond c₁).val]) ∧ ∃ t, c₀ = s₀ ++ t)) ∧
+          (∃ ok sup, closing (fuse c₀ u) = .filled .confirm src ok sup) ∧
+          src.idx + 1 = (fuse c₀ u).length ∧
+          (candidate s₀).reading ∈ live s₀ ∧
+          r = crystallize converge s₀ (fuse c₀ u) (candidate s₀) := by
+      intro s' hs' h'
+      obtain ⟨s₀, c₀, u₀, src₀, hs, rest⟩ := ih s' s' h'
+      refine ⟨s₀, c₀, u₀, src₀, Or.inr ?_, rest⟩
+      rcases hs with ⟨rfl, hc⟩ | hs
+      · exact ⟨hs', hc⟩
+      · exact hs
     simp only [induce] at h
     split at h
-    · exact ih _ _ h
+    · obtain ⟨s₀, c₀, u₀, src₀, hs, rest⟩ := ih _ _ h
+      refine ⟨s₀, c₀, u₀, src₀, ?_, rest⟩
+      rcases hs with ⟨rfl, t, rfl⟩ | hs
+      · exact Or.inl ⟨rfl, u.val :: (session (fuse c u)).val :: t, by simp [fuse]⟩
+      · exact Or.inr hs
     · split at h
       · rename_i k src ok sup hcl
         cases k
@@ -58,24 +80,12 @@ theorem crystallized_on_confirm (respond declare : Context P → Response P) (s 
           split at h
           · rename_i hlive
             cases h
-            exact ⟨s, c, u, src, Or.inl rfl, ⟨ok, sup, hcl⟩, hi, hlive, rfl⟩
-          · obtain ⟨s₀, c₀, u₀, src₀, hs, rest⟩ := ih _ _ h
-            refine ⟨s₀, c₀, u₀, src₀, Or.inr ?_, rest⟩
-            rcases hs with rfl | hs
-            · exact ⟨_, rfl⟩
-            · exact hs
+            exact ⟨s, c, u, src, Or.inl ⟨rfl, [], by simp⟩, ⟨ok, sup, hcl⟩, hi, hlive, rfl⟩
+          · exact drawn _ ⟨_, rfl⟩ h
         · simp [hi] at h
-          obtain ⟨s₀, c₀, u₀, src₀, hs, rest⟩ := ih _ _ h
-          refine ⟨s₀, c₀, u₀, src₀, Or.inr ?_, rest⟩
-          rcases hs with rfl | hs
-          · exact ⟨_, rfl⟩
-          · exact hs
+          exact drawn _ ⟨_, rfl⟩ h
       · simp at h
-        obtain ⟨s₀, c₀, u₀, src₀, hs, rest⟩ := ih _ _ h
-        refine ⟨s₀, c₀, u₀, src₀, Or.inr ?_, rest⟩
-        rcases hs with rfl | hs
-        · exact ⟨_, rfl⟩
-        · exact hs
+        exact drawn _ ⟨_, rfl⟩ h
 
 /-- A closing is a filled occurrence that cites a turn the person sent. -/
 theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
@@ -127,23 +137,15 @@ theorem found_cases_unfolded (c : Context P) (i : Instance) (h : i ∈ found c) 
   simp only [casesSection, List.mem_map]
   exact ⟨i, List.mem_eraseDups.mpr (List.mem_append_right _ h), rfl⟩
 
-/-- The candidate a closing records is the one its sheet showed, on a reading in play on that
-    sheet. -/
-theorem shown_candidate_live (respond declare : Context P → Response P) (s c : Context P)
-    (us : List (Utterance P)) (r : CrystallizedAbstraction P)
-    (h : induce respond declare s c us = .crystallized r) :
-    ∃ s₀ : Context P, r.candidate = shownCandidate s₀ ∧ r.candidate.reading ∈ live s₀ := by
-  obtain ⟨s₀, c₀, u, _, _, _, _, hl, rfl⟩ := crystallized_on_confirm respond declare s c us r h
-  exact ⟨s₀, rfl, hl⟩
-
 /-- The candidate of a crystallized abstraction stands on a reading in play on the sheet the confirm
     answered, so the record's cross view carries that reading's row. -/
-theorem crystallized_candidate_live (respond declare : Context P → Response P) (s c : Context P)
-    (us : List (Utterance P)) (r : CrystallizedAbstraction P)
-    (h : induce respond declare s c us = .crystallized r) :
+theorem crystallized_candidate_live (respond session converge : Context P → Response P)
+    (s c : Context P) (us : List (Utterance P)) (r : CrystallizedAbstraction P)
+    (h : induce respond session converge s c us = .crystallized r) :
     ∃ s₀ : Context P, r.candidate.reading ∈ live s₀ ∧
       (r.candidate.reading, row s₀ r.candidate.reading) ∈ r.crossView := by
-  obtain ⟨s₀, c₀, u, _, _, _, _, hl, rfl⟩ := crystallized_on_confirm respond declare s c us r h
+  obtain ⟨s₀, c₀, u, _, _, _, _, hl, rfl⟩ :=
+    crystallized_on_confirm respond session converge s c us r h
   exact ⟨s₀, hl, live_reading_crossed s₀ _ hl⟩
 
 /-- A line's standing is a filled occurrence that cites a turn the person sent: no value of yours
@@ -162,8 +164,8 @@ theorem standing_by_person (c : Context P) (e : Entry) (s : Standing)
 
 /-- Every provenance line of a crystallized record is a line the sheet the closing turn followed
     showed. -/
-theorem record_lines_shown (declare : Context P → Response P) (s c' : Context P) (k : Candidate)
-    (p : Provenance) (hp : p ∈ (crystallize declare s c' k).provenance) : p.entry ∈ entries s := by
+theorem record_lines_shown (converge : Context P → Response P) (s c' : Context P) (k : Candidate)
+    (p : Provenance) (hp : p ∈ (crystallize converge s c' k).provenance) : p.entry ∈ entries s := by
   simp only [crystallize, provenanceOf, List.mem_map] at hp
   obtain ⟨e, he, rfl⟩ := hp
   exact he
@@ -171,9 +173,9 @@ theorem record_lines_shown (declare : Context P → Response P) (s c' : Context 
 /-- Every line of a crystallized record that carries a standing has it from a filled occurrence in
     the context the closing turn was fused into, citing a turn the person sent: the record gives no
     line a standing that no person's turn reached. -/
-theorem record_standing_by_person (declare : Context P → Response P) (s c' : Context P)
+theorem record_standing_by_person (converge : Context P → Response P) (s c' : Context P)
     (k : Candidate) (p : Provenance)
-    (hp : p ∈ (crystallize declare s c' k).provenance) (st : Standing)
+    (hp : p ∈ (crystallize converge s c' k).provenance) (st : Standing)
     (hs : p.standing = some st) :
     ∃ src ok sup, standingOcc c' p.entry = .filled st src ok sup ∧
       (c'[src.idx]'src.lt).origin = .person := by
