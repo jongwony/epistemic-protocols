@@ -27,6 +27,14 @@ theorem silence (respond session converge : Context P → Response P) (c : Conte
     induce respond session converge c [] = .holding c := by
   simp [induce]
 
+/-- An utterance that does not bear on this run joins the context with the session's answer to
+    it; no pass runs and no sheet is drawn. -/
+theorem other_work_draws_nothing (respond session converge : Context P → Response P)
+    (c : Context P) (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
+    induce respond session converge c (u :: us) =
+      induce respond session converge (fuse c u ++ [(session (fuse c u)).val]) us := by
+  simp [induce, h]
+
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(collect c).map (·.val), rfl⟩
 
