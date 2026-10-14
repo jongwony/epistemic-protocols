@@ -39,9 +39,9 @@ theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(collect c).map (·.val), rfl⟩
 
 /-- A crystallized abstraction comes only from a filled closing — a person's turn, by
-    `closed_by_person` — that cites the utterance just fused onto a context `c₀`, where what
-    collection returned for it is not `Overturned`; the record is `crystallize` on that fused
-    context and what collection returned for it. -/
+    `closed_by_person` — that cites the utterance just fused onto a context `c₀`, where that
+    context, with what collection returned for it, is not `Overturned`; the record is `crystallize`
+    on that fused context and what collection returned for it. -/
 theorem crystallized_on_recognition (respond session converge : Context P → Response P)
     (c : Context P) (us : List (Utterance P)) (r : CrystallizedAbstraction P)
     (h : induce respond session converge c us = .crystallized r) :
@@ -70,9 +70,9 @@ theorem crystallized_on_recognition (respond session converge : Context P → Re
         · simp [hc, hi] at h
           exact ih _ h
 
-/-- A recognition citing the utterance just fused, on a turn that bears on the run, where what
-    collection returned for it is not `Overturned`, crystallizes the record `crystallize` reads on
-    the context with it and what collection returned for it. -/
+/-- A recognition citing the utterance just fused, on a turn that bears on the run, where the
+    context with it and what collection returned for it is not `Overturned`, crystallizes the record
+    `crystallize` reads on that context. -/
 theorem recognition_crystallizes (respond session converge : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (src : Cite (fuse c u)) (hc : ∃ ok sup, closing (fuse c u) = .filled () src ok sup)
@@ -82,8 +82,8 @@ theorem recognition_crystallizes (respond session converge : Context P → Respo
   obtain ⟨ok, sup, hc⟩ := hc
   simp [induce, hre, hc, hi, hno]
 
-/-- A recognition whose collection is `Overturned` crystallizes nothing at that step: the sheet is
-    drawn again on the context with what collection returned. -/
+/-- A recognition where the context, with what collection returned for it, is `Overturned`
+    crystallizes nothing at that step: the sheet is drawn again on that context. -/
 theorem overturned_draws_again (respond session converge : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (ho : Overturned (pass (fuse c u))) :
