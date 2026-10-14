@@ -130,11 +130,11 @@ structure CatalogEntry where
 
 /-- The installed skills' descriptions, read as they stand when the run starts and never written:
     `entries`, every installed skill other than this probe's own, and `self`, this probe's own
-    entry, which `entries` leaves out. This contract lists no skill and no deficit of its own. -/
+    entry, whose skill no entry names. This contract lists no skill and no deficit of its own. -/
 structure Catalog where
   entries  : List CatalogEntry
   self     : CatalogEntry
-  excludes : self ∉ entries
+  excludes : ∀ e ∈ entries, e.skill ≠ self.skill
 
 /-- **Your reading** of a description: the end it declares — what the person can say or recognize
     once that skill has run — or `none` where it declares none. Nothing is written in where a
@@ -245,7 +245,9 @@ axiom Invoked : Context P → Prop
     what is stuck — symptoms described in place of it, hesitation between skills, "which one fits
     this?". An earlier probe does not keep this on; each occasion is read afresh, and a round the
     person just passed over or ended is not raised again unbidden — it is read as received. A
-    request for a recommendation drawn from session history is not this. -/
+    request for a recommendation drawn from session history is not this. While a run of this
+    probe holds, no unsolicited probe starts: what bears on what is stuck is that run's, as
+    `Reaches` reads it. -/
 axiom DeficitUnrecognized : Context P → Prop
 
 def Activated (c : Context P) : Prop := Invoked c ∨ DeficitUnrecognized c
@@ -396,8 +398,9 @@ round holds.
 recognized: the person's turn took a shown candidate, put the situation in their own words, or
 said none shown is theirs; the RecognizedSituation carries the answer, what the round it answered
 offered, the contrary grounds it closed over, and which turn recognized it — quoted in the trace
-with the intent taken from it, and how the turn was read — the candidate taken, whether its run
-was read as taken or declined, and what will now run — relayed before any hand-off. What it hands
+with the intent taken from it, and how the turn was read — the candidate taken; whether this
+probe runs its skill, the person declined its run, or the person's own turn invoked it; and what
+will now run — relayed before any hand-off. What it hands
 off is `invokedBy`'s.
 Convergence evidence: (UserSituation → [rounds] → Candidates(grounds, rules-out, ends) →
 recognition → RecognizedSituation). Demonstrated, not asserted.
@@ -430,7 +433,7 @@ def grounding : Op → Annot × String
   | .present  => (.interaction .constitution, "two or more candidates, each line with its description, cited grounds, rules-out condition, and skill with its declared end, as `respond` lays them out; your contrary grounds; a free answer, with no option list and no ranking")
   | .short    => (.interaction .constitution, "the ground carries fewer than two candidates: said as such, with the one line it carries, if any, as `respond` lays it out, and what more of the situation would help")
   | .readTurn => (.sense, "Internal analysis: whether the latest utterance is the person's own invocation of this probe, as `Invoked` reads it, whether it bears on this run, as `Reaches` reads it, whether a turn of the person's is still owed, as `Owed` reads it, and what it does there — a shown candidate taken, with or without its run, the person's own words, none shown, or more of the situation — read whole against the fused context")
-  | .converge => (.interaction .extension, "RecognizedSituation, before any invocation: how the recognizing turn was read — the candidate taken, whether its run was read as taken or declined, and what will now run — with the turn quoted, what the round it answered offered, and the contrary grounds it closed over")
+  | .converge => (.interaction .extension, "RecognizedSituation, relayed before any invocation as CONVERGENCE states")
   | .invoke   => (.dispatch, "invoke: after the trace, in the same turn, the skill nextMove names — the person's taking a line that disclosed its run is their invocation of that skill — with the recognized situation in the session; then this run ends")
 
 /-- The operation a run hands off through: a recognition whose `nextMove` names a skill invokes it

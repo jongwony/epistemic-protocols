@@ -226,30 +226,19 @@ private theorem start_recognized (catalog : Catalog) (respond : Catalog → Cont
   · exact probe_recognized catalog respond session r _ _ h
   · cases h
 
-/-- A recognition closes only where the latest utterance bears on the run and no turn of the
-    person's is owed: contrary grounds they have not closed over, or a reply whose reading their
-    words have not settled, hold every answer back alike. -/
-theorem recognized_only_unowed (catalog : Catalog) (respond : Catalog → Context P → Response P)
-    (session : Context P → Response P) (c : Context P) (us : List (Utterance P))
-    (r : RecognizedSituation P) (h : start catalog respond session c us = .recognized r) :
-    ∃ c₀ : Context P, closing catalog c₀ = some r ∧ r.context = c₀ ∧ Reaches c₀ ∧ ¬ Owed c₀ := by
-  obtain ⟨c₀, hc₀, hre, ho⟩ := start_recognized catalog respond session c us r h
-  obtain ⟨_, hctx, _⟩ := closing_by_person catalog c₀ r hc₀
-  exact ⟨c₀, hc₀, hctx, hre, ho⟩
-
 /-- Every situation a run recognizes was recognized by the person: a recognized outcome comes only
-    from a closing — at any depth of the recursion, never from a close of yours — and that closing
-    cites the last turn of the context it closes on, the person's latest utterance, which supports
-    its answer. -/
+    from a closing — at any depth of the recursion, never from a close of yours — where the latest
+    utterance bears on the run and no turn of the person's is owed, and that closing cites the last
+    turn of the context it closes on, the person's latest utterance, which supports its answer. -/
 theorem recognized_only_by_person (catalog : Catalog) (respond : Catalog → Context P → Response P)
     (session : Context P → Response P) (c : Context P) (us : List (Utterance P))
     (r : RecognizedSituation P) (h : start catalog respond session c us = .recognized r) :
-    ∃ (c₀ : Context P) (s : Cite c₀), closing catalog c₀ = some r ∧ r.context = c₀ ∧
-      s.idx = r.recognizedAt ∧ s.idx + 1 = c₀.length ∧ (c₀[s.idx]'s.lt).origin = .person ∧
-      AnswerSupported c₀ (c₀[s.idx]'s.lt) r.answer := by
-  obtain ⟨c₀, hc₀, _⟩ := start_recognized catalog respond session c us r h
+    ∃ (c₀ : Context P) (s : Cite c₀), closing catalog c₀ = some r ∧ Reaches c₀ ∧ ¬ Owed c₀ ∧
+      r.context = c₀ ∧ s.idx = r.recognizedAt ∧ s.idx + 1 = c₀.length ∧
+      (c₀[s.idx]'s.lt).origin = .person ∧ AnswerSupported c₀ (c₀[s.idx]'s.lt) r.answer := by
+  obtain ⟨c₀, hc₀, hre, ho⟩ := start_recognized catalog respond session c us r h
   obtain ⟨s, hs⟩ := closing_by_person catalog c₀ r hc₀
-  exact ⟨c₀, s, hc₀, hs⟩
+  exact ⟨c₀, s, hc₀, hre, ho, hs⟩
 
 private theorem shown_in_line (catalog : Catalog) (c : Context P) (k : Candidate)
     (h : k ∈ shownIn catalog c) :
@@ -265,10 +254,11 @@ private theorem shown_in_line (catalog : Catalog) (c : Context P) (k : Candidate
     obtain ⟨l, hl, hk⟩ := h
     exact ⟨n, p, l, rfl, hl, hk⟩
 
-/-- A shown candidate is recognized only from a line a round of this run showed: the closing that
-    took it read a presentation, on the context it was shown on, holding a line with that
-    candidate, resting on at least one turn of that context, every ground citing a turn none of
-    your own, and its skill, if any, one the catalog holds. -/
+/-- A shown candidate is recognized only from a line of the latest presentation `presented`
+    reads: the closing that took it read that presentation, on the context it was shown on,
+    holding a line with that candidate, resting on at least one turn of that context, every
+    ground citing a turn none of your own, and its skill, if any, one the catalog's entries
+    hold. -/
 theorem shown_only_from_shown_line (catalog : Catalog)
     (respond : Catalog → Context P → Response P) (session : Context P → Response P)
     (c : Context P) (us : List (Utterance P)) (r : RecognizedSituation P) (k : Candidate)
@@ -289,15 +279,15 @@ theorem shown_only_from_shown_line (catalog : Catalog)
 /-- A run hands off only where the person took, at their latest turn, a candidate the round showed
     with the run of the skill its line showed: the dispatch follows an answer `.shown k true`
     whose candidate is among those the recognition records as shown, whose skill the catalog's
-    entries hold — never this probe's own — and which the last turn of the closing context — the
-    person's — supports. -/
+    entries hold under a name other than this probe's own, and which the last turn of the closing
+    context — the person's — supports. -/
 theorem invokes_only_taken_skill (catalog : Catalog) (respond : Catalog → Context P → Response P)
     (session : Context P → Response P) (c : Context P) (us : List (Utterance P))
     (r : RecognizedSituation P) (h : start catalog respond session c us = .recognized r)
     (hi : invokedBy (.recognized r) = some .invoke) :
     ∃ (k : Candidate) (e : CatalogEntry) (c₀ : Context P) (s : Cite c₀),
       r.answer = .shown k true ∧ k.skill = some e ∧ k ∈ r.shown ∧ e ∈ catalog.entries ∧
-      e ≠ catalog.self ∧
+      e.skill ≠ catalog.self.skill ∧
       closing catalog c₀ = some r ∧ s.idx = r.recognizedAt ∧ s.idx + 1 = c₀.length ∧
       (c₀[s.idx]'s.lt).origin = .person ∧ AnswerSupported c₀ (c₀[s.idx]'s.lt) r.answer := by
   obtain ⟨c₀, hc₀, _⟩ := start_recognized catalog respond session c us r h
@@ -313,7 +303,7 @@ theorem invokes_only_taken_skill (catalog : Catalog) (respond : Catalog → Cont
         have hmem := hsk k true ha
         obtain ⟨n, p, l, -, -, hlk⟩ := shown_in_line catalog c₀ k hmem
         have hin : e ∈ catalog.entries := l.inCatalog e (hlk ▸ he)
-        refine ⟨k, e, c₀, s, rfl, he, ?_, hin, fun hs₁ => catalog.excludes (hs₁ ▸ hin), hc₀,
+        refine ⟨k, e, c₀, s, rfl, he, ?_, hin, catalog.excludes e hin, hc₀,
           (congrArg RecognizedSituation.recognizedAt hr).symm, hl, ho, ha ▸ hs⟩
         rw [congrArg RecognizedSituation.shown hr]
         exact hmem
