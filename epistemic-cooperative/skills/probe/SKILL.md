@@ -31,6 +31,8 @@ and catalog the installed skills' descriptions:
   [it carries fewer]                           say so, with what it does carry and what more of
                                                the situation would help → Stop
   next utterance u: c' := fuse(c, u) →
+    [u does not bear on this run — it ends the probe or turns to other work]  the session answers
+      it; that answer stays in the context; no round of this run is raised and nothing closes
     [u takes a shown candidate, puts the situation in their own words, or says none shown is
      theirs]  close: recognized → a taken candidate's shown skill is invoked
     [otherwise] u is more of the situation — a narrower slice, a correction, a candidate set
@@ -164,20 +166,22 @@ structure Line (c : Context P) where
 
 /-- What a round showed. -/
 inductive Presentation (c : Context P)
-  /-- two or more candidates side by side, each line with its grounds, its rules-out condition,
-      and its `ending` -/
+  /-- two or more distinct candidates side by side, each line with its grounds, its rules-out
+      condition, and its `ending` -/
   | alternatives (lines : List (Line c)) (two : 2 ≤ lines.length)
+      (distinct : (lines.map (·.candidate)).Nodup)
   /-- the ground carried fewer than two: said as such, with what it does carry and what more of the
       situation would help; no candidate is offered to take -/
   | short (said : String)
 
 /-- The candidates a round offered to take: none after a short round. -/
 def Presentation.shown {c : Context P} : Presentation c → List Candidate
-  | .alternatives ls _ => ls.map (·.candidate)
-  | .short _           => []
+  | .alternatives ls _ _ => ls.map (·.candidate)
+  | .short _             => []
 
-/-- **Your reading**: what your latest presentation showed, read from that response, each skill as
-    the catalog holds it — what was shown, not what you meant to show; `none` before any. -/
+/-- **Your reading**: your latest presentation as it was shown, read from that response — each
+    ground citing a turn that stood when the round was shown, each skill as the catalog holds it;
+    what was shown, not what you meant to show; `none` before any. -/
 axiom presented : Catalog → (c : Context P) → Option (Presentation c)
 
 /-- The candidates the latest round offered to take. -/
@@ -191,7 +195,8 @@ def shownIn (catalog : Catalog) (c : Context P) : List Candidate :=
 axiom dissent : Context P → List String
 
 /-- How a person's turn recognizes what is stuck. Premise: one utterance carries one of these or
-    none; whatever else it says is more of the situation, read by the next pass. -/
+    none; whatever else it says is more of the situation — read by the next pass where the turn
+    closes nothing, and left in the context where it closes. -/
 inductive Answer
   /-- the person takes a shown candidate as their situation -/
   | shown (k : Candidate)
@@ -200,11 +205,15 @@ inductive Answer
   /-- the person says none of the shown candidates is theirs -/
   | noneShown
 
-/-- **Your judgment**: the cited turn recognizes the situation this way, read whole against the
-    context as it now stands. A candidate is taken where the turn says it is theirs or goes on with
-    it as theirs; a rewording stands as they said it, beside any contrary ground and never replaced
-    by yours. Uncertainty, a hypothetical use, a question about a candidate, an invocation alone,
-    and silence recognize nothing, and your readings, scores, and rankings fill nothing. -/
+/-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round
+    recognizes nothing — recognizes the situation this way, read whole against the context as it
+    now stands. A candidate is taken where the turn says it is theirs or goes on with it as theirs;
+    a rewording stands as they said it, beside any contrary ground and never replaced by yours, and
+    "none of these" together with what is stuck in their own words is a rewording. A rewording over
+    which you hold contrary grounds not yet shown recognizes nothing yet: the next round shows them
+    beside it, and the person's next turn may stand by it. Uncertainty, a hypothetical use, a
+    question about a candidate, the invocation of this probe alone, and silence recognize nothing,
+    and your readings, scores, and rankings fill nothing. -/
 axiom AnswerSupported : Context P → Turn P → Answer → Prop
 
 /-- Only the person recognizes. -/
@@ -215,7 +224,8 @@ def answerCoord : Coord P Answer :=
     included, whose reading the next round may say and ask about. -/
 axiom answer : (c : Context P) → Occ (answerCoord (P := P)) c
 
-/-- **Your reading**: the person invoked this probe themselves. -/
+/-- **Your reading**, on the present turn: the person invoked this probe themselves; an earlier
+    invocation does not keep it on. -/
 axiom Invoked : Context P → Prop
 
 /-- **Your judgment**, on the present turn: the person senses something is off and does not name
@@ -224,6 +234,13 @@ axiom Invoked : Context P → Prop
 axiom DeficitUnrecognized : Context P → Prop
 
 def Activated (c : Context P) : Prop := Invoked c ∨ DeficitUnrecognized c
+
+/-- **Your judgment**: the latest utterance bears on this run — a recognition, more of the
+    situation, a question about a candidate, a correction, a read beyond the session admitted —
+    judged on what the whole utterance does, read on the context with it. An utterance that ends
+    the probe or turns to other work leaves the run as it stands: the session answers it, that
+    answer stays in the context, no round of this run is raised, and nothing closes. -/
+axiom Reaches : Context P → Prop
 
 /-- Once it has run, the person can say what is stuck right now — one shown candidate, their own
     rewording, or none of those shown — having seen what in the situation each candidate rests on,
@@ -247,7 +264,8 @@ def nextMove : Answer → Option CatalogEntry
 
 inductive Outcome (P : Type)
   | notActivated (c : Context P)
-  /-- the person recognized what is stuck -/
+  /-- the person recognized their situation — a shown candidate, their own words, or none of
+      those shown -/
   | recognized (r : RecognizedSituation P)
   | holding (c : Context P)
 
@@ -260,8 +278,9 @@ abbrev Mode (P : Type) := Context P
 
 /-! ── PHASE TRANSITIONS ──
 A pass appends what the person admitted reading beyond the session [Tool]; `respond` presents one
-round from the context it leaves. Each utterance is fused; a recognition closes, and anything else
-is read by the next pass.
+round from the context it leaves; `session` is the session's own answer to an utterance that does
+not bear on this run, which stays in the context without being a round of it. Each utterance is
+fused; a recognition closes, and anything else that bears on the run is read by the next pass.
 -/
 
 /-- **Your collection** for one pass. The situation is the current session by default; a read
@@ -275,21 +294,24 @@ def pass (c : Context P) : Context P := c ++ (gathered c).map (·.val)
 
 open Classical in
 /-- The person's recognition, read from the latest utterance against the round before it: a
-    shown candidate only where that round offered it, `noneShown` only where a round offered
-    candidates, and the person's own words after any round. -/
+    shown candidate only where that round offered it and its skill, if any, is in the catalog,
+    `noneShown` only where a round offered candidates, and the person's own words after any
+    round. -/
 def closing (catalog : Catalog) (c : Context P) : Option (RecognizedSituation P) :=
+  let shown := shownIn catalog c
   match answer c with
   | .open_ _ => none
   | .filled (.shown k) s _ _ =>
-    if k ∈ shownIn catalog c then
-      some ⟨c, .shown k, shownIn catalog c, dissent c, s.idx⟩
+    if k ∈ shown ∧ ∀ e, k.skill = some e → e ∈ catalog then
+      some ⟨c, .shown k, shown, dissent c, s.idx⟩
     else none
   | .filled .noneShown s _ _ =>
-    if shownIn catalog c = [] then none
-    else some ⟨c, .noneShown, shownIn catalog c, dissent c, s.idx⟩
+    if shown = [] then none
+    else some ⟨c, .noneShown, shown, dissent c, s.idx⟩
   | .filled (.reworded t) s _ _ =>
-    some ⟨c, .reworded t, shownIn catalog c, dissent c, s.idx⟩
+    some ⟨c, .reworded t, shown, dissent c, s.idx⟩
 
+open Classical in
 /-- `respond` presents the round a pass leaves, as a horizon the person may take, reword, or set
     aside, never as the answer. Where the ground carries two or more candidates, drawn from
     different readings of the situation: each line its candidate's description of the situation,
@@ -298,31 +320,33 @@ def closing (catalog : Catalog) (c : Context P) : Option (RecognizedSituation P)
     declares one — after the evidence, once per skill, and never as evidence of fit; then your
     contrary grounds; then the turn yields to a free answer — a candidate, their own words, none of
     these, or more of the situation — with no option list. A candidate the person said is not
-    theirs is drawn again only on new ground. Where the ground carries fewer: say so, with what it
-    does carry and what more of the situation, or which read beyond the session, would help.
-    Throughout, the wording is tentative and speaks of fit. -/
-def probe (catalog : Catalog) (respond : Catalog → Context P → Response P) :
-    Context P → List (Utterance P) → Outcome P
+    theirs is drawn again in this run only on new ground. Where the ground carries fewer: say so,
+    with what it does carry and what more of the situation, or which read beyond the session,
+    would help. Throughout, the wording is tentative and speaks of fit. -/
+def probe (catalog : Catalog) (respond : Catalog → Context P → Response P)
+    (session : Context P → Response P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
     let c' := fuse c u
-    match closing catalog c' with
-    | some r => .recognized r
-    | none =>
-      let c₁ := pass c'
-      probe catalog respond (c₁ ++ [(respond catalog c₁).val]) us
+    if ¬ Reaches c' then probe catalog respond session (c' ++ [(session c').val]) us
+    else
+      match closing catalog c' with
+      | some r => .recognized r
+      | none =>
+        let c₁ := pass c'
+        probe catalog respond session (c₁ ++ [(respond catalog c₁).val]) us
 
 open Classical in
-def start (catalog : Catalog) (respond : Catalog → Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) : Outcome P :=
+def start (catalog : Catalog) (respond : Catalog → Context P → Response P)
+    (session : Context P → Response P) (c : Context P) (us : List (Utterance P)) : Outcome P :=
   if Activated c then
     let c₁ := pass c
-    probe catalog respond (c₁ ++ [(respond catalog c₁).val]) us
+    probe catalog respond session (c₁ ++ [(respond catalog c₁).val]) us
   else .notActivated c
 
 /-! ── LOOP ──
 The loop is dialogue: each round ends where the turn yields, and nothing counts down. Every
-utterance that recognizes nothing is read whole by the next pass — a narrower slice of the
+utterance that bears on the run and recognizes nothing is read whole by the next pass — a narrower slice of the
 situation, a correction, a candidate set aside, a question, a read beyond the session admitted —
 and the pass reads the situation again on the context as it now stands. No number of rounds ends
 the probe; the person's recognition does, and without it the round holds.
@@ -364,7 +388,7 @@ def grounding : Op → Annot × String
   | .draw     => (.sense, "Internal analysis: candidates drawn from different readings of the situation, each grounded in turns it cites, with the condition that would rule it out and the installed skill that takes it")
   | .present  => (.interaction .constitution, "two or more candidates, each line its description, its cited grounds, its rules-out condition, then its skill and declared end; your contrary grounds; a free answer, with no option list and no ranking")
   | .short    => (.interaction .constitution, "the ground carries fewer than two candidates: said as such, with what it does carry and what more of the situation would help")
-  | .readTurn => (.sense, "Internal analysis: the latest utterance read against the fused context — a shown candidate taken, the situation in the person's own words, none shown, or more of the situation")
+  | .readTurn => (.sense, "Internal analysis: whether the latest utterance bears on this run, as `Reaches` reads it, and what it does there — a shown candidate taken, the situation in the person's own words, none shown, or more of the situation — read whole against the fused context")
   | .converge => (.interaction .extension, "RecognizedSituation: the answer with the turn that gave it quoted, what the round it answered offered, and the contrary grounds it closed over")
   | .invoke   => (.dispatch, "invoke: after the trace, in the same turn, the skill nextMove names, with the recognized situation in the session; then this run ends")
 
