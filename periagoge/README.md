@@ -25,7 +25,7 @@ The name draws a structural analogy from Plato *Republic* VII.518d, where περ
 
 Activate when at least two concrete cases seem to share something whose name, rule, or reach is still unsettled for you. A named abstraction whose meaning is being reconsidered from its cases is in process; applying a fixed meaning to a disputed case is not.
 
-When the user's intent is articulated but its decision coordinates are implicit in the externalized substrate, defer to Euporia (`/elicit`). When the concept already exists in prior work and only needs to be recognized rather than formed or re-formed, defer to Anamnesis (`/recollect`).
+When the user's intent is articulated but its decision coordinates are implicit in the externalized substrate, defer to Euporia (`/elicit`). When the concept already exists in prior work and only needs to be recognized rather than formed or reconsidered, defer to Anamnesis (`/recollect`).
 
 ## Components
 
