@@ -291,8 +291,9 @@ def recordOf (c : Context P) : Record c :=
     whatever else the turn says, a request to write, move, or remove a version included: what they
     ask done to the versions is carried out first, as `carriedOut` says, and what else they say
     stands in its own words in the context; the session answers them, saying where each version is
-    as last observed, no round is drawn, the run holds, and later turns bear on it only where they
-    come back to it. Where reading a turn as other work, as ending the run, or as recognizing a
+    as last observed and what the person asked done to it that is not observed done, with the
+    reason where it failed; no round is drawn, the run holds, and later turns bear on it only where
+    they come back to it. Where reading a turn as other work, as ending the run, or as recognizing a
     version was unclear, the session's answer says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 

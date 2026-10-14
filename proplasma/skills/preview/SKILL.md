@@ -225,10 +225,10 @@ axiom dissent : Context P → List String
     as it stands: the session answers it, that answer stays in the context, and no gate of this run
     is raised. Words that end the run without constituting a direction do not bear on it, whatever
     else the turn says, and what else it says stands in its own words in the context: the session
-    answers them, saying where each probe this run wrote is, as last observed — only a
-    constitution discards them; no round is drawn, the run holds, and later turns bear on it only
-    where they come back to it. Where reading a turn as other work, as ending the run, or as
-    constituting a direction was unclear, the session's answer says briefly how it took it. -/
+    answers them, saying where each probe this run wrote is, as last observed; no round is drawn,
+    the run holds, and later turns bear on it only where they come back to it. Where reading a turn
+    as other work, as ending the run, or as constituting a direction was unclear, the session's
+    answer says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
 /-- How the person closes the run. -/

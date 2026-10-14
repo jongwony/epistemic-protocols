@@ -328,8 +328,8 @@ axiom dissent : Context P → List String
 /-- **Your judgment**: the cited turn takes the method as the map showed it, read against the
     context as it now stands; whatever the same turn settles or changes is read with it, and is
     carried on the relayed map's ledger rather than drawn into a map that waits. A turn before the latest
-    map, or from an earlier run, takes nothing on it. Your own reading that the method is ready
-    closes nothing. -/
+    map, or from an earlier run, takes nothing on it. Where the turn's intent is unclear, it takes
+    nothing. Your own reading that the method is ready closes nothing. -/
 axiom ResolutionSupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person takes the method. -/

@@ -222,10 +222,10 @@ axiom Reaches : Context P → Prop
 
 /-- **Your judgment**: the cited turn says the intent is aligned enough — the aporia is resolved —
     read against the context as it now stands. It closes the run: coordinates need not all be
-    filled, and what is open is residual. Filled coordinates, or your own reading, close nothing.
-    Whether an earlier resolution still reaches what is now at issue is read on the current
-    context: a later question may reopen the alignment, ask only about a fact, or concern other
-    work. -/
+    filled, and what is open is residual. Where the turn's intent is unclear, it closes nothing.
+    Filled coordinates, or your own reading, close nothing. Whether an earlier resolution still
+    reaches what is now at issue is read on the current context: a later question may reopen the
+    alignment, ask only about a fact, or concern other work. -/
 axiom ResolutionSupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person settles the intent. -/

@@ -247,9 +247,10 @@ axiom Reaches : Context P → Prop
 
 /-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round closes
     nothing — says that what they now understand of the target serves their purpose, read on the
-    context as it now stands. An acknowledgment of an explanation is not that. The map's
-    standings, or your own reading, close nothing, and no standing holds the closure back. Setting
-    one aspect aside does not close the run; a set-aside aspect stays on the map as it stood. -/
+    context as it now stands. An acknowledgment of an explanation is not that. Where the turn's
+    intent is unclear, it closes nothing. The map's standings, or your own reading, close nothing,
+    and no standing holds the closure back. Setting one aspect aside does not close the run; a
+    set-aside aspect stays on the map as it stood. -/
 axiom ClosureSupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person closes the run. -/
