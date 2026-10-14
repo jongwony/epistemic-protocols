@@ -140,7 +140,7 @@
     ],
     "expected": [],
     "adjudicated": false,
-    "note": "A different deficit surfaces while a gate holds. Route's own answer is at most one finding line, which requires invoking Route; the hook must not pre-empt it."
+    "note": "A different deficit surfaces while a gate holds. Route's own answer while a gate holds is a pointer line, never an invocation; the hook must not pre-empt it."
   },
   {
     "id": "installed-not-loaded",

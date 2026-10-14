@@ -21,83 +21,82 @@ variable {P : Type}
 instance : Nonempty Catalog :=
   ⟨{ entries := [], self := { skill := "", description := "" }, excludes := by simp }⟩
 
-/-- The three outcomes of one pass, each read off the reading `fits` makes and the occasion:
-    silence, an invocation of a line, or one pointer line for each fit. -/
+/-- The three outcomes of one pass, each read off the fits `raised` keeps and the occasion:
+    silence, an invocation of a line, or one pointer line for each fit raised now. -/
 private theorem route_cases (k : Catalog) (c : Context P) :
-    (route k c = .silence ∧ (fits k c = [] ∨ ¬ Raise c (fits k c))) ∨
-    (∃ l, route k c = .invoke l ∧ fits k c = [l] ∧ Raise c (fits k c) ∧ Plain c l ∧
-      PolicyApplies c ∧ ¬ Holding c) ∨
-    (∃ h, route k c = .point (fits k c) h ∧ Raise c (fits k c) ∧
-      ¬ (∃ l, fits k c = [l] ∧ Plain c l ∧ PolicyApplies c ∧ ¬ Holding c)) := by
+    (route k c = .silence ∧ raised k c = []) ∨
+    (∃ l, route k c = .invoke l ∧ raised k c ≠ [] ∧ l ∈ raised k c ∧ fits k c = [l] ∧
+      Plain c l ∧ PolicyApplies c ∧ ¬ Holding c) ∨
+    (∃ h, route k c = .point (raised k c) h) := by
   unfold route
   split
-  · next h => exact Or.inl ⟨rfl, Or.inl h⟩
+  · next h => exact Or.inl ⟨rfl, h⟩
   · next l ls h =>
-    by_cases hr : Raise c (fits k c)
-    · by_cases hi : ls = [] ∧ Plain c l ∧ PolicyApplies c ∧ ¬ Holding c
-      · obtain ⟨rfl, hp, hq, hh⟩ := hi
-        refine Or.inr (Or.inl ⟨l, ?_, h, hr, hp, hq, hh⟩)
-        simp [hr, hp, hq, hh]
-      · refine Or.inr (Or.inr ⟨by rw [h]; exact List.cons_ne_nil l ls, ?_, hr, ?_⟩)
-        · simp only [hr, not_true_eq_false, ↓reduceIte, hi]
-        · rintro ⟨l₁, h₁, hp, hq, hh⟩
-          rw [h] at h₁
-          simp only [List.cons.injEq] at h₁
-          obtain ⟨rfl, rfl⟩ := h₁
-          exact hi ⟨rfl, hp, hq, hh⟩
-    · refine Or.inl ⟨?_, Or.inr hr⟩
-      simp [hr]
+    by_cases hi : fits k c = [l] ∧ Plain c l ∧ PolicyApplies c ∧ ¬ Holding c
+    · obtain ⟨hf, hp, hq, hh⟩ := hi
+      refine Or.inr (Or.inl ⟨l, ?_, by rw [h]; exact List.cons_ne_nil l ls,
+        by rw [h]; exact List.mem_cons_self .., hf, hp, hq, hh⟩)
+      simp [hf, hp, hq, hh]
+    · refine Or.inr (Or.inr ⟨by rw [h]; exact List.cons_ne_nil l ls, ?_⟩)
+      simp only [hi, ↓reduceIte]
 
-/-- A pass invokes a line only where that line is the whole of the reading `fits` makes, the fit
-    is plain, the routing policy covers the occasion, no checkpoint holds, and the fits are to be
-    raised now. -/
+/-- A pass invokes a line only where that line is the whole of the reading `fits` makes, it is
+    raised now, the fit is plain, the routing policy covers the occasion, and no checkpoint
+    holds. -/
 theorem invoke_requires (k : Catalog) (c : Context P) (l : Line k c)
     (h : route k c = .invoke l) :
-    fits k c = [l] ∧ Plain c l ∧ PolicyApplies c ∧ ¬ Holding c ∧ Raise c [l] := by
-  rcases route_cases k c with ⟨hs, -⟩ | ⟨l₁, h₁, hf, hr, hp, hq, hh⟩ | ⟨_, hpt, -⟩
+    fits k c = [l] ∧ Raise c l ∧ Plain c l ∧ PolicyApplies c ∧ ¬ Holding c := by
+  rcases route_cases k c with ⟨hs, -⟩ | ⟨l₁, h₁, -, hm, hf, hp, hq, hh⟩ | ⟨_, hpt⟩
   · rw [hs] at h; cases h
   · rw [h₁] at h
     cases h
-    exact ⟨hf, hp, hq, hh, hf ▸ hr⟩
+    have hr : Raise c l := by
+      unfold raised at hm
+      simpa using (List.mem_filter.mp hm).2
+    exact ⟨hf, hr, hp, hq, hh⟩
   · rw [hpt] at h; cases h
 
 /-- While a checkpoint holds the person's judgment, a pass invokes nothing. -/
 theorem holding_never_invokes (k : Catalog) (c : Context P) (h : Holding c) (l : Line k c) :
-    route k c ≠ .invoke l := fun hi => (invoke_requires k c l hi).2.2.2.1 h
+    route k c ≠ .invoke l := fun hi => (invoke_requires k c l hi).2.2.2.2 h
 
-/-- Where two or more fits are read, a pass invokes nothing. -/
+/-- Where two or more fits are read — one whose pointer the person passed over among them — a pass
+    invokes nothing. -/
 theorem several_never_invoke (k : Catalog) (c : Context P) (h : 2 ≤ (fits k c).length)
     (l : Line k c) : route k c ≠ .invoke l := by
   intro hi
   rw [(invoke_requires k c l hi).1] at h
   simp at h
 
-/-- A pointer shows exactly the reading `fits` makes — every fit, none left out and none added —
-    and only where the fits are to be raised now. -/
-theorem point_is_reading (k : Catalog) (c : Context P) (ls : List (Line k c)) (hne : ls ≠ [])
-    (h : route k c = .point ls hne) : ls = fits k c ∧ Raise c (fits k c) := by
-  rcases route_cases k c with ⟨hs, -⟩ | ⟨l₁, h₁, -⟩ | ⟨_, hpt, hr, -⟩
+/-- A pointer shows exactly the fits raised now — each fit `fits` reads that `Raise` admits, none
+    left out and none added. -/
+theorem point_is_raised (k : Catalog) (c : Context P) (ls : List (Line k c)) (hne : ls ≠ [])
+    (h : route k c = .point ls hne) : ∀ l, l ∈ ls ↔ l ∈ fits k c ∧ Raise c l := by
+  rcases route_cases k c with ⟨hs, -⟩ | ⟨l₁, h₁, -⟩ | ⟨_, hpt⟩
   · rw [hs] at h; cases h
   · rw [h₁] at h; cases h
   · rw [hpt] at h
     cases h
-    exact ⟨rfl, hr⟩
+    intro l
+    unfold raised
+    simp [List.mem_filter]
 
-/-- Where the fits are not to be raised now, a pass is silent. -/
-theorem not_raised_silent (k : Catalog) (c : Context P) (h : ¬ Raise c (fits k c)) :
+/-- Where no fit is to be raised now — nothing fits, or every fit is a pointer not to be raised
+    again — a pass is silent. -/
+theorem none_raised_silent (k : Catalog) (c : Context P) (h : ∀ l ∈ fits k c, ¬ Raise c l) :
     route k c = .silence := by
-  rcases route_cases k c with ⟨hs, -⟩ | ⟨_, -, -, hr, -⟩ | ⟨_, -, hr, -⟩
+  have hr : raised k c = [] := by
+    unfold raised
+    exact List.filter_eq_nil_iff.mpr (fun l hl => by simpa using h l hl)
+  rcases route_cases k c with ⟨hs, -⟩ | ⟨_, -, hne, -⟩ | ⟨hne, -⟩
   · exact hs
-  · exact absurd hr h
-  · exact absurd hr h
+  · exact absurd hr hne
+  · exact absurd hr hne
 
 /-- Where nothing fits, a pass is silent. -/
 theorem empty_silent (k : Catalog) (c : Context P) (h : fits k c = []) :
-    route k c = .silence := by
-  rcases route_cases k c with ⟨hs, -⟩ | ⟨l, -, hf, -⟩ | ⟨hne, -⟩
-  · exact hs
-  · rw [h] at hf; cases hf
-  · exact absurd h hne
+    route k c = .silence :=
+  none_raised_silent k c (by simp [h])
 
 /-- A pass hands off only through an invocation, and the protocol it names is that invocation's
     line's entry. -/
@@ -115,11 +114,11 @@ theorem invokes_only_catalog (k : Catalog) (c : Context P) (e : Entry)
   obtain ⟨l, -, rfl⟩ := only_invoke_dispatches k c _ e h
   exact ⟨l.mem, k.excludes _ l.mem⟩
 
-/-- The reading an invocation hands over rests on at least one cited turn of the context, and no
-    cited turn is one of yours. -/
-theorem invoked_reading_grounded (k : Catalog) (c : Context P) (l : Line k c)
-    (_h : route k c = .invoke l) :
-    l.grounds ≠ [] ∧ ∀ g ∈ l.grounds, (c[g.idx]'g.lt).origin ≠ .assistant :=
-  ⟨l.grounded, fun g _ => cited_not_assistant g⟩
+/-- Every line — the one an invocation hands over and each pointer line alike — cites at least
+    one turn of the context, none of them yours, and its fit is judged on those cited turns. -/
+theorem line_grounded (k : Catalog) (c : Context P) (l : Line k c) :
+    l.grounds ≠ [] ∧ (∀ g ∈ l.grounds, (c[g.idx]'g.lt).origin ≠ .assistant) ∧
+      FitSupported c l.entry l.reading l.grounds :=
+  ⟨l.grounded, fun g _ => cited_not_assistant g, l.fit⟩
 
 end Route

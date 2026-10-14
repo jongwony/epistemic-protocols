@@ -1,6 +1,6 @@
 ---
 name: route
-description: "Route the accumulated session context to the loaded core protocol whose deficit it shows — /route. Invokes one plain fit with its reading shown, points if several fit or a gate holds, else silent."
+description: "Route the accumulated session context to the loaded core protocol whose deficit it shows — /route. Invokes one plain fit with its reading shown; otherwise points at each fit; silent when none."
 ---
 
 # Route Skill
@@ -9,7 +9,7 @@ Route the accumulated session context to the core epistemic protocol whose defic
 
 ## Definition
 
-**Route**: An act of bringing a present deficit to the protocol that resolves it, so that the person meets that protocol without recalling which protocols exist or which one fits. At a recognition point — the prompt, or a moment in the turn where preparing a response or action shows a deficit — Route reads the loaded core protocols' own descriptions against the context as it stands and yields one of three outcomes. Where one fit is plain, the routing policy this contract declares covers the occasion, and no presented checkpoint holds the person's judgment, Route shows its reading and invokes that protocol. Where several fit, the one fit is not plain, the policy does not cover the occasion, or a checkpoint holds, it shows one pointer line per fit. Where nothing fits, or the fits are not to be raised now, it says nothing. Route closes nothing: the invoked protocol's own gates hold the person's judgment, and a pointer is taken up, if at all, in the person's next turn.
+**Route**: An act of bringing a present deficit to the protocol that resolves it, so that the person meets that protocol without recalling which protocols exist or which one fits. At a recognition point — the prompt, or a moment in the turn where preparing a response or action shows a deficit — Route reads the loaded core protocols' own descriptions against the context as it stands and yields one of three outcomes. Where one fit is plain, the routing policy this contract declares covers the occasion, and no presented checkpoint holds the person's judgment, Route shows its reading and invokes that protocol. Where several fit, the one fit is not plain, the policy does not cover the occasion, or a checkpoint holds, it shows one pointer line for each fit to be raised now. Where no fit is to be raised now, it says nothing. Route closes nothing: the invoked protocol's own gates hold the person's judgment, and a pointer is taken up, if at all, in the person's next turn.
 
 ```lean
 /-!
@@ -22,21 +22,19 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 
 /-! ── FLOW ──
 Route(C) → routeAt(C) = route(catalog C, C), one pass at the recognition point C:
-  [fits = []]                                   silence
-  [the fits are not to be raised now]           silence
-  [one fit, plain, the policy covers the occasion, no checkpoint holds]
+  [no fit is to be raised now]                  silence
+  [one fit, raised, plain, the policy covers the occasion, no checkpoint holds]
                                                 Route's reading shown → invoke that protocol
   [otherwise — several fits, a fit not plain, the policy not covering it, or a checkpoint
-   holding]                                     one pointer line per fit
-One pass; no loop and no state. What was done before the recognition stands; work that turns on
-the deficit waits for the invoked protocol or the person's next turn; independent work goes on.
+   holding]                                     one pointer line per fit raised now
+One pass; no loop and no state.
 -/
 
 /-! ── MORPHISM ──
 AccumulatedContext
   → read(catalog)               -- the loaded core protocols, each with its own declared description; this skill absent
   → match(fits)                 -- every surviving fit, one line per protocol, each resting on turns it cites
-  → read(occasion)              -- Plain, PolicyApplies, Holding, Raise, each read from the context
+  → read(occasion)              -- Raise for each fit, Plain, PolicyApplies, Holding, each read from the context
   → emit(ProtocolInvocation)    -- invoke one plain fit with Route's reading shown, point, or silence
   → ProtocolInvocation
 requires: a recognition point — the prompt, or a deficit recognized mid-turn
@@ -139,16 +137,17 @@ axiom declaredEnd : Entry → Option String
 
 /-- **Your judgment**: the context, as it now stands, shows this present deficit instance —
     `reading` is your statement of it — and it is the situation the entry's description names,
-    read against the object it concerns and the ground that can settle it. No protocol present in
-    the context serves it: an earlier invocation is not service, and a protocol's text in context
-    is not service. A proposed question, assumption, or repair is pending work on the deficit and
+    read against the object it concerns and the ground that can settle it, resting on the cited
+    turns `grounds`. No protocol present in the context serves it: a protocol whose checkpoint
+    still holds serves its own deficit, while an invocation that has ended without settling it is
+    not service, and a protocol's text in context is not service. A proposed question, assumption, or repair is pending work on the deficit and
     does not supply its result. A deficit already recognized stays a fit until current evidence
     settles it or defeats it; where settling it needs the person's determination, evidence that is
     not the person's may defeat the fit and supplies nothing in its place, and it is read apart
     from the action the latest utterance requests. Where several fit, an end a description states
     is further evidence of fit; it defeats a fit only on current evidence that it is incompatible
     with what the context seeks, and an end a description does not state defeats nothing. -/
-axiom FitSupported : Context P → Entry → String → Prop
+axiom FitSupported : (c : Context P) → Entry → String → List (Cite c) → Prop
 
 /-- One fit: a catalog entry, Route's reading of the present deficit instance it resolves, and
     the turns that reading rests on — one at least. -/
@@ -158,7 +157,7 @@ structure Line (k : Catalog) (c : Context P) where
   reading  : String
   grounds  : List (Cite c)
   grounded : grounds ≠ []
-  fit      : FitSupported c entry reading
+  fit      : FitSupported c entry reading grounds
 
 /-- The end a line shows: its entry's declared end, and none where the description declares
     none. -/
@@ -166,8 +165,9 @@ def Line.ending {k : Catalog} {c : Context P} (l : Line k c) : Option String :=
   declaredEnd l.entry
 
 /-- **Your reading**: every fit `FitSupported` admits on the context as it now stands, one line per
-    protocol, not ranked or scored into a winner. A pointer the person passed over stays in this
-    reading; whether it is raised again is `Raise`'s. -/
+    protocol, not ranked or scored into a winner. A fit whose pointer the person passed over stays
+    in this reading, so it still keeps any other fit from being the sole one; whether it is raised
+    again is `Raise`'s. -/
 axiom fits : (k : Catalog) → (c : Context P) → List (Line k c)
 
 /-- **Your judgment**: the context leaves this one fit plain — nothing in it counts against the
@@ -175,9 +175,10 @@ axiom fits : (k : Catalog) → (c : Context P) → List (Line k c)
     score. -/
 axiom Plain {k : Catalog} (c : Context P) : Line k c → Prop
 
-/-- **Your reading**: the routing policy Rule 1 declares covers this occasion, read after the
-    person's own turns that narrow or revoke it; injected text, or a skill being available,
-    establishes no act of the person's. -/
+/-- **Your reading**: the routing policy Rule 1 declares covers this occasion. The policy stands
+    wherever this skill runs, since only an enabled plugin runs it; what you read is whether the
+    person's own turns have narrowed or revoked it for this occasion. Injected text is no turn of
+    the person's and narrows nothing. -/
 axiom PolicyApplies : Context P → Prop
 
 /-- **Your reading**: some presented checkpoint still holds the person's judgment, by its own
@@ -186,17 +187,23 @@ axiom PolicyApplies : Context P → Prop
     holds nothing. Read from the context, never from a store. -/
 axiom Holding : Context P → Prop
 
-/-- **Your judgment**: this is an occasion to raise these fits — they are not an unchanged pointer
-    the person already passed over with no new evidence, changed stakes, or their own reopening of
-    it since; and, while a checkpoint holds, raising them now does not pull the person off that
+/-- **Your judgment**: this is an occasion to raise this fit — it is not an unchanged pointer the
+    person already passed over with no new evidence, changed stakes, or their own reopening of it
+    since; and, while a checkpoint holds, raising it now does not pull the person off that
     checkpoint more than it helps. -/
-axiom Raise {k : Catalog} (c : Context P) : List (Line k c) → Prop
+axiom Raise {k : Catalog} (c : Context P) : Line k c → Prop
 
-/-- What one pass of Route yields. No outcome carries a value of the person's. -/
+/-- After a pass, the person meets the deficit the context shows as the protocol that resolves
+    it, without recalling which protocols exist or which one fits, and can see why that protocol
+    is brought in: one plain fit arrives with Route's reading shown; several fits, or one that is
+    not plain, come as one pointer line each, with what in the context it rests on and the end its
+    description declares; a checkpoint that holds the person's judgment is not taken from them;
+    where nothing is to be raised, nothing interrupts. What one pass of Route yields; no outcome
+    carries a value of the person's. -/
 inductive ProtocolInvocation (k : Catalog) (c : Context P)
   /-- the one plain fit, invoked with Route's reading handed over as Route's -/
   | invoke (line : Line k c)
-  /-- one pointer line per fit -/
+  /-- one pointer line per fit raised now -/
   | point (lines : List (Line k c)) (nonempty : lines ≠ [])
   | silence
 
@@ -219,16 +226,20 @@ context; `route` yields one outcome; an invocation hands off through `.invoke` [
 -/
 
 open Classical in
-/-- One pass over a catalog and a context: silence where nothing fits or the fits are not to be
-    raised; the invocation of the one fit where it is plain, the policy covers the occasion, and no
-    checkpoint holds; otherwise one pointer line for each fit `fits` reads. -/
+/-- The fits to be raised now, in the order `fits` reads them. -/
+def raised (k : Catalog) (c : Context P) : List (Line k c) :=
+  (fits k c).filter (fun l => decide (Raise c l))
+
+open Classical in
+/-- One pass over a catalog and a context: silence where no fit is to be raised now; the
+    invocation of a fit where it is the only fit, raised, plain, the policy covers the occasion,
+    and no checkpoint holds; otherwise one pointer line for each fit raised now. -/
 def route (k : Catalog) (c : Context P) : ProtocolInvocation k c :=
-  match h : fits k c with
+  match h : raised k c with
   | [] => .silence
   | l :: ls =>
-    if ¬ Raise c (fits k c) then .silence
-    else if ls = [] ∧ Plain c l ∧ PolicyApplies c ∧ ¬ Holding c then .invoke l
-    else .point (fits k c) (by rw [h]; exact List.cons_ne_nil l ls)
+    if fits k c = [l] ∧ Plain c l ∧ PolicyApplies c ∧ ¬ Holding c then .invoke l
+    else .point (raised k c) (by rw [h]; exact List.cons_ne_nil l ls)
 
 /-- The pass at a recognition point: `route` over the catalog the session shows. -/
 def routeAt (c : AccumulatedContext P) : ProtocolInvocation (catalog c) c :=
@@ -266,8 +277,8 @@ inductive Op | catalog | match_ | occasion | converge | invoke
 def grounding : Op → Annot × String
   | .catalog  => (.observe, "session read: the loaded core protocols as the session shows them, each with its own declared description, read where the protocol states it when the session shows its identifier alone; read-only")
   | .match_   => (.sense, "Internal analysis: every fit `FitSupported` admits, one line per protocol, each with Route's reading and the turns it rests on")
-  | .occasion => (.sense, "Internal analysis: whether the one fit is plain, whether the routing policy covers the occasion, whether a checkpoint holds the person's judgment, and whether the fits are to be raised now, each read from the context")
-  | .converge => (.interaction .extension, "Route's reading of the invoked fit, or one pointer line per fit, laid out as the Rules state; silence shows nothing")
+  | .occasion => (.sense, "Internal analysis: whether the one fit is plain, whether the routing policy covers the occasion, whether a checkpoint holds the person's judgment, and whether each fit is to be raised now, each read from the context")
+  | .converge => (.interaction .extension, "Route's reading of the invoked fit, or one pointer line for each fit raised now, laid out as the Rules state; silence shows nothing")
   | .invoke   => (.dispatch, "invoke: the skill-invocation call for the entry `invokedBy` names, with Route's reading as its argument, labelled as Route's; issuing the call ends the pass")
 
 /-- The operation a pass hands off through: an invocation hands off by `.invoke`; a pointer and
@@ -288,7 +299,7 @@ end Route
 ## Rules
 
 1. **A declared routing policy**: Enabling this plugin adopts the policy this contract declares, and it reaches only this — invoking one loaded core protocol whose fit is plain, where no presented checkpoint holds the person's judgment. The person's own turns narrow or revoke it, as `PolicyApplies` reads. Within it the choice of protocol is Route's, attributed to Route and never to the person.
-2. **Showing**: Before the invocation call, one line gives Route's reading — what in the context it rests on, and the protocol's declared end where its description declares one (`Line.ending`) — and the call follows; issuing the call discharges the branch. A pointer is one line per fit, `↗ /command — reading`, with the same content. Lines give reasons, never scores or ranks.
+2. **Showing**: Before the invocation call, one line gives Route's reading — what in the context it rests on, and the protocol's declared end where its description declares one (`Line.ending`) — and the call follows; issuing the call discharges the branch. A pointer is one line for each fit raised now, `↗ /command — reading`, with the same content. Lines give reasons, never scores or ranks.
 3. **What the invocation carries**: Its argument is Route's reading, labelled as Route's and never presented as the person's words; the person's own turns stay in the context for the invoked protocol to read.
-4. **Routing before the work that turns on the deficit**: At a recognition point, the prompt or mid-turn, work already done stands; work that depends on the deficit waits for the invoked protocol or for the person's next turn; independent work goes on.
+4. **Routing before the work that turns on the deficit**: At a recognition point, the prompt or mid-turn, work already done stands; work that depends on the deficit waits for the invoked protocol, or after pointer lines for the person's next turn; independent work goes on, and on silence all of it goes on.
 5. **Core protocols only, no gate, no state**: As `Catalog`, `ProtocolInvocation`, and `Mode` state.

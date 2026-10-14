@@ -183,7 +183,7 @@ test("the advisory is labelled, modal, and demands a check — and is not a Rout
   // contract's pointer line, `↗ /command — reading`, is what a /route pass
   // shows.
   assert.doesNotMatch(line, /↗/);
-  assert.doesNotMatch(line, /—\s*reason/);
+  assert.doesNotMatch(line, /—\s*reading/);
   assert.doesNotMatch(line, /Route (recommends|suggests|routed)/i);
   assert.equal(renderAdvisory([]), "");
 });
