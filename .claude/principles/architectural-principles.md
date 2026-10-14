@@ -80,8 +80,7 @@ Epistemic dialogue protocols coexist with a harness's built-in execution command
 
 ## Termination
 
-- At derivation, require a withdrawal result where ending at the person's word needs an independently grounded account of the work's standing that existing outcomes cannot carry. Show the obligation and what would be lost without that result.
-- On withdrawal, record the person's ending and what remains established or unresolved. Present exits under `premise/gate-design.md` §Differential Future Requirement.
+- A person ending a run — withdrawing or stopping — is not a result constructor. The ending and what was taken up to it stay in the accumulated context; the AI's default reading is that it was taken thus, and the person answers by rejecting or approving that reading. A result the person closes is one where something stands, such as a recognition or a confirmation. An AI retracting its own mark is not such an ending.
 - While a gate awaits the person, silence or turning to unrelated work leaves it holding.
 - At an execution handoff, name the required capability and stop there.
 
