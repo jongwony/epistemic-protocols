@@ -113,14 +113,9 @@ theorem none_raised_silent (k : Catalog) (c : Context P) (h : ∀ l ∈ fits k c
   · rw [hr] at hl; cases hl
   · exact absurd hr hne
 
-/-- Where nothing fits, a pass is silent. -/
-theorem empty_silent (k : Catalog) (c : Context P) (h : fits k c = []) :
-    route k c = .silence :=
-  none_raised_silent k c (by simp [h])
-
 /-- The protocol a pass names for its hand-off comes only from an invocation: `invokedBy` names
     that invocation's line's entry, and a pointer or silence names none. -/
-theorem only_invoke_dispatches (k : Catalog) (c : Context P) (o : ProtocolInvocation k c)
+private theorem only_invoke_dispatches (k : Catalog) (c : Context P) (o : ProtocolInvocation k c)
     (e : Entry) (h : invokedBy o = some e) : ∃ l, o = .invoke l ∧ l.entry = e := by
   cases o with
   | invoke l => simp only [invokedBy, Option.some.injEq] at h; exact ⟨l, rfl, h⟩

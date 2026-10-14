@@ -24,7 +24,7 @@ The table triggers; it does not match. The two ends of each morphism — the def
 | Outcome | When |
 |---------|------|
 | Invoke the protocol, Route's reading shown first | The only fit to raise now is plain, the routing policy the skill declares covers the occasion, and no presented gate holds the user's judgment |
-| One pointer line per fit raised now (`↗ /command — reading`) | There are fits to raise now but not all of that holds — several, one not plain, the policy not covering the occasion, or a gate holding the user's judgment — the holding protocol keeps it, and the line waits in the transcript |
+| One pointer line per fit raised now (`↗ /command — reading`) | There are fits to raise now but not all of that holds — several, one not plain, the policy not covering the occasion, or a gate holding the user's judgment; where a gate holds, the holding protocol keeps the user's judgment and the line waits in the transcript |
 | Silence | No fit to raise now: nothing fits, or none is to be brought up again now — the skill's `Raise` reads what is already before the user, what they turned away, and what they asked not to be raised |
 
 ## What this plugin does not do
@@ -63,7 +63,7 @@ These review cases distinguish an unresolved deficit from a settled one. Supply 
 |------------------------|-------------------|
 | A completed result misses the actual setting; an adaptation is proposed but its disposition remains open | Compare the mismatch with the loaded deficits and take the routing decision — invoke, point, or stay silent, as the outcome table above reads it — before any repair |
 | The same mismatch has a user-selected disposition and the requested adaptation has resolved it; no other deficit remains | Silence is available on the current evidence |
-| One protocol's gate still holds and a different deficit is recognized | Point, never invoke: one line for each fit raised now, while the holding protocol keeps the user's judgment; no automatic switch |
+| One protocol's gate still holds and a different deficit is recognized | Point or stay silent, never invoke: one line for each fit raised now, while the holding protocol keeps the user's judgment; no automatic switch |
 
 A routing outcome can therefore be silence after a settled mismatch, or a pointer while a gate holds. What may not be missing is the routing decision itself: recognizing a live fit and proceeding directly to an ad hoc question or repair skips it. Work already done at the recognition stands; work that turns on the deficit waits behind that decision, and then until the deficit is taken up — by the invoked protocol, or by the user's own words — while independent work goes on; no outcome of `/route`, silence included, lifts that wait. These are semantic review cases, not automated behavioral tests; hook tests check delivery of the directive, not whether a model follows it.
 
