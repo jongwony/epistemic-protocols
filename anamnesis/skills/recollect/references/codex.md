@@ -39,4 +39,4 @@ Check the directory before emitting the `cd`. When the recorded path is gone —
 codex resume <session_id>
 ```
 
-When the working directory was never recorded, report the candidate as identified and omit the resume command. A record found under another root resumes only with that root as `CODEX_HOME`; say so beside the handle.
+When the working directory was never recorded, report the candidate as found and omit the resume command. A record found under another root resumes only with that root as `CODEX_HOME`; say so beside the handle.

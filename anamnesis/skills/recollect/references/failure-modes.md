@@ -7,7 +7,7 @@ Read when a pass finds nothing to present, when a presented candidate is correct
 FalseAnchor        : an identifier matched, and its record is not the one meant — or the identifier names a different kind of thing than the cue claims
                      -- cause: a match on the literal alone. An identifier anchors a candidate only where the kind of thing it names fits what the cue claims — an issue number anchors an issue or the changes that cite it, not an arbitrary commit; a path anchors the artifact at that path. A bare number carries no repository until one is read from the record around it, and a number that labels a list item, a rule, a finding, or an image placeholder names nothing at all
                      -- detection: the person corrects the cue despite the match, or the record around the identifier shows it names something else
-                     -- recovery: drop the anchor, keep the record only if other axes still reach it, and search the corrected cue as given
+                     -- recovery: drop the anchor and say which one was dropped and why, keep the record only if other axes still reach it, and search the corrected cue as given
 
 IndexLacking       : the record carries the past meant, and its index entry does not
                      -- cause: the index is a lossy extraction; an extractor did not capture what the cue names
@@ -52,8 +52,10 @@ A pass that leaves nothing to present runs in the turn the searches ran in; noth
 before the person has added to the cue
   -- report what was searched, per root, and which records did not open, then the one open question
 after the person has added to the cue
-  -- a search past the boundary still worth offering: the wider search with what it would read and its cost, against stopping here
+  -- a search past the boundary still worth offering: the wider search with what it would read and its cost, against declining it
   -- nothing further worth reaching for: close unresolved with the scope searched per root and the causes the evidence supports
+after the person has declined the wider search
+  -- that extension is no longer admissible; the search inside the boundary goes on, and where nothing there is left worth reaching for, the unresolved close names the extension declined
 an index that is empty or whose capture failed
   -- the records themselves remain searchable along the cue's axes; the capture outcome says whether the index was validated empty, failed, unfinished, or never written, and that is what the round reports about it
   -- an empty index says nothing about whether the past took place
