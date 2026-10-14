@@ -38,7 +38,7 @@ Install every protocol, together with the [`route`](#route) and [`epistemic-coop
 curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
 ```
 
-`route` lets the agent invoke a suitable protocol from the conversation context, and find relevant collaboration principles when needed, so you do not have to know which protocol fits. It is still experimental: its wording and hook set can change between releases. `epistemic-cooperative` adds guided learning (`/onboard`), deficit recognition (`/probe`), and contributor tools. To leave either one out, run `claude plugin disable <name>@epistemic-protocols` after installing; without `route`, every protocol stays installed and callable by its own command.
+`route` lets the agent invoke a suitable protocol from the conversation context, and find relevant collaboration principles when needed, so you do not have to know which protocol fits. It is still experimental: its wording and hook set can change between releases. `epistemic-cooperative` adds guided learning (`/onboard`), recognizing what is stuck from grounded candidates (`/probe`), and contributor tools. To leave either one out, run `claude plugin disable <name>@epistemic-protocols` after installing; without `route`, every protocol stays installed and callable by its own command.
 
 You can also invoke a protocol yourself at the decision point you are at — for example `/inquire` before handing work to the AI, or `/bound` when you cannot yet see what a task needs you to decide.
 

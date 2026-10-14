@@ -38,7 +38,7 @@ AI 협업이 방향을 잘못 잡으면, 전부 다시 합니다. 이 프로토�
 curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
 ```
 
-`route`는 에이전트가 대화 맥락에 맞는 프로토콜을 호출하고 필요한 시점에 관련 협업 원칙을 찾도록 돕습니다. 그래서 어떤 프로토콜이 맞는지 몰라도 됩니다. 아직 실험 단계라 문구와 훅 구성이 릴리스마다 바뀔 수 있습니다. `epistemic-cooperative`는 가이드 학습(`/onboard`), 결핍 인식(`/probe`), 컨트리뷰터 도구를 제공합니다. 둘 중 하나를 빼고 싶다면 설치 뒤 `claude plugin disable <name>@epistemic-protocols`를 실행하세요. `route`가 없어도 모든 프로토콜은 설치된 채로 각자의 명령으로 호출할 수 있습니다.
+`route`는 에이전트가 대화 맥락에 맞는 프로토콜을 호출하고 필요한 시점에 관련 협업 원칙을 찾도록 돕습니다. 그래서 어떤 프로토콜이 맞는지 몰라도 됩니다. 아직 실험 단계라 문구와 훅 구성이 릴리스마다 바뀔 수 있습니다. `epistemic-cooperative`는 가이드 학습(`/onboard`), 근거를 인용한 후보로 무엇이 막혀 있는지 알아보기(`/probe`), 컨트리뷰터 도구를 제공합니다. 둘 중 하나를 빼고 싶다면 설치 뒤 `claude plugin disable <name>@epistemic-protocols`를 실행하세요. `route`가 없어도 모든 프로토콜은 설치된 채로 각자의 명령으로 호출할 수 있습니다.
 
 지금 서 있는 결정 지점에서 프로토콜을 직접 호출할 수도 있습니다 — 예를 들어 AI에게 작업을 넘기기 전에 `/inquire`, 작업에서 무엇을 결정해야 할지 아직 보이지 않을 때 `/bound`.
 

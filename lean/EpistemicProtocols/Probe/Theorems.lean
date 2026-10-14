@@ -34,36 +34,47 @@ theorem start_silence (catalog : Catalog) (respond : Catalog → Context P → R
   simp only [h, ↓reduceIte]
   exact ⟨_, silence catalog respond session _⟩
 
-/-- Each step of the recursion either closes on a recognition or goes on with a context that
-    extends the one before the utterance: nothing is removed from what the person and the reads
-    put there. -/
+/-- A fresh invocation of this probe by the person supersedes the run: the run holds where it
+    stood, before that utterance, and closes nothing in it; the invocation is `start`'s. -/
+theorem fresh_invocation_supersedes (catalog : Catalog)
+    (respond : Catalog → Context P → Response P) (session : Context P → Response P)
+    (c : Context P) (u : Utterance P) (us : List (Utterance P)) (h : Invoked (fuse c u)) :
+    probe catalog respond session c (u :: us) = .holding c := by
+  simp [probe, h]
+
+/-- Each step of the recursion holds where it stood on a fresh invocation, closes on a
+    recognition, or goes on with a context that extends the one before the utterance: nothing is
+    removed from what the person and the reads put there. -/
 theorem step_extends (catalog : Catalog) (respond : Catalog → Context P → Response P)
     (session : Context P → Response P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) :
-    (∃ r, probe catalog respond session c (u :: us) = .recognized r) ∨
+    probe catalog respond session c (u :: us) = .holding c ∨
+      (∃ r, probe catalog respond session c (u :: us) = .recognized r) ∨
       ∃ t, probe catalog respond session c (u :: us) =
         probe catalog respond session (c ++ t) us := by
   obtain ⟨t₀, ht₀⟩ := fuse_extends c u
   simp only [probe]
   split
-  · exact Or.inr ⟨t₀ ++ [(session (fuse c u)).val], by rw [ht₀, List.append_assoc]⟩
+  · exact Or.inl rfl
   · split
-    · next r _ => exact Or.inl ⟨r, rfl⟩
-    · refine Or.inr ⟨t₀ ++ ((gathered (fuse c u)).map (·.val) ++
-        [(respond catalog (pass (fuse c u))).val]), ?_⟩
-      simp only [pass]
-      rw [ht₀]
-      simp [List.append_assoc]
+    · exact Or.inr (Or.inr ⟨t₀ ++ [(session (fuse c u)).val], by rw [ht₀, List.append_assoc]⟩)
+    · split
+      · next r _ => exact Or.inr (Or.inl ⟨r, rfl⟩)
+      · refine Or.inr (Or.inr ⟨t₀ ++ ((gathered (fuse c u)).map (·.val) ++
+          [(respond catalog (pass (fuse c u))).val]), ?_⟩)
+        simp only [pass]
+        rw [ht₀]
+        simp [List.append_assoc]
 
 /-- An utterance that does not bear on this run — one that ends the probe or turns to other work —
     raises no round and closes nothing: the session's answer joins the context and the run goes
     on as it stood. -/
 theorem unrelated_raises_no_round (catalog : Catalog) (respond : Catalog → Context P → Response P)
     (session : Context P → Response P) (c : Context P) (u : Utterance P)
-    (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
+    (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u)) (h : ¬ Reaches (fuse c u)) :
     probe catalog respond session c (u :: us) =
       probe catalog respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
-  simp [probe, h]
+  simp [probe, hi, h]
 
 private theorem probe_ne_notActivated (catalog : Catalog)
     (respond : Catalog → Context P → Response P) (session : Context P → Response P)
@@ -77,10 +88,12 @@ private theorem probe_ne_notActivated (catalog : Catalog)
     intro c
     simp only [probe]
     split
-    · exact ih _
+    · intro h; cases h
     · split
-      · intro h; cases h
       · exact ih _
+      · split
+        · intro h; cases h
+        · exact ih _
 
 /-- An invocation of the person's own always activates: the run never ends as not activated. -/
 theorem invocation_activates (catalog : Catalog) (respond : Catalog → Context P → Response P)
@@ -192,15 +205,17 @@ private theorem probe_recognized (catalog : Catalog) (respond : Catalog → Cont
     intro c h
     simp only [probe] at h
     split at h
-    · exact ih _ h
-    · next hre =>
-      split at h
-      · next r₁ hr =>
-        cases h
-        split at hr
-        · cases hr
-        · next ho => exact ⟨_, hr, Classical.not_not.mp hre, ho⟩
+    · cases h
+    · split at h
       · exact ih _ h
+      · next hre =>
+        split at h
+        · next r₁ hr =>
+          cases h
+          split at hr
+          · cases hr
+          · next ho => exact ⟨_, hr, Classical.not_not.mp hre, ho⟩
+        · exact ih _ h
 
 private theorem start_recognized (catalog : Catalog) (respond : Catalog → Context P → Response P)
     (session : Context P → Response P) (c : Context P) (us : List (Utterance P))
@@ -264,7 +279,7 @@ theorem shown_only_from_shown_line (catalog : Catalog)
       closing catalog c₀ = some r ∧ presented catalog c₀ = some ⟨n, p⟩ ∧ l ∈ p.lines ∧
       l.candidate = k ∧ l.grounds ≠ [] ∧
       (∀ g ∈ l.grounds, ((c₀.take n)[g.src.idx]'g.src.lt).origin ≠ .assistant) ∧
-      ∀ e, k.skill = some e → e ∈ catalog := by
+      ∀ e, k.skill = some e → e ∈ catalog.entries := by
   obtain ⟨c₀, hc₀, _⟩ := start_recognized catalog respond session c us r h
   obtain ⟨_, -, -, -, -, hsk, -⟩ := closing_cases catalog c₀ r hc₀
   obtain ⟨n, p, l, hp, hl, rfl⟩ := shown_in_line catalog c₀ k (hsk k b hk)
@@ -273,14 +288,16 @@ theorem shown_only_from_shown_line (catalog : Catalog)
 
 /-- A run hands off only where the person took, at their latest turn, a candidate the round showed
     with the run of the skill its line showed: the dispatch follows an answer `.shown k true`
-    whose candidate is among those the recognition records as shown, whose skill the catalog
-    holds, and which the last turn of the closing context — the person's — supports. -/
+    whose candidate is among those the recognition records as shown, whose skill the catalog's
+    entries hold — never this probe's own — and which the last turn of the closing context — the
+    person's — supports. -/
 theorem invokes_only_taken_skill (catalog : Catalog) (respond : Catalog → Context P → Response P)
     (session : Context P → Response P) (c : Context P) (us : List (Utterance P))
     (r : RecognizedSituation P) (h : start catalog respond session c us = .recognized r)
     (hi : invokedBy (.recognized r) = some .invoke) :
     ∃ (k : Candidate) (e : CatalogEntry) (c₀ : Context P) (s : Cite c₀),
-      r.answer = .shown k true ∧ k.skill = some e ∧ k ∈ r.shown ∧ e ∈ catalog ∧
+      r.answer = .shown k true ∧ k.skill = some e ∧ k ∈ r.shown ∧ e ∈ catalog.entries ∧
+      e ≠ catalog.self ∧
       closing catalog c₀ = some r ∧ s.idx = r.recognizedAt ∧ s.idx + 1 = c₀.length ∧
       (c₀[s.idx]'s.lt).origin = .person ∧ AnswerSupported c₀ (c₀[s.idx]'s.lt) r.answer := by
   obtain ⟨c₀, hc₀, _⟩ := start_recognized catalog respond session c us r h
@@ -295,7 +312,8 @@ theorem invokes_only_taken_skill (catalog : Catalog) (respond : Catalog → Cont
       | some e =>
         have hmem := hsk k true ha
         obtain ⟨n, p, l, -, -, hlk⟩ := shown_in_line catalog c₀ k hmem
-        refine ⟨k, e, c₀, s, rfl, he, ?_, l.inCatalog e (hlk ▸ he), hc₀,
+        have hin : e ∈ catalog.entries := l.inCatalog e (hlk ▸ he)
+        refine ⟨k, e, c₀, s, rfl, he, ?_, hin, fun hs₁ => catalog.excludes (hs₁ ▸ hin), hc₀,
           (congrArg RecognizedSituation.recognizedAt hr).symm, hl, ho, ha ▸ hs⟩
         rw [congrArg RecognizedSituation.shown hr]
         exact hmem
