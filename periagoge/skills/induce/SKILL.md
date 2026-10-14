@@ -293,9 +293,9 @@ def openTrace (c : Context P) (taken : List Reading) : List (OpenItem × Option 
     line. -/
 abbrev Entry := String
 
-/-- **Your reading**: the lines the sheet shows as the context now stands — its values; your
-    doubts and the points still open are not among them, `dissent` and the open trace carry
-    them. -/
+/-- **Your reading**: the lines the sheet shows, or at a recognition the record as you read it, as
+    the context now stands — its values; your doubts and the points still open are not among them,
+    `dissent` and the open trace carry them. -/
 axiom entries : Context P → List Entry
 
 /-- Who first put a value forward — you, the person, or any other source — kept apart from how
