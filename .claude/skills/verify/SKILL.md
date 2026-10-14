@@ -156,7 +156,7 @@ Ready to commit.
 ## Verification Results
 
 ### Critical (1 issue)
-- State machine totality: hyphegesis/skills/conduct/SKILL.md - Undefined transition when the person withdraws after the method was handed off
+- State machine totality: hyphegesis/skills/conduct/SKILL.md - Undefined transition when the person's words end the run before a method is taken
 
 ### Concerns (2 issues)
 - Categorical terminology: hyphegesis/skills/conduct/SKILL.md - limit/colimit may not match intended semantics
