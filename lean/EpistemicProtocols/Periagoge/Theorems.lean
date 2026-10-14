@@ -40,14 +40,14 @@ theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
 
 /-- A crystallized abstraction comes only from a filled closing — a person's turn, by
     `closed_by_person` — that cites the utterance just fused onto a context `c₀`; the record is
-    `crystallize` on that fused context. -/
+    `crystallize` on that fused context and what collection returned for it. -/
 theorem crystallized_on_recognition (respond session converge : Context P → Response P)
     (c : Context P) (us : List (Utterance P)) (r : CrystallizedAbstraction P)
     (h : induce respond session converge c us = .crystallized r) :
     ∃ (c₀ : Context P) (u : Utterance P) (src : Cite (fuse c₀ u)),
       (∃ ok sup, closing (fuse c₀ u) = .filled () src ok sup) ∧
       src.idx + 1 = (fuse c₀ u).length ∧
-      r = crystallize converge (fuse c₀ u) := by
+      r = crystallize converge (pass (fuse c₀ u)) := by
   induction us generalizing c with
   | nil => simp [induce] at h
   | cons u us ih =>
@@ -66,13 +66,13 @@ theorem crystallized_on_recognition (respond session converge : Context P → Re
           exact ih _ h
 
 /-- A recognition citing the utterance just fused, on a turn that bears on the run, crystallizes
-    the record `crystallize` reads on the context with it. -/
+    the record `crystallize` reads on the context with it and what collection returned for it. -/
 theorem recognition_crystallizes (respond session converge : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (src : Cite (fuse c u)) (hc : ∃ ok sup, closing (fuse c u) = .filled () src ok sup)
     (hi : src.idx + 1 = (fuse c u).length) :
     induce respond session converge c (u :: us) =
-      .crystallized (crystallize converge (fuse c u)) := by
+      .crystallized (crystallize converge (pass (fuse c u))) := by
   obtain ⟨ok, sup, hc⟩ := hc
   simp [induce, hre, hc, hi]
 
