@@ -1,6 +1,6 @@
 # Route — /route
 
-Route the accumulated session context to the core epistemic protocol whose deficit it shows, and invoke it.
+Route the accumulated session context to the core epistemic protocol whose deficit it shows, and bring that protocol in.
 
 > [한국어](./README_ko.md)
 
@@ -23,9 +23,9 @@ The table triggers; it does not match. The two ends of each morphism — the def
 
 | Outcome | When |
 |---------|------|
-| Invoke the protocol, Route's reading shown first | One loaded protocol's fit is plain, the routing policy the skill declares covers the occasion, and no presented gate holds the user's judgment |
-| One pointer line per fit raised now (`↗ /command — reading`) | Several fit, the one fit is not plain, the policy does not cover the occasion, or a gate holds the user's judgment — the holding protocol keeps it, and the line waits in the transcript |
-| Silence | No fit is to be raised now: nothing fits; each fit is one the user already set aside — moved past its pointer, or declined its invocation — with nothing new since, or the user asked not to be pointed at; or, while a gate holds, raising it now would pull the user off that gate more than it helps |
+| Invoke the protocol, Route's reading shown first | The only fit to raise now is plain, the routing policy the skill declares covers the occasion, and no presented gate holds the user's judgment |
+| One pointer line per fit raised now (`↗ /command — reading`) | There are fits to raise now but not all of that holds — several, one not plain, the policy not covering the occasion, or a gate holding the user's judgment — the holding protocol keeps it, and the line waits in the transcript |
+| Silence | No fit to raise now: nothing fits, or none is to be brought up again now — the skill's `Raise` reads what is already before the user, what they turned away, and what they asked not to be raised |
 
 ## What this plugin does not do
 
@@ -65,7 +65,7 @@ These review cases distinguish an unresolved deficit from a settled one. Supply 
 | The same mismatch has a user-selected disposition and the requested adaptation has resolved it; no other deficit remains | Silence is available on the current evidence |
 | One protocol's gate still holds and a different deficit is recognized | Point, never invoke: one line for each fit raised now, while the holding protocol keeps the user's judgment; no automatic switch |
 
-A routing outcome can therefore be silence after a settled mismatch, or a pointer while a gate holds. What may not be missing is the routing decision itself: recognizing a live fit and proceeding directly to an ad hoc question or repair skips it. Work already done at the recognition stands; work that turns on the deficit waits behind that decision; no outcome of `/route` releases or holds back anything beyond that — what rests on a judgment only the user can give waits for it whatever `/route` yields, and what rests on none goes on. These are semantic review cases, not automated behavioral tests; hook tests check delivery of the directive, not whether a model follows it.
+A routing outcome can therefore be silence after a settled mismatch, or a pointer while a gate holds. What may not be missing is the routing decision itself: recognizing a live fit and proceeding directly to an ad hoc question or repair skips it. Work already done at the recognition stands; work that turns on the deficit waits behind that decision, and then until the deficit is taken up — by the invoked protocol, or by the user's own words — while independent work goes on; no outcome of `/route`, silence included, lifts that wait. These are semantic review cases, not automated behavioral tests; hook tests check delivery of the directive, not whether a model follows it.
 
 ## What the hooks inject
 

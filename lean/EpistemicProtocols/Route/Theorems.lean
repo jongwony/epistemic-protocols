@@ -25,44 +25,41 @@ instance : Nonempty Catalog :=
     silence, an invocation of a line, or one pointer line for each fit raised now. -/
 private theorem route_cases (k : Catalog) (c : Context P) :
     (route k c = .silence ∧ raised k c = []) ∨
-    (∃ l, route k c = .invoke l ∧ raised k c ≠ [] ∧ l ∈ raised k c ∧ fits k c = [l] ∧
-      Plain c l ∧ PolicyApplies c ∧ ¬ Holding c) ∨
+    (∃ l, route k c = .invoke l ∧ raised k c = [l] ∧ Plain c l ∧ PolicyApplies c ∧
+      ¬ Holding c) ∨
     (∃ h, route k c = .point (raised k c) h) := by
   unfold route
   split
   · next h => exact Or.inl ⟨rfl, h⟩
   · next l ls h =>
-    by_cases hi : fits k c = [l] ∧ Plain c l ∧ PolicyApplies c ∧ ¬ Holding c
-    · obtain ⟨hf, hp, hq, hh⟩ := hi
-      refine Or.inr (Or.inl ⟨l, ?_, by rw [h]; exact List.cons_ne_nil l ls,
-        by rw [h]; exact List.mem_cons_self .., hf, hp, hq, hh⟩)
-      simp [hf, hp, hq, hh]
+    by_cases hi : ls = [] ∧ Plain c l ∧ PolicyApplies c ∧ ¬ Holding c
+    · obtain ⟨rfl, hp, hq, hh⟩ := hi
+      exact Or.inr (Or.inl ⟨l, by simp [hp, hq, hh], h, hp, hq, hh⟩)
     · refine Or.inr (Or.inr ⟨by rw [h]; exact List.cons_ne_nil l ls, ?_⟩)
       simp only [hi, ↓reduceIte, h]
 
-/-- A pass invokes a line only where that line is the whole of the reading `fits` makes, it is
-    raised now, the fit is plain, the routing policy covers the occasion, and no checkpoint
+/-- A pass invokes a line only where it is the only fit raised now — a fit `fits` reads that
+    `Raise` admits —, the fit is plain, the routing policy covers the occasion, and no checkpoint
     holds. -/
 theorem invoke_requires (k : Catalog) (c : Context P) (l : Line k c)
     (h : route k c = .invoke l) :
-    fits k c = [l] ∧ Raise c l ∧ Plain c l ∧ PolicyApplies c ∧ ¬ Holding c := by
-  rcases route_cases k c with ⟨hs, -⟩ | ⟨l₁, h₁, -, hm, hf, hp, hq, hh⟩ | ⟨_, hpt⟩
+    raised k c = [l] ∧ l ∈ fits k c ∧ Raise c l ∧ Plain c l ∧ PolicyApplies c ∧ ¬ Holding c := by
+  rcases route_cases k c with ⟨hs, -⟩ | ⟨l₁, h₁, hr, hp, hq, hh⟩ | ⟨_, hpt⟩
   · rw [hs] at h; cases h
   · rw [h₁] at h
     cases h
-    have hr : Raise c l := by
-      unfold raised at hm
-      simpa using (List.mem_filter.mp hm).2
-    exact ⟨hf, hr, hp, hq, hh⟩
+    have hm : l ∈ raised k c := by rw [hr]; exact List.mem_singleton_self l
+    unfold raised at hm
+    have hm' := List.mem_filter.mp hm
+    exact ⟨hr, hm'.1, by simpa using hm'.2, hp, hq, hh⟩
   · rw [hpt] at h; cases h
 
 /-- While a checkpoint holds the person's judgment, a pass invokes nothing. -/
 theorem holding_never_invokes (k : Catalog) (c : Context P) (h : Holding c) (l : Line k c) :
-    route k c ≠ .invoke l := fun hi => (invoke_requires k c l hi).2.2.2.2 h
+    route k c ≠ .invoke l := fun hi => (invoke_requires k c l hi).2.2.2.2.2 h
 
-/-- Where two or more fits are read — one whose pointer the person passed over among them — a pass
-    invokes nothing. -/
-theorem several_never_invoke (k : Catalog) (c : Context P) (h : 2 ≤ (fits k c).length)
+/-- Where two or more fits are raised now, a pass invokes nothing. -/
+theorem several_never_invoke (k : Catalog) (c : Context P) (h : 2 ≤ (raised k c).length)
     (l : Line k c) : route k c ≠ .invoke l := by
   intro hi
   rw [(invoke_requires k c l hi).1] at h
@@ -81,16 +78,16 @@ theorem point_is_raised (k : Catalog) (c : Context P) (ls : List (Line k c)) (hn
     unfold raised
     simp [List.mem_filter]
 
-/-- Where no fit is to be raised now — nothing fits, or every fit is a pointer not to be raised
-    again — a pass is silent. -/
+/-- Where no fit is to be raised now — nothing fits, or `Raise` admits none of the fits — a pass
+    is silent. -/
 theorem none_raised_silent (k : Catalog) (c : Context P) (h : ∀ l ∈ fits k c, ¬ Raise c l) :
     route k c = .silence := by
   have hr : raised k c = [] := by
     unfold raised
     exact List.filter_eq_nil_iff.mpr (fun l hl => by simpa using h l hl)
-  rcases route_cases k c with ⟨hs, -⟩ | ⟨_, -, hne, -⟩ | ⟨hne, -⟩
+  rcases route_cases k c with ⟨hs, -⟩ | ⟨_, -, hl, -⟩ | ⟨hne, -⟩
   · exact hs
-  · exact absurd hr hne
+  · rw [hr] at hl; cases hl
   · exact absurd hr hne
 
 /-- Where nothing fits, a pass is silent. -/
@@ -98,14 +95,23 @@ theorem empty_silent (k : Catalog) (c : Context P) (h : fits k c = []) :
     route k c = .silence :=
   none_raised_silent k c (by simp [h])
 
-/-- A pass hands off only through an invocation, and the protocol it names is that invocation's
-    line's entry. -/
+/-- The protocol a pass names for its hand-off comes only from an invocation: `invokedBy` names
+    that invocation's line's entry, and a pointer or silence names none. -/
 theorem only_invoke_dispatches (k : Catalog) (c : Context P) (o : ProtocolInvocation k c)
     (e : Entry) (h : invokedBy o = some e) : ∃ l, o = .invoke l ∧ l.entry = e := by
   cases o with
   | invoke l => simp only [invokedBy, Option.some.injEq] at h; exact ⟨l, rfl, h⟩
   | point ls hne => simp [invokedBy] at h
   | silence => simp [invokedBy] at h
+
+/-- `handoff` dispatches through `.invoke` exactly for an invocation; a pointer and silence hand
+    nothing off. -/
+theorem handoff_only_invoke (k : Catalog) (c : Context P) (o : ProtocolInvocation k c) :
+    (handoff o = some .invoke ↔ ∃ l, o = .invoke l) ∧ (∀ op, handoff o = some op → op = .invoke) := by
+  cases o with
+  | invoke l => exact ⟨⟨fun _ => ⟨l, rfl⟩, fun _ => rfl⟩, fun op h => by simp [handoff, invokedBy] at h; exact h.symm⟩
+  | point ls hne => simp [handoff, invokedBy]
+  | silence => simp [handoff, invokedBy]
 
 /-- The protocol a pass invokes is one of the catalog's entries, and never this skill: its name
     is not the name of the catalog's own entry. -/
