@@ -181,7 +181,7 @@ theorem identified_only_by_person (respond session endReport : Context P → Res
     (h : start respond session endReport c us = .identified v) :
     ∃ (c₀ : Context P) (s : Cite c₀), closing c₀ = some (.identified v) ∧
       s.idx = v.identifiedAt ∧ s.idx + 1 = c₀.length ∧ (c₀[s.idx]'s.lt).origin = .person ∧
-      AnswerSupported c₀ (c₀[s.idx]'s.lt) () := by
+      AnswerSupported c₀ (c₀[s.idx]'s.lt) () ∧ v.dissent = dissent (c₀.take s.idx) := by
   have hc : ∃ c₀ : Context P, closing c₀ = some (.identified v) := by
     unfold start at h
     split at h
@@ -191,8 +191,8 @@ theorem identified_only_by_person (respond session endReport : Context P → Res
       · exact recollect_identified respond session endReport _ us v h
     · cases h
   obtain ⟨c₀, hc₀⟩ := hc
-  obtain ⟨s, h₁, h₂, h₃, h₄, _⟩ := identified_by_person c₀ v hc₀
-  exact ⟨c₀, s, hc₀, h₁, h₂, h₃, h₄⟩
+  obtain ⟨s, h₁, h₂, h₃, h₄, h₅⟩ := identified_by_person c₀ v hc₀
+  exact ⟨c₀, s, hc₀, h₁, h₂, h₃, h₄, h₅⟩
 
 theorem answer_by_person {c : Context P} {s : Cite c}
     (ok : (answerCoord (P := P)).admits s.src) : s.src.val = .person := ok
