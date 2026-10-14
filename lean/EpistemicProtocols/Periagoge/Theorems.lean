@@ -19,85 +19,108 @@ variable {P : Type}
     meaning and exist so that no judgment can assume what nothing inhabits. -/
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
-instance : Nonempty Candidate := ⟨⟨"", "", "", none⟩⟩
-instance : Nonempty Row := ⟨⟨"", ⟨"", ⟨"", ""⟩⟩, ⟨"", ⟨"", ""⟩⟩, ""⟩⟩
-instance : Nonempty Move := ⟨.confirm⟩
-instance : Nonempty CaseUnfolding := ⟨⟨"", "", "", "", ""⟩⟩
+instance : Nonempty Row := ⟨⟨"", [], [], ""⟩⟩
 
-theorem silence (respond declare : Context P → Response P) (c : Context P) :
-    induce respond declare c [] = .holding c := by
+instance : Nonempty Candidate := ⟨⟨"", "", "", [], none⟩⟩
+
+theorem silence (respond session converge : Context P → Response P) (c : Context P) :
+    induce respond session converge c [] = .holding c := by
   simp [induce]
 
-theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t := by
-  let c₁ := c ++ (collect c).map (·.val)
-  exact ⟨(collect c).map (·.val) ++ (passRecord c₁).map (·.val), by simp [pass, c₁]⟩
+/-- An utterance that does not bear on this run joins the context with the session's answer to
+    it; no pass runs and no sheet is drawn. -/
+theorem other_work_draws_nothing (respond session converge : Context P → Response P)
+    (c : Context P) (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
+    induce respond session converge c (u :: us) =
+      induce respond session converge (fuse c u ++ [(session (fuse c u)).val]) us := by
+  simp [induce, h]
 
-theorem crystallized_on_confirm (respond declare : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : CrystallizedAbstraction P)
-    (h : induce respond declare c us = .crystallized r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .confirm ∧ CandidateLive c₁ ∧ Covered c₁ ∧
-      r = crystallize declare c₁ := by
+theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
+  ⟨(collect c).map (·.val), rfl⟩
+
+/-- A crystallized abstraction comes only from a filled closing — a person's turn, by
+    `closed_by_person` — that cites the utterance just fused onto a context `c₀`, where that
+    context, with what collection returned for it, is not `Overturned`; the record is `crystallize`
+    on that fused context and what collection returned for it. -/
+theorem crystallized_on_recognition (respond session converge : Context P → Response P)
+    (c : Context P) (us : List (Utterance P)) (r : CrystallizedAbstraction P)
+    (h : induce respond session converge c us = .crystallized r) :
+    ∃ (c₀ : Context P) (u : Utterance P) (src : Cite (fuse c₀ u)),
+      (∃ ok sup, closing (fuse c₀ u) = .filled () src ok sup) ∧
+      src.idx + 1 = (fuse c₀ u).length ∧
+      ¬ Overturned (pass (fuse c₀ u)) ∧
+      r = crystallize converge (pass (fuse c₀ u)) := by
   induction us generalizing c with
   | nil => simp [induce] at h
   | cons u us ih =>
     simp only [induce] at h
     split at h
     · exact ih _ h
-    · split at h
-      · cases h
-      · cases h
-      · rename_i hk
-        split at h
-        · rename_i hc
-          cases h
-          exact ⟨_, hk, hc.1, hc.2, rfl⟩
-        · exact ih _ h
-      · exact ih _ h
+    · cases hc : closing (fuse c u) with
+      | open_ _ => simp [hc] at h; exact ih _ h
+      | filled a src ok sup =>
+        cases a
+        by_cases hi : src.idx + 1 = (fuse c u).length
+        · by_cases ho : Overturned (pass (fuse c u))
+          · simp [hc, hi, ho] at h
+            exact ih _ h
+          · simp [hc, hi, ho] at h
+            cases h
+            exact ⟨c, u, src, ⟨ok, sup, hc⟩, hi, ho, rfl⟩
+        · simp [hc, hi] at h
+          exact ih _ h
 
-theorem withdrawn_on_stop (respond declare : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : Withdrawn P) (h : induce respond declare c us = .withdrawn r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .stop ∧ r = withdraw declare c₁ := by
-  induction us generalizing c with
-  | nil => simp [induce] at h
-  | cons u us ih =>
-    simp only [induce] at h
-    split at h
-    · exact ih _ h
-    · split at h
-      · rename_i hk
-        cases h
-        exact ⟨_, hk, rfl⟩
-      · cases h
-      · split at h
-        · cases h
-        · exact ih _ h
-      · exact ih _ h
+/-- A recognition citing the utterance just fused, on a turn that bears on the run, where the
+    context with it and what collection returned for it is not `Overturned`, crystallizes the record
+    `crystallize` reads on that context. -/
+theorem recognition_crystallizes (respond session converge : Context P → Response P)
+    (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
+    (src : Cite (fuse c u)) (hc : ∃ ok sup, closing (fuse c u) = .filled () src ok sup)
+    (hi : src.idx + 1 = (fuse c u).length) (hno : ¬ Overturned (pass (fuse c u))) :
+    induce respond session converge c (u :: us) =
+      .crystallized (crystallize converge (pass (fuse c u))) := by
+  obtain ⟨ok, sup, hc⟩ := hc
+  simp [induce, hre, hc, hi, hno]
 
-theorem routed_on_route (respond declare : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (t : String) (r : Withdrawn P)
-    (h : induce respond declare c us = .routed t r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some (.route t) ∧ r = withdraw declare c₁ := by
-  induction us generalizing c with
-  | nil => simp [induce] at h
-  | cons u us ih =>
-    simp only [induce] at h
-    split at h
-    · exact ih _ h
-    · split at h
-      · cases h
-      · rename_i hk
-        cases h
-        exact ⟨_, hk, rfl⟩
-      · split at h
-        · cases h
-        · exact ih _ h
-      · exact ih _ h
+/-- A turn that bears on the run and recognizes nothing — no filled closing cites the utterance
+    just fused, or the context with it and what collection returned for it is `Overturned` —
+    crystallizes nothing at that step: the sheet is drawn again on that context. -/
+theorem unrecognized_draws_again (respond session converge : Context P → Response P)
+    (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
+    (h : (¬ ∃ (src : Cite (fuse c u)), ∃ ok sup, closing (fuse c u) = .filled () src ok sup ∧
+            src.idx + 1 = (fuse c u).length) ∨
+         Overturned (pass (fuse c u))) :
+    induce respond session converge c (u :: us) =
+      induce respond session converge
+        (pass (fuse c u) ++ [(respond (pass (fuse c u))).val]) us := by
+  rcases h with hn | ho
+  · cases hc : closing (fuse c u) with
+    | open_ _ => simp [induce, hre, hc]
+    | filled a src ok sup =>
+      cases a
+      have hi : src.idx + 1 ≠ (fuse c u).length := fun hi => hn ⟨src, ok, sup, hc, hi⟩
+      simp [induce, hre, hc, hi]
+  · simp [induce, hre, ho]
 
-theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
-    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
+/-- A closing is a filled occurrence that cites a turn the person sent. -/
+theorem closed_by_person (c : Context P) (h : filledValue (closing c) = some ()) :
+    ∃ src ok sup, closing c = .filled () src ok sup ∧ (c[src.idx]'src.lt).origin = .person := by
   cases hc : closing c with
   | open_ _ => simp [hc, filledValue] at h
-  | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
+  | filled a src ok sup =>
+    cases a
+    exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
+
+/-- A reading's setting-aside is a filled occurrence that cites a turn the person sent. -/
+theorem set_aside_by_person (c : Context P) (r : Reading) (g : String)
+    (h : filledValue (setAside c r) = some g) :
+    ∃ src ok sup, setAside c r = .filled g src ok sup ∧ (c[src.idx]'src.lt).origin = .person := by
+  cases hc : setAside c r with
+  | open_ _ => simp [hc, filledValue] at h
+  | filled a src ok sup =>
+    simp only [hc, filledValue, Option.some.injEq] at h
+    subst h
+    exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
 
 theorem live_leaves_only_by_person (c : Context P) (r : Reading) (hr : r ∈ readings c)
     (hn : r ∉ live c) : ∃ g, filledValue (setAside c r) = some g := by
@@ -108,39 +131,86 @@ theorem live_leaves_only_by_person (c : Context P) (r : Reading) (hr : r ∈ rea
   | none => simp_all
   | some g => exact ⟨g, rfl⟩
 
+/-- A reading still in play is not among the readings the person set aside. -/
+theorem live_not_set_aside (c : Context P) (r : Reading) (h : r ∈ live c) :
+    r ∉ (setAsideReadings c).map Prod.fst := by
+  simp only [live, List.mem_filter, Option.isNone_iff_eq_none] at h
+  simp only [setAsideReadings, List.mem_map, List.mem_filterMap, not_exists, not_and]
+  intro p ⟨r', _, hp⟩ hpr
+  cases hv : filledValue (setAside c r') with
+  | none => simp [hv] at hp
+  | some g =>
+    simp only [hv, Option.map_some, Option.some.injEq] at hp
+    subst hp hpr
+    simp [hv] at h
+
 theorem live_reading_crossed (c : Context P) (r : Reading) (h : r ∈ live c) :
     (r, row c r) ∈ crossView c := by
   simp only [crossView, List.mem_map]
   exact ⟨r, h, rfl⟩
 
+theorem brought_cases_unfolded (c : Context P) (i : Instance) (h : i ∈ brought c) :
+    (i, unfoldCase c i) ∈ casesSection c := by
+  simp only [casesSection, List.mem_map]
+  exact ⟨i, List.mem_eraseDups.mpr (List.mem_append_left _ (List.mem_append_left _ h)), rfl⟩
+
 theorem row_cases_unfolded (c : Context P) (i : Instance) (h : i ∈ rowCases c) :
     (i, unfoldCase c i) ∈ casesSection c := by
   simp only [casesSection, List.mem_map]
-  exact ⟨i, h, rfl⟩
+  exact ⟨i, List.mem_eraseDups.mpr (List.mem_append_left _ (List.mem_append_right _ h)), rfl⟩
 
-theorem shown_candidate_live (c : Context P) (k : Candidate) (h : shownCandidate c = some k) :
-    k.reading ∈ live c := by
-  unfold shownCandidate at h
-  split at h
-  · rename_i hl
-    cases h
-    exact hl
-  · cases h
+theorem found_cases_unfolded (c : Context P) (i : Instance) (h : i ∈ found c) :
+    (i, unfoldCase c i) ∈ casesSection c := by
+  simp only [casesSection, List.mem_map]
+  exact ⟨i, List.mem_eraseDups.mpr (List.mem_append_right _ h), rfl⟩
 
-theorem exhausted_when_none_live (c : Context P) (h : live c = []) : focus c = .exhausted := by
-  simp [focus, h]
+/-- A line's standing is a filled occurrence that cites a turn the person sent: no value of yours
+    stands set or adopted on your own reading. -/
+theorem standing_by_person (c : Context P) (e : Entry) (s : Standing)
+    (h : standing c e = some s) :
+    ∃ src ok sup, standingOcc c e = .filled s src ok sup ∧
+      (c[src.idx]'src.lt).origin = .person := by
+  unfold standing at h
+  cases hc : standingOcc c e with
+  | open_ _ => simp [hc, filledValue] at h
+  | filled a src ok sup =>
+    simp only [hc, filledValue, Option.some.injEq] at h
+    subst h
+    exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
 
-theorem nothing_adopted_before_confirm (c : Context P) (p : Provenance) (h : p ∈ provenance c) :
-    p.standing ≠ .adopted := by
-  simp only [provenance, List.mem_map] at h
-  obtain ⟨e, _, rfl⟩ := h
-  simp only [standing]
-  split <;> simp
+/-- Every provenance line of a crystallized record is one of the lines `entries` reads on the
+    context the record is read on. -/
+theorem record_lines_from_entries (converge : Context P → Response P) (c : Context P)
+    (p : Provenance) (hp : p ∈ (crystallize converge c).provenance) : p.entry ∈ entries c := by
+  simp only [crystallize, provenanceOf, List.mem_map] at hp
+  obtain ⟨e, he, rfl⟩ := hp
+  exact he
 
-theorem set_aside_by_person {c : Context P} {r : Reading} {s : Cite c}
-    (ok : (setAsideCoord (P := P) r).admits s.src) : s.src.val = .person := ok
+/-- Every line of a crystallized record that carries a standing has it from a filled occurrence in
+    the context the record is read on, citing a turn the person sent: the record gives no line a
+    standing that no person's turn reached. -/
+theorem record_standing_by_person (converge : Context P → Response P) (c : Context P)
+    (p : Provenance) (hp : p ∈ (crystallize converge c).provenance) (st : Standing)
+    (hs : p.standing = some st) :
+    ∃ src ok sup, standingOcc c p.entry = .filled st src ok sup ∧
+      (c[src.idx]'src.lt).origin = .person := by
+  simp only [crystallize, provenanceOf, List.mem_map] at hp
+  obtain ⟨e, _, rfl⟩ := hp
+  exact standing_by_person c e st hs
 
-theorem disposed_by_person {c : Context P} {i : OpenItem} {s : Cite c}
-    (ok : (dispositionCoord (P := P) i).admits s.src) : s.src.val = .person := ok
+/-- Words an open item carries in the open trace are a filled occurrence, on the context the
+    words are read on, that cites a turn the person sent. -/
+theorem open_words_by_person (c : Context P) (t : List Reading) (i : OpenItem) (w : String)
+    (h : (i, some w) ∈ openTrace c t) :
+    ∃ src ok sup, openWords c i = .filled w src ok sup ∧
+      (c[src.idx]'src.lt).origin = .person := by
+  simp only [openTrace, List.mem_map, Prod.mk.injEq] at h
+  obtain ⟨j, _, rfl, hw⟩ := h
+  cases hc : openWords c j with
+  | open_ _ => simp [hc, filledValue] at hw
+  | filled a src ok sup =>
+    simp only [hc, filledValue, Option.some.injEq] at hw
+    subst hw
+    exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
 
 end Periagoge
