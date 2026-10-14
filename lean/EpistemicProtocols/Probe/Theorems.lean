@@ -70,61 +70,83 @@ theorem invocation_activates (catalog : Catalog) (respond : Catalog → Context 
   simp only [ha, ↓reduceIte]
   exact probe_ne_notActivated catalog respond session c _ _
 
-theorem answer_by_person {c : Context P} {s : Cite c}
-    (ok : (answerCoord (P := P)).admits s.src) : s.src.val = .person := ok
+private theorem closing_cases (catalog : Catalog) (c : Context P) (r : RecognizedSituation P)
+    (h : closing catalog c = some r) :
+    ∃ s : Cite c, s.idx + 1 = c.length ∧ (c[s.idx]'s.lt).origin = .person ∧
+      AnswerSupported c (c[s.idx]'s.lt) r.answer ∧
+      r = ⟨c, r.answer, shownIn catalog c, dissent c, s.idx⟩ ∧
+      (∀ k, r.answer = .shown k → k ∈ shownIn catalog c ∧ ∀ e, k.skill = some e → e ∈ catalog) ∧
+      (r.answer = .noneShown → shownIn catalog c ≠ []) := by
+  unfold closing at h
+  cases hA : answer c with
+  | open_ x => rw [hA] at h; simp at h
+  | filled a s ok sup =>
+    rw [hA] at h
+    simp only at h
+    split at h
+    · next hl =>
+      cases a with
+      | shown k =>
+        simp only at h
+        split at h
+        · next hg =>
+          cases h
+          refine ⟨s, hl, s.ok.trans ok, sup, rfl, ?_, ?_⟩
+          · intro k₁ hk
+            simp only [Answer.shown.injEq] at hk
+            subst hk
+            exact hg
+          · intro hn; cases hn
+        · cases h
+      | noneShown =>
+        simp only at h
+        split at h
+        · cases h
+        · next hn =>
+          cases h
+          refine ⟨s, hl, s.ok.trans ok, sup, rfl, ?_, ?_⟩
+          · intro k₁ hk; cases hk
+          · intro _; exact hn
+      | reworded t =>
+        simp only [Option.some.injEq] at h
+        subst h
+        refine ⟨s, hl, s.ok.trans ok, sup, rfl, ?_, ?_⟩
+        · intro k₁ hk; cases hk
+        · intro hn; cases hn
+    · cases h
 
-/-- A closing rests on the person's turn: the recognition it emits is read from the context it
-    closes on, and cites a turn the person sent that supports its answer. -/
+/-- A closing rests on the person's latest turn: the recognition it emits is read from the context
+    it closes on, and cites that context's last turn, which the person sent and which supports its
+    answer. -/
 theorem closing_by_person (catalog : Catalog) (c : Context P) (r : RecognizedSituation P)
     (h : closing catalog c = some r) :
-    ∃ s : Cite c, r.context = c ∧ s.idx = r.recognizedAt ∧ (c[s.idx]'s.lt).origin = .person ∧
-      AnswerSupported c (c[s.idx]'s.lt) r.answer := by
-  unfold closing at h
-  cases hA : answer c with
-  | open_ x => rw [hA] at h; simp at h
-  | filled a s ok sup =>
-    rw [hA] at h
-    cases a with
-    | shown k =>
-      simp only at h
-      split at h
-      · cases h; exact ⟨s, rfl, rfl, s.ok.trans ok, sup⟩
-      · cases h
-    | noneShown =>
-      simp only at h
-      split at h
-      · cases h
-      · cases h; exact ⟨s, rfl, rfl, s.ok.trans ok, sup⟩
-    | reworded t =>
-      simp only [Option.some.injEq] at h
-      subst h; exact ⟨s, rfl, rfl, s.ok.trans ok, sup⟩
+    ∃ s : Cite c, r.context = c ∧ s.idx = r.recognizedAt ∧ s.idx + 1 = c.length ∧
+      (c[s.idx]'s.lt).origin = .person ∧ AnswerSupported c (c[s.idx]'s.lt) r.answer := by
+  obtain ⟨s, hl, ho, hs, hr, -, -⟩ := closing_cases catalog c r h
+  exact ⟨s, congrArg RecognizedSituation.context hr,
+    (congrArg RecognizedSituation.recognizedAt hr).symm, hl, ho, hs⟩
 
-private theorem closing_shown (catalog : Catalog) (c : Context P) (r : RecognizedSituation P)
-    (k : Candidate) (h : closing catalog c = some r) (hk : r.answer = .shown k) :
-    k ∈ shownIn catalog c ∧ ∀ e, k.skill = some e → e ∈ catalog := by
-  unfold closing at h
-  cases hA : answer c with
-  | open_ x => rw [hA] at h; simp at h
-  | filled a s ok sup =>
-    rw [hA] at h
-    cases a with
-    | shown k₁ =>
-      simp only at h
-      split at h
-      · next hg =>
-        cases h
-        simp only [Answer.shown.injEq] at hk
-        subst hk
-        exact hg
-      · cases h
-    | noneShown =>
-      simp only at h
-      split at h
-      · cases h
-      · cases h; cases hk
-    | reworded t =>
-      simp only [Option.some.injEq] at h
-      subst h; cases hk
+/-- `noneShown` closes only where the round it answered offered candidates. -/
+theorem none_shown_after_candidates (catalog : Catalog) (c : Context P)
+    (r : RecognizedSituation P) (h : closing catalog c = some r) (hn : r.answer = .noneShown) :
+    r.shown ≠ [] := by
+  obtain ⟨_, -, -, -, hr, -, hne⟩ := closing_cases catalog c r h
+  rw [congrArg RecognizedSituation.shown hr]
+  exact hne hn
+
+/-- After a short round only the person's own words close, and the recognition carries no shown
+    candidates: it claims no comparison took place. -/
+theorem after_short_only_reworded (catalog : Catalog) (c : Context P) (r : RecognizedSituation P)
+    (n : Nat) (said : String) (h : closing catalog c = some r)
+    (hp : presented catalog c = some ⟨n, .short said⟩) :
+    (∃ t, r.answer = .reworded t) ∧ r.shown = [] := by
+  obtain ⟨_, -, -, -, hr, hk, hne⟩ := closing_cases catalog c r h
+  have he : shownIn catalog c = [] := by simp [shownIn, hp, Presentation.shown]
+  refine ⟨?_, by rw [congrArg RecognizedSituation.shown hr]; exact he⟩
+  cases ha : r.answer with
+  | shown k => have := (hk k ha).1; rw [he] at this; cases this
+  | noneShown => exact absurd he (hne ha)
+  | reworded t => exact ⟨t, rfl⟩
 
 private theorem probe_recognized (catalog : Catalog) (respond : Catalog → Context P → Response P)
     (session : Context P → Response P) (r : RecognizedSituation P) :
@@ -170,12 +192,13 @@ theorem recognized_only_unowed (catalog : Catalog) (respond : Catalog → Contex
 
 /-- Every situation a run recognizes was recognized by the person: a recognized outcome comes only
     from a closing — at any depth of the recursion, never from a close of yours — and that closing
-    cites a turn the person sent that supports its answer. -/
+    cites the last turn of the context it closes on, the person's latest utterance, which supports
+    its answer. -/
 theorem recognized_only_by_person (catalog : Catalog) (respond : Catalog → Context P → Response P)
     (session : Context P → Response P) (c : Context P) (us : List (Utterance P))
     (r : RecognizedSituation P) (h : start catalog respond session c us = .recognized r) :
     ∃ (c₀ : Context P) (s : Cite c₀), closing catalog c₀ = some r ∧ r.context = c₀ ∧
-      s.idx = r.recognizedAt ∧ (c₀[s.idx]'s.lt).origin = .person ∧
+      s.idx = r.recognizedAt ∧ s.idx + 1 = c₀.length ∧ (c₀[s.idx]'s.lt).origin = .person ∧
       AnswerSupported c₀ (c₀[s.idx]'s.lt) r.answer := by
   obtain ⟨c₀, hc₀, _⟩ := start_recognized catalog respond session c us r h
   obtain ⟨s, hs⟩ := closing_by_person catalog c₀ r hc₀
@@ -183,17 +206,19 @@ theorem recognized_only_by_person (catalog : Catalog) (respond : Catalog → Con
 
 private theorem shown_in_alternatives (catalog : Catalog) (c : Context P) (k : Candidate)
     (h : k ∈ shownIn catalog c) :
-    ∃ (ls : List (Line c)) (two : 2 ≤ ls.length)
+    ∃ (n : Nat) (ls : List (Line (c.take n))) (two : 2 ≤ ls.length)
       (distinct : (ls.map (·.candidate.situation)).Nodup),
-      presented catalog c = some (.alternatives ls two distinct) ∧ k ∈ ls.map (·.candidate) := by
+      presented catalog c = some ⟨n, .alternatives ls two distinct⟩ ∧
+      k ∈ ls.map (·.candidate) := by
   unfold shownIn at h
   cases hp : presented catalog c with
   | none => rw [hp] at h; simp at h
   | some p =>
     rw [hp] at h
+    obtain ⟨n, p⟩ := p
     cases p with
     | alternatives ls two distinct =>
-      exact ⟨ls, two, distinct, rfl, by simpa [Presentation.shown] using h⟩
+      exact ⟨n, ls, two, distinct, rfl, by simpa [Presentation.shown] using h⟩
     | short _ => simp [Presentation.shown] at h
 
 private theorem other_member {α : Type} (l : List α) (k : α) (hd : l.Nodup)
@@ -208,26 +233,28 @@ private theorem other_member {α : Type} (l : List α) (k : α) (hd : l.Nodup)
     · exact ⟨b, by simp, fun e => hab (ha.trans e.symm)⟩
     · exact ⟨a, by simp, ha⟩
 
-/-- A shown candidate is recognized only from a round that offered it beside at least one line
-    describing another situation: the closing that took it read a presentation of two or more
-    lines, no two describing one situation, the taken candidate among them, each line resting on
-    at least one cited turn. -/
+/-- A shown candidate is recognized only from a round that offered it beside a line with other
+    situation text: the closing that took it read a presentation, on the context it was shown on,
+    of two or more lines, no two with the same situation text, the taken candidate among them,
+    each line resting on at least one turn of that context. Whether the texts describe different
+    situations is your judgment in `respond`. -/
 theorem shown_only_from_alternatives (catalog : Catalog)
     (respond : Catalog → Context P → Response P) (session : Context P → Response P)
     (c : Context P) (us : List (Utterance P)) (r : RecognizedSituation P) (k : Candidate)
     (h : start catalog respond session c us = .recognized r) (hk : r.answer = .shown k) :
-    ∃ (c₀ : Context P) (ls : List (Line c₀)) (two : 2 ≤ ls.length)
+    ∃ (c₀ : Context P) (n : Nat) (ls : List (Line (c₀.take n))) (two : 2 ≤ ls.length)
       (distinct : (ls.map (·.candidate.situation)).Nodup),
-      closing catalog c₀ = some r ∧ presented catalog c₀ = some (.alternatives ls two distinct) ∧
+      closing catalog c₀ = some r ∧
+      presented catalog c₀ = some ⟨n, .alternatives ls two distinct⟩ ∧
       k ∈ ls.map (·.candidate) ∧ (∃ l ∈ ls, l.candidate.situation ≠ k.situation) ∧
       ∀ l ∈ ls, l.grounds ≠ [] := by
   obtain ⟨c₀, hc₀, _⟩ := start_recognized catalog respond session c us r h
-  obtain ⟨hin, _⟩ := closing_shown catalog c₀ r k hc₀ hk
-  obtain ⟨ls, two, distinct, hp, hm⟩ := shown_in_alternatives catalog c₀ k hin
+  obtain ⟨_, -, -, -, -, hsk, -⟩ := closing_cases catalog c₀ r hc₀
+  obtain ⟨n, ls, two, distinct, hp, hm⟩ := shown_in_alternatives catalog c₀ k (hsk k hk).1
   have hlen : 2 ≤ (ls.map (·.candidate.situation)).length := by simpa using two
   obtain ⟨s₂, hs₂, hne⟩ := other_member _ k.situation distinct hlen
   obtain ⟨l, hl, rfl⟩ := List.mem_map.mp hs₂
-  exact ⟨c₀, ls, two, distinct, hc₀, hp, hm, ⟨l, hl, hne⟩, fun l _ => l.grounded⟩
+  exact ⟨c₀, n, ls, two, distinct, hc₀, hp, hm, ⟨l, hl, hne⟩, fun l _ => l.grounded⟩
 
 /-- The next move is exactly what was shown and taken: a shown candidate carries the skill its line
     showed, and the person's own words and none shown carry none. -/
@@ -266,7 +293,8 @@ theorem next_move_in_catalog (catalog : Catalog) (respond : Catalog → Context 
   cases ha : r.answer with
   | shown k =>
     rw [ha] at he
-    exact (closing_shown catalog c₀ r k hc₀ ha).2 e he
+    obtain ⟨_, -, -, -, -, hsk, -⟩ := closing_cases catalog c₀ r hc₀
+    exact (hsk k ha).2 e he
   | reworded t => rw [ha] at he; cases he
   | noneShown => rw [ha] at he; cases he
 

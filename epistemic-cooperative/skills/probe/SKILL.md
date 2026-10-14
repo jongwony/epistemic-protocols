@@ -166,8 +166,8 @@ structure Line (c : Context P) where
 
 /-- What a round showed. -/
 inductive Presentation (c : Context P)
-  /-- two or more candidates side by side, no two describing one situation, each line with its
-      grounds, its rules-out condition, and its `ending` -/
+  /-- two or more candidates side by side, no two lines with the same situation text, each line
+      with its grounds, its rules-out condition, and its `ending` -/
   | alternatives (lines : List (Line c)) (two : 2 ≤ lines.length)
       (distinct : (lines.map (·.candidate.situation)).Nodup)
   /-- the ground carried fewer than two: said as such, with what it does carry and what more of the
@@ -179,14 +179,14 @@ def Presentation.shown {c : Context P} : Presentation c → List Candidate
   | .alternatives ls _ _ => ls.map (·.candidate)
   | .short _             => []
 
-/-- **Your reading**: your latest presentation as it was shown, read from that response — each
-    ground citing a turn that stood when the round was shown, each skill as the catalog holds it;
+/-- **Your reading**: your latest presentation as it was shown, read from that response, on the
+    context it was shown on — the first `n` turns of `c` — each skill as the catalog holds it;
     what was shown, not what you meant to show; `none` before any. -/
-axiom presented : Catalog → (c : Context P) → Option (Presentation c)
+axiom presented : Catalog → (c : Context P) → Option (Σ n : Nat, Presentation (c.take n))
 
 /-- The candidates the latest round offered to take. -/
 def shownIn (catalog : Catalog) (c : Context P) : List Candidate :=
-  ((presented catalog c).map (·.shown)).getD []
+  ((presented catalog c).map (·.2.shown)).getD []
 
 /-- **Your record**: your contrary grounds, each with what it bears on and what it rests on —
     against a candidate, or against the person's own wording — attached where the person
@@ -204,13 +204,13 @@ inductive Answer
   /-- the person says none of the shown candidates is theirs -/
   | noneShown
 
-/-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round
-    recognizes nothing — recognizes the situation this way, read whole against the context as it
-    now stands. A candidate is taken where the turn says it is theirs or goes on with it as theirs;
-    a rewording stands as they said it, beside any contrary ground and never replaced by yours, and
-    "none of these" together with what is stuck in their own words is a rewording. Uncertainty, a
-    hypothetical use, a question about a candidate, the invocation of this probe alone, and
-    silence recognize nothing, and your readings, scores, and rankings fill nothing. -/
+/-- **Your judgment**: the cited turn recognizes the situation this way, read whole against the
+    context as it now stands. A candidate is taken where the turn says it is theirs or goes on
+    with it as theirs; a rewording stands as they said it, beside any contrary ground and never
+    replaced by yours, and "none of these" together with what is stuck in their own words is a
+    rewording. Uncertainty, a hypothetical use, a question about a candidate, the invocation of
+    this probe alone, and silence recognize nothing, and your readings, scores, and rankings fill
+    nothing. -/
 axiom AnswerSupported : Context P → Turn P → Answer → Prop
 
 /-- Only the person recognizes. -/
@@ -236,7 +236,8 @@ def Activated (c : Context P) : Prop := Invoked c ∨ DeficitUnrecognized c
     judged on what the whole utterance does, read on the context with it. An utterance that ends
     the probe or turns to other work leaves the run as it stands: the session answers it, that
     answer stays in the context, no round of this run is raised, and nothing closes. Once the
-    person has ended the probe, a later utterance bears on this run only where it reopens it. -/
+    person has ended the probe, or passed over a round they did not ask for, a later utterance
+    bears on this run only where it reopens it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your reading**: a turn of the person's is still owed before a recognition closes — read on
@@ -294,8 +295,9 @@ run is read by the next pass.
 /-- **Your collection** for one pass. The situation is the current session, and the files and
     records the person pointed at in it are read in the pass; a read beyond them — earlier
     sessions, or files and records they have not pointed at — is offered in a round with what it
-    would read, and runs only once a person's turn admits it. Each read returns as an evidence
-    turn; nothing is written. -/
+    would read, and runs only once a person's turn admits it. What the context already holds from
+    a read is not read again unless an utterance or evidence says it changed. Each read returns as
+    an evidence turn; nothing is written. -/
 axiom gathered : Context P → List (Evidence P)
 
 def pass (c : Context P) : Context P := c ++ (gathered c).map (·.val)
@@ -309,15 +311,18 @@ def closing (catalog : Catalog) (c : Context P) : Option (RecognizedSituation P)
   let shown := shownIn catalog c
   match answer c with
   | .open_ _ => none
-  | .filled (.shown k) s _ _ =>
-    if k ∈ shown ∧ ∀ e, k.skill = some e → e ∈ catalog then
-      some ⟨c, .shown k, shown, dissent c, s.idx⟩
+  | .filled a s _ _ =>
+    if s.idx + 1 = c.length then
+      match a with
+      | .shown k =>
+        if k ∈ shown ∧ ∀ e, k.skill = some e → e ∈ catalog then
+          some ⟨c, .shown k, shown, dissent c, s.idx⟩
+        else none
+      | .noneShown =>
+        if shown = [] then none
+        else some ⟨c, .noneShown, shown, dissent c, s.idx⟩
+      | .reworded t => some ⟨c, .reworded t, shown, dissent c, s.idx⟩
     else none
-  | .filled .noneShown s _ _ =>
-    if shown = [] then none
-    else some ⟨c, .noneShown, shown, dissent c, s.idx⟩
-  | .filled (.reworded t) s _ _ =>
-    some ⟨c, .reworded t, shown, dissent c, s.idx⟩
 
 open Classical in
 /-- `respond` presents the round a pass leaves, as a horizon the person may take, reword, or set
@@ -326,7 +331,8 @@ open Classical in
     each line its candidate's description of the situation, then what it rests on, each ground
     with the turn it cites, then the condition that would rule it out, then the skill that takes
     it, saying that taking the candidate runs that skill, and that skill's declared end where its
-    description declares one — after the evidence, once per skill, and never as evidence of fit.
+    description declares one — after the evidence, never as evidence of fit, and reading "as
+    above" on a later line with the same skill.
     Where it carries fewer: say so, with what it does carry and what more of the situation, or
     which read beyond the session, would help. Every round shows the contrary grounds you hold
     and, where a turn of the person's is owed, what it is owed for; then the turn yields to a free

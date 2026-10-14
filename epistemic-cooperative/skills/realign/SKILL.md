@@ -254,7 +254,7 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
       disposition: Optional(A), active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Realign composes with `/probe` upstream when the candidate a person takes there shows /realign as its skill. Realign composes with `/induce` laterally when an in-conversation abstraction crystallization references the project guide direction (the crystallized abstraction may be inscribed to the direction line via a subsequent /realign invocation). Composition targets are determined at runtime by disposition and session context, not by a pre-committed structural registry — Realign is a utility skill, not a core protocol.
+*: product — (D₁ × D₂) → (R₁ × R₂). Realign composes with `/probe` upstream when the candidate a person takes there shows /realign as its skill. Realign composes with `/induce` laterally when an in-conversation abstraction crystallization references the project guide direction (the crystallized abstraction may be inscribed to the direction line via a subsequent /realign invocation). Composition targets are determined at runtime by the person's recognition and session context, not by a pre-committed structural registry — Realign is a utility skill, not a core protocol.
 ```
 
 ## Storage Reference
