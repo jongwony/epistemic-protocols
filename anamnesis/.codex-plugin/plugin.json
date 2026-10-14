@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Anamnesis",
-    "shortDescription": "Recognize the past you reached for — a session, line of work, or concept — in a story on records you can reopen: it took place, not that it still holds — /recollect",
-    "longDescription": "Recognize the past you reached for — a session, line of work, or concept — in a story on records you can reopen: it took place, not that it still holds — /recollect",
+    "shortDescription": "Recognize the past you reached for — a session, line of work, or concept — in a story on records you can reopen: it took place, not that it still holds — /recollect (ἀνάμνησις: a recollecting)",
+    "longDescription": "Recognize the past you reached for — a session, line of work, or concept — in a story on records you can reopen: it took place, not that it still holds — /recollect (ἀνάμνησις: a recollecting)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

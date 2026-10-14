@@ -133,7 +133,7 @@ theorem identified_by_person (c : Context P) (v : RecalledContext P)
     (h : closing c = some (.identified v)) :
     ∃ s : Cite c, s.idx = v.identifiedAt ∧ s.idx + 1 = c.length ∧
       (c[s.idx]'s.lt).origin = .person ∧ AnswerSupported c (c[s.idx]'s.lt) () ∧
-      v.dissent = dissent (c.take s.idx) := by
+      v.dissent = dissent (c.take s.idx) v.recognizable := by
   unfold closing at h
   cases hA : answer c with
   | open_ x =>
@@ -181,7 +181,7 @@ theorem identified_only_by_person (respond session endReport : Context P → Res
     (h : start respond session endReport c us = .identified v) :
     ∃ (c₀ : Context P) (s : Cite c₀), closing c₀ = some (.identified v) ∧
       s.idx = v.identifiedAt ∧ s.idx + 1 = c₀.length ∧ (c₀[s.idx]'s.lt).origin = .person ∧
-      AnswerSupported c₀ (c₀[s.idx]'s.lt) () ∧ v.dissent = dissent (c₀.take s.idx) := by
+      AnswerSupported c₀ (c₀[s.idx]'s.lt) () ∧ v.dissent = dissent (c₀.take s.idx) v.recognizable := by
   have hc : ∃ c₀ : Context P, closing c₀ = some (.identified v) := by
     unfold start at h
     split at h

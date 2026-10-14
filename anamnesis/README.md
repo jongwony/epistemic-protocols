@@ -16,8 +16,6 @@ AI systems often discard vague recall signals (`RecallAmbiguous`) — the user s
 
 **Source-grounded recognition**: AI reads the cue out of the utterance and the accumulated context — the past meant, the whole it names, and the axes it can be reached along (a time, a person, an artifact, an identifier, a coined term) — and follows those axes to the records that may bear it. It opens each member of the leading candidate at the span the cue reaches — for an artifact, the change history of that span — and tells the story in the records' words, each sentence resting on an opened record with its speaker kept and its source and resume handle given, and yields the turn. The user identifies it — saying so, or going on with it as the past they meant — or adds to the cue in their own words and the search runs again; no number of corrections ends the recall. An index's gist is a cue that wakes recall, never evidence of it; the opened record is the evidence; the identification is the user's.
 
-Once it has run, you recognize the past you were reaching for — a conversation, or a line of work, topic, or settled concept across several — in a story whose every sentence rests on a record you can reopen, knowing it took place, not that it still holds.
-
 Claude Code and Codex records are searched together when both are available, starting from the current configuration's root; another root — an older configuration moved aside — is searched when the recall points at it, and every candidate keeps its runtime and root label. Reading named spans of named records and finding candidates across a population already bounded run without asking; a search whose extent passes that boundary is offered with its cost, and runs only on the user's word.
 
 ### Codex capture lifecycle
