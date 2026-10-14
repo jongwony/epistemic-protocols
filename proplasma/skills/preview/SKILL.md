@@ -481,7 +481,7 @@ def grounding : Op → Annot × String
   | .cleanupVerify     => (.observe, "environment run, artifact read: the verification step closing the same sequence — each path verified absent after its destruction; a disposition observed per probe, and a probe no observation reached declared as not verified; a probe still present is declared with the path to remove by hand, and the direction the person settled stands")
   | .assemble          => (.sense, "Internal analysis: the terminal record built from the harvest and the completed discard trace — after cleanup, never before")
   | .converge          => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with DirectionalContrast")
-  | .seam              => (.interaction .extension, "after a constitution or not activating, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; otherwise, as session text, the `notActivated` reading is handed on after not activating, and after a constitution the record, the dissent travelling in it; every Constitution gate inside this protocol and the next fires unchanged")
+  | .seam              => (.interaction .extension, "after a constitution or not activating, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; otherwise, after a constitution, the record is handed on as session text, the dissent travelling in it; every Constitution gate inside this protocol and the next fires unchanged")
 
 /-- The operations that write a fan's probes, by tier: a Mockup through `.instantiate`, and
     `.instantiateDelegate` where delegated; a Vignette writes no file. -/
