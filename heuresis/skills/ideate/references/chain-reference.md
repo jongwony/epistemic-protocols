@@ -2,7 +2,8 @@
 
 Read when the request names material — a prior protocol's output in the session, or a record
 outside it read by a tool — once that material has folded in, before the first pass; and when
-the request resumes an earlier field, before its map is redrawn. This reference does not bind
+the request resumes an earlier field, before its map is redrawn or before the pass when the
+resuming request opens frames. This reference does not bind
 on `Entry = Seeded` generally — only when the entry carries named material.
 
 Named material folds in as seeds and is promoted to candidates on the first pass exactly like

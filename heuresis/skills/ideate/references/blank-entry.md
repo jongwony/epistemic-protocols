@@ -1,6 +1,7 @@
 # Blank entry — frame-first gate before any concrete candidate
 
-Read when `Entry = Blank` — before anything is presented to the user. This is the
+Read when a frame map is to be presented — on `Entry = Blank` before anything is presented
+to the user, or when a held frame map is resumed. This is the
 frame-first law: the presentation template, the frame map's answer, and the
 requirement they jointly satisfy.
 
@@ -30,5 +31,6 @@ rest stay on the map as unexplored. An idea the user gives here is their own dir
 example of yours: it lands as their candidate under the frame it fits, and frame-first is
 untouched. An answer on the map that opens nothing presents the map again rather than running
 an empty pass; where it asks to take the field while no candidate exists, the map says plainly
-that there is nothing to take yet. Leaving, or turning to other work, leaves the run holding
-with no map redrawn.
+that there is nothing to take yet. A turn that only leaves or only turns to other work gets
+the session's answer and no map; what it says beside about the field stands and shows as a
+change on the next map drawn.

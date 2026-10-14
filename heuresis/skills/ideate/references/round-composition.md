@@ -8,7 +8,7 @@ User-facing emit (round presentations, frame maps, convergence traces, gate opti
 
 ## When some of what is in view belongs to a later round or a trace rather than this one
 
-Each round redraws the whole field as one map, as `respond` in SKILL.md lays it out: every change since the map the user answered shows in full, while earlier rounds compress to branches and counts when the map grows large. Keep the next-move implication beside the map (which frames remain to open, where a branch could be dug, what is parked, what signals remain unaddressed, your contrary grounds, whether to continue or take the field) so the user can recognize the decision without context-switching.
+The map is the one `respond` in SKILL.md lays out. Keep the next-move implication beside the map (which frames remain to open, where a branch could be dug, what is parked, what signals remain unaddressed, your contrary grounds, whether to continue or take the field) so the user can recognize the decision without context-switching.
 
 ## When this protocol's own phases bear on where a sentence sits relative to a gate
 
