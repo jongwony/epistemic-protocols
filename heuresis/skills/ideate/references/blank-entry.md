@@ -1,11 +1,11 @@
 # Blank entry — frame-first gate before any concrete candidate
 
-Read when a frame map is to be presented — on `Entry = Blank` before anything is presented
-to the user, or when a held frame map is resumed. This is the frame-first law: the frame map's
-template and the requirement it satisfies. What each answer opens is `targets` in SKILL.md.
+Read whenever the gate is the frame map — no frame opened yet — before it is presented. This
+is the frame-first law: the frame map's template and the requirement it satisfies. What each
+answer opens is `targets` in SKILL.md.
 
-On a Blank entry, the frame map is presented via Cognitive Partnership Move (Constitution)
-BEFORE any concrete candidate is generated — abstract frames only, so the user picks a
+While no frame has been opened, the frame map is presented via Cognitive Partnership Move
+(Constitution) BEFORE any concrete candidate of yours is generated — abstract frames only, so the user picks a
 direction of divergence, not a specific idea, preserving ownership and mitigating
 early-example fixation.
 
