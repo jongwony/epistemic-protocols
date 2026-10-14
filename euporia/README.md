@@ -23,7 +23,7 @@ Greek εὐπορία — literally "good passage" (εὖ "well" + πόρος "w
 
 Invoke it when your intent is articulated but turns on decisions you have not named — they may show in your words, your material, or the decision structure of the domain the intent sits in. Invoking `/elicit` is your declaration of that: the first surface shows the intent as the AI understands it, with its sources, and you may say at once that it is aligned enough. When the AI raises it on its own, the first surface is a proposal you confirm or decline.
 
-An intent whose axis is already fixed may be better served by an axis-specific protocol, and a set of cases whose shared abstraction, named already or not, is still to be fitted to what you mean, by Periagoge. Which to run is yours to choose; once a run is active, it closes only by your own words.
+An intent whose axis is already fixed may be better served by an axis-specific protocol, and a set of cases whose shared abstraction is still to be formed or re-formed to fit what you mean, by Periagoge. Which to run is yours to choose; once a run is active, it closes only by your own words.
 
 ## Components
 

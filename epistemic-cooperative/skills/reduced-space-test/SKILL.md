@@ -59,7 +59,7 @@ Reduced-Space Test orchestrates existing protocols; most per-step work is delega
 - On an actually emitted, applicable `DefinedBoundary`, project the validation scope and its coverage complement from the current boundary entries, their setting record, and the `ScopedClaimFrame`. An item in the boundary's residual can be pending work inside the scope; an established exclusion can belong to the coverage complement with no unsettled judgment. Preserve this distinction when composing the result.
 - At the `/inquire` handoff, pass the settled scope, conditions, and source-grounded pending obligations that bear on the observation. Its scope-covers-claim discipline governs what the evidence can support.
 
-## Phase 0: Intake + Crystallize the Pattern (conditional)
+## Phase 0: Intake + Conditional Front
 
 Read the `InferenceUncertainClaim`: the proposition the user cannot settle by reasoning alone, and why evidence in a stand-in space is wanted.
 
@@ -68,7 +68,7 @@ Front with a crystallization step only when the test intent is genuinely under-f
 - If the test intent is aporetic — the user senses an unknown but cannot yet state the proposition — front with `/elicit` (Euporia) to surface it.
 - If the test pattern recurs but is not yet settled — the same stand-in-validation shape appears across cases, and what it is has yet to be fitted to what the user means — front with `/induce` (Periagoge) to crystallize it.
 
-When neither front applies, proceed directly to Phase 1. The front step is a conditional affordance, not a mandatory gate.
+The front step is a conditional affordance, not a mandatory gate.
 
 ## Phase 1: Decompose the Equivalence Claim into Facets
 

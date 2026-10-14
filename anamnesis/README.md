@@ -52,7 +52,7 @@ node --test anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomn
 
 **Anamnesis vs Aitesis** — the closest neighbor. Both involve information access, but the phenomenological test differs. Aitesis discovers facts the user does not know (`ContextInsufficient` — "I need information"). Anamnesis verifies context the user vaguely knows exists (`RecallAmbiguous` — "I know this was discussed, but where?"). Empty intention seeking fulfillment → Anamnesis; no intention at all regarding the topic → Aitesis.
 
-**Anamnesis vs Periagoge** — the boundary above one session. A concept prior sessions already settled is recognized here, as the unit above any one session; a concept being formed from cases, or re-formed from them, to fit what you mean now is crystallized by Periagoge (`/induce`), whether or not a name for it is already in use. Recognition of what was settled → Anamnesis; fitting what the cases share to what you mean → Periagoge.
+**Anamnesis vs Periagoge** — the boundary above one session. A concept prior sessions already settled is recognized here, as the unit above any one session; a concept being formed from cases at hand, or re-formed from them, to fit what you mean now is crystallized by Periagoge (`/induce`). Recognition of what was settled → Anamnesis; fitting what the cases share to what you mean → Periagoge.
 
 ## Protocol Flow
 

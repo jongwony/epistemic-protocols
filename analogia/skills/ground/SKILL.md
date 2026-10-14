@@ -173,10 +173,10 @@ structure Question where
     — and the turn asks nothing narrower, the conclusion is that the structure is preserved in the
     target; the relations under it are what collection finds, never a list fixed here. A narrower
     question the turn asks — whether the retries will match, say — is that turn's whole scope.
-    Where an abstraction whose meaning is fixed is tested against its own cases (the abstraction the
-    source, its cases the target), the conclusion for each case asked about is that it instantiates
-    the abstraction, and a collective relation asked of the cases together is one more conclusion,
-    never replaced by the per-case ones.
+    Where a located abstraction is tested against its own cases (the abstraction the source, its
+    cases the target), the conclusion for each case asked about is that it instantiates the
+    abstraction, and a collective relation asked of the cases together is one more conclusion, never
+    replaced by the per-case ones.
     Articulating what a stated purpose entails is reading it; choosing among materially different
     purposes, conclusions, or source–target pairs is not, and a pair `R` or a fact fixes is read,
     not asked.
@@ -415,7 +415,7 @@ Priority: explicit_arg > current_output > most_recent_output
   /ground "text"    → R = "text"
   /ground (alone)   → R = the most recent relevant output in the session, the AI's or the user's
   "ground this..."  → R = the text currently under discussion
-  "does this abstraction hold across its cases?" → R = an abstraction and the
+  "does this abstraction hold across its cases?" → R = a candidate abstraction and the
     instances it claims to subsume → self-grounding
 With no relevant text, the first pass's question gate asks for the material to audit; it invents
 no candidate.
@@ -556,7 +556,7 @@ end Analogia
 
 ### Activation heuristics and exceptions
 
-Activate where a mapping is being relied on and what it licenses about a case is open: an abstract framework applied to a concrete case, a structure carried over from an earlier design or a sibling, a possible structural mismatch, or an abstraction whose meaning is fixed, tested against its own cases. Prior-session recall indices may seed where to look; they do not settle a constitutive judgment.
+Activate where a mapping is being relied on and what it licenses about a case is open: an abstract framework applied to a concrete case, a structure carried over from an earlier design or a sibling, a possible structural mismatch, or a located abstraction tested against its own cases. Prior-session recall indices may seed where to look; they do not settle a constitutive judgment.
 
 A source or target account this session can reach — code, documents, a repository, a published source — is read as evidence inside the audit, whether or not the reader already holds it; the audit never waits for the reader to bring an account first, and never asks them to judge a correspondence. Where what the reader wants is only to come to hold an account, with no mapping being relied on, that is explanation rather than this audit, and the AI-guided path does not activate. Absence of evidence that a mapping is being relied on establishes neither eligibility nor its lack; where the accumulated context does not settle it, say which reading is being used and continue.
 
