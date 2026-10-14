@@ -391,10 +391,10 @@ axiom Reaches : Context P → Prop
     and the doubts — with every line, who proposed it and, where a person's turn reached it, how it
     stood. Whatever you produce at a recognition that the person has not seen — a line re-drawn or
     re-phrased, the goal and the candidate included, a doubt formed on their changes, what you make
-    of what collection returns for what their turn brought — is yours, and the recognition takes
-    none of it. Where it is read wrong, the person's later words correct it, or they undo the turn
-    as their host lets them; either way the context as it then stands is what is read. It records
-    the person's settlement for their goal, not proof that the reading is correct. -/
+    of what collection returns for what their turn brought — stays a proposal, and the recognition
+    takes none of it. Where it is read wrong, the person's later words correct it, or they undo
+    the turn as their host lets them; either way the context as it then stands is what is read. It
+    records the person's settlement for their goal, not proof that the reading is correct. -/
 structure CrystallizedAbstraction (P : Type) where
   context    : Context P
   goal       : String
