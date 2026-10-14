@@ -309,8 +309,7 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
     what the taking turn itself changes — an exclusion, a park, an idea of theirs, a proposal
     taken — applies as far as its words reach. No pass runs after it, and nothing you form after
     it — a fresh candidate, a newly inferred exclusion — is taken. The readings you re-make on that
-    context — the unaddressed signals, your doubts — are yours; where one differs from the map the
-    person answered, the trace marks it as changed. Frame-distributed, never scored;
+    context — the unaddressed signals, your doubts — are yours. Frame-distributed, never scored;
     complete for whatever unfolds it next, a later /ideate resuming from it included. -/
 structure DiverseCandidateField (P : Type) where
   context  : Context P
