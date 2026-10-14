@@ -323,7 +323,7 @@ inductive Standing | set | adopted
     that recognizes the abstraction takes every line the sheet it followed showed, with no second
     permission; a line it holds back stays as it stood, and the person's changes since that sheet
     stand in their own words. A question, a request to see something, or a bare mention makes
-    nothing stand; a value no turn of the person's reached stays your proposal, however long it
+    nothing stand; a value no turn of the person's reached stays a proposal, however long it
     has gone unchallenged. -/
 axiom StandingSupported : Entry → Context P → Turn P → Standing → Prop
 
