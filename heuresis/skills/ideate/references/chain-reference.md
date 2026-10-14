@@ -11,7 +11,8 @@ the user's own fragments, gaining the frame each lands under. Each seed keeps th
 the material already carries, or otherwise the origin of the turn it was read from —
 `external` for a record a tool read — so an assistant's output never becomes the user's by
 being chained. Only the record the user named is read; nothing beside it is scanned. A record
-named at a later gate is read then, and its items land under their frames at the next pass.
+named at a later gate, in a turn that bears on the run, is read then, and its items land under
+their frames at the next pass.
 
 A request that continues a field this protocol drew earlier resumes it, whether the person
 took that field or left it holding: its frames, branches, candidates with their origins,
