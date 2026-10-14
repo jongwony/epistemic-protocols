@@ -38,10 +38,10 @@ test("directive carries the firing conditions and stays short", () => {
   //     before that deficit is addressed (a9b47430).
   assert.match(DIRECTIVE, /at the prompt or mid-turn while preparing a response or action/);
   assert.match(DIRECTIVE, /before addressing that deficit/);
-  // (b) the one narrowing condition, defined in place: a gate holds until
+  // (b) the order at a holding gate, defined in place: a gate holds until
   //     its own contract takes an answer at it, closes it, or entrusts the
   //     prompt to the session. "active" is not the directive's vocabulary:
-  //     what narrows /route is a holding gate, read from the contract, not
+  //     what holds is a gate, read from the contract, not
   //     an invocation that has not yet converged.
   assert.match(DIRECTIVE, /A presented gate holds until its protocol's contract takes an answer at it, closes it, or entrusts the prompt to the session\./);
   // (b') the prompt is that protocol's to read first, by its own contract —

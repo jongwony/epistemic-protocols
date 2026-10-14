@@ -38,7 +38,7 @@ private theorem route_cases (k : Catalog) (c : Context P) :
         by rw [h]; exact List.mem_cons_self .., hf, hp, hq, hh⟩)
       simp [hf, hp, hq, hh]
     · refine Or.inr (Or.inr ⟨by rw [h]; exact List.cons_ne_nil l ls, ?_⟩)
-      simp only [hi, ↓reduceIte]
+      simp only [hi, ↓reduceIte, h]
 
 /-- A pass invokes a line only where that line is the whole of the reading `fits` makes, it is
     raised now, the fit is plain, the routing policy covers the occasion, and no checkpoint
