@@ -290,11 +290,13 @@ def recordOf (c : Context P) : Record c :=
     this run is raised. Words that end the run without recognizing a version do not bear on it,
     whatever else the turn says, a request to write, move, or remove a version included: what they
     ask done to the versions is carried out first, as `carriedOut` says, and what else they say
-    stands in its own words in the context; the session answers them, saying where each version is
-    as last observed and what the person asked done to it that is not observed done, with the
-    reason where it failed; no round is drawn, the run holds, and later turns bear on it only where
-    they come back to it. Where reading a turn as other work, as ending the run, or as recognizing a
-    version was unclear, the session's answer says briefly how it took it. -/
+    stands in its own words in the context, a value they set standing in the record as any turn's
+    does; the session answers them, saying where each version is as last observed and what the
+    person asked done to it that is not observed done, with the reason where it failed; no round is
+    drawn, the run holds, and later turns bear on it only where they come back to it; your own
+    reading that the person is done ends nothing. Where a turn taken as other work or as ending the
+    run could also be read as recognizing a version, or as bearing on the run otherwise, the
+    session's answer says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
 /-- How the person closes the run. -/
@@ -475,27 +477,26 @@ the context as it now stands, and what changed since the standing they last answ
 A production happens where the person's turn calls for a version none shown embodies, and nowhere
 else: an insufficiency you find is shown with its basis and the revision you propose, and you
 produce it once the person takes it up. Each production relays its intent whole, with what changed,
-before it makes anything. The loop is dialogue: each round ends at the gate, and only the person's
-recognition closes the run; no round count, cap, or fatigue closes it.
+before it makes anything. The loop is dialogue: each round ends at the gate, and no round count,
+cap, or fatigue closes it.
 -/
 
 /-! ── CONVERGENCE ──
-converged: a RecognizedForm — a version the person encountered and recognized for the purpose as
-it stands, its record built by `recordOf` after what the recognizing turn asked done was observed —
-the one closing of `Outcome`; holding is a round no turn of the person's that bears on the run has
-answered. A recognition establishes the person's judgment of fit for that purpose on what the
-version's medium showed; correctness against a standard outside preference rests on the checks the
-findings name, and readiness for use on nothing here; a contrary ground it was taken over rides it
-in the dissent. The convergence evidence: the turn read as the closing, quoted, and the intent taken
-from it, and where it took a reading the round before showed of an unclear turn, that earlier turn
-quoted too; the recognized version as it was encountered and where it is; the purpose as it stands,
-marked as yours where you read it, each part with what it rests on; every version with where it is
-and what the person asked done to it that is not observed done, each failure with its reason; the
-values the person holds, each with who proposed it and whether their words set it or their turn took
-it; the findings with their sources; what stays unestablished; and the dissent, each item with what
-it bears on, what it rests on, and the person's answer where they gave one — a contrary ground first
-visible at the closing turn is shown here and attached, and the closure stands. Demonstrated, not
-asserted.
+converged: a RecognizedForm — a version the person encountered and recognized for the purpose as it
+stands, its record built by `recordOf` after what the recognizing turn asked done was observed;
+holding is a round no turn of the person's that bears on the run has answered. A recognition
+establishes the person's judgment of fit for that purpose on what the version's medium showed;
+correctness against a standard outside preference rests on the checks the findings name, and
+readiness for use on nothing here; a contrary ground it was taken over rides it in the dissent. The
+convergence evidence: the turn read as the closing, quoted, and the intent taken from it, and where
+it took a reading the round before showed of an unclear turn, that earlier turn quoted too; the
+recognized version as it was encountered and where it is; the purpose as it stands, marked as yours
+where you read it, each part with what it rests on; every version with where it is and what the
+person asked done to it that is not observed done, each failure with its reason; the values the
+person holds, each with who proposed it and whether their words set it or their turn took it; the
+findings with their sources; what stays unestablished; and the dissent, each item with what it bears
+on, what it rests on, and the person's answer where they gave one — a contrary ground first visible
+at the closing turn is shown here and attached, and the closure stands. Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──

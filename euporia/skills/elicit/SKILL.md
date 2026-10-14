@@ -213,11 +213,13 @@ def residual (c : Context P) : List Entry :=
     it stands: the session answers it, that answer stays in the context, and no gate of this run is
     raised. Words that end the run — a decline of the proposed run included — without saying the
     intent is aligned enough do not bear on it, whatever else the turn says, and what else it says
-    stands in its own words in the context: the session answers them, no surface is drawn, the run
-    holds, and later turns bear on it only where they come back to it. Where reading a turn as
-    other work, as ending the run, or as saying the intent is aligned enough was unclear, the
-    session's answer says briefly how it took it. An AI-guided run the person has not confirmed
-    has not started: nothing they say is recorded into it. -/
+    stands in its own words in the context, a value it sets standing in the record as any turn's
+    does: the session answers them, no surface is drawn, the run holds, and later turns bear on it
+    only where they come back to it; your own reading that the person is done ends nothing. Where a
+    turn taken as other work or as ending the run could also be read as saying the intent is
+    aligned enough, or as bearing on the run otherwise, the session's answer says briefly how it
+    took it. An AI-guided run the person has not confirmed has not started: nothing they say is
+    recorded into it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your judgment**: the cited turn says the intent is aligned enough — the aporia is resolved —
@@ -305,12 +307,11 @@ earlier answer is held apart from what later ones say. No fixed cap: each surfac
 -/
 
 /-! ── CONVERGENCE ──
-converged: a ResolvedEndpoint the person's utterance closed — the one closing of `Outcome`; holding
-is a surface no turn of the person's that bears on the run has answered. Convergence evidence: at
-the resolution, present the read-back of the intent in the person's language and the trace — each
-coordinate → where it came from → what stands on it, in the words of the turn that set it → who
-proposed it and how it stood — beside the residual and the dissent attached to the closure.
-Demonstrated, not asserted.
+converged: a ResolvedEndpoint the person's utterance closed; holding is a surface no turn of the
+person's that bears on the run has answered. Convergence evidence: at the resolution, present the
+read-back of the intent in the person's language and the trace — each coordinate → where it came
+from → what stands on it, in the words of the turn that set it → who proposed it and how it stood —
+beside the residual and the dissent attached to the closure. Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -339,7 +340,7 @@ def grounding : Op → Annot × String
   | .surface      => (.interaction .constitution, "a plain one-sentence read-back of the intent as understood, every round the first included, with its sources and each recorded value marked by who proposed it and how it stood; where the intent of the person's turn was unclear, how you took it, in one line; each open coordinate the round shows, with its question, where it comes from — the person's material cited, their words quoted as said without an unstated mental model, or the domain's decision structure marked as yours — what leaving it open changes, and any default as your proposal; your contrary grounds before the answer slots. Guidance for the showing: coordinates the domain raises come after the ones the person's material and words raise, as open questions rather than filled examples; a deferred coordinate returns in the same wording with the same basis, marked as returning. The answer may give values, defer, or say the intent is aligned enough, in any form; an answer beyond the slots joins the context whole")
   | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on this run, and what it does there — the values it makes stand, a resolution — read whole against the fused context as it now stands, whatever form it takes")
   | .converge     => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with ResolvedEndpoint")
-  | .seam         => (.interaction .extension, "after a resolution, proceed to the next move the person declared — the task the seed asked for, or other work they named; cite that source; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam         => (.interaction .extension, "after a resolution, proceed to the next move the person declared — the task the seed asked for, or other work they named; after words that end the run, only to a next move the person declared with them, never the seed's task; cite that source; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Intent resolution emergent via session context.

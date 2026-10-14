@@ -239,10 +239,12 @@ axiom dissent : Context P → List String
     the run as it stands: the session answers it, that answer stays in the context, and no gate of
     this run is raised. Words that end the run without saying that what they understand serves
     their purpose do not bear on it, whatever else the turn says, and what else it says stands in
-    its own words in the context: the session answers them, no round is drawn, the run holds, and
-    later turns bear on it only where they come back to it. Where reading a turn as other work, as
-    ending the run, or as saying what they understand serves their purpose was unclear, the
-    session's answer says briefly how it took it. -/
+    its own words in the context, a value it sets standing in the record as any turn's does: the
+    session answers them, no round is drawn, the run holds, and later turns bear on it only where
+    they come back to it; your own reading that the person is done ends nothing. Where a turn taken
+    as other work or as ending the run could also be read as saying what they understand serves
+    their purpose, or as bearing on the run otherwise, the session's answer says briefly how it
+    took it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round closes
@@ -343,9 +345,9 @@ earlier answer is held apart from what later ones say. No fixed cap: each round 
 -/
 
 /-! ── CONVERGENCE ──
-converged: a VerifiedUnderstanding the person's utterance closed — the one closing of `Outcome`;
-holding is a round no turn of the person's that bears on the run has answered. The convergence
-evidence — the map at closure: each aspect with its standing, what it rests
+converged: a VerifiedUnderstanding the person's utterance closed; holding is a round no turn of the
+person's that bears on the run has answered. The convergence evidence — the map at closure: each
+aspect with its standing, what it rests
 on (the person's own reading with the material it was measured against, in their words; each check
 run, with what it showed and, where it ran on a stand-in, what it left untested; each check named
 and not run, with who named it and what it would settle; the person's account with neither measure

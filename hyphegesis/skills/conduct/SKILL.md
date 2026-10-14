@@ -362,10 +362,12 @@ axiom relay : (c : Context P) → Occ (relayCoord (P := P)) c
     grant, a direction, a question about the map, a taking. An utterance about other work leaves
     the run as it stands: the session answers it, that answer stays in the context, and no gate of
     this run is raised. Words that end the run without taking a method do not bear on it, whatever
-    else the turn says, and what else it says stands in its own words in the context: the session
-    answers them, no map is drawn, the run holds, and later turns bear on it only where they come
-    back to it. Where reading a turn as other work, as ending the run, or as taking the method was
-    unclear, the session's answer says briefly how it took it. -/
+    else the turn says, and what else it says stands in its own words in the context, a value it
+    sets standing in the record as any turn's does: the session answers them, no map is drawn, the
+    run holds, and later turns bear on it only where they come back to it; your own reading that
+    the person is done ends nothing. Where a turn taken as other work or as ending the run could
+    also be read as taking the method, or as bearing on the run otherwise, the session's answer
+    says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your record**: the navigation block over the record where the person's turns behind this
@@ -528,7 +530,8 @@ def grounding : Op → Annot × String
   | .handoff       => (.dispatch, "delegate: after the relayed map, in the same turn, the ConductedMethod handed to the substrate, which executes it; the record an incoming pointer names stays where its locator names; then this run ends")
 
 /-- The operation an outcome hands off through: a conducted or relayed run hands `emitted` to the
-    substrate by `.handoff`, after the relayed map; a holding hands nothing off. -/
+    substrate by `.handoff`, after the relayed map; a holding hands nothing off, and the draft does
+    not become the next move. -/
 def handedOffBy : Outcome P → Option Op
   | .conducted _ _ => some .handoff
   | .relayed _ _   => some .handoff

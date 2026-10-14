@@ -80,7 +80,7 @@ Epistemic dialogue protocols coexist with a harness's built-in execution command
 
 ## Termination
 
-- A person ending a run — withdrawing or stopping — is not a result constructor. The ending and what was taken up to it stay in the accumulated context; the AI's default reading is that it was taken thus, and the person answers by rejecting or approving that reading. A result the person closes is one where something stands, such as a recognition or a confirmation. An AI retracting its own mark is not such an ending.
+- A person ending a run — withdrawing or stopping — is not a result constructor. The ending and what was taken up to it stay in the accumulated context; the AI's default reading is that it was taken thus, and the person answers by rejecting or approving that reading. A result the person closes is one where something stands, such as a recognition or a confirmation. An AI retracting its own flag is not such an ending.
 - While a gate awaits the person, silence or turning to unrelated work leaves it holding.
 - At an execution handoff, name the required capability and stop there.
 

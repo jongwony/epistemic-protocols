@@ -224,11 +224,12 @@ axiom dissent : Context P → List String
     run neither closes it nor answers its judgments. An utterance about other work leaves the run
     as it stands: the session answers it, that answer stays in the context, and no gate of this run
     is raised. Words that end the run without constituting a direction do not bear on it, whatever
-    else the turn says, and what else it says stands in its own words in the context: the session
-    answers them, saying where each probe this run wrote is, as last observed; no round is drawn,
-    the run holds, and later turns bear on it only where they come back to it. Where reading a turn
-    as other work, as ending the run, or as constituting a direction was unclear, the session's
-    answer says briefly how it took it. -/
+    else the turn says, and what else it says stands in its own words in the context, a purpose it
+    sets standing as any turn's does: the session answers them, saying where each probe this run
+    wrote is, as last observed; no round is drawn, the run holds, and later turns bear on it only
+    where they come back to it; your own reading that the person is done ends nothing. Where a turn
+    taken as other work or as ending the run could also be read as constituting a direction, or as
+    bearing on the run otherwise, the session's answer says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
 /-- How the person closes the run. -/
@@ -423,15 +424,14 @@ Every round re-judges the whole run against the whole context: nothing counts do
 waits for a later gate. A fan happens where the person's turn asks to see something no probe has
 materialized, and nowhere else: an insufficiency you find is shown with its basis and the revision
 you propose, and you fan over it once the person takes it up. Each fan relays the spec whole, with
-what changed, before it generates. The loop is dialogue: each round ends at the gate, and only the
-person's constitution closes the run.
+what changed, before it generates. The loop is dialogue: each round ends at the gate.
 -/
 
 /-! ── CONVERGENCE ──
-converged: a DirectionalContrast — a direction the person constituted over the map, harvested
-before discard, every probe's disposition declared — the one closing of `Outcome`; holding is a
-round no turn of the person's that bears on the run has answered. A constitution adopts the
-direction as the map showed it; it establishes nothing about a direction no probe materialized, and
+converged: a DirectionalContrast — a direction the person constituted over the map, harvested before
+discard, every probe's disposition declared; holding is a round no turn of the person's that bears
+on the run has answered. A constitution adopts the direction as the map showed it; it establishes
+nothing about a direction no probe materialized, and
 a contrary ground it was taken over rides it as dissent. The convergence evidence: the turn read as
 the closing, quoted, and the intent taken from it, and where it took a reading the round before
 showed of an unclear turn, that earlier turn quoted too; the purpose as it stands, marked as yours
