@@ -40,14 +40,14 @@ theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
 
 /-- A crystallized abstraction comes only from a filled closing — a person's turn, by
     `closed_by_person` — that cites the utterance just fused onto a context `c₀`; the record is
-    `crystallize` on `c₀` and that fused context. -/
+    `crystallize` on that fused context. -/
 theorem crystallized_on_recognition (respond session converge : Context P → Response P)
     (c : Context P) (us : List (Utterance P)) (r : CrystallizedAbstraction P)
     (h : induce respond session converge c us = .crystallized r) :
     ∃ (c₀ : Context P) (u : Utterance P) (src : Cite (fuse c₀ u)),
       (∃ ok sup, closing (fuse c₀ u) = .filled () src ok sup) ∧
       src.idx + 1 = (fuse c₀ u).length ∧
-      r = crystallize converge c₀ (fuse c₀ u) := by
+      r = crystallize converge (fuse c₀ u) := by
   induction us generalizing c with
   | nil => simp [induce] at h
   | cons u us ih =>
@@ -66,13 +66,13 @@ theorem crystallized_on_recognition (respond session converge : Context P → Re
           exact ih _ h
 
 /-- A recognition citing the utterance just fused, on a turn that bears on the run, crystallizes
-    the record `crystallize` reads on the context before it and the context with it. -/
+    the record `crystallize` reads on the context with it. -/
 theorem recognition_crystallizes (respond session converge : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (src : Cite (fuse c u)) (hc : ∃ ok sup, closing (fuse c u) = .filled () src ok sup)
     (hi : src.idx + 1 = (fuse c u).length) :
     induce respond session converge c (u :: us) =
-      .crystallized (crystallize converge c (fuse c u)) := by
+      .crystallized (crystallize converge (fuse c u)) := by
   obtain ⟨ok, sup, hc⟩ := hc
   simp [induce, hre, hc, hi]
 
@@ -139,25 +139,25 @@ theorem standing_by_person (c : Context P) (e : Entry) (s : Standing)
     subst h
     exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
 
-/-- Every provenance line of a crystallized record is a line the sheet the closing turn followed
-    showed. -/
-theorem record_lines_shown (converge : Context P → Response P) (c c' : Context P) (p : Provenance)
-    (hp : p ∈ (crystallize converge c c').provenance) : p.entry ∈ entries c := by
+/-- Every provenance line of a crystallized record is one of the lines `entries` reads on the
+    context the record is read on. -/
+theorem record_lines_shown (converge : Context P → Response P) (c : Context P) (p : Provenance)
+    (hp : p ∈ (crystallize converge c).provenance) : p.entry ∈ entries c := by
   simp only [crystallize, provenanceOf, List.mem_map] at hp
   obtain ⟨e, he, rfl⟩ := hp
   exact he
 
 /-- Every line of a crystallized record that carries a standing has it from a filled occurrence in
-    the context the closing turn was fused into, citing a turn the person sent: the record gives no
-    line a standing that no person's turn reached. -/
-theorem record_standing_by_person (converge : Context P → Response P) (c c' : Context P)
-    (p : Provenance) (hp : p ∈ (crystallize converge c c').provenance) (st : Standing)
+    the context the record is read on, citing a turn the person sent: the record gives no line a
+    standing that no person's turn reached. -/
+theorem record_standing_by_person (converge : Context P → Response P) (c : Context P)
+    (p : Provenance) (hp : p ∈ (crystallize converge c).provenance) (st : Standing)
     (hs : p.standing = some st) :
-    ∃ src ok sup, standingOcc c' p.entry = .filled st src ok sup ∧
-      (c'[src.idx]'src.lt).origin = .person := by
+    ∃ src ok sup, standingOcc c p.entry = .filled st src ok sup ∧
+      (c[src.idx]'src.lt).origin = .person := by
   simp only [crystallize, provenanceOf, List.mem_map] at hp
   obtain ⟨e, _, rfl⟩ := hp
-  exact standing_by_person c' e st hs
+  exact standing_by_person c e st hs
 
 /-- Words an open item carries in the open trace are a filled occurrence, on the context the
     words are read on, that cites a turn the person sent. -/

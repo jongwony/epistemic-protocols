@@ -28,7 +28,7 @@ Periagoge(A) → start(c) → induce(c, utterances), where c is the fused sessio
   next utterance u, read on fuse(c, u):
     [does not bear on this run]                                the session answers it; that answer
                                                                stays in c; the sheet holds
-    [the person recognizes the sheet's goal and its candidate] crystallized
+    [the person recognizes the goal and the candidate]         crystallized
     [otherwise]                                                what is collected now enters c → the sheet again → Stop
   no utterance: the sheet holds
 -/
@@ -323,9 +323,11 @@ inductive Standing | set | adopted
     (`set`), or took it as a sheet showed it before that turn (`adopted`). A narrow answer stays
     narrow: taking one case's place in a row takes that placement, not the sheet around it. A turn
     that recognizes the abstraction takes every line the sheet it followed showed, with no second
-    permission; a line it holds back stays as it stood. A question, a request to see something, or
-    a bare mention makes nothing stand; a value no turn of the person's reached stays your proposal,
-    however long it has gone unchallenged. -/
+    permission; a line it holds back stays as it stood, and the person's changes since that sheet
+    stand in their own words. A line you re-drew because of such a change, which the person has
+    not seen, stays your proposal. A question, a request to see something, or a bare mention makes
+    nothing stand; a value no turn of the person's reached stays your proposal, however long it
+    has gone unchallenged. -/
 axiom StandingSupported : Entry → Context P → Turn P → Standing → Prop
 
 /-- Only the person's turn makes a value stand. -/
@@ -345,9 +347,9 @@ structure Provenance where
   proposer : Proposer
   standing : Option Standing
 
-/-- Every line the sheet `c` showed, with how it stands as `c'` stands. -/
-def provenanceOf (c c' : Context P) : List Provenance :=
-  (entries c).map (fun e => ⟨e, proposer c e, standing c' e⟩)
+/-- Every line, with who first put it forward and how it stands. -/
+def provenanceOf (c : Context P) : List Provenance :=
+  (entries c).map (fun e => ⟨e, proposer c e, standing c e⟩)
 
 /-- **Your record**: your doubts, each with what it touches and what it rests on, shown before the
     person's turn it bears on. One raised before is raised again only on new evidence. Your reading
@@ -356,22 +358,17 @@ def provenanceOf (c c' : Context P) : List Provenance :=
 axiom dissent : Context P → List String
 
 /-- **Your judgment**: the cited turn — the latest utterance — closes the run: read whole against
-    the context as it now stands and the sheet it followed, whatever form it takes, it recognizes
-    the goal and the candidate, as that sheet showed them, as what the person means, with no second
-    permission. A turn that changes anything that sheet shows — a rename, a rule correction, a move
-    of the goal or the candidate, a reading set aside or brought back, a case brought or placed on
-    the other side of the candidate's row — recognizes nothing: the sheet is drawn again with the
-    change. Where the person's turns changed something after the sheet this turn follows that no
-    sheet has shown yet — a move, a rename, a reading set aside, words in a turn that ended the run
-    — the turn recognizes nothing, and the sheet is drawn again with those changes. Holding a line
-    back — not taking it, without saying it is wrong — leaves it as it stood, a proposal where no
-    turn of the person's took it. A recognition stands where the turn also holds back a line other
-    than the goal, the candidate's name or its rule — a case's placement in the candidate's row
-    among them —, says something about an open item, raises a point still open (a point for later
-    is not a change to what the sheet shows), or answers a doubt without correcting what the sheet
-    shows; holding back the goal, the candidate's name or its rule recognizes nothing.
-    "Not yet" or a question closes nothing; silence, other work, and your own reading that the
-    candidate fits close nothing. Where the turn's intent is unclear, it closes nothing. -/
+    the context as it now stands, whatever form it takes, it recognizes the goal and the candidate,
+    as the sheet it followed showed them together with every change the person made since — the
+    turn's own included —, as what the person means, with no second permission; such changes do
+    not stop the recognition. Holding a line back — not taking it, without saying it is wrong —
+    leaves it as it stood, a proposal where no turn of the person's took it. A recognition stands
+    where the turn also holds back a line other than the goal, the candidate's name or its rule — a
+    case's placement in the candidate's row among them —, says something about an open item, raises
+    a point still open, or answers a doubt; holding back the goal, the candidate's name or its rule
+    recognizes nothing. "Not yet" or a question closes nothing; silence, other work, and your own
+    reading that the candidate fits close nothing. Where the turn's intent is unclear, it closes
+    nothing. -/
 axiom ClosingSupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person closes. -/
@@ -393,15 +390,17 @@ axiom Reaches : Context P → Prop
 
 /-- Once it has run, the person can name what their cases share, say which cases it takes in and
     which it leaves out, and recognize it as serving their goal.
-    `CrystallizedAbstraction`: the sheet the person's recognition followed, its views as that sheet
-    carried them — its goal and candidate, its cross view, where the row of the candidate's reading
+    `CrystallizedAbstraction`: your reading of the context with the recognizing turn, declared as
+    your reading — its goal and candidate, its cross view, where the row of the candidate's reading
     is what the candidate takes in and leaves out, its cases, the readings set aside with the
-    person's grounds, the open trace — with any point the recognizing turn raised —, and the
-    doubts — with every line it showed, who proposed it and, where a person's turn reached it, how
-    it stood. The declaration unfolds every case the record carries, folded on that sheet or not,
-    and shows every reading set aside, whether that sheet showed it or not, so the person sees each
-    at the close. It records the person's settlement for their goal, not proof that the reading is
-    correct. -/
+    person's grounds, the open trace, and the doubts — with every line, who proposed it and, where
+    a person's turn reached it, how it stood. The declaration shows first what changed since the
+    sheet the recognition answered — the person's moves, and what you re-drew because of them,
+    marked as yours —, unfolds every case the record carries, folded on that sheet or not, and
+    shows every reading set aside, whether that sheet showed it or not, so the person sees each at
+    the close. Where it is read wrong, the person's later words correct it, or they undo the turn
+    as their host lets them; either way the context as it then stands is what is read. It records
+    the person's settlement for their goal, not proof that the reading is correct. -/
 structure CrystallizedAbstraction (P : Type) where
   context    : Context P
   goal       : String
@@ -448,17 +447,15 @@ axiom collect : Context P → List (Evidence P)
 
 def pass (c : Context P) : Context P := c ++ (collect c).map (·.val)
 
-/-- The crystallized abstraction: `c` is the context the recognition answered, whose latest sheet
-    is the one the recognition followed, and `c'` that context with the recognizing turn fused.
-    Every view, the candidate included, is read on `c`; the standing of the lines it showed, the
-    open items, and the words on them are read on `c'`. The context ends in the declaration. -/
-def crystallize (converge : Context P → Response P) (c c' : Context P) :
+/-- The crystallized abstraction: every view read on `c`, the context with the recognizing turn.
+    The context ends in the declaration. -/
+def crystallize (converge : Context P → Response P) (c : Context P) :
     CrystallizedAbstraction P :=
-  { context := c' ++ [(converge c').val], goal := goal c, candidate := candidate c,
+  { context := c ++ [(converge c).val], goal := goal c, candidate := candidate c,
     crossView := crossView c, cases := casesSection c, setAside := setAsideReadings c,
-    openTrace := openTrace c' ((candidate c).reading :: (candidate c).merges),
+    openTrace := openTrace c ((candidate c).reading :: (candidate c).merges),
     dissent := dissent c,
-    provenance := provenanceOf c c' }
+    provenance := provenanceOf c }
 
 open Classical in
 /-- `respond` presents the sheet the Protocol section describes under "The sheet": the candidate
@@ -475,7 +472,7 @@ def induce (respond session converge : Context P → Response P) :
       let latest : Bool := match closing c' with
         | .filled _ src _ _ => decide (src.idx + 1 = c'.length)
         | .open_ _          => false
-      if latest then .crystallized (crystallize converge c c')
+      if latest then .crystallized (crystallize converge c')
       else
         let c₁ := pass c'
         induce respond session converge (c₁ ++ [(respond c₁).val]) us
@@ -549,13 +546,13 @@ Then the goal: what the abstraction is for. Where the user has said it, quote th
 
 Then the cross view, one row per live reading. Each row says what the reading becomes against the goal — the check it would give you — which of the cases shown it takes in and which it leaves out, and where the candidate sits on that reading; the candidate's own row places every case on the sheet, except one the user's words put on the boundary, which it neither takes in nor leaves out, and the sheet shows that case with their words. Name every case by a short phrase that carries the feature being judged. Then a cases section: every case the user brought, every case the rows use, and every case you found, unfolded in a few lines — what happened, what in it bears on the goal and the readings, how it surfaced, who brought it — so every case is read on the sheet itself. A sheet whose move invites recognition unfolds every case on it; elsewhere, unfold a new or changed case again, and an unchanged one may be folded as the same as the last sheet. Collect as widely as the judgment needs; the sheet carries what the current judgment needs, and a case that would decide it against the candidate is never left off. The readings the user set aside appear beside their own words when they change and when reconsidering needs them. Label each field with the question it answers, in the user's words, and say each term this file uses as the concrete question it stands for in the user's material. Draw the fields with the structure the host renders — headings, tables, lists.
 
-Under the sheet, where the user asked about the sheet, answer it there first; then what changed since the sheet the user last answered: the user's moves first, then what you re-drew because of them and anything else that moved, each marked as forced by a move of theirs or as your proposal. A reading you would no longer hold stays in the cross view until the user sets it aside; dropping it is your proposal, shown here. The examples the last sheet showed stay as it showed them until a move of the user's reaches them; an example you would change otherwise is likewise a proposal here. Then your doubts, each beside what it bears on, with what it rests on and the user's answer where they gave one; a doubt is raised again only on new evidence. A reading that the cases are no longer this protocol's to settle is shown the same way, with its basis, and closes nothing. Then the points still open, each in the words of whoever raised it — the user's quoted, yours marked as yours.
+Under the sheet, where the user asked about the sheet, answer it there first; then what changed since the sheet the user last answered: the user's moves first, then what you re-drew because of them and anything else that moved, each marked as forced by a move of theirs or as your proposal. A reading you would no longer hold stays in the cross view until the user sets it aside; dropping it is your proposal, shown here and among your doubts. The examples the last sheet showed stay as it showed them until a move of the user's reaches them; an example you would change otherwise is likewise a proposal here. Then your doubts, each beside what it bears on, with what it rests on and the user's answer where they gave one; a doubt is raised again only on new evidence. A reading that the cases are no longer this protocol's to settle is shown the same way, with its basis, and closes nothing. Then the points still open, each in the words of whoever raised it — the user's quoted, yours marked as yours.
 
 Then one move to ask about, in words — the one whose answer would most change how goal and readings cross — and what each way of answering does to the goal and the candidate. Where every reading drawn so far was set aside, say so with the grounds shown, beside the candidate you put forward on a new reading, and ask whether to name a distinction the readings missed, read another set of cases, or move the goal. Invite recognition only where the candidate fits the goal on every case shown, as the concrete question whether the goal and the candidate, as this sheet shows them, are what the user means, never by naming the act; where a case could still separate it, ask about that case first. Recognizing the abstraction and stopping stay open on every sheet.
 
-The user may answer in their own words, and one answer may reach several parts of the sheet: read it whole, apply it as far as its words reach, leave what it does not reach as it stood, and show what a correction disturbs. A turn that takes something you showed — a case's place, the goal, the rule — makes it theirs then, on the scope its words reach; a narrow answer stays narrow. An utterance about other work leaves the run as it stands, and words that end the run without recognizing the abstraction leave it holding, whatever else the turn says; neither draws a sheet, and the sheet returns when the user comes back to it. A reading leaves the cross view only by the user's words setting it aside, and comes back when their words bring it back, with their earlier ground shown beside it. Only the user closes the run, by recognizing the goal and the candidate as the sheet they answered showed them, with no second permission and your doubts riding along without refusing it; where a turn that bears on the run recognizes nothing by the closing judgment in the block above (`ClosingSupported`), draw the sheet again with every change no sheet has shown yet.
+The user may answer in their own words, and one answer may reach several parts of the sheet: read it whole, apply it as far as its words reach, leave what it does not reach as it stood, and show what a correction disturbs. A turn that takes something you showed — a case's place, the goal, the rule — makes it theirs then, on the scope its words reach; a narrow answer stays narrow. An utterance about other work leaves the run as it stands, and words that end the run without recognizing the abstraction leave it holding, whatever else the turn says; neither draws a sheet, and the sheet returns when the user comes back to it. A reading leaves the cross view only by the user's words setting it aside, and comes back when their words bring it back, with their earlier ground shown beside it. Only the user closes the run, by recognizing the goal and the candidate as the sheet they answered showed them and as they changed them since, with no second permission and your doubts riding along without refusing it; where a turn that bears on the run recognizes nothing by the closing judgment in the block above (`ClosingSupported`), draw the sheet again with every change no sheet has shown yet.
 
-At a recognition, before proceeding, quote the recognizing turn and declare the trace beside it — the sheet the recognition answered, with the user's standing on its lines: the goal and who set it; the candidate, with what its reading's row takes in and leaves out; the cross view; every case unfolded, folded on that sheet or not, with who brought it; the readings set aside with the user's grounds; every line with who proposed it and, where a turn of the user's reached it, how it stood; the doubts, the user's answers to them standing in their own turns, quoted; and the open trace. The open items are the live readings the candidate does not take and the points still open, those the recognizing turn raised included; each carries the user's own words about it from a turn of theirs that still reaches it, and an item no such turn reaches is shown as open — undisposed. After a recognition, go on only to a next move the user declared, a routing policy they adopted, or their grant, citing it.
+At a recognition, before proceeding, quote the recognizing turn and declare beside it the trace as you read it on the context with that turn, said to be your reading — first what changed since the sheet the recognition answered: the user's moves, and what you re-drew because of them, marked as yours; then the goal and who set it; the candidate, with what its reading's row takes in and leaves out; the cross view; every case unfolded, folded on that sheet or not, with who brought it; the readings set aside with the user's grounds; every line with who proposed it and, where a turn of the user's reached it, how it stood; the doubts, the user's answers to them standing in their own turns, quoted; and the open trace. The open items are the live readings the candidate does not take and the points still open, those the recognizing turn raised included; each carries the user's own words about it from a turn of theirs that still reaches it, and an item no such turn reaches is shown as open — undisposed. After a recognition, go on only to a next move the user declared, a routing policy they adopted, or their grant, citing it.
 
 Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or the order of the sheet bears on where a sentence sits.
 
@@ -563,6 +560,6 @@ Read `references/round-composition.md` before composing when terminology must re
 
 - **Recognition over Recall**: Present the sheet and one move with anticipatable consequences, and yield for the user's judgment.
 - **Goal and candidate first, tested against each other**: Lead every sheet, after any case you found, with the goal and the working candidate, any shortfall in its ground shown beside it, and test the candidate against the goal through the cases each row takes in and leaves out. The goal and the alternatives beside the candidate are what keep the user's judgment their own.
-- **Only the user closes**: The run closes only on the user's recognition of the sheet they followed; where a turn that bears on the run changes something no sheet has shown yet, draw the sheet again with it first. Words that end the run without recognizing the abstraction leave it holding.
+- **Only the user closes**: The run closes only on the user's recognition of the sheet they followed, with the changes they made since. Words that end the run without recognizing the abstraction leave it holding.
 - **Round composition**: Compose each round in everyday language, keep each judgment beside its evidence and next-move implication, and place analysis before the move.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
