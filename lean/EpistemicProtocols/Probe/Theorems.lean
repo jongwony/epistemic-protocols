@@ -34,6 +34,27 @@ theorem start_silence (catalog : Catalog) (respond : Catalog → Context P → R
   simp only [h, ↓reduceIte]
   exact ⟨_, silence catalog respond session _⟩
 
+/-- A pass only appends: the context it leaves extends the one it read. -/
+theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
+  ⟨(gathered c).map (·.val), rfl⟩
+
+/-- Each step of the recursion either closes on a recognition or goes on with a context that
+    extends the fused one: nothing is removed from what the person and the reads put there. -/
+theorem step_extends (catalog : Catalog) (respond : Catalog → Context P → Response P)
+    (session : Context P → Response P) (c : Context P) (u : Utterance P)
+    (us : List (Utterance P)) :
+    (∃ r, probe catalog respond session c (u :: us) = .recognized r) ∨
+      ∃ t, probe catalog respond session c (u :: us) =
+        probe catalog respond session (fuse c u ++ t) us := by
+  simp only [probe]
+  split
+  · exact Or.inr ⟨_, rfl⟩
+  · split
+    · next r _ => exact Or.inl ⟨r, rfl⟩
+    · refine Or.inr ⟨(gathered (fuse c u)).map (·.val) ++
+        [(respond catalog (pass (fuse c u))).val], ?_⟩
+      simp [pass]
+
 /-- An utterance that does not bear on this run — one that ends the probe or turns to other work —
     raises no round and closes nothing: the session's answer joins the context and the run goes
     on as it stood. -/
@@ -61,14 +82,14 @@ private theorem probe_ne_notActivated (catalog : Catalog)
       · intro h; cases h
       · exact ih _
 
-/-- An invocation of the person's own always activates. -/
+/-- An invocation of the person's own always activates: the run never ends as not activated. -/
 theorem invocation_activates (catalog : Catalog) (respond : Catalog → Context P → Response P)
     (session : Context P → Response P) (c : Context P) (us : List (Utterance P))
-    (h : Invoked c) : start catalog respond session c us ≠ .notActivated c := by
+    (h : Invoked c) (d : Context P) : start catalog respond session c us ≠ .notActivated d := by
   have ha : Activated c := Or.inl h
   unfold start
   simp only [ha, ↓reduceIte]
-  exact probe_ne_notActivated catalog respond session c _ _
+  exact probe_ne_notActivated catalog respond session d _ _
 
 private theorem closing_cases (catalog : Catalog) (c : Context P) (r : RecognizedSituation P)
     (h : closing catalog c = some r) :
@@ -137,7 +158,7 @@ theorem none_shown_after_candidates (catalog : Catalog) (c : Context P)
 /-- After a short round only the person's own words close, and the recognition carries no shown
     candidates: it claims no comparison took place. -/
 theorem after_short_only_reworded (catalog : Catalog) (c : Context P) (r : RecognizedSituation P)
-    (n : Nat) (said : String) (h : closing catalog c = some r)
+    (n : Fin c.length) (said : String) (h : closing catalog c = some r)
     (hp : presented catalog c = some ⟨n, .short said⟩) :
     (∃ t, r.answer = .reworded t) ∧ r.shown = [] := by
   obtain ⟨_, -, -, -, hr, hk, hne⟩ := closing_cases catalog c r h
@@ -206,7 +227,7 @@ theorem recognized_only_by_person (catalog : Catalog) (respond : Catalog → Con
 
 private theorem shown_in_alternatives (catalog : Catalog) (c : Context P) (k : Candidate)
     (h : k ∈ shownIn catalog c) :
-    ∃ (n : Nat) (ls : List (Line (c.take n))) (two : 2 ≤ ls.length)
+    ∃ (n : Fin c.length) (ls : List (Line (c.take n))) (two : 2 ≤ ls.length)
       (distinct : (ls.map (·.candidate.situation)).Nodup),
       presented catalog c = some ⟨n, .alternatives ls two distinct⟩ ∧
       k ∈ ls.map (·.candidate) := by
@@ -242,7 +263,7 @@ theorem shown_only_from_alternatives (catalog : Catalog)
     (respond : Catalog → Context P → Response P) (session : Context P → Response P)
     (c : Context P) (us : List (Utterance P)) (r : RecognizedSituation P) (k : Candidate)
     (h : start catalog respond session c us = .recognized r) (hk : r.answer = .shown k) :
-    ∃ (c₀ : Context P) (n : Nat) (ls : List (Line (c₀.take n))) (two : 2 ≤ ls.length)
+    ∃ (c₀ : Context P) (n : Fin c₀.length) (ls : List (Line (c₀.take n))) (two : 2 ≤ ls.length)
       (distinct : (ls.map (·.candidate.situation)).Nodup),
       closing catalog c₀ = some r ∧
       presented catalog c₀ = some ⟨n, .alternatives ls two distinct⟩ ∧
@@ -255,12 +276,6 @@ theorem shown_only_from_alternatives (catalog : Catalog)
   obtain ⟨s₂, hs₂, hne⟩ := other_member _ k.situation distinct hlen
   obtain ⟨l, hl, rfl⟩ := List.mem_map.mp hs₂
   exact ⟨c₀, n, ls, two, distinct, hc₀, hp, hm, ⟨l, hl, hne⟩, fun l _ => l.grounded⟩
-
-/-- The next move is exactly what was shown and taken: a shown candidate carries the skill its line
-    showed, and the person's own words and none shown carry none. -/
-theorem next_move_exact (k : Candidate) (t : String) :
-    nextMove (.shown k) = k.skill ∧ nextMove (.reworded t) = none ∧ nextMove .noneShown = none :=
-  ⟨rfl, rfl, rfl⟩
 
 /-- A run hands off only where the person took a shown candidate whose line showed a skill. -/
 theorem invokes_only_taken_skill (o : Outcome P) :
