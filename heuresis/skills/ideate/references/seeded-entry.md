@@ -9,7 +9,7 @@ fixation risk the Blank-path gate exists to avoid does not apply the same way he
 
 How many derived frames the first pass opens is your judgment — enough to show the field
 widening, few enough that the round can be taken in. Every frame left closed shows on the
-map as unexplored, and a continue that names nothing opens all of them.
+map as unexplored; what a later continue opens is `targets` in SKILL.md.
 
 On the first pass the original seeds are promoted to candidates under the frame each lands
 in — each keeping the origin its seed carried (the user's own fragments as `person`) —
