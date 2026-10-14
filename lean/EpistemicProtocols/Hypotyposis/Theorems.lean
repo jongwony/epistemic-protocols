@@ -33,7 +33,8 @@ theorem relay_before_production (ai : AITurns P) (c : Context P) :
 
 theorem unrelated_adds_no_gate (ai : AITurns P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
-    sketch ai c (u :: us) = sketch ai (fuse c u ++ [(ai.session (fuse c u)).val]) us := by
+    sketch ai c (u :: us) =
+      sketch ai (settle (fuse c u) ++ [(ai.session (settle (fuse c u))).val]) us := by
   simp [sketch, h]
 
 /-- A turn that bears on the run, closes nothing, and calls for no version makes no version: the

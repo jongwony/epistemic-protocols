@@ -38,7 +38,8 @@ Hypotyposis(I) → start(c) → sketch(c, utterances), where c is the fused sess
     last answered, where each version is; your readings and contrary grounds, each with what it
     bears on and rests on → one opening → Stop
   next utterance u, read on fuse(c, u):
-    [does not bear on this run]   the session answers it; that answer stays in c; no gate of this run
+    [does not bear on this run]   what their words ask done to the versions, observed; the session
+                                  answers it; that answer stays in c; no gate of this run
     [the person recognizes v]     what their words ask done to the versions, observed → RecognizedForm
     [otherwise]                   what is gathered now enters c; a production where their turn
                                   calls for a version none shown embodies; what their words ask
@@ -287,9 +288,11 @@ def recordOf (c : Context P) : Record c :=
     on the run neither closes it nor answers its judgments. An utterance about other work leaves
     the run as it stands: the session answers it, that answer stays in the context, and no gate of
     this run is raised. Words that end the run without recognizing a version do not bear on it,
-    whatever else the turn says, and what else it says stands in its own words in the context: the
-    session answers them, no round is drawn, the run holds, and later turns bear on it only where
-    they come back to it. Where reading a turn as other work or as ending the run was unclear, the
+    whatever else the turn says, a request to write, move, or remove a version included: what they
+    ask done to the versions is carried out first, as `carriedOut` says, and what else they say
+    stands in its own words in the context; the session answers them, saying where each version is
+    as last observed, no round is drawn, the run holds, and later turns bear on it only where they
+    come back to it. Where reading a turn as other work or as ending the run was unclear, the
     session's answer says briefly that the run was left as it stands. -/
 axiom Reaches : Context P → Prop
 
@@ -434,16 +437,19 @@ def production (ai : AITurns P) (c : Context P) : Context P :=
   consulted (c₃ ++ (produce c₃).map (·.val))
 
 open Classical in
-/-- A turn about other work is answered by the session and leaves the run as it stands; a closing
-    is read from the person's turn before anything is gathered, and its record is built after what
-    that turn asked done is observed; otherwise what is gathered now enters the context, a
-    production runs where the turn calls for a version none shown embodies, what the turn asks
-    done to the versions is carried out, and the round follows. -/
+/-- A turn that does not bear on the run has what it asks done to the versions carried out, then
+    the session answers it, and the run holds; a closing is read from the person's turn before
+    anything is gathered, and its record is built after what that turn asked done is observed;
+    otherwise what is gathered now enters the context, a production runs where the turn calls for
+    a version none shown embodies, what the turn asks done to the versions is carried out, and the
+    round follows. -/
 def sketch (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
     let f := fuse c u
-    if ¬ Reaches f then sketch ai (f ++ [(ai.session f).val]) us
+    if ¬ Reaches f then
+      let f' := settle f
+      sketch ai (f' ++ [(ai.session f').val]) us
     else match filledValue (closing f) with
     | some (.recognize v) => .recognized (recognizedOn f v)
     | none =>
