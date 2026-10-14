@@ -1,6 +1,6 @@
 ---
 name: ideate
-description: "The idea field is empty, narrowed early, or thin; from the user's words and what they name, they can then look over one map — frames, branches, each idea's origin, what is unexplored — and take it."
+description: "Idea field empty, narrowed early, or thin: from the user's words and what they name, they look over one map — frames, branches, each idea's origin, what is unexplored — and take it, nothing chosen."
 ---
 
 # Heuresis Protocol
@@ -312,8 +312,9 @@ axiom Invoked : Context P → Prop
 /-- **Your judgment**: the latest utterance bears on this run. A turn that only turns to other
     work or only ends the run does not bear on it: the session answers it, no map is drawn, and no
     pass runs; what that turn says beside about the field — an exclusion, an idea, a park, a record
-    named as material — stands in the context. Later turns bear on a holding run only where they
-    come back to it. -/
+    named as material — stands in the context. With nothing to take, a taking said together with
+    other work or an ending goes with that work or ending. Later turns bear on a holding run only
+    where they come back to it. -/
 axiom Reaches : Context P → Prop
 
 /-- Once it has run, the person can look over one map of their idea field — each frame and the
