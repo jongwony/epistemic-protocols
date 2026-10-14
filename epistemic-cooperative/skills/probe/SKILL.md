@@ -1,307 +1,477 @@
 ---
 name: probe
-description: "Deficit Recognition Probe — surface multiple deficit hypotheses for the user's current situation and route by user-constituted recognition (fit review, not protocol scoring)."
+description: "Something feels off and the user cannot name what is stuck: the user can then say what it is — a shown candidate, their own words, or none shown — having seen what each rests on and what rules it out."
 user_invocable: true
 ---
 
 # Probe Skill
 
-Deficit Recognition Probe — when the user is uncertain which epistemic deficit (and therefore which protocol) fits the current situation, surface AI-generated multi-hypothesis candidates with reverse-evidence conditions, and route on user-constituted recognition. Type: `(DeficitUnrecognized, AI, RECOGNIZE, UserSituation) → ProtocolRoute`.
-
-Invoke directly with `/probe` when the user wants a fit review across the protocol catalog before committing to a single protocol invocation. The AI may also surface these hypotheses on its own when it detects genuine deficit-ambiguity — offered as a low-confidence horizon for the user's fusion, not a covert frame (Rule 1); explicit invocation is one entry, not the only one.
+Resolve a sense that something is off, before the person can name what is stuck, into a situation they recognize, through grounded candidates for what is stuck. Type: `(DeficitUnrecognized, AI, RECOGNIZE, UserSituation) → RecognizedSituation`.
 
 ## Definition
 
-**Probe** (ἐπίγνωσις, *epígnōsis*: knowing-upon, recognition of what was already there): A dialogical act of resolving a user's vague sense that "something is off" into a recognized deficit + protocol route, where AI scans the user's recent situation against the catalog of epistemic deficits, presents at minimum two hypotheses with falsification conditions, and the user constitutes the route via recognition — never AI-resolved scoring.
+**Probe** (ἐπίγνωσις, *epígnōsis*: knowing-upon, recognition of what was already there): A dialogical act of turning a person's sense that something is off into a situation they recognize. AI reads the present situation and the descriptions of the other installed skills, and shows the candidates the ground carries for what is stuck, at least two where it carries them — each a description of the situation resting on turns of it that it cites, with the condition that would rule it out, the installed skill that takes it where one does, and that skill's declared end where its description declares one. The person takes one shown candidate, puts the situation in their own words, or says none shown is theirs; that recognition is what the run yields, and no score, ranking, or reading of the AI's makes it. Where the ground carries only one, AI shows that one and says it carries no second rather than inventing one; where it carries none, AI says so. Taking a shown candidate whose line showed a skill takes that skill's invocation with it, unless the person declines the run.
 
-This skill stands in structural homology with Anamnesis (`/recollect`) — both realize the RECOGNIZE operation family. Anamnesis recognizes past context from vague recall; Probe recognizes present-situation deficit from vague unease. Anamnesis output is `RecalledContext`; Probe output is `ProtocolRoute`. Both treat user recognition as the constitutive act and refuse AI-side resolution.
+```lean
+/-!
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract.
+-/
 
-## When to Use
+/-! ── FLOW ──
+Probe(U) → start(catalog, c) → probe(catalog, c, utterances), where c is the fused session
+context and catalog is as `Catalog` states, read once when the run starts:
+  [no unrecognized deficit, and the person did not invoke this]  nothing is shown; not activated
+  pass(c): what `gathered` reads enters the context; the situation is read against the catalog
+  [the ground carries two or more candidates]  present them → Stop
+  [it carries fewer]                           say so, with the one line it carries, if any,
+                                               and what more of the situation would help → Stop
+  next utterance u: c' := fuse(c, u) →
+    [u is the person's own invocation of this probe]  this run holds where it stood; the
+      invocation is `start`'s
+    [u does not bear on this run]  as `Reaches` states; the session answers it
+    [a turn of the person's is still owed]  no answer closes → pass(c') → a round that serves it
+    [u takes a shown candidate, puts the situation in their own words, or says none shown is
+     theirs]  close: recognized → the hand-off `invokedBy` names
+    [otherwise] u is more of the situation — a narrower slice, a correction, a candidate set
+      aside, a question, a read beyond the session admitted → pass(c') → the same reading
+  no utterance: the round holds; nothing is recognized and nothing closes
+-/
 
-Invoke this skill when:
-- The user feels something is off but does not yet name which epistemic deficit fits
-- A protocol invocation is being considered, and the user wants a fit review across alternatives before committing
-- Multiple plausible routes coexist (e.g., "is this a goal problem or a context problem?") and the user wants the alternatives surfaced explicitly with their reverse-evidence conditions
+/-! ── MORPHISM ──
+UserSituation
+  → detect(deficit_unrecognized)   -- something is off and what is stuck goes unnamed; an invocation of the person's own activates on its own
+  → read(catalog)                  -- as `Catalog` states, once at the start; the contract names no skill and no deficit
+  → draw(candidates, situation)    -- descriptions of the situation, each resting on turns it cites, each with what would rule it out
+  → present(candidates)            -- grounds, then the rules-out condition, then the skill and its declared end; contrary grounds; the turn yields
+  → recognize(situation, person)   -- a shown candidate, the person's own words, or none shown: the person's observable act
+  → emit(RecognizedSituation)      -- the answer, what the round showed, the contrary grounds closed over, and the recognizing turn, as session text
+  → RecognizedSituation
+requires: deficit_unrecognized(U) ∨ invoked(U)   -- runtime checkpoint, read by `start` before the first pass
+deficit:  DeficitUnrecognized                    -- activation precondition
+preserves: the catalog                           -- read, never written; the context only grows
+invariant: Recognition over Resolution
+-/
 
-Skip when:
-- The deficit is already named with confidence (invoke the matching protocol directly)
-- The user wants pattern-based recommendation from session history with optional trial (use `/onboard`)
+namespace Probe
+
+/-! ── GROUND ──
+The session primitive this contract reads.
+-/
+
+inductive Origin | person | assistant | external | peer | injected | unknown
+  deriving DecidableEq
+
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
+structure Turn (P : Type) where
+  origin  : Origin
+  content : P
+
+abbrev Context (P : Type) := List (Turn P)
+
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
+
+/-- Any turn a person sent, whatever it does. -/
+def Utterance (P : Type) := {e : Turn P // e.origin = .person}
+def Response (P : Type) := {e : Turn P // e.origin = .assistant}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
+
+def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
+
+/-- One turn of the context, with the origin it grounds on. -/
+structure Cite {P : Type} (c : Context P) where
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
+
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
+structure Coord (P A : Type) where
+  admits   : Grounding → Prop
+  supports : Context P → Turn P → A → Prop
+
+/-- `open_` may carry a candidate citation whose support is still short. -/
+inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
+  | open_  (candidate : Option (Cite c))
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
+      (supported : q.supports c (c[src.idx]'src.lt) a)
+
+/-- The same turn, cited from a longer context; what it supports is judged again against the
+    context that now stands. -/
+def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
+  { idx := s.idx
+    lt := by have := s.lt; simp; omega
+    src := s.src
+    ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
+
+/-! ── TYPES ── -/
+
+noncomputable section
+
+variable {P : Type}
+
+/-- `U`: the person's present situation — their utterances and the context they stand in. What is
+    stuck is read from it, never stored beside it. -/
+abbrev UserSituation (P : Type) := Context P
+
+/-- One installed skill as the session lists it: its name and its description. -/
+structure CatalogEntry where
+  skill       : String
+  description : String
+
+/-- The installed skills' descriptions, read as they stand when the run starts and never written:
+    `entries`, every installed skill other than this probe's own, and `self`, this probe's own
+    entry, whose skill no entry names. This contract lists no skill and no deficit of its own. -/
+structure Catalog where
+  entries  : List CatalogEntry
+  self     : CatalogEntry
+  excludes : ∀ e ∈ entries, e.skill ≠ self.skill
+
+/-- **Your reading** of a description: the end it declares — what the person can say or recognize
+    once that skill has run — or `none` where it declares none. Nothing is written in where a
+    description is silent, and a skill whose description declares no end keeps its candidacy. -/
+axiom declaredEnd : CatalogEntry → Option String
+
+/-- A candidate for what is stuck: one description of the situation, and the installed skill that
+    takes it where one does. -/
+structure Candidate where
+  situation : String
+  skill     : Option CatalogEntry
+
+/-- The end a candidate's line shows: its skill's declared end, and none where it has no skill or
+    the skill's description declares none. -/
+def Candidate.ending (k : Candidate) : Option String := k.skill.bind declaredEnd
+
+/-- **Your judgment**: the cited turn carries this about the situation, read against the context as
+    it now stands — what the person said, or what a read returned. -/
+axiom ClaimSupported : Context P → Turn P → String → Prop
+
+/-- One thing the situation shows, with the turn that carries it. -/
+structure Claim (c : Context P) where
+  text      : String
+  src       : Cite c
+  supported : ClaimSupported c (c[src.idx]'src.lt) text
+
+/-- One line of a presentation: a candidate whose skill, if any, is one the catalog holds, what in
+    the situation it rests on — one cited turn at least — and the condition that would rule it
+    out, which may be one not yet observed. -/
+structure Line (catalog : Catalog) (c : Context P) where
+  candidate : Candidate
+  inCatalog : ∀ e, candidate.skill = some e → e ∈ catalog.entries
+  grounds   : List (Claim c)
+  grounded  : grounds ≠ []
+  rulesOut  : String
+
+/-- What a round showed. -/
+inductive Presentation (catalog : Catalog) (c : Context P)
+  /-- two or more candidates side by side, no two lines with the same situation text, each line
+      with its grounds, its rules-out condition, and its `ending` -/
+  | alternatives (lines : List (Line catalog c)) (two : 2 ≤ lines.length)
+      (distinct : (lines.map (·.candidate.situation)).Nodup)
+  /-- the ground carried fewer than two: said as such, with the one line it carries where it
+      carries one, laid out like any other line, and what more of the situation would help -/
+  | short (line : Option (Line catalog c))
+
+/-- The lines a round showed: one or none in a short round. -/
+def Presentation.lines {catalog : Catalog} {c : Context P} :
+    Presentation catalog c → List (Line catalog c)
+  | .alternatives ls _ _ => ls
+  | .short l             => l.toList
+
+/-- The candidates a round offered to take. -/
+def Presentation.shown {catalog : Catalog} {c : Context P} (p : Presentation catalog c) :
+    List Candidate :=
+  p.lines.map (·.candidate)
+
+/-- **Your reading**: your latest presentation as it was shown, read from that response, on the
+    context it was shown on — the first `n` turns of `c`, a strict prefix; what was shown, not
+    what you meant to show; `none` before any. -/
+axiom presented : (catalog : Catalog) → (c : Context P) →
+    Option (Σ n : Fin c.length, Presentation catalog (c.take n))
+
+/-- The candidates the latest round offered to take. -/
+def shownIn (catalog : Catalog) (c : Context P) : List Candidate :=
+  ((presented catalog c).map (·.2.shown)).getD []
+
+/-- **Your record**: your contrary grounds bearing on what the latest utterance recognizes — the
+    candidate it takes, or the person's own wording — each with what it bears on and what it rests
+    on, attached where the person recognizes over them; raised again only on new evidence. Empty
+    when there are none. -/
+axiom dissent : Context P → List String
+
+/-- How a person's turn recognizes what is stuck. Premise: one utterance carries one of these or
+    none; whatever else it says is more of the situation — read by the next pass where the turn
+    closes nothing, and left in the context where it closes. -/
+inductive Answer
+  /-- the person takes a shown candidate as their situation; `run` is whether this probe is to
+      run the skill its line showed — true where the turn neither declines that run nor itself
+      invokes that skill, since the line said that taking the candidate runs that skill -/
+  | shown (k : Candidate) (run : Bool)
+  /-- the person says what is stuck in their own words -/
+  | reworded (situation : String)
+  /-- the person says none of the shown candidates is theirs -/
+  | noneShown
+
+/-- **Your judgment**: the cited turn recognizes the situation this way, read whole against the
+    context as it now stands. A candidate is taken where the turn says it is theirs or goes on with
+    it as theirs, and its `run` is read from whether the turn declines the skill's run or itself
+    invokes that skill; a rewording stands as they said it, beside any contrary ground and never
+    replaced by yours, and "none of these" together with what is stuck in their own words is a
+    rewording. Uncertainty, a hypothetical use, a question about a candidate, and silence recognize
+    nothing, and your readings, scores, and rankings fill nothing. -/
+axiom AnswerSupported : Context P → Turn P → Answer → Prop
+
+/-- Only the person recognizes. -/
+def answerCoord : Coord P Answer :=
+  { admits := (·.val = .person), supports := AnswerSupported }
+
+/-- **Your reading** of the latest utterance: `open_` where it recognizes nothing. -/
+axiom answer : (c : Context P) → Occ (answerCoord (P := P)) c
+
+/-- **Your reading**, on the present turn: the person invoked this probe themselves; an earlier
+    invocation does not keep it on. -/
+axiom Invoked : Context P → Prop
+
+/-- **Your judgment**, on the present turn: the person senses something is off and does not name
+    what is stuck — symptoms described in place of it, hesitation between skills, "which one fits
+    this?". An earlier probe does not keep this on; each occasion is read afresh, and a round the
+    person just passed over or ended is not raised again unbidden — it is read as received. A
+    request for a recommendation drawn from session history is not this. While a run of this
+    probe holds, no unsolicited probe starts: what bears on what is stuck is that run's, as
+    `Reaches` reads it. -/
+axiom DeficitUnrecognized : Context P → Prop
+
+def Activated (c : Context P) : Prop := Invoked c ∨ DeficitUnrecognized c
+
+/-- **Your judgment**: the latest utterance bears on this run — a recognition, more of the
+    situation, a question about a candidate, a correction, a read beyond the session admitted —
+    judged on what the whole utterance does, read on the context with it. An utterance that ends
+    the probe or turns to other work leaves the run as it stands: the session answers it, that
+    answer stays in the context, no round of this run is raised, and nothing closes. Once the
+    person has ended the probe, or passed over a round they did not ask for, a later utterance
+    bears on this run only where it reopens it. -/
+axiom Reaches : Context P → Prop
+
+/-- **Your reading**: a turn of the person's is still owed before a recognition closes — read on the
+    context as it now stands, the latest utterance included. Guidance for the reading, not cases it
+    must check: contrary grounds of yours the person has not closed over, any the latest utterance
+    itself raises against what it takes among them — a fact it states that meets the taken
+    candidate's rules-out condition, or a remedy it says was already tried; a reply whose reading
+    their words have not settled — after a short round, whether it takes the line shown, gives more
+    of the situation, or is their own wording of what is stuck. Where a turn is owed, no answer
+    closes, and the next round serves it. -/
+axiom Owed : Context P → Prop
+
+/-- Once it has run, the person can say what is stuck right now — one shown candidate, their own
+    rewording, or none of those shown — having seen what in the situation each candidate rests on,
+    what would rule it out, and what taking it would let them say.
+    `RecognizedSituation`, emitted as session text: the person's answer, the candidates the round
+    it answered offered — one or none after a short round, where no comparison is claimed — your
+    contrary grounds it closed over, and the turn that recognized it. -/
+structure RecognizedSituation (P : Type) where
+  context      : Context P
+  answer       : Answer
+  shown        : List Candidate
+  dissent      : List String
+  recognizedAt : Nat
+
+/-- The move a recognition takes with it: taking a shown candidate whose line showed a skill, with
+    its run, takes that skill's invocation; a declined run, a rewording, and `noneShown` carry
+    none. It claims no fit beyond the person's recognition. -/
+def nextMove : Answer → Option CatalogEntry
+  | .shown k true => k.skill
+  | _             => none
+
+inductive Outcome (P : Type)
+  | notActivated (c : Context P)
+  /-- the person recognized their situation — a shown candidate, their own words, or none of
+      those shown -/
+  | recognized (r : RecognizedSituation P)
+  | holding (c : Context P)
+
+/-! ── MODE STATE ──
+Λ is the fused context, and the catalog is the run's parameter, read once at start; every reading
+above is taken from these. No phase, count, or set of candidates set aside is stored.
+-/
+
+abbrev Mode (P : Type) := Context P
+
+/-! ── PHASE TRANSITIONS ──
+The catalog is read once at start [Tool]. A pass appends what `gathered` reads [Tool]; `respond`
+presents one round from the context it leaves; the person's own invocation of this probe ends this
+run holding where it stood, being `start`'s; `session` answers an utterance `Reaches` does not hold
+of. Each utterance is fused; where `Reaches` holds and no turn of the person's is owed, a
+recognition closes, and anything else `Reaches` holds of is read by the next pass.
+-/
+
+/-- **Your collection** for one pass. The situation is the current session, and the files and
+    records the person pointed at in it are read in the pass; a read beyond them — earlier
+    sessions, or files and records they have not pointed at — is offered in a round with what it
+    would read, and runs only once a person's turn admits it. What the context already holds from
+    a read is not read again unless an utterance or evidence says it changed. Each read returns as
+    an evidence turn; nothing is written. -/
+axiom gathered : Context P → List (Evidence P)
+
+def pass (c : Context P) : Context P := c ++ (gathered c).map (·.val)
+
+open Classical in
+/-- The person's recognition, read from the latest utterance against the round before it: a
+    shown candidate only where that round offered it, `noneShown` only where a round offered
+    candidates, and the person's own words in any case. -/
+def closing (catalog : Catalog) (c : Context P) : Option (RecognizedSituation P) :=
+  let shown := shownIn catalog c
+  match answer c with
+  | .open_ _ => none
+  | .filled a s _ _ =>
+    if s.idx + 1 = c.length then
+      match a with
+      | .shown k b =>
+        if k ∈ shown then
+          some ⟨c, .shown k b, shown, dissent c, s.idx⟩
+        else none
+      | .noneShown =>
+        if shown = [] then none
+        else some ⟨c, .noneShown, shown, dissent c, s.idx⟩
+      | .reworded t => some ⟨c, .reworded t, shown, dissent c, s.idx⟩
+    else none
+
+open Classical in
+/-- `respond` presents the round a pass leaves, as a horizon the person may take, reword, or set
+    aside, never as the answer. Where the ground carries two or more candidates, drawn from
+    different readings of the situation: each line its candidate's description of the situation,
+    then what it rests on, each ground with the turn it cites, then the condition that would rule it
+    out, then the skill that takes it, saying that taking the candidate runs that skill, and that
+    skill's declared end where its description declares one — after the evidence, never as evidence
+    of fit, and reading "as above" on a later line with the same skill. Each line's grounds are
+    given with the same care and specificity, and nothing in the layout favors one line. Where it
+    carries one: that line, laid out as any line is, saying the ground carries no second; where it
+    carries none: say so; either way, what more of the situation would help. Every round shows the
+    contrary grounds you hold, what a turn of the person's is owed for where one is owed, and,
+    wherever one would help, the read beyond the session `gathered` would offer, with what it would
+    read; then the turn yields to a free answer — a candidate, their own words, none of these, or
+    more of the situation — with no option list. A question about the shown candidates, and a round
+    serving an owed turn, keep that round's candidates as they were shown beside what is answered or
+    owed; they are redrawn only where the ground moved for another reason, and a candidate the
+    person said is not theirs is drawn again only on new ground. Throughout, the wording is
+    tentative and speaks of fit. -/
+def probe (catalog : Catalog) (respond : Catalog → Context P → Response P)
+    (session : Context P → Response P) : Context P → List (Utterance P) → Outcome P
+  | c, []      => .holding c
+  | c, u :: us =>
+    let c' := fuse c u
+    if Invoked c' then .holding c
+    else if ¬ Reaches c' then probe catalog respond session (c' ++ [(session c').val]) us
+    else
+      match (if Owed c' then none else closing catalog c') with
+      | some r => .recognized r
+      | none =>
+        let c₁ := pass c'
+        probe catalog respond session (c₁ ++ [(respond catalog c₁).val]) us
+
+open Classical in
+def start (catalog : Catalog) (respond : Catalog → Context P → Response P)
+    (session : Context P → Response P) (c : Context P) (us : List (Utterance P)) : Outcome P :=
+  if Activated c then
+    let c₁ := pass c
+    probe catalog respond session (c₁ ++ [(respond catalog c₁).val]) us
+  else .notActivated c
+
+/-! ── LOOP ──
+The loop is dialogue: each round ends where the turn yields, and nothing counts down. Every
+utterance `Reaches` holds of that closes nothing is read whole by the next pass — a narrower
+slice of the situation, a correction, a candidate set aside, a question, a read beyond the session
+admitted, a turn that was owed — and the pass reads the situation again on the context as it now
+stands. No number of rounds ends the probe; the person's recognition does, and without it the
+round holds.
+-/
+
+/-! ── CONVERGENCE ──
+recognized: the person's turn took a shown candidate, put the situation in their own words, or
+said none shown is theirs; the RecognizedSituation carries the answer, what the round it answered
+offered, the contrary grounds it closed over, and which turn recognized it — quoted in the trace
+with the intent taken from it, and how the turn was read — the candidate taken; whether this
+probe runs its skill, the person declined its run, or the person's own turn invoked it; and what
+will now run — relayed before any hand-off. What it hands
+off is `invokedBy`'s.
+Convergence evidence: (UserSituation → [rounds] → Candidates(grounds, rules-out, ends) →
+recognition → RecognizedSituation). Demonstrated, not asserted.
+-/
+
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented.
+-/
+
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
+
+inductive Op | detect | catalog | gather | draw | present | short | readTurn | converge | invoke
+
+def grounding : Op → Annot × String
+  | .detect   => (.sense, "Internal analysis: whether the person senses something is off without naming what is stuck; an invocation of their own activates without it")
+  | .catalog  => (.observe, "artifact read, once at start: the descriptions of the installed skills other than this probe's own, as the session lists them, read where they are installed when the listing does not carry one; read-only")
+  | .gather   => (.observe, "artifact read, record read: what the person pointed at in the session, and reads beyond it a person's turn admitted; read-only")
+  | .draw     => (.sense, "Internal analysis: candidates drawn from different readings of the situation, each grounded in turns it cites, with the condition that would rule it out and the skill from the catalog that takes it")
+  | .present  => (.interaction .constitution, "two or more candidates, each line with its description, cited grounds, rules-out condition, and skill with its declared end, as `respond` lays them out; your contrary grounds; a free answer, with no option list and no ranking")
+  | .short    => (.interaction .constitution, "the ground carries fewer than two candidates: said as such, with the one line it carries, if any, as `respond` lays it out, and what more of the situation would help")
+  | .readTurn => (.sense, "Internal analysis: whether the latest utterance is the person's own invocation of this probe, as `Invoked` reads it, whether it bears on this run, as `Reaches` reads it, whether a turn of the person's is still owed, as `Owed` reads it, and what it does there — a shown candidate taken, with or without its run, the person's own words, none shown, or more of the situation — read whole against the fused context")
+  | .converge => (.interaction .extension, "RecognizedSituation, relayed before any invocation as CONVERGENCE states")
+  | .invoke   => (.dispatch, "invoke: after the trace, in the same turn, the skill nextMove names — the person's taking a line that disclosed its run is their invocation of that skill — with the recognized situation in the session; then this run ends")
+
+/-- The operation a run hands off through: a recognition whose `nextMove` names a skill invokes it
+    by `.invoke`; any other outcome hands nothing off. -/
+def invokedBy : Outcome P → Option Op
+  | .recognized r => (nextMove r.answer).map fun _ => .invoke
+  | _             => none
+
+/-! ── COMPOSITION ──
+The recognized situation stays in the session as text for whatever runs next to read. The one
+hand-off is `invokedBy`'s, to a skill the catalog held and the person's taking carried; no other
+contract is named here.
+-/
+
+end
+
+end Probe
+```
+
+## Mode Activation
+
+`/probe` is directly invocable, and an invocation of the person's own always activates; an earlier run left holding ends there, as `probe` states. With no situation recoverable from the context, the first round is the short one, asking for more of it. Unsolicited, it surfaces only on what `DeficitUnrecognized` reads.
 
 ## Distinction from /onboard
 
 | Skill | Stance | Input | Output |
 |-------|--------|-------|--------|
 | `/onboard` | Pattern-based recommendation + optional trial | Session history patterns | Recommended protocol + scenario + trial |
-| `/probe` | Active AI-hypothesized deficit recognition | Current user situation | At minimum two hypothesis candidates + user-constituted route |
+| `/probe` | Grounded candidates for what is stuck, recognized by the user | Current user situation | The situation the user recognizes — a shown candidate, their own words, or none shown |
 
-The two coexist by design — neither replaces the other. Probe is for experienced users with frame-binding uncertainty; `/onboard` is for users who want pattern-based learning.
-
-## Protocol
-
-### Phase 0: Detection
-
-Detect that the user's situation admits ambiguous deficit framing. Heuristics:
-
-- The user's request describes symptoms ("something feels off", "not sure which protocol") rather than naming a deficit
-- The session shows a pattern that maps to two or more candidate deficits with comparable plausibility
-- The user explicitly invokes `/probe`
-
-Phase 0 detection is silent — internal analysis, no output of its own. On a positive detection the protocol may proceed to surface the hypothesis horizon (Phase 1–2) without waiting for an explicit `/probe`, provided the surface is horizon-marked (Rule 1). If detection fails (the deficit is already clearly named with confidence), deactivate without surfacing.
-
-### Phase 1: Catalog Scan
-
-Scan the user's situation against the full catalog of epistemic deficits. For each candidate hypothesis, build a `Set(CoverageEntry)` where each entry pairs:
-
-- A `deficit: DeficitName` matched against the situation
-- The `protocol: ProtocolId` that addresses that deficit
-- `evidence: Evidence` — the situation signal supporting the match
-- `reverse_evidence: Evidence` — the observation that would shrink the coverage to exclude this entry
-- `end: Optional(String)` — the protocol's declared end: what the user can then say or recognize once it has run, read from that protocol's own description at scan time. Absent where the description states none; an absent end leaves the entry's candidacy unchanged.
-
-A hypothesis with `|coverage| = 1` is a single-protocol projection (preserves prior single-protocol behavior). A hypothesis with `|coverage| ≥ 2` is a set-valued coverage — multi-protocol projection within one hypothesis. This intra-hypothesis multi-protocol projection is structurally distinct from the inter-protocol composition defined in the `── COMPOSITION ──` block; do not conflate the two.
-
-When `Λ.coverage_constraint` is set (from a prior `Narrow(CoverageSubset)`), filter the scan output to hypotheses whose coverage protocol set intersects with the constraint — this preserves user-directed narrowing across re-scan iterations.
-
-Construct the candidate set. Keep at minimum two candidates with non-overlapping reverse-evidence conditions — singleton high-confidence framing is forbidden (see Rules section, Rule 5).
-
-**Intent-decoding disambiguation** (Rule 18): Before defaulting a candidate to a missing-information framing (e.g., ContextInsufficient/`/inquire`), check Euporia's own deficit (`aporia`, `euporia/skills/elicit/SKILL.md`): the user holds a direction but has not fixed which decisions it turns on. The undetermined decision may show in the user's own utterance, in evidence within Probe's scope — current-session evidence (Rule 3 default scope), the user's own codebase, project rules or Northstar documents, or environment (cross-session recall stays opt-in per Rule 4) — or in the decision structure of the domain the intent sits in. When it holds, include AbstractAporia (`/elicit`) in the candidate set — a decision the user has not named is intent-decoding, not external-fact supply, and belongs to `/elicit` rather than `/inquire`. A missing fact the work needs, with the intent itself settled, still routes to `/inquire`.
-
-**Single-pass routing scope**: Phase 1 enumerates named deficits across the catalog as a one-shot fit review. Per-protocol convergence dynamics — including the rounds within a protocol such as `/elicit` — remain internal to that destination protocol; Probe does not surface, measure, or aggregate convergence efficiency across uses (Rule 7 reinforcement; how rounds are shown is the destination protocol's surface, not Probe's).
-
-### Phase 2: Hypothesis Presentation
-
-Present the candidate hypotheses as text output before the Constitution interaction. Each protocol block under `Coverage:` renders one `CoverageEntry` (deficit, protocol, evidence, reverse_evidence, optional end), applying Rule 19's omission and once-per-protocol display. Format per hypothesis:
-
-```
-Hypothesis N — N interpretations possible / decision point is X
-  Coverage:
-    /<protocol_a> (<DeficitName>):
-      Evidence: <quote or paraphrase>
-      Reverse-evidence: <observation that would shrink coverage to exclude this entry>
-      Afterward: <the protocol's declared end, as its description states it>
-    /<protocol_b> (<DeficitName>):
-      Evidence: <...>
-      Reverse-evidence: <...>
-      Afterward: <...>
-  (Singleton |coverage|=1: render the single CoverageEntry as one protocol line, equivalent to prior single-protocol format)
-  (No declared end: omit the Afterward line. A protocol already shown with its end: "Afterward: as above")
-```
-
-**Declared end follows the evidence** (Rule 19): the `Afterward` line comes after Evidence and Reverse-evidence, so the user reads whether the situation fits before reading what the protocol would leave them with. The end is the protocol's own statement of its resolution — it is not evidence that the deficit fits, and an attractive end does not outweigh reverse-evidence.
-
-**Coverage option-set minimality**: When `|coverage| ≥ 2`, coverage subsets are NOT enumerated as additional options — the per-entry Evidence and Reverse-evidence within the Coverage block serve as the short descriptions that guide singleton selection. The user invokes a singleton through free response or `Narrow(CoverageSubset)`. This preserves option-set minimality and induces the Hermeneutic circle through iterative user-initiated dialogue rather than AI-side menu expansion. (This contextual rule informs the gate decision and therefore precedes the gate options.)
-
-The hypothesis surface above offers a candidate horizon of the deficit space — open to your recognition, redirection, or transcendence, not a settled answer. Present the recognition Constitution interaction as a free-response prompt:
-
-```
-Which hypothesis fits your present situation?
-
-Free response — the disposition is constituted by the user's natural utterance.
-Recognition / Redirect / Dismiss / Narrow scope / Stop are all reachable via free response; no typed selection is required.
-```
-
-The disposition field belongs to the user. AI does not score, rank, or pre-resolve the choice. Free response preserves the user's implicit freedom to respond beyond any anticipated typed options — this freedom is inherent in conversation turn structure: gated does not mean unstructured; it means the user's response is constitutive (Rule 12 Recognition over Recall, inscribed in this SKILL.md; and evidence is presented as text output before the gate rather than folded into it).
-
-### Phase 3: Route Integration
-
-After user response (free-response utterance from Phase 2):
-
-**Free-response parse**: Phase 3 resolves the utterance to the R coproduct constructor whose semantic intent most closely matches — affirmative adoption of a presented hypothesis routes to `Recognize`, alternative deficit/protocol nomination routes to `Redirect`, rejection of all hypotheses routes to `Dismiss`, scope restriction (situation slice or coverage subset) routes to `Narrow`, and exit signal routes to `Stop`. The presented hypotheses serve as the recognition substrate; no typed selection is required. When the utterance does not unambiguously resolve into a single constructor, Phase 3 issues one bounded re-prompt requesting clarification; persistent ambiguity after the bounded retry defaults to `Stop` to preserve the user's exit-without-disposition right.
-
-**Disposition handling**:
-
-- **Recognize**: Emit the recognized route as session text, carrying `target_coverage: Set(CoverageEntry)` — each entry pairs a deficit with its protocol, plus the supporting evidence and reverse-evidence. The user may invoke any subset of coverage protocols; the constituted recognition record covers the entire coverage set.
-- **Redirect**: Record the user-named deficit/protocol as the recognized route. AI does not contest user redirection.
-- **Dismiss**: Emit a short fit-review note recording that none of the presented hypotheses fit. No protocol is recommended.
-- **Narrow scope** — branches by argument type (distinct semantics):
-  - `Narrow(s: Slice)`: User restricts the situation scope (e.g., a specific decision, file, conversation slice). Rebind `U.session_slice ← s`, clear `Λ.dismissed_in_session` (new scope justifies fresh dismissals), and re-run Phase 1.
-  - `Narrow(s: CoverageSubset)`: User restricts the protocol set of the selected hypothesis without changing situation scope. Write `Λ.coverage_constraint ← s`, preserve `Λ.dismissed_in_session` (situation unchanged), and re-run Phase 1 — Scan filters output to hypotheses whose coverage protocols intersect `s`. Compound-filter exhaustion: if `|H[]| < 2` cannot be satisfied after both `Λ.coverage_constraint` and `Λ.dismissed_in_session` filters apply, surface a fit-review note explaining the constraint combination and deactivate (explicit handling for the compound case; do not rely on the generic `narrow_iterations ≥ 3` exhaustion path alone).
-- **Stop**: Deactivate without disposition.
-
-No cumulative score, grade, or ranking is produced or stored across uses.
-
-```
-── FLOW ──
-Probe(U) → Detect(U) →
-  named_deficit(U): skip → deactivate
-  vague_deficit(U): Scan(U, Catalog, Λ.coverage_constraint) → H[] →           -- each h ∈ H[] carries Set(CoverageEntry), |coverage|≥1
-    |H[]| < 2: enrich Scan or expand Catalog window → re-scan
-    |H[]| ≥ 2: present(H[]) → Qc(H[]) → Stop → utterance → parse → R →
-        Recognize(h):     emit(ProtocolRoute(h.coverage)) → converge            -- target_coverage = h.coverage : Set(CoverageEntry)
-        Redirect(d):      emit(ProtocolRoute(d)) → converge
-        Dismiss:          emit(FitReviewNote(no_fit)) → converge
-        Narrow(s: Slice): rebind(U.session_slice, s) → clear(Λ.dismissed_in_session) → Phase 1
-                          -- new situation scope justifies clearing dismissals
-        Narrow(s: CoverageSubset): write(Λ.coverage_constraint, s) → Phase 1
-                          -- coverage filter only; situation scope unchanged; dismissals preserved
-        Stop:             deactivate
-
-── MORPHISM ──
-UserSituation
-  → detect(vague_deficit)             -- recognize that a deficit is implied but not named
-  → scan(situation, Catalog, Λ.coverage_constraint)
-                                      -- enumerate candidate hypotheses as Set(CoverageEntry); set-valued coverage
-                                      --   (multi-protocol projection within a hypothesis is structurally distinct
-                                      --    from inter-protocol composition defined in the COMPOSITION block)
-  → present(H[], multi_hypothesis)    -- surface offered as one horizon for the user's fusion (marked: low-confidence + per-entry reverse-evidence + transcendable); the user's recognition, not the surface, is constitutive
-  → recognize(h, user)                -- user adopts h.coverage as a whole; refinable via Narrow(CoverageSubset)
-  → emit(ProtocolRoute | FitReviewNote)   -- ProtocolRoute carries target_coverage as Set(CoverageEntry)
-  → ProtocolRoute | FitReviewNote
-requires: vague_deficit(U)             -- activation precondition: a detected vague deficit; on detection the surface may follow as a marked horizon (Rule 1), invoked or AI-initiated
-deficit:  DeficitUnrecognized          -- activation precondition
-preserves: Catalog                     -- catalog read-only; U is rebindable on Narrow
-invariant: Recognition over Resolution
-
-── TYPES ──
-U                = UserSituation { utterance: String, session_slice: Optional(Slice) }
-Catalog          = Set(DeficitEntry)               -- all named deficits + Emergent
-DeficitEntry     = { deficit: DeficitName, protocol: ProtocolId,
-                     trigger_signal: String, reverse_evidence_template: String,
-                     end: Optional(String) }
-                   -- end: populated from the protocol's own declared description when Catalog is built for this scan;
-                   --   absent where none is declared; Scan leaves Catalog unchanged
-Evidence         = String                           -- quoted or paraphrased situation evidence
-CoverageEntry    = { deficit: DeficitName, protocol: ProtocolId,
-                     evidence: Evidence, reverse_evidence: Evidence,
-                     end: Optional(String) }       -- copied from the DeficitEntry; presented after the evidence
-                   -- per-protocol unit; deficit label is co-located with its protocol (no top-level deficit set)
-Hypothesis       = { coverage: Set(CoverageEntry) } -- |coverage| ≥ 1
-                   -- |coverage|=1: singleton hypothesis (single-protocol projection)
-                   -- |coverage|≥2: set-valued coverage (multi-protocol projection within one hypothesis)
-H[]              = List(Hypothesis)                 -- |H[]| ≥ 2 invariant
-Scan             = (UserSituation, Catalog, Optional(Set(ProtocolId))) → H[]
-                   -- third argument is Λ.coverage_constraint; when set, output is filtered to hypotheses
-                   --   whose coverage protocol set intersects with the constraint
-CoverageSubset   = Set(ProtocolId)                  -- 0 < |CoverageSubset| < |selected.coverage|
-                   -- non-empty proper subset of a selected hypothesis's coverage protocols
-Qc               = present each entry's evidence and reverse-evidence, followed by its declared end when present
-                   and not yet shown for that protocol in this presentation;
-                   free-response Constitution interaction (Phase 3 parses utterance into R)
-R                = Recognition ∈ {Recognize(Hypothesis),                  -- adopts entire coverage
-                                  Redirect(DeficitName | ProtocolId),
-                                  Dismiss,
-                                  Narrow(Slice | CoverageSubset),         -- distinct semantics per variant; see FLOW
-                                  Stop}
-ProtocolRoute    = session text { target_coverage: Set(CoverageEntry) }    -- |target_coverage| ≥ 1
-                   -- recognized_deficits = π_deficit(target_coverage); evidence_trace = π_evidence(target_coverage)
-                   --   (derived projections, not separate fields)
-FitReviewNote    = session text { presented_hypotheses, dismissed: true }
-DeficitName      ∈ {BoundaryUndefined, ContextInsufficient,
-                    MappingUncertain, AbstractionInProcess, AbstractAporia,
-                    GoalPlanUncompiled, ApplicationDecontextualized,
-                    RecallAmbiguous, TargetUngrasped,
-                    MethodUnderdetermined,
-                    DirectionUnrecognizable, CandidateFieldUnderexpanded,
-                    FitUnrecognized} ∪ Emergent
-ProtocolId       ∈ {bound, inquire, ground, induce, elicit,
-                    apportion, contextualize, recollect,
-                    grasp, conduct, preview, ideate, sketch} ∪ Emergent
-Phase            ∈ {0, 1, 2, 3}
-
-── PHASE TRANSITIONS ──
-Phase 0: U → Detect(U) → vague_deficit(U)?                          -- silent trigger detection
-Phase 1: U → Scan(U, Catalog, Λ.coverage_constraint) → H[]          -- catalog scan; each h carries Set(CoverageEntry)
-           Λ.coverage_constraint set → filter H[] to {h : π_protocol(h.coverage) ∩ Λ.coverage_constraint ≠ ∅}
-           |H[]| < 2 → enrich(U) → Phase 1                          -- multi-hypothesis invariant
-           |H[]| ≥ 2 → Phase 2
-Phase 2: H[] → present(H[], evidence, reverse_evidence, end) → Qc(H[]) → Stop → utterance → parse → R   -- free-response Constitution interaction [Tool]
-           -- omit absent ends; show each protocol's end once per presentation
-Phase 3: R → integrate(R, U) →
-           Recognize(h)            → emit(ProtocolRoute(h.coverage)) → converge   -- target_coverage : Set(CoverageEntry)
-           Redirect(d)             → emit(ProtocolRoute(d)) → converge            -- user-named alternative
-           Dismiss                 → emit(FitReviewNote(no_fit)) → converge       -- no fit, recorded
-           Narrow(s: Slice)        → rebind(U.session_slice, s) → clear(Λ.dismissed_in_session) → Phase 1
-           Narrow(s: CoverageSubset) → write(Λ.coverage_constraint, s) → Phase 1  -- preserve dismissed_in_session
-           Stop                    → deactivate                                    -- exit without disposition
-
-── LOOP ──
-Phase 1 → Phase 2 → Phase 3 →
-  Recognize: converge
-  Redirect: converge
-  Dismiss: converge
-  Narrow(Slice): rebind U to narrower scope → Phase 1
-  Narrow(CoverageSubset): apply coverage filter → Phase 1
-  Stop: deactivate
-Max 3 narrowing iterations. Exhausted: surface candidate set as fit-review note → deactivate.
-Convergence evidence: per disposition, emit one of {ProtocolRoute, FitReviewNote} or deactivate without artifact (Stop).
-
-── CONVERGENCE ──
-recognized = R ∈ {Recognize(h), Redirect(d), Dismiss}
-exhausted  = narrow_iterations ≥ 3
-session_text(probe) ∋ {ProtocolRoute | FitReviewNote} (Stop deactivates without artifact)
-
-── TOOL GROUNDING ──
--- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 Detect      (sense)    → Internal analysis (heuristic vague-deficit detection)
-Phase 1 Scan        (sense)    → Internal analysis (catalog match against situation)
-Phase 1 enrich      (sense)    → Internal analysis (situation broadening when |H[]| < 2)
-Phase 2 Qc          (constitution)     → present (multi-hypothesis surface) + free-response receive (no typed option enumeration)
-Phase 3 parse       (sense)        → Internal analysis (free-response utterance → R coproduct by semantic intent; bounded retry on ambiguous)
-Phase 3 emit        (extension)    → TextPresent+Proceed (ProtocolRoute or FitReviewNote)
-Phase 3 rebind      (track)    → Internal state update (Narrow(Slice) disposition — rebinds U.session_slice, clears Λ.dismissed_in_session)
-Phase 3 write       (track)    → Internal state update (Narrow(CoverageSubset) disposition — sets Λ.coverage_constraint, preserves Λ.dismissed_in_session)
-converge            (extension)    → TextPresent+Proceed (convergence trace)
-
-── MODE STATE ──
-Λ = { phase: Phase, U: UserSituation,
-      hypotheses: List(Hypothesis), presented: Set(Hypothesis),
-      dismissed_in_session: Set(Hypothesis),
-      coverage_constraint: Optional(Set(ProtocolId)),   -- written by Narrow(CoverageSubset); consumed by Phase 1 Scan filter
-      narrow_iterations: Nat,
-      disposition: Optional(Recognition),
-      active: Bool, cause_tag: String }
-
-── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Probe composes downstream into the recognized protocol when the user selects Recognize or Redirect — composition target is determined at runtime by user disposition.
-```
-
-## Storage Reference
-
-The hypomnesis sibling `misfit.md` sub-index (under `{config_dir}/projects/{slug}/hypomnesis/{session-id}/`) is the designed-for read location for accumulated probe usage records — fit-review notes, recognized routes, and dismissed hypotheses. Probe reads this sub-index when available to enrich situation context. `{config_dir}` is the Claude Code config directory — `CLAUDE_CONFIG_DIR` when set, else `~/.claude`; a substrate detail of this realization, not protocol vocabulary. Read the value and substitute an absolute path before reading; a `${...}` left in this text is inert, since Read/Grep perform no shell expansion. The writer mechanism is out of scope for this skill and is implemented separately at the substrate layer.
+The two coexist; neither replaces the other.
 
 ## Rules
 
-1. **Horizon-marked surfacing (not invocation-gated)** — Probe surfaces its hypotheses on explicit `/probe` invocation OR when the AI detects genuine deficit-ambiguity (Phase 0) and offers the surface as *one horizon for the user's fusion of horizons*. AI-initiated surfacing is licensed precisely by the marking already inscribed elsewhere — low-confidence dialogic form (Rule 11), per-entry reverse-evidence (Rule 5), free-response transcendence (Rule 8), and user-held disposition (Rule 6) — which together render the framing visible *as* framing, so a surfaced hypothesis cannot covertly install itself as the user's own fore-understanding. Still forbidden: *unmarked* surfacing (presenting the set as the settled deficit-space or the answer rather than a transcendable horizon), and sticky/background re-activation (Rule 2). The user's recognition stays the constitutive act; AI surfacing aids the fusion, it does not perform it.
-2. **No sticky mode — per-occasion surfacing** — Probe has no persistent activation: no always-on background loop, no implicit carry-over re-activation across turns, no sticky session state. AI-initiated surfacing (Rule 1) fires per-occasion on a genuine ambiguity detected in the present turn and then rests; it is not a standing scanner. Each surfacing — invoked or AI-initiated — is a fresh, self-contained occasion.
-3. **Current-session default scope** — Default evidence window is the present session. Cross-session evidence is opt-in only.
-4. **All-time scope requires explicit confirmation** — Cross-session recall (reading prior `misfit.md` records or session history beyond the current session) requires an explicit Active-authority confirmation; never default behavior.
-5. **Multi-hypothesis required** — Minimum two alternatives with distinct reverse-evidence conditions per hypothesis. Singleton high-confidence framing collapses Probe into Resolution; this is forbidden. Anti-singleton guard operates at hypothesis level (`|H[]| ≥ 2`). Each hypothesis carries set-valued coverage (`|coverage| ≥ 1`; `|coverage| ≥ 2` represents intra-hypothesis multi-protocol projection — structurally distinct from inter-protocol composition defined in the `── COMPOSITION ──` block). The reverse-evidence requirement applies per CoverageEntry within `Hypothesis.coverage`. **Two-level cardinality**: A single hypothesis with `|coverage| = 2` does NOT satisfy this guard — `|H[]| ≥ 2` requires at minimum two distinct Hypothesis records, each with its own coverage. The `|H[]| ≥ 2` guard operates on hypothesis count; `|coverage| ≥ 1` on per-hypothesis projection.
-6. **Disposition field belongs to the user** — Recognize / Redirect / Dismiss / Narrow / Stop is a constitutive user act. AI never resolves the disposition unilaterally.
-7. **No cumulative score / grade / ranking** — Across uses, no fitness metric, success rate, or aggregated quality score is produced or stored. Each probe is independent.
-8. **Stop / Narrow / Dismiss always reachable via free response** — Stop, Narrow, and Dismiss are always available as user dispositions; they are reached through natural-language utterance (parsed by Phase 3 lexical patterns) rather than typed selection. Graceful exit and scope narrowing are always available — no typed dropdown is required to reach them.
-9. **Blocked vocabulary** — The terms "wrong", "misuse detected", and "should have used" must not appear in Probe output. These vocabularies frame Probe as a corrective judge rather than a fit-review companion.
-10. **Recommended vocabulary** — Use "fit review" as the positive framing replacement for the blocked vocabulary in #9. Output describes hypotheses, evidence, and reverse-evidence; never verdicts.
-11. **Hypothesis form** — Each hypothesis is phrased as low-confidence dialogic: "N interpretations possible / decision point is X". Certainty framings ("clearly", "definitely", "the answer is") are forbidden.
-12. **Recognition over Recall** — Present structured hypothesis options via Cognitive Partnership Move (Constitution) and yield turn. Each option carries differential reverse-evidence so the post-selection state is anticipatable.
-13. **Detection with Authority** — AI detects candidate deficits with cited situation evidence; the user constitutes the recognition. AI never resolves the disposition.
-15. **Convergence evidence** — Present a transformation trace before declaring convergence: Recognize/Redirect/Dismiss/Narrow produce a session-text artifact (ProtocolRoute or FitReviewNote); Stop deactivates without an artifact.
-16. **Coexistence with /onboard** — Probe does not replace pattern-based recommendation (`/onboard`). The two skills occupy distinct stances.
-17. **Structural-change calibration** — When a candidate hypothesis concerns whether a structural change crosses the architectural threshold, distinguish at hypothesis construction time:
-    - **Architectural inscription**: addition of a new core protocol, category-level promotion. Deferral pending accumulated use evidence applies.
-    - **Type-level realization**: type-level realization of an already-inscribed `── COMPOSITION ──` product within an existing protocol's operational scope. Internal iteration; deferral framing does not apply.
-    The distinction informs `evidence` / `reverse_evidence` formulation when structural-change extent (line count, file count, scope size) is the apparent signal — extent alone does not determine architectural status. Maps approximately onto the downstream-remediation axis a candidate is also classified on — *surgical* (a deterministic 1–2 line edit) versus *design* (a decision-bearing structural change): type-level realization ≈ surgical, architectural inscription ≈ design (`≈` denotes approximate analogical mapping between vocabulary axes; not formal type-isomorphism — `≅` is reserved for the latter).
-18. **Intent-decoding disambiguation** — When constructing Phase 1 candidates, a missing-information framing (ContextInsufficient/`/inquire`) must not crowd out AbstractAporia/`/elicit` by default: include `/elicit` in the candidate set when the user has not fixed which decisions their direction turns on, per Euporia's own deficit (`aporia`, `euporia/skills/elicit/SKILL.md`) — whether that shows in the utterance, in evidence within Probe's scope (Rule 3 default scope; cross-session recall stays opt-in per Rule 4), or in the decision structure of the domain the intent sits in.
-19. **Declared end, after the evidence** — Each coverage entry shows its protocol's declared end — what the user can then say or recognize once that protocol has run — so the user can recognize the end they want as well as the deficit they are in. At each scan, the end is read from the protocol's own declared description; Probe maintains no separate authored copy, and the values carried in this scan's entries come from that runtime read. It is presented after the entry's evidence and reverse-evidence and is never offered as evidence of fit: an attractive end does not outweigh reverse-evidence. A protocol whose description states no end keeps equal candidacy and is presented without one. The end sentence is shown once per protocol in each presentation; later occurrences read "Afterward: as above".
-
-## UX Safeguards
-
-- **Session immunity for dismissed hypotheses** — A hypothesis dismissed in the current session is not re-presented in the same session unless the user explicitly re-probes the same scope. Re-presenting a dismissed hypothesis without user-driven re-scope erodes the user's disposition authority (Rule 6 reinforcement). Realized via `Λ.dismissed_in_session`: Phase 3 Dismiss adds presented hypotheses to this set; Phase 1 Scan filters out members of this set. Clearing rules: `Narrow(Slice)` clears the set (new situation scope justifies fresh dismissals); `Narrow(CoverageSubset)` preserves the set (situation unchanged, only coverage filter applied).
-- **Progress opacity** — No progress counter, no "X of Y hypotheses considered" framing. Such counters reintroduce a quasi-score (Rule 7 reinforcement).
-- **Ephemeral recognition** — Each probe disposition is a present-tense fit review, not a permanent record. The user's disposition does not bind future probes (Rule 7 reinforcement).
-- **Pre-gate evidence visibility** — All hypothesis evidence, reverse-evidence, and declared ends are laid out before the disposition gate so the user reads context before deciding (evidence stays out of the disposition question itself; structural).
-- **Vocabulary discipline** — Probe output uses "hypothesis", "fit review", "evidence", "reverse-evidence", "disposition", "route". The skill never speaks of mistakes, errors, or misuse (Rule 9 + Rule 10 reinforcement).
-
-## Trigger Signals
-
-Invoke `/probe` when:
-- The user describes symptoms but cannot name a single protocol that fits
-- The user is about to invoke a protocol but expresses uncertainty between two or more candidates
-- The user asks "which one fits this?" without providing a specific deficit name
-- The user wants a fit review before committing to a protocol invocation
-
-## Skip Conditions
-
-Skip Probe when:
-- The user has already named the deficit with confidence
-- The user requests pattern-based recommendation from session history (`/onboard`)
-
+- **The person recognizes**: As `closing`, `AnswerSupported`, and `Owed` state.
+- **Contrary grounds before the close**: As `Owed` and `respond` state.
+- **Symmetric, unranked candidates**: As `Line`, `Presentation`, and `respond` state.
+- **A taken candidate takes its shown skill**: As `nextMove` and the `invoke` grounding state.
+- **Reads beyond the session**: As `gathered` states.
+- **The running probe is no candidate**: As `Catalog` and the `catalog` grounding state.
+- **Each probe stands alone**: Nothing of a probe is kept beside the context to score, rank, or filter a later one, and no round counts its progress. What a later probe knows of an earlier one, a candidate set aside included, is what the session's context holds.
