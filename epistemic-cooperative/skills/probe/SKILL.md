@@ -22,19 +22,19 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 -/
 
 /-! ── FLOW ──
-Probe(U) → start(catalog, c) → probe(catalog, c, utterances), where c is the fused session context
-and catalog the installed skills' descriptions:
+Probe(U) → start(catalog, c) → probe(catalog, c, utterances), where c is the fused session
+context and catalog the installed skills' descriptions:
   [no unrecognized deficit, and the person did not invoke this]  nothing is shown; not activated
-  pass(c): what the person admitted reading beyond the session enters the context; the situation
-    and the catalog are read
+  pass(c): what `gathered` reads enters the context; the situation and the catalog are read
   [the ground carries two or more candidates]  present them → Stop
   [it carries fewer]                           say so, with what it does carry and what more of
                                                the situation would help → Stop
   next utterance u: c' := fuse(c, u) →
     [u does not bear on this run — it ends the probe or turns to other work]  the session answers
       it; that answer stays in the context; no round of this run is raised and nothing closes
+    [a turn of the person's is still owed]  no answer closes → pass(c') → a round that serves it
     [u takes a shown candidate, puts the situation in their own words, or says none shown is
-     theirs]  close: recognized → a taken candidate's shown skill is invoked
+     theirs]  close: recognized → the hand-off `invokedBy` names
     [otherwise] u is more of the situation — a narrower slice, a correction, a candidate set
       aside, a question, a read beyond the session admitted → pass(c') → the same reading
   no utterance: the round holds; nothing is recognized and nothing closes
@@ -166,10 +166,10 @@ structure Line (c : Context P) where
 
 /-- What a round showed. -/
 inductive Presentation (c : Context P)
-  /-- two or more distinct candidates side by side, each line with its grounds, its rules-out
-      condition, and its `ending` -/
+  /-- two or more candidates side by side, no two describing one situation, each line with its
+      grounds, its rules-out condition, and its `ending` -/
   | alternatives (lines : List (Line c)) (two : 2 ≤ lines.length)
-      (distinct : (lines.map (·.candidate)).Nodup)
+      (distinct : (lines.map (·.candidate.situation)).Nodup)
   /-- the ground carried fewer than two: said as such, with what it does carry and what more of the
       situation would help; no candidate is offered to take -/
   | short (said : String)
@@ -189,9 +189,8 @@ def shownIn (catalog : Catalog) (c : Context P) : List Candidate :=
   ((presented catalog c).map (·.shown)).getD []
 
 /-- **Your record**: your contrary grounds, each with what it bears on and what it rests on —
-    against a candidate, or against the person's own wording — shown before the person's turn and
-    attached when they recognize over it; raised again only on new evidence. Empty when there are
-    none. -/
+    against a candidate, or against the person's own wording — attached where the person
+    recognizes over them; raised again only on new evidence. Empty when there are none. -/
 axiom dissent : Context P → List String
 
 /-- How a person's turn recognizes what is stuck. Premise: one utterance carries one of these or
@@ -209,19 +208,16 @@ inductive Answer
     recognizes nothing — recognizes the situation this way, read whole against the context as it
     now stands. A candidate is taken where the turn says it is theirs or goes on with it as theirs;
     a rewording stands as they said it, beside any contrary ground and never replaced by yours, and
-    "none of these" together with what is stuck in their own words is a rewording. A rewording over
-    which you hold contrary grounds not yet shown recognizes nothing yet: the next round shows them
-    beside it, and the person's next turn may stand by it. Uncertainty, a hypothetical use, a
-    question about a candidate, the invocation of this probe alone, and silence recognize nothing,
-    and your readings, scores, and rankings fill nothing. -/
+    "none of these" together with what is stuck in their own words is a rewording. Uncertainty, a
+    hypothetical use, a question about a candidate, the invocation of this probe alone, and
+    silence recognize nothing, and your readings, scores, and rankings fill nothing. -/
 axiom AnswerSupported : Context P → Turn P → Answer → Prop
 
 /-- Only the person recognizes. -/
 def answerCoord : Coord P Answer :=
   { admits := (·.val = .person), supports := AnswerSupported }
 
-/-- **Your reading** of the latest utterance: `open_` where it recognizes nothing — an unclear one
-    included, whose reading the next round may say and ask about. -/
+/-- **Your reading** of the latest utterance: `open_` where it recognizes nothing. -/
 axiom answer : (c : Context P) → Occ (answerCoord (P := P)) c
 
 /-- **Your reading**, on the present turn: the person invoked this probe themselves; an earlier
@@ -239,8 +235,19 @@ def Activated (c : Context P) : Prop := Invoked c ∨ DeficitUnrecognized c
     situation, a question about a candidate, a correction, a read beyond the session admitted —
     judged on what the whole utterance does, read on the context with it. An utterance that ends
     the probe or turns to other work leaves the run as it stands: the session answers it, that
-    answer stays in the context, no round of this run is raised, and nothing closes. -/
+    answer stays in the context, no round of this run is raised, and nothing closes. Once the
+    person has ended the probe, a later utterance bears on this run only where it reopens it. -/
 axiom Reaches : Context P → Prop
+
+/-- **Your reading**: a turn of the person's is still owed before a recognition closes — read on
+    the context as it now stands, the latest utterance included. Guidance for the reading, not
+    cases it must check: contrary grounds of yours the person has not closed over, any the latest
+    utterance itself raises against what it takes among them — a fact it states that meets the
+    taken candidate's rules-out condition, or a remedy it says was already tried; a reply whose
+    reading their words have not settled — after a short round, more of the situation or their
+    own wording of what is stuck. Where a turn is owed, no answer closes, and the next round
+    serves it. -/
+axiom Owed : Context P → Prop
 
 /-- Once it has run, the person can say what is stuck right now — one shown candidate, their own
     rewording, or none of those shown — having seen what in the situation each candidate rests on,
@@ -277,17 +284,18 @@ set of candidates set aside is stored.
 abbrev Mode (P : Type) := Context P
 
 /-! ── PHASE TRANSITIONS ──
-A pass appends what the person admitted reading beyond the session [Tool]; `respond` presents one
-round from the context it leaves; `session` is the session's own answer to an utterance that does
-not bear on this run, which stays in the context without being a round of it. Each utterance is
-fused; a recognition closes, and anything else that bears on the run is read by the next pass.
+A pass appends what `gathered` reads [Tool]; `respond` presents one round from the context it
+leaves; `session` is the session's own answer to an utterance that does not bear on this run, which
+stays in the context without being a round of it. Each utterance is fused; where it bears on the
+run and no turn of the person's is owed, a recognition closes, and anything else that bears on the
+run is read by the next pass.
 -/
 
-/-- **Your collection** for one pass. The situation is the current session by default; a read
-    beyond it — earlier sessions, or files and records the person has not pointed at — is offered
-    in a round with what it would read, and runs only once a person's turn admits it. Each read
-    returns as an evidence turn; nothing is written. Empty where nothing admitted is left to
-    read. -/
+/-- **Your collection** for one pass. The situation is the current session, and the files and
+    records the person pointed at in it are read in the pass; a read beyond them — earlier
+    sessions, or files and records they have not pointed at — is offered in a round with what it
+    would read, and runs only once a person's turn admits it. Each read returns as an evidence
+    turn; nothing is written. -/
 axiom gathered : Context P → List (Evidence P)
 
 def pass (c : Context P) : Context P := c ++ (gathered c).map (·.val)
@@ -314,15 +322,19 @@ def closing (catalog : Catalog) (c : Context P) : Option (RecognizedSituation P)
 open Classical in
 /-- `respond` presents the round a pass leaves, as a horizon the person may take, reword, or set
     aside, never as the answer. Where the ground carries two or more candidates, drawn from
-    different readings of the situation: each line its candidate's description of the situation,
-    then what it rests on, each ground with the turn it cites, then the condition that would rule
-    it out, then the skill that takes it and that skill's declared end where its description
-    declares one — after the evidence, once per skill, and never as evidence of fit; then your
-    contrary grounds; then the turn yields to a free answer — a candidate, their own words, none of
-    these, or more of the situation — with no option list. A candidate the person said is not
-    theirs is drawn again in this run only on new ground. Where the ground carries fewer: say so,
-    with what it does carry and what more of the situation, or which read beyond the session,
-    would help. Throughout, the wording is tentative and speaks of fit. -/
+    different readings of the situation — the skill running this probe is no candidate's skill:
+    each line its candidate's description of the situation, then what it rests on, each ground
+    with the turn it cites, then the condition that would rule it out, then the skill that takes
+    it, saying that taking the candidate runs that skill, and that skill's declared end where its
+    description declares one — after the evidence, once per skill, and never as evidence of fit.
+    Where it carries fewer: say so, with what it does carry and what more of the situation, or
+    which read beyond the session, would help. Every round shows the contrary grounds you hold
+    and, where a turn of the person's is owed, what it is owed for; then the turn yields to a free
+    answer — a candidate, their own words, none of these, or more of the situation — with no
+    option list. A question about the shown candidates is answered with that round's candidates
+    standing; they are redrawn only where the ground moved, and a candidate the person said is not
+    theirs is drawn again in this run only on new ground. Throughout, the wording is tentative and
+    speaks of fit. -/
 def probe (catalog : Catalog) (respond : Catalog → Context P → Response P)
     (session : Context P → Response P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
@@ -330,7 +342,7 @@ def probe (catalog : Catalog) (respond : Catalog → Context P → Response P)
     let c' := fuse c u
     if ¬ Reaches c' then probe catalog respond session (c' ++ [(session c').val]) us
     else
-      match closing catalog c' with
+      match (if Owed c' then none else closing catalog c') with
       | some r => .recognized r
       | none =>
         let c₁ := pass c'
@@ -346,18 +358,19 @@ def start (catalog : Catalog) (respond : Catalog → Context P → Response P)
 
 /-! ── LOOP ──
 The loop is dialogue: each round ends where the turn yields, and nothing counts down. Every
-utterance that bears on the run and recognizes nothing is read whole by the next pass — a narrower
+utterance that bears on the run and closes nothing is read whole by the next pass — a narrower
 slice of the situation, a correction, a candidate set aside, a question, a read beyond the session
-admitted — and the pass reads the situation again on the context as it now stands. No number of rounds ends
-the probe; the person's recognition does, and without it the round holds.
+admitted, a turn that was owed — and the pass reads the situation again on the context as it now
+stands. No number of rounds ends the probe; the person's recognition does, and without it the
+round holds.
 -/
 
 /-! ── CONVERGENCE ──
 recognized: the person's turn took a shown candidate, put the situation in their own words, or
 said none shown is theirs; the RecognizedSituation carries the answer, what the round it answered
 offered, the contrary grounds it closed over, and which turn recognized it — quoted in the trace
-with the intent taken from it. A taken candidate whose line showed a skill hands off to that
-skill's invocation after the trace; the person's own words and none shown hand nothing off.
+with the intent taken from it. A taken candidate whose line showed a skill hands off as
+`.invoke` grounds it; the person's own words and none shown hand nothing off.
 Convergence evidence: (UserSituation → [rounds] → Candidates(grounds, rules-out, ends) →
 recognition → RecognizedSituation). Demonstrated, not asserted.
 -/
@@ -384,13 +397,13 @@ inductive Op | detect | catalog | gather | draw | present | short | readTurn | c
 def grounding : Op → Annot × String
   | .detect   => (.sense, "Internal analysis: whether the person senses something is off without naming what is stuck; an invocation of their own activates without it")
   | .catalog  => (.observe, "artifact read: the installed skills' descriptions as the session lists them, read where they are installed when the listing does not carry one; read-only")
-  | .gather   => (.observe, "artifact read, record read: what a person's turn admitted reading beyond the current session; read-only")
+  | .gather   => (.observe, "artifact read, record read: what the person pointed at in the session, and reads beyond it a person's turn admitted; read-only")
   | .draw     => (.sense, "Internal analysis: candidates drawn from different readings of the situation, each grounded in turns it cites, with the condition that would rule it out and the installed skill that takes it")
   | .present  => (.interaction .constitution, "two or more candidates, each line its description, its cited grounds, its rules-out condition, then its skill and declared end; your contrary grounds; a free answer, with no option list and no ranking")
   | .short    => (.interaction .constitution, "the ground carries fewer than two candidates: said as such, with what it does carry and what more of the situation would help")
-  | .readTurn => (.sense, "Internal analysis: whether the latest utterance bears on this run, as `Reaches` reads it, and what it does there — a shown candidate taken, the situation in the person's own words, none shown, or more of the situation — read whole against the fused context")
+  | .readTurn => (.sense, "Internal analysis: whether the latest utterance bears on this run, as `Reaches` reads it, whether a turn of the person's is still owed, as `Owed` reads it, and what it does there — a shown candidate taken, the situation in the person's own words, none shown, or more of the situation — read whole against the fused context")
   | .converge => (.interaction .extension, "RecognizedSituation: the answer with the turn that gave it quoted, what the round it answered offered, and the contrary grounds it closed over")
-  | .invoke   => (.dispatch, "invoke: after the trace, in the same turn, the skill nextMove names, with the recognized situation in the session; then this run ends")
+  | .invoke   => (.dispatch, "invoke: after the trace, in the same turn, the skill nextMove names, unless the person's turn already invoked it, with the recognized situation in the session; then this run ends")
 
 /-- The operation a run hands off through: a recognition that took a shown candidate whose line
     showed a skill invokes it by `.invoke`; any other outcome hands nothing off. -/
