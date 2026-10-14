@@ -32,31 +32,33 @@ theorem fresh_invocation_holds (respond session endReport : Context P → Respon
     recollect respond session endReport c (u :: us) = .holding c := by
   simp [recollect, h]
 
-/-- A turn that is no invocation, does not bear on this recall, and carries an empty intention
-    holds the step on the context before that turn. -/
+/-- A turn that is no invocation, identifies nothing, does not bear on this recall, and carries
+    an empty intention holds the step on the context before that turn. -/
 theorem ai_start_holds (respond session endReport : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u))
-    (h : ¬ Reaches (fuse c u)) (hv : EmptyIntention (fuse c u)) :
+    (hc : closing (fuse c u) = none) (h : ¬ Reaches (fuse c u))
+    (hv : EmptyIntention (fuse c u)) :
     recollect respond session endReport c (u :: us) = .holding c := by
-  simp [recollect, hi, h, hv]
+  simp [recollect, hi, hc, h, hv]
 
-/-- A turn that is no invocation, does not bear on this recall, and carries no empty intention
-    joins the context with the session's answer to it; no pass runs on it. -/
+/-- A turn that is no invocation, identifies nothing, does not bear on this recall, and carries no
+    empty intention joins the context with the session's answer to it; no pass runs on it. -/
 theorem unreached_step (respond session endReport : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u))
-    (h : ¬ Reaches (fuse c u)) (hv : ¬ EmptyIntention (fuse c u)) :
+    (hc : closing (fuse c u) = none) (h : ¬ Reaches (fuse c u))
+    (hv : ¬ EmptyIntention (fuse c u)) :
     recollect respond session endReport c (u :: us) =
       recollect respond session endReport (fuse c u ++ [(session (fuse c u)).val]) us := by
-  simp [recollect, hi, h, hv]
+  simp [recollect, hi, hc, h, hv]
 
-/-- A turn that bears on this recall, identifies nothing, and ends it joins the context with the
-    ending report; no pass runs on it. -/
+/-- A turn that is no invocation, identifies nothing, bears on this recall, and ends it joins the
+    context with the ending report; no pass runs on it. -/
 theorem ending_reports (respond session endReport : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u))
-    (h : Reaches (fuse c u)) (hc : closing (fuse c u) = none) (he : Ends (fuse c u)) :
+    (hc : closing (fuse c u) = none) (h : Reaches (fuse c u)) (he : Ends (fuse c u)) :
     recollect respond session endReport c (u :: us) =
       recollect respond session endReport (fuse c u ++ [(endReport (fuse c u)).val]) us := by
-  simp [recollect, hi, h, hc, he]
+  simp [recollect, hi, hc, h, he]
 
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(search c).map (·.val) ++ (passRecord (c ++ (search c).map (·.val))).map (·.val), by
