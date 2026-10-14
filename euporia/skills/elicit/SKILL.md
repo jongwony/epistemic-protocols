@@ -214,8 +214,9 @@ def residual (c : Context P) : List Entry :=
     raised. Words that end the run without saying the intent is aligned enough do not bear on it,
     whatever else the turn says, and what else it says stands in its own words in the context: the
     session answers them, no surface is drawn, the run holds, and later turns bear on it only where
-    they come back to it. An AI-guided run the person has not confirmed has not started:
-    nothing they say is recorded into it. -/
+    they come back to it. Where reading a turn as other work or as ending the run was unclear, the
+    session's answer says briefly that the run was left as it stands. An AI-guided run the person
+    has not confirmed has not started: nothing they say is recorded into it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your judgment**: the cited turn says the intent is aligned enough — the aporia is resolved —
@@ -303,10 +304,11 @@ earlier answer is held apart from what later ones say. No fixed cap: each surfac
 
 /-! ── CONVERGENCE ──
 converged: a ResolvedEndpoint the person's utterance closed — the one closing of `Outcome`; holding
-is a surface no turn of the person's that bears on the run has answered. Convergence evidence: at the resolution, present the read-back of the intent in the person's
-language and the trace — each coordinate → where it came from → what stands on it, in the words of
-the turn that set it → who proposed it and how it stood — beside the residual and the dissent
-attached to the closure. Demonstrated, not asserted.
+is a surface no turn of the person's that bears on the run has answered. Convergence evidence: at
+the resolution, present the read-back of the intent in the person's language and the trace — each
+coordinate → where it came from → what stands on it, in the words of the turn that set it → who
+proposed it and how it stood — beside the residual and the dissent attached to the closure.
+Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──

@@ -364,7 +364,8 @@ axiom relay : (c : Context P) → Occ (relayCoord (P := P)) c
     this run is raised. Words that end the run without taking a method do not bear on it, whatever
     else the turn says, and what else it says stands in its own words in the context: the session
     answers them, no map is drawn, nothing is handed off, the run holds, and later turns bear on it
-    only where they come back to it. -/
+    only where they come back to it. Where reading a turn as other work or as ending the run was
+    unclear, the session's answer says briefly that the run was left as it stands. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your record**: the navigation block over the record where the person's turns behind this
@@ -453,11 +454,12 @@ abbrev Mode (P : Type) := Context P
 A step is one arm of a structural recursion over the person's utterances. Each utterance is
 fused; one that bears on the run is then observed (`.groundPointer`, `.inventory`): what the
 pointer's record returns and the loaded inventory enter the context before the presentation they
-inform, and an utterance that does not bear on the run triggers no reading. `respond` is the next map (`.map`, then `.mapGate`), or, when the run closes on a taking
-— or, at `start`, on a relay — the map relayed before `emitted` is handed off in the same turn
-(`.relay`, then `.handoff`); a taking closes whatever the same turn changed, which the relayed
-map's ledger shows; `session` is the session's own answer to an utterance about other work,
-which stays in the context without being a gate of this run.
+inform, and an utterance that does not bear on the run triggers no reading. `respond` is the next
+map (`.map`, then `.mapGate`), or, when the run closes on a taking — or, at `start`, on a relay —
+the map relayed before `emitted` is handed off in the same turn (`.relay`, then `.handoff`); a
+taking closes whatever the same turn changed, which the relayed map's ledger shows; `session` is the
+session's own answer to an utterance about other work, which stays in the context without being a
+gate of this run.
 -/
 
 open Classical in
