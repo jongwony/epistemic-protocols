@@ -265,9 +265,9 @@ Branch: That's enough for today → end session with brief closing, Try a differ
 
 **Execution**: Prompt the user to invoke the actual protocol (e.g., type `/inquire`). The protocol runs in the same session with the mini prompt as context. Trial ends when the invoked protocol reaches its natural termination or the user ends it. After the trial ends, present Post-Trial Insight and LOOP.
 
-Offer trial for the top-recommended protocol first. If user completes it, optionally offer trial for the second recommendation.
+Offer trial for the top-recommended protocol first. When that trial ends, optionally offer trial for the second recommendation.
 
-**Post-Trial Insight** (presented after trial completion):
+**Post-Trial Insight** (presented after the trial ends):
 
 After each trial, present a brief insight card sourced from the **Philosophy** field in `references/scenarios.md`. Structure:
 

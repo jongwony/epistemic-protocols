@@ -363,9 +363,9 @@ axiom relay : (c : Context P) → Occ (relayCoord (P := P)) c
     the run as it stands: the session answers it, that answer stays in the context, and no gate of
     this run is raised. Words that end the run without taking a method do not bear on it, whatever
     else the turn says, and what else it says stands in its own words in the context: the session
-    answers them, no map is drawn, nothing is handed off, the run holds, and later turns bear on it
-    only where they come back to it. Where reading a turn as other work or as ending the run was
-    unclear, the session's answer says briefly that the run was left as it stands. -/
+    answers them, no map is drawn, the run holds, and later turns bear on it only where they come
+    back to it. Where reading a turn as other work or as ending the run was unclear, the session's
+    answer says briefly that the run was left as it stands. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your record**: the navigation block over the record where the person's turns behind this
