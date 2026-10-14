@@ -52,7 +52,7 @@ node --test anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomn
 
 **Anamnesis vs Aitesis** — the closest neighbor. Both involve information access, but the phenomenological test differs. Aitesis discovers facts the user does not know (`ContextInsufficient` — "I need information"). Anamnesis verifies context the user vaguely knows exists (`RecallAmbiguous` — "I know this was discussed, but where?"). Empty intention seeking fulfillment → Anamnesis; no intention at all regarding the topic → Aitesis.
 
-**Anamnesis vs Periagoge** — the boundary above one session. A concept prior sessions already settled is recognized here, as the unit above any one session; a concept being formed from cases at hand, or re-formed from them, to fit what you mean now is crystallized by Periagoge (`/induce`). Recognition of what was settled → Anamnesis; fitting what the cases share to what you mean → Periagoge.
+**Anamnesis vs Periagoge** — the boundary above one session. A concept prior sessions already settled is recognized here, as the unit above any one session; a concept being formed from cases at hand, or reconsidered from them, to fit what you mean now is crystallized by Periagoge (`/induce`). Recognition of what was settled → Anamnesis; fitting what the cases share to what you mean → Periagoge.
 
 ## Protocol Flow
 
@@ -79,7 +79,7 @@ The cue names the axes the past can be reached along; there is no fixed set. A t
 **Skip**:
 - When you already know the session ID, file path, or decision — direct lookup is cheaper
 - When no prior context exists (novel domain — use Aitesis / `/inquire` instead)
-- When the concept must be formed, or re-formed, from cases at hand to fit what you mean now (use Periagoge / `/induce` instead)
+- When the concept must be formed, or reconsidered, from cases at hand to fit what you mean now (use Periagoge / `/induce` instead)
 - When the request is to generate, not to remember
 
 ## Install

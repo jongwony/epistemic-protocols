@@ -66,9 +66,9 @@ Read the `InferenceUncertainClaim`: the proposition the user cannot settle by re
 Front with a crystallization step only when the test intent is genuinely under-formed:
 
 - If the test intent is aporetic — the user senses an unknown but cannot yet state the proposition — front with `/elicit` (Euporia) to surface it.
-- If the test pattern recurs and what it is, is still being fitted to what the user means — the same stand-in-validation shape appears across cases — front with `/induce` (Periagoge) to crystallize it.
+- If the same stand-in-validation shape recurs across cases and its name, rule, or reach is still unsettled for the user, front with `/induce` (Periagoge) to crystallize it.
 
-The front step is a conditional affordance, not a mandatory gate.
+Without a front, or after one, proceed to Phase 1.
 
 ## Phase 1: Decompose the Equivalence Claim into Facets
 
@@ -140,7 +140,7 @@ At empirical convergence, present the pairing: the scoped resolution with its sc
 
 ## Operational checklist (per cycle)
 
-- [ ] Phase 0 the `InferenceUncertainClaim` is stated; a `/elicit` or `/induce` front is used only when the intent is aporetic or what a recurring pattern is, is still being fitted to what the user means
+- [ ] Phase 0 the `InferenceUncertainClaim` is stated; a `/elicit` or `/induce` front is used only when the intent is aporetic or a recurring pattern's name, rule, or reach is still unsettled for the user
 - [ ] Phase 1 critical facets, surrogate↔target difference inventory, influence-path hypotheses, and a gap-measurement approach are surfaced as the `ScopedClaimFrame`, and the frame is surfaced for user recognition (with an Emergent missing-facet probe) before Phase 2 draws the boundary over it
 - [ ] Phase 2 projects an actually emitted, applicable `DefinedBoundary` into test scope and coverage `Residual` against `ScopedClaimFrame`, retaining pending obligations in the scope record, and every part of the cut the user did not draw themselves — an observed fact or an AI choice inside a grant drawing nothing — is surfaced for their recognition before projection; a projection waits while its boundary has reopened; absent that result, the actual exit and what it left — a withdrawal's record or a gate still holding — govern continuation
 - [ ] Phase 3 `/inquire` captures `EmpiricalEvidence` inside the bounded space under a scope-covers-claim discipline
