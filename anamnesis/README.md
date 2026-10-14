@@ -79,7 +79,7 @@ The cue names the axes the past can be reached along; there is no fixed set. A t
 **Skip**:
 - When you already know the session ID, file path, or decision — direct lookup is cheaper
 - When no prior context exists (novel domain — use Aitesis / `/inquire` instead)
-- When the concept must be formed, or re-formed, from cases to fit what you mean now (use Periagoge / `/induce` instead)
+- When the concept must be formed, or re-formed, from cases at hand to fit what you mean now (use Periagoge / `/induce` instead)
 - When the request is to generate, not to remember
 
 ## Install
