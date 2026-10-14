@@ -245,8 +245,8 @@ inductive Closing
     the map, or how you took an unclear turn — adopts it as shown, with no second permission. A
     direction no probe materialized — read from the accumulated context — and not a composition of
     probes already shown constitutes as the turn names it. Where its intent is unclear, it closes
-    nothing, and where you took it as a closing the probes stay in place. Your readings, the map's
-    cells, and the open unknowns close nothing and hold no closing back. -/
+    nothing. Your readings, the map's cells, and the open unknowns close nothing and hold no closing
+    back. -/
 axiom ClosingSupported : Context P → Turn P → Closing → Prop
 
 /-- Only the person closes. -/
