@@ -142,8 +142,11 @@ structure Seed where
   origin  : Origin
 
 /-- `blank`: a topic only. `seeded`: idea fragments, named material, or both. `resumed`: the
-    request continues a field this protocol drew earlier in the context, taken or holding. The three
-    take different paths: the frame map first, a first pass, or the earlier field's map redrawn. -/
+    request continues a field this protocol drew, taken or holding — earlier in the context, or
+    carried in material the request names, such as a field exported to an issue, whose frames,
+    branches, candidates with their origins, exclusions, and parks carry over as that material
+    records them. The three take different paths: the frame map first, a first pass, or the
+    earlier field's map redrawn. -/
 inductive Entry
   | blank
   | seeded (seeds : List Seed)
@@ -254,7 +257,7 @@ structure ParkedFollowUp (c : Context P) where
 
 /-- **Your reading** of every deferral in the person's turns, each citing the turn that made it.
     What the cited turn asks is your `supports` reading of it. A request to deepen is not a
-    deferral: it opens a branch. -/
+    deferral: it opens a branch. A parked frame the person later opens is no longer parked. -/
 axiom parked : (c : Context P) → List (ParkedFollowUp c)
 
 /-- **Your judgment**: your doubts about the field or about taking it, each naming what it concerns
@@ -266,9 +269,9 @@ axiom dissent : Context P → List String
     frames selected and any the person named, shaped into frames; at a round, the named unexplored
     frames, a new angle shaped into frames, or a branch under an open frame or candidate the
     person asked to deepen. An excluded frame is never among them. A continue that names nothing
-    takes every unexplored frame except one the person parked or one you propose excluding; the
-    person naming such a frame opens it. On a Seeded entry's first pass, how many derived frames to
-    open is yours; the rest stay unexplored. At a Resumed entry's resuming step, the frames the
+    takes every unexplored frame except one the person parked; the person naming it opens it. On
+    a Seeded entry's first pass, at least one derived frame, how many being yours; the rest stay
+    unexplored. At a Resumed entry's resuming step, the frames the
     request names or asks to deepen — an opened frame it names is deepened by a branch under it,
     never reopened; a request that only continues opens none. Empty when the answer opens nothing —
     a deferral alone, an idea of the person's own, a question, a correction, a pick among
@@ -351,8 +354,8 @@ reachable as named material; a request to continue an earlier field, taken or ho
 /-! ── MODE STATE ──
 Λ is the fused context and nothing else; every reading above is taken from it, and each is of this
 run's field — its topic, signals, frames, candidates, exclusions, proposals, parks, and doubts. On
-a Resumed entry, this run's field is the earlier field it continues, as it stands in the context
-with the person's later turns on it, its signals included; otherwise it holds only what this
+a Resumed entry, this run's field is the earlier field it continues, as `Entry` says, with the
+person's later turns on it, its signals included; otherwise it holds only what this
 run's request and later turns bring, and an earlier field enters only as named material. The map
 a round draws is re-read from the context each time, never stored.
 -/
@@ -453,7 +456,7 @@ def Interaction.realization : Interaction → Continuation
 
 inductive Op | bind | readReference | classify | extractSignals | classifyRelay | deriveFrames
              | qframes | generate | present | qround | readAnswer | shapeFrames | park | converge
-             | seam
+             | seam | holdReply
 
 def grounding : Op → Annot × String
   | .bind           => (.sense, "Internal analysis: the invocation utterance and a chain reference it names, or on a bare resume the latest field this protocol drew in the session, as U-BINDING says; nothing unnamed is scanned")
@@ -471,6 +474,7 @@ def grounding : Op → Annot × String
   | .park           => (.interaction .extension, "something the person set aside for later acknowledged as parked, quoting their request; declared in the field; its durable record is the host's")
   | .converge       => (.interaction .extension, "DiverseCandidateField — its trace, as \"The map\" describes")
   | .seam           => (.interaction .extension, "after the person takes the field, proceed only to the next move the person declared, an adopted routing policy, or a grant of theirs, citing that source; the field crosses whole, every origin, branch, park, signal, and doubt intact, and the seam never selects, ranks, or trims it; every Constitution gate here and in what comes next fires unchanged")
+  | .holdReply      => (.interaction .extension, "within the session's answer to a turn read as other work or as an ending where that reading was unclear: that this run was left as it stands")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Candidate-field resolution emergent via session context.
@@ -495,11 +499,11 @@ Present the classification as a short basis-cited relay: the inferred entry, why
 
 Every map is in everyday language and is drawn from the context each time. It shows the whole field: the frames and the branches dug under them, the candidates under each with their origins, the unexplored frames, the frames out of scope with the person's turn quoted — a frame brought back in shown as brought back, citing that turn — your proposed exclusions marked as yours, each by name, what is parked with the person's request quoted, every signal still unaddressed, and your doubts. Mark every change since the map the person answered: this round's candidates, exclusions and proposals taken, signals changed, readings you re-made, and what a turn that did not bear on the run said about the field. Material the person named that is not yet on the map — awaiting its read, or the first pass on a frame map — shows as pending. When the map grows large, compress earlier material to branches and counts, the density yours to judge, while those changes and every proposed exclusion show in full; the taking's trace is never compressed. On a Resumed entry, redraw the earlier field's map — the whole field as last shown, with the person's later turns that bear on it, and the material it compressed still reachable.
 
-Where the person asked about the map, answer it first, from the map, beside the gate; nothing in the answer ranks or chooses. A request for your pick or a ranking is answered there too: say that choosing follows the taking, and rank nothing. Where reading a turn as other work or as an ending was unclear, the session's answer says briefly that the run was left as it stands.
+Where the person asked about the map, answer it first, from the map, before the gate; nothing in the answer ranks or chooses. A request for your pick or a ranking is answered there too: say that choosing follows the taking, and rank nothing. Where reading a turn as other work or as an ending was unclear, the session's answer carries what `holdReply` names.
 
-While no frame has been opened, the gate is the frame map and its selector — abstract frames, before any candidate of yours, in the template `references/blank-entry.md` carries — and once a candidate of the person's is on the map, "Take this field as it stands" is offered as a choice of its own, outside the multi-select frame selector. Before every gate that offers taking the field — every round gate, and such a frame map — say first what continuing would cost to review and what taking keeps. Where the person explicitly asks for the field while no candidate exists, say plainly that there is nothing to take yet.
+While no frame has been opened, the gate is the frame map and its selector — abstract frames, before any candidate of yours, in the template `references/blank-entry.md` carries — and once a candidate of the person's is on the map, "Take this field as it stands" is offered as a choice of its own, outside the multi-select frame selector; an answer that chooses frames together with it opens those frames, and the field is not taken. Before every gate that offers taking the field — every round gate, and such a frame map — say first what continuing would cost to review and what taking keeps. Where the person explicitly asks for the field while no candidate exists, say plainly that there is nothing to take yet.
 
-At every round gate, ask: continue first and "Take this field as it stands" second, rendered in the person's idiom, with symmetric specificity. Continue names its widening target, the frames `targets` would open — unexplored frames other than those the person parked or you propose excluding, a new angle, or a branch under whatever the person asks to deepen; when no such frame is left, it says so and asks the person to name a frame, give a new angle, or say what to deepen, naming no frame, candidate, or branch itself. Any novelty or coverage observation, and every doubt, stays before the gate and does not recommend or reorder either answer.
+At every round gate, present continue first and "Take this field as it stands" second, rendered in the person's idiom, with symmetric specificity. Continue names its widening target, the frames `targets` would open — unexplored frames other than those the person parked, a new angle, or a branch under whatever the person asks to deepen; when no such frame is left, it says so and asks the person to name a frame, give a new angle, or say what to deepen, naming no frame, candidate, or branch itself. Any novelty or coverage observation, and every doubt, stays before the gate and does not recommend or reorder either answer.
 
 At the taking, show the field's trace: the topic, then the whole map as drawn above with nothing compressed — each frame and branch marked out of scope wherever it is excluded, and otherwise explored or unexplored — and with it what only the trace carries: material named but not yet in the field, listed as named and not in the field; each exclusion taken with the field, shown as your proposal the person took; and every change since the map the person answered, marked.
 

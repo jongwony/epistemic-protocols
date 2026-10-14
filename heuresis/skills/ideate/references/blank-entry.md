@@ -24,7 +24,7 @@ options:
 Or:
 - Name an angle of your own — it is shaped into a frame and opened with the rest
 
-Beside the selector, as a choice of its own where SKILL.md's "The map" offers it:
+Beside the selector, as a choice of its own where and as SKILL.md's "The map" offers it:
 - Take this field as it stands
 ```
 
