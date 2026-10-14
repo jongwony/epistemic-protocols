@@ -123,9 +123,9 @@ structure Instance where
     still unsettled for the person and at least two concrete cases can be read together: a named
     abstraction whose meaning is being reconsidered from its cases is in process; applying a fixed
     meaning to a disputed case is not; a set of cases this session already crystallized, or whose
-    run the person's words ended, stays inactive unless the person reopens it. Where no essence is
-    sensed or no second case was found, say what was searched and what would settle it. `none`
-    where the case is this protocol's.
+    run the person's words ended, stays inactive unless the person's words reopen it, a correction
+    of its record among them. Where no essence is sensed or no second case was found, say what was
+    searched and what would settle it. `none` where the case is this protocol's.
     During a run, a reading that the case is no longer this protocol's is shown with its basis
     among your doubts and closes nothing. -/
 axiom notActivated : Context P → Option String
@@ -217,8 +217,8 @@ structure Example where
     the cases shown that it takes in and those it leaves out, and where the working candidate sits
     on it. The row of the reading the candidate stands on sorts every case on the sheet into taken
     in or left out, except a case the person's words place on the boundary, which it leaves in
-    neither list and the sheet shows with their words; the other readings' rows carry the cases
-    that separate them, and either of their lists may then be empty. -/
+    neither list and the sheet and the record show with their words; the other readings' rows carry
+    the cases that separate them, and either of their lists may then be empty. -/
 structure Row where
   againstGoal   : String
   catches       : List Example
@@ -245,9 +245,9 @@ def crossView (c : Context P) : List (Reading × Row) := (live c).map (fun r => 
     bears on the goal and the readings, how it surfaced, and who brought it. -/
 axiom unfoldCase : Context P → Instance → String
 
-/-- Every case the cross view uses, once each. -/
+/-- Every case the cross view uses. -/
 def rowCases (c : Context P) : List Instance :=
-  ((crossView c).flatMap (fun x => (x.2.catches ++ x.2.misses).map (·.source))).eraseDups
+  (crossView c).flatMap (fun x => (x.2.catches ++ x.2.misses).map (·.source))
 
 /-- The cases section of the sheet: every case the person brought, every case the cross view uses,
     and every case you found, each once, with its unfolding; which of them a sheet shows unfolded
@@ -305,14 +305,16 @@ inductive Proposer | ai | person | source
 /-- **Your reading**: the position of the turn that first put forward line `e`. A value whose
     content a turn of the person's or of another source put forward, and which you then drew up,
     was put forward by that turn; a case the person singled out from what they pointed you to was
-    put forward by the turn of theirs that singled it out. -/
+    put forward by the turn of theirs that singled it out. A line no turn has put forward yet —
+    one you draw at a recognition — has no position in the context, and is yours. -/
 axiom introducedAt : Context P → Entry → Nat
 
 def proposer (c : Context P) (e : Entry) : Proposer :=
   match c[introducedAt c e]? with
   | some ⟨.person, _⟩    => .person
   | some ⟨.assistant, _⟩ => .ai
-  | _                    => .source
+  | some _               => .source
+  | none                 => .ai
 
 /-- How a line came to stand on a person's turn: the turn gave it in its own words, or took it as
     a sheet showed it. -/
@@ -363,12 +365,11 @@ axiom dissent : Context P → List String
     turn's own included —, as what the person means, with no second permission; such changes do
     not stop the recognition. Holding a line back — not taking it, without saying it is wrong —
     leaves it as it stood, a proposal where no turn of the person's took it. A recognition stands
-    where the turn also holds back a line other than the goal, the candidate's name or its rule — a
-    case's placement in the candidate's row among them —, says something about an open item, raises
-    a point still open, or answers a doubt; holding back the goal, the candidate's name or its rule
-    recognizes nothing. "Not yet" or a question closes nothing; silence, other work, and your own
-    reading that the candidate fits close nothing. Where the turn's intent is unclear, it closes
-    nothing. -/
+    whatever else the turn does — holds back another line, a case's placement among them, says
+    something about an open item or raises one, answers a doubt —; holding back the goal, the
+    candidate's name or its rule, or setting aside the reading the candidate stands on, recognizes
+    nothing. "Not yet" or a question closes nothing; silence, other work, and your own reading that
+    the candidate fits close nothing. Where the turn's intent is unclear, it closes nothing. -/
 axiom ClosingSupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person closes. -/

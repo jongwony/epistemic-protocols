@@ -141,8 +141,8 @@ theorem standing_by_person (c : Context P) (e : Entry) (s : Standing)
 
 /-- Every provenance line of a crystallized record is one of the lines `entries` reads on the
     context the record is read on. -/
-theorem record_lines_shown (converge : Context P → Response P) (c : Context P) (p : Provenance)
-    (hp : p ∈ (crystallize converge c).provenance) : p.entry ∈ entries c := by
+theorem record_lines_from_entries (converge : Context P → Response P) (c : Context P)
+    (p : Provenance) (hp : p ∈ (crystallize converge c).provenance) : p.entry ∈ entries c := by
   simp only [crystallize, provenanceOf, List.mem_map] at hp
   obtain ⟨e, he, rfl⟩ := hp
   exact he
