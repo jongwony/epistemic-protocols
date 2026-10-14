@@ -45,13 +45,13 @@ theorem resumed_redraws (relay generate respond session : Context P → Response
           [(respond (receive c ++ [(relay (receive c)).val])).val]) us := by
   simp only [start, h, advance, ht, ↓reduceIte]
 
-/-- On a fresh invocation that takes nothing, this run returns holding, on the context with that
+/-- On a fresh invocation that takes nothing, this run returns holding, on the context before that
     utterance. -/
 theorem fresh_invocation_holds (generate respond session : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P))
     (hk : ¬ Taken c u)
     (hi : Invoked (fuse c u)) :
-    ideate generate respond session c (u :: us) = .holding (fuse c u) := by
+    ideate generate respond session c (u :: us) = .holding c := by
   simp only [ideate, hk, hi, ↓reduceDIte, ↓reduceIte]
 
 /-- A turn that takes nothing, is no fresh invocation, and does not bear on the run joins the

@@ -1,6 +1,6 @@
 ---
 name: ideate
-description: "The idea field is empty, narrowed too early, or thin: the user can then look over one map of it — frames, branches, each idea's origin, what is unexplored or set aside — and take it, nothing chosen."
+description: "The idea field is empty, narrowed early, or thin; from the user's words and what they name, they can then look over one map — frames, branches, each idea's origin, what is unexplored — and take it."
 ---
 
 # Heuresis Protocol
@@ -144,8 +144,12 @@ structure Seed where
 /-- `blank`: a topic only. `seeded`: idea fragments, named material, or both. `resumed`: the
     request continues a field this protocol drew, taken or holding — earlier in the context, or
     carried in material the request names, such as a field exported to an issue, whose frames,
-    branches, candidates with their origins, exclusions, and parks carry over as that material
-    records them. The three take different paths: the frame map first, a first pass, or the
+    branches, candidates with their origins, exclusions, parks, and which frames were opened carry
+    over as that material records them. Exclusions and parks carried that way cite the request
+    that names the material — the person's adoption of it, as `Seed` says — and carry the
+    material's own record of the earlier turn, shown as recorded and never as said in this
+    context; the redrawn map is that field's map, and no opened frame is reopened. The three take
+    different paths: the frame map first, a first pass, or the
     earlier field's map redrawn. -/
 inductive Entry
   | blank
@@ -185,14 +189,16 @@ structure Frame where
     registered frame is read here. -/
 axiom frames : Context P → List Frame
 
-/-- **Your reading**: a pass has opened the frame. -/
+/-- **Your reading**: a pass has opened the frame — for a field carried in named material, as that
+    material records it (`Entry`). -/
 axiom Opened : Context P → Frame → Bool
 
 /-- The explored frames: the registered ones a pass opened, so none lies outside the register. -/
 def explored (c : Context P) : List Frame := (frames c).filter (Opened c)
 
-/-- A frame the person put out of scope, with the turn in which they did — its branches and
-    candidates go with it. -/
+/-- A frame the person put out of scope, with the turn in which they did — for one carried in
+    named material, the request that names it, as `Entry` says — its branches and candidates go
+    with it. -/
 structure Exclusion (c : Context P) where
   frame    : Frame
   request  : Cite c
@@ -229,14 +235,13 @@ structure Candidate where
     on a Seeded entry's first pass the seeds, each keeping its own origin, and every generated one
     as `assistant`; the items of material the person names for this field — a record once
     `reference` has read it, or material the session already holds, such as an earlier answer of
-    yours — under the frames they fit with their own origin, `external` for a tool read, on the
-    next map with no pass needed, except that on a frame map where no frame has been opened they
-    fold in at the first pass; and an idea the person contributes to this field at any turn,
-    judged from their words — not a hypothetical, a quotation, or an idea about other work — under
-    the frame it fits with origin `person`, on the next map — or, where it was said in the taking
-    turn or in a turn of theirs since the map that turn answered, in the field the taking closes.
-    Never removed, re-ranked, or relabeled, an
-    excluded frame's included. -/
+    yours — under the frames they fit with their own origin, `external` for a tool read; and an
+    idea the person contributes to this field at any turn, judged from their words — not a
+    hypothetical, a quotation, or an idea about other work — under the frame it fits with origin
+    `person`. Each lands on the next map the run draws — or, said in the taking turn or in a turn
+    of the person's since the map that turn answered, in the field the taking closes; on a frame
+    map, items not the person's own stay pending until a frame opens. Never removed, re-ranked, or
+    relabeled, an excluded frame's included. -/
 axiom candidates : Context P → List Candidate
 
 /-- **Your judgment**, remade at each map before a gate from the candidates and signals as they
@@ -248,7 +253,8 @@ def Unaddressed (c : Context P) (s : Signal) : Prop :=
   s ∈ signals c ∧ ¬ ∃ x ∈ candidates c, Responds c x s
 
 /-- Something the person themselves set aside for later — a frame or branch they want to return
-    to after this run — with the turn in which they said so. -/
+    to after this run — with the turn in which they said so, or for one carried in named
+    material the request that names it, as `Entry` says. -/
 structure ParkedFollowUp (c : Context P) where
   frame    : Frame
   note     : Option String
@@ -285,7 +291,8 @@ axiom targets : Context P → List Frame
     since that map changed — the taking turn's included — each as far as its words reach. A turn
     answering a map with no candidate on it takes nothing; where its ideas land is `candidates`. A
     turn asking for material not yet on the map to join first does not yet take the field: it asks
-    for a map not yet shown. Words that end the run or turn elsewhere without taking the field do
+    for a map not yet shown; nor does a turn that chooses frames together with taking — the frames
+    open. Words that end the run or turn elsewhere without taking the field do
     not take it. A pick among candidates, a judgment on one, or a correction does not by itself
     take the field. -/
 axiom ClosingSupported : Context P → Turn P → Unit → Prop
@@ -302,13 +309,11 @@ axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
     where the request asks to continue — the earlier field is never discarded. -/
 axiom Invoked : Context P → Prop
 
-/-- **Your judgment**: the latest utterance bears on this run. A request to take the field bears
-    on it where there is something to take or the person asks for the field itself; with nothing to
-    take, a "stop" or "enough", or a taking said together with other work or an ending, goes with
-    that ending or other work. A turn that only turns to other work or only ends the run does not
-    bear on it: the session answers it, no map is drawn, and no pass runs; what that turn says
-    beside about the field — an exclusion, an idea, a park, a record named as material — stands in
-    the context. Later turns bear on a holding run only where they come back to it. -/
+/-- **Your judgment**: the latest utterance bears on this run. A turn that only turns to other
+    work or only ends the run does not bear on it: the session answers it, no map is drawn, and no
+    pass runs; what that turn says beside about the field — an exclusion, an idea, a park, a record
+    named as material — stands in the context. Later turns bear on a holding run only where they
+    come back to it. -/
 axiom Reaches : Context P → Prop
 
 /-- Once it has run, the person can look over one map of their idea field — each frame and the
@@ -318,11 +323,12 @@ axiom Reaches : Context P → Prop
     `DiverseCandidateField`, read from `context`, the context with the taking turn: the topic, every
     candidate with its frame or branch and its origin, the explored frames, the unexplored ones,
     the frames the person put out of scope with their turns cited, the parked follow-ups with
-    their citations, the unaddressed signals, and your doubts (`dissent`). It holds what
+    their citations, the unaddressed signals, your doubts (`dissent`), and the material named but
+    not yet in the field. It holds what
     `ClosingSupported` reads the taking turn as taking; the unaddressed signals and your doubts are
     as the map the person took showed them, with what the person's own turns since changed. No pass
-    runs after it, and nothing you form or re-make after it
-    — a fresh candidate, a newly inferred exclusion, a signal or doubt read again — is taken.
+    runs after it, and nothing you form or re-make after it — a fresh candidate, a newly inferred
+    exclusion, a signal or doubt read again — is taken.
     Frame-distributed, never scored; complete for whatever unfolds it next, a later /ideate
     resuming from it included. -/
 structure DiverseCandidateField (P : Type) where
@@ -403,7 +409,7 @@ def ideate (generate respond session : Context P → Response P) :
   | c, u :: us =>
     let c' := fuse c u
     if h : Taken c u then .field ⟨c', h.2⟩
-    else if Invoked c' then .holding c'
+    else if Invoked c' then .holding c
     else if ¬ Reaches c' then ideate generate respond session (c' ++ [(session c').val]) us
     else ideate generate respond session (advance generate respond (receive c')) us
 
@@ -497,11 +503,11 @@ Present the classification as a short basis-cited relay: the inferred entry, why
 
 ### The map
 
-Every map is in everyday language and is drawn from the context each time. It shows the whole field: the frames and the branches dug under them, the candidates under each with their origins, the unexplored frames, the frames out of scope with the person's turn quoted — a frame brought back in shown as brought back, citing that turn — your proposed exclusions marked as yours, each by name, what is parked with the person's request quoted, every signal still unaddressed, and your doubts. Mark every change since the map the person answered: this round's candidates, exclusions and proposals taken, signals changed, readings you re-made, and what a turn that did not bear on the run said about the field. Material the person named that is not yet on the map — awaiting its read, or the first pass on a frame map — shows as pending. When the map grows large, compress earlier material to branches and counts, the density yours to judge, while those changes and every proposed exclusion show in full; the taking's trace is never compressed. On a Resumed entry, redraw the earlier field's map — the whole field as last shown, with the person's later turns that bear on it, and the material it compressed still reachable.
+Every map is in everyday language and is drawn from the context each time. It shows the whole field: the frames and the branches dug under them, the candidates under each with their origins, the unexplored frames, the frames out of scope with the person's turn quoted — a frame brought back in shown as brought back, citing that turn — your proposed exclusions marked as yours, each by name, what is parked with the person's request quoted, every signal still unaddressed, and your doubts. Mark every change since the map the person answered: this round's candidates, exclusions and proposals taken, signals changed, readings you re-made, and what a turn that did not bear on the run said about the field. Material the person named that is not yet on the map — awaiting its read, or on a frame map a frame to open — shows as pending. When the map grows large, compress earlier material to branches and counts, the density yours to judge, while those changes and every proposed exclusion show in full; the taking's trace is never compressed. On a Resumed entry, redraw the earlier field's map — the whole field as last shown, with the person's later turns that bear on it, and the material it compressed still reachable.
 
 Where the person asked about the map, answer it first, from the map, before the gate; nothing in the answer ranks or chooses. A request for your pick or a ranking is answered there too: say that choosing follows the taking, and rank nothing. Where reading a turn as other work or as an ending was unclear, the session's answer carries what `holdReply` names.
 
-While no frame has been opened, the gate is the frame map and its selector — abstract frames, before any candidate of yours, in the template `references/blank-entry.md` carries — and once a candidate of the person's is on the map, "Take this field as it stands" is offered as a choice of its own, outside the multi-select frame selector; an answer that chooses frames together with it opens those frames, and the field is not taken. Before every gate that offers taking the field — every round gate, and such a frame map — say first what continuing would cost to review and what taking keeps. Where the person explicitly asks for the field while no candidate exists, say plainly that there is nothing to take yet.
+While no frame has been opened, the gate is the frame map and its selector — abstract frames, before any candidate of yours, in the template `references/blank-entry.md` carries — and once a candidate of the person's is on the map, "Take this field as it stands" is offered as a choice of its own, outside the multi-select frame selector; an answer that chooses frames together with it reads as `ClosingSupported` says. Before every gate that offers taking the field — every round gate, and such a frame map — say first what continuing would cost to review and what taking keeps, naming your proposed exclusions that taking would take. Where the person explicitly asks for the field while no candidate exists, say plainly that there is nothing to take yet. Where named material waits on the frame map for a frame to open, the gate says so plainly.
 
 At every round gate, present continue first and "Take this field as it stands" second, rendered in the person's idiom, with symmetric specificity. Continue names its widening target, the frames `targets` would open — unexplored frames other than those the person parked, a new angle, or a branch under whatever the person asks to deepen; when no such frame is left, it says so and asks the person to name a frame, give a new angle, or say what to deepen, naming no frame, candidate, or branch itself. Any novelty or coverage observation, and every doubt, stays before the gate and does not recommend or reorder either answer.
 
