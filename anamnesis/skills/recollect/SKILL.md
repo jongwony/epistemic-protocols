@@ -33,13 +33,12 @@ Anamnesis(V) → start(c) → recollect(c, utterances), where c is the fused ses
   [nothing to present ∧ nothing further worth reaching for]    close: unresolved within the scope searched
   next utterance u: c' := fuse(c, u) →
     [u is the person's own invocation of this protocol]  hold
-    [u takes the presented recognizable as the past they meant]  close: identified
-    [u ends the recall without identifying anything]   the ending report; no pass runs; the recall stays as it stood
     [u does not bear on this recall (Reaches)]
         [u points at another past without a name]      hold
         [otherwise]                                    the session answers it; no pass runs; the recall stays as it stood
-    [otherwise] u is more cue, a correction, a place to look, a wider boundary admitted or declined,
-        a question about or a remark on what was shown → pass(c') → the same reading
+    [u takes the presented recognizable as the past they meant]  close: identified
+    [u ends the recall]                                the ending report; no pass runs; the recall stays as it stood
+    [otherwise]                                        pass(c') → the same reading
   no utterance: the round holds; nothing is identified and nothing closes
 -/
 
@@ -280,14 +279,12 @@ axiom expansion : Context P → Option Expansion
 
 /-- **Your reading**: the person has added to the cue since this recall began — an answer, a
     correction, a place to look. This recall is the one the latest invocation or empty intention
-    started, together with a recall it continues: a bare `/recollect` whose previous turn points
-    at no past, made while a recall holds, continues it, and that recall's cue, what the person
-    added, its findings, and the extensions declined in it carry over. -/
+    started, or an earlier one the person's words continue. -/
 axiom AddedToCue : Context P → Prop
 
-/-- **Your reading**: the recognizable the latest presenting round showed, read from that
-    response. A reply that answers a question, a `session` answer, or an end report leaves it as
-    it was; a round that asks the open question or offers the wider search clears it. -/
+/-- **Your reading**: the recognizable the latest `respond` round led with, read from that
+    response; `none` after a round that asked the open question or offered the wider search. A
+    `session` answer or an end report leaves it unchanged. -/
 axiom presented : Context P → Option Recognizable
 
 /-- **Your judgment**: the cited turn takes the presented recognizable as the past the person
@@ -305,17 +302,18 @@ def answerCoord : Coord P Unit :=
 axiom answer : (c : Context P) → Occ (answerCoord (P := P)) c
 
 /-- **Your judgment**: the latest utterance bears on this recall — more cue, a correction, a place
-    to look, an admission or a decline of the wider search, a question about what was shown, a
-    remark or a form instruction on the presentation, which re-renders it and adds no search. A
-    turn about other work bears only where it also adds to the cue. A turn that does not bear runs
-    no search, and the recall stays as it stood with every word of that turn in the context; later
-    turns bear on it only where they come back to the recall itself, not where they merely mention
-    its past. After an ending (`Ends`), a later utterance bears on this recall only where it
-    reopens it. -/
+    to look, an admission or a decline of the wider search, an identification of what was shown,
+    an ending of this recall, a question about what was shown, a remark or a form instruction on
+    the presentation, which re-renders it and adds no search. A turn about other work bears only
+    where it also adds to the cue. A turn that points at another past than this recall's does not
+    bear on it, an ending said with it included. A turn that does not bear runs no search, and the
+    recall stays as it stood with every word of that turn in the context; later turns bear on it
+    only where they come back to the recall itself, not where they merely mention its past. After
+    an ending (`Ends`), a later utterance bears on this recall only where it reopens it. -/
 axiom Reaches : Context P → Prop
 
-/-- **Your reading**: the latest utterance ends this recall without identifying anything, whatever
-    else it says — an ending governs a decline or a correction said with it. -/
+/-- **Your reading**: the latest utterance ends this recall; an ending governs a decline or a
+    correction said with it. -/
 axiom Ends : Context P → Prop
 
 /-- **Your reading**: the latest utterance is the person's own invocation of this protocol. -/
@@ -336,8 +334,8 @@ axiom dissent : Context P → List String
     line of work, topic, or settled concept across several — in a story whose every sentence rests
     on a record they can reopen, knowing it took place, not that it still holds.
     `RecalledContext`, emitted as session text: the identified recognizable, its story, the
-    qualifications that bear on its members, the scope searched, the doubts that stood when the
-    person identified it, and the turn that identified it. -/
+    qualifications that bear on its members, the scope searched, the doubts that stood before the
+    identifying turn, and that turn. -/
 structure RecalledContext (P : Type) where
   context        : Context P
   recognizable   : Recognizable
@@ -360,13 +358,11 @@ inductive Outcome (P : Type)
 bind(V) = explicit_arg ∪ colocated_expr ∪ prev_user_turn   -- priority: explicit_arg > colocated_expr > prev_user_turn
   /recollect "text"   → the cue is read from "text" and the context
   "recall … topic"    → the cue is read from the text before the trigger
-  /recollect (alone)  → the cue is read from the previous person turn where it points at a past; otherwise, while a recall
-                        holds, it continues that recall (see `AddedToCue`); with neither, see `search`
+  /recollect (alone)  → the cue is read from the previous person turn where it points at a past; otherwise see `search`
 Several vague references: bind the first and note the others.
-An explicit invocation starts a fresh recall, after a close or while another holds, unless it continues one; the earlier recall
-holds where it stood — its question superseded, nothing it showed identified by it. What an earlier recall found stays in the context
-the new cue is read from, so a turn that goes back to an earlier candidate is cue for the current recall, which can present it
-again.
+An explicit invocation starts a fresh recall, after a close or while another holds; the earlier recall holds where it stood —
+its question superseded, nothing it showed identified by it. What an earlier recall found stays in the context the new cue is
+read from; only words that continue an earlier recall return to it.
 -/
 
 /-! ── MODE STATE ──
@@ -378,21 +374,19 @@ abbrev Mode (P : Type) := Context P
 /-! ── PHASE TRANSITIONS ──
 A pass reads the cue, runs the searches within the boundary, opens the leading recognizable's
 members, and records what it found; the reads enter the context as evidence turns [Tool]. Then the
-AI's own close fires, or `respond` presents one round. Each utterance is fused and read in the
-order `recollect` takes: an identification closes; an ending is answered by `endReport`, and a turn
-that does not bear on the recall by `session`, the session's own answer, each without a pass and
-staying in the context; anything else is read by the next pass.
+AI's own close fires, or `respond` presents one round. Each utterance is fused and read as
+`recollect` takes it: it leaves the recall holding, closes it, or gets an answer — `session`,
+`endReport`, or a round — that stays in the context.
 -/
 
-/-- **Your collection** for one pass. One principle governs every read it makes — a search toward
-    the cue along its axes, the opening of a member of the leading recognizable at the span the
-    cue reaches (for an artifact, the change history of that span), the capture outcome of a
-    record a search examined, one that matched nothing included: read or read again what the
-    latest turn gives reason to — a moved cue, a place to look, an admitted extension, a record
-    now reachable that was not, a question about what was shown that more of an opened record
-    answers (a named span of a named record stays within the boundary) —, within the established
-    boundary. A remark, a form instruction, or a decline gives no reason to read. Each read
-    returns as an evidence turn; nothing is written to the records. With no recoverable cue
+/-- **Your collection** for one pass: what the cue as it now stands gives reason to read and the
+    context does not already hold, or holds only from before a change the person's words or
+    evidence report — within the established boundary, the searches toward the cue along its
+    axes, the opening of each member of the leading recognizable at the span the cue reaches (for
+    an artifact, the change history of that span) and of the next candidate's where one's records
+    do not open, and the capture outcome of every record a search examined, one that matched
+    nothing included. A remark, a form instruction, or a decline adds nothing new to read. Each
+    read returns as an evidence turn; nothing is written to the records. With no recoverable cue
     nothing is worth reading, and the first round is the open question. -/
 axiom search : Context P → List (Evidence P)
 
@@ -415,7 +409,7 @@ def closing (c : Context P) : Option (Outcome P) :=
   | .filled _ s _ _, some r =>
     if s.idx + 1 = c.length then
       some (.identified ⟨c, r, (story c r).map (·.text), (qualifications c r).map (·.finding),
-        searched c, dissent c, s.idx⟩)
+        searched c, dissent (c.take s.idx), s.idx⟩)
     else none
   | _, _ => none
 
@@ -438,14 +432,14 @@ def recollect (respond session endReport : Context P → Response P) :
   | c, u :: us =>
     let c' := fuse c u
     if Invoked c' then .holding c
+    else if ¬ Reaches c' then
+      if EmptyIntention c' then .holding c
+      else recollect respond session endReport (c' ++ [(session c').val]) us
     else
       match closing c' with
       | some o => o
       | none =>
         if Ends c' then recollect respond session endReport (c' ++ [(endReport c').val]) us
-        else if ¬ Reaches c' then
-          if EmptyIntention c' then .holding c
-          else recollect respond session endReport (c' ++ [(session c').val]) us
         else
           let c₁ := pass c'
           match settle c₁ with
@@ -464,11 +458,9 @@ def start (respond session endReport : Context P → Response P) (c : Context P)
 
 /-! ── LOOP ──
 The loop is dialogue: each round ends where the turn yields, and nothing counts down. Every
-utterance that bears on the recall and identifies nothing is read whole by the next pass — more
-cue, a correction naming an earlier, a narrower, or a wider past, a place to look, an admission or
-a decline of the wider search, a question about or a remark on what was shown — and the pass reads
-what that turn gives reason to read. A correction is new ground, so no number of them ends the
-recall. An ending, or a turn that does not bear on the recall (`Reaches`), runs no pass, and the
+utterance that bears on the recall (`Reaches`) and neither identifies nor ends it is read whole
+by the next pass, which reads what the cue as it then stands gives reason to read. A correction
+is new ground, so no number of them ends the recall. An ending, or a turn that does not bear on the recall (`Reaches`), runs no pass, and the
 recall holds as it stood.
 The recall closes on the person's identification, or where the evidence leaves nothing further
 worth reaching for.
@@ -516,8 +508,8 @@ def grounding : Op → Annot × String
   | .qualify           => (.observe, "artifact read, environment run: the capture outcome for every record the searches examined, one that matched nothing included, associated by runtime, store root, and session identity, per the capture-outcome reference; read-only")
   | .ask               => (.interaction .constitution, "with nothing to present and nothing yet added to the cue, what was searched with the capture evidence of the records examined, then one open question asking for more of what the person remembers")
   | .expand            => (.interaction .constitution, "what was searched so far, which records did not open, and the capture evidence of the records examined, then the wider search with what it would read and its cost, against declining it as `expansion` reads a decline, apart from ending the recall")
-  | .present           => (.interaction .constitution, "the presentation the Protocol section names")
-  | .readTurn          => (.sense, "Internal analysis: the latest utterance read whole against the fused context, in the order `recollect` takes — whether it is the person's own invocation of this protocol (`Invoked`); whether it identifies the presented recognizable; whether it ends the recall (`Ends`); whether it bears on this recall (`Reaches`) and, where it does not, whether it points at another past without a name (`EmptyIntention`); where it bears, a decline of the wider search, more cue — a correction, a place to look, an admission of the wider search — or a question about or a remark on what was shown")
+  | .present           => (.interaction .constitution, "the round with a leading recognizable, as The presentation in the Protocol section lays it out")
+  | .readTurn          => (.sense, "Internal analysis: the latest utterance read whole against the fused context, in the order `recollect` takes — `Invoked`, `Reaches` (and, where it does not bear, `EmptyIntention`), an identification, `Ends` — what bears being as `Reaches` lists it")
   | .resolve           => (.interaction .extension, "on identification, RecalledContext — the story, the excerpts with locators and handles, the qualifications, the scope searched, the doubts that stood, the identifying turn quoted, and the currency caveat")
   | .unresolved        => (.interaction .extension, "on an unresolved close, the scope report the Rules name")
   | .endReport         => (.interaction .extension, "to a turn that ends the recall without identifying anything: that nothing was identified, then the scope report the Rules name, with no new search")
@@ -556,7 +548,7 @@ The records the past work left are wherever it left them: its conversations, the
 
 With a leading recognizable, the round carries its story, each claim with the record it rests on and that record's handle; the particulars from the opened records that tell this past apart, and your doubts that it is the past meant (`dissent`); each member located in time from what its record says of when the work took place, leaving the time unknown where nothing says it, and named by its root and, for a conversation, the runtime that keeps it; the members whose records did not open; the adjacent candidates named so a correction can point at them; the members' qualifications; and that recall establishes that the past took place and not that it still holds. Then the turn yields, with no option list.
 
-In any round, a question the person asked about what was shown is answered beside the gate from the records already opened, without re-presenting the whole round. Where the turn also asks for other work, the round names that request so the person can take it up; it is not carried out within this round, which yields.
+In any round, a question the person asked about what was shown is answered beside the gate from the records already opened, without re-presenting what is unchanged. Where the turn also asks for other work, the round names that request so the person can take it up; it is not carried out within this round, which yields.
 
 ## Known failure modes
 
