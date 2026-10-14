@@ -9,7 +9,7 @@ Name what several concrete cases share by crossing a working candidate with the 
 
 ## Definition
 
-**Periagoge** (περιαγωγή): a turning-around — a dialogical act for the moment when several concrete cases seem to share something no one has named yet, or that a name in use no longer says. From the first sheet the AI states the goal the abstraction serves and a working candidate — a name and a rule, with the ground it stands on and, where that ground is short, what is short beside it —, each value on the sheet marked as set by the user's words, taken by them from what the AI showed, or still a proposal, marked with who put it forward, and crosses every live reading of what the cases share with that goal: which cases each reading takes in and which it leaves out, each case on the sheet unfolded when it is new or changed and every one when the sheet invites recognition. The user answers in their own words: they move the goal or the candidate, take what the AI showed, set a reading aside, or recognize the abstraction; they can stop at any time, and the run stays as it stood. Once it has run, the user can name what their cases share, say which cases it takes in and which it leaves out, and recognize it as serving their goal — their settlement for that goal, not proof that the reading is correct (the Greek dialectical vocabulary supplies the source terms).
+**Periagoge** (περιαγωγή): a turning-around — a dialogical act for the moment when several concrete cases seem to share something no one has named yet, or that a name in use no longer says. From the first sheet the AI states the goal the abstraction serves and a working candidate — a name and a rule, with the ground it stands on and, where that ground is short, what is short beside it —, and crosses every live reading of what the cases share with that goal: which cases each reading takes in and which it leaves out. The user answers in their own words: they move the goal or the candidate, take what the AI showed, set a reading aside, or recognize the abstraction; they can stop at any time, and the run stays as it stood. Once it has run, the user can name what their cases share, say which cases it takes in and which it leaves out, and recognize it as serving their goal — their settlement for that goal, not proof that the reading is correct (the Greek dialectical vocabulary supplies the source terms).
 
 ```lean
 /-!
@@ -28,7 +28,12 @@ Periagoge(A) → start(c) → induce(c, utterances), where c is the fused sessio
   next utterance u, read on fuse(c, u):
     [does not bear on this run]                                the session answers it; that answer
                                                                stays in c; the sheet holds
-    [the person recognizes the goal and the candidate]         what is collected now enters c → crystallized
+    [the person recognizes the goal and the candidate]         what is collected now enters c; where
+                                                               it holds a case no sheet has shown
+                                                               that would decide against that
+                                                               candidate (`Overturned`)
+                                                               → the sheet again → Stop; otherwise
+                                                               → crystallized
     [otherwise]                                                what is collected now enters c → the sheet again → Stop
   no utterance: the sheet holds
 -/
@@ -447,6 +452,11 @@ axiom collect : Context P → List (Evidence P)
 
 def pass (c : Context P) : Context P := c ++ (collect c).map (·.val)
 
+/-- **Your judgment**: what collection returned since the recognizing turn holds a case no sheet
+    has shown that would decide against the candidate that turn recognized; where it does, the turn
+    recognizes nothing. -/
+axiom Overturned : Context P → Prop
+
 /-- The crystallized abstraction: every view read on `c`, the context with the recognizing turn and
     what collection returned for it. The context ends in the declaration. -/
 def crystallize (converge : Context P → Response P) (c : Context P) :
@@ -460,7 +470,8 @@ def crystallize (converge : Context P → Response P) (c : Context P) :
 open Classical in
 /-- `respond` presents the sheet the Protocol section describes under "The sheet": the candidate
     as `candidate` gives it, the cross view (`crossView`), and the cases of `casesSection`. A
-    recognition is the person's closing, filled, citing the latest utterance. -/
+    recognition is the person's closing, filled, citing the latest utterance; it crystallizes
+    unless what collection returns for it is `Overturned`. -/
 def induce (respond session converge : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
@@ -471,10 +482,9 @@ def induce (respond session converge : Context P → Response P) :
       let latest : Bool := match closing c' with
         | .filled _ src _ _ => decide (src.idx + 1 = c'.length)
         | .open_ _          => false
-      if latest then .crystallized (crystallize converge (pass c'))
-      else
-        let c₁ := pass c'
-        induce respond session converge (c₁ ++ [(respond c₁).val]) us
+      let c₁ := pass c'
+      if latest ∧ ¬ Overturned c₁ then .crystallized (crystallize converge c₁)
+      else induce respond session converge (c₁ ++ [(respond c₁).val]) us
 
 def start (respond session converge : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
@@ -549,7 +559,7 @@ Under the sheet, where the user asked about the sheet, answer it there first; th
 
 Then one move to ask about, in words — the one whose answer would most change how goal and readings cross — and what each way of answering does to the goal and the candidate. Where every reading drawn so far was set aside, say so with the grounds shown, beside the candidate you put forward on a new reading, and ask whether to name a distinction the readings missed, read another set of cases, or move the goal. Invite recognition only where the candidate fits the goal on every case shown, as the concrete question whether the goal and the candidate, as this sheet shows them, are what the user means, never by naming the act; where a case could still separate it, ask about that case first. Recognizing the abstraction and stopping stay open on every sheet.
 
-The user may answer in their own words, and one answer may reach several parts of the sheet: read it whole, apply it as far as its words reach, leave what it does not reach as it stood, and show what a correction disturbs. A turn that takes something you showed — a case's place, the goal, the rule — makes it theirs then, on the scope its words reach; a narrow answer stays narrow. An utterance about other work leaves the run as it stands, and words that end the run without recognizing the abstraction leave it holding, whatever else the turn says; neither draws a sheet, and the sheet returns when the user comes back to it. A reading leaves the cross view only by the user's words setting it aside, and comes back when their words bring it back, with their earlier ground shown beside it. Only the user closes the run, by recognizing the goal and the candidate as the sheet they answered showed them and as they changed them since, with no second permission and your doubts riding along without refusing it; where a turn that bears on the run recognizes nothing by the closing judgment in the block above (`ClosingSupported`), draw the sheet again with every change no sheet has shown yet.
+The user may answer in their own words, and one answer may reach several parts of the sheet: read it whole, apply it as far as its words reach, leave what it does not reach as it stood, and show what a correction disturbs. A turn that takes something you showed — a case's place, the goal, the rule — makes it theirs then, on the scope its words reach; a narrow answer stays narrow. An utterance about other work leaves the run as it stands, and words that end the run without recognizing the abstraction leave it holding, whatever else the turn says; neither draws a sheet, and the sheet returns when the user comes back to it. A reading leaves the cross view only by the user's words setting it aside, and comes back when their words bring it back, with their earlier ground shown beside it. Only the user closes the run, by recognizing the goal and the candidate as the sheet they answered showed them and as they changed them since, with no second permission and your doubts riding along without refusing it; where a turn that bears on the run recognizes nothing by the closing judgment in the block above (`ClosingSupported`), or what you collect for it holds a case no sheet has shown that would decide against the candidate it recognized (`Overturned`), draw the sheet again with every change no sheet has shown yet, that case among them.
 
 At a recognition, before proceeding, quote the recognizing turn and declare beside it the trace as you read it on the context with that turn, said to be your reading — first what changed since the sheet the recognition answered: the user's moves, and what you produced at the recognition that they have not seen, marked as yours; then the goal and who set it; the candidate, with what its reading's row takes in and leaves out, and a case on the boundary with the user's words; the cross view; every case unfolded, folded on that sheet or not, with who brought it; the readings set aside with the user's grounds; every line with who proposed it and, where a turn of the user's reached it, how it stood; the doubts, the user's answers to them standing in their own turns, quoted; and the open trace. The open items are the live readings the candidate does not take and the points still open, those the recognizing turn raised included; each carries the user's own words about it from a turn of theirs that still reaches it, and an item no such turn reaches is shown as open — undisposed. After a recognition, go on only to a next move the user declared, a routing policy they adopted, or their grant, citing it.
 

@@ -39,14 +39,16 @@ theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(collect c).map (·.val), rfl⟩
 
 /-- A crystallized abstraction comes only from a filled closing — a person's turn, by
-    `closed_by_person` — that cites the utterance just fused onto a context `c₀`; the record is
-    `crystallize` on that fused context and what collection returned for it. -/
+    `closed_by_person` — that cites the utterance just fused onto a context `c₀`, where what
+    collection returned for it is not `Overturned`; the record is `crystallize` on that fused
+    context and what collection returned for it. -/
 theorem crystallized_on_recognition (respond session converge : Context P → Response P)
     (c : Context P) (us : List (Utterance P)) (r : CrystallizedAbstraction P)
     (h : induce respond session converge c us = .crystallized r) :
     ∃ (c₀ : Context P) (u : Utterance P) (src : Cite (fuse c₀ u)),
       (∃ ok sup, closing (fuse c₀ u) = .filled () src ok sup) ∧
       src.idx + 1 = (fuse c₀ u).length ∧
+      ¬ Overturned (pass (fuse c₀ u)) ∧
       r = crystallize converge (pass (fuse c₀ u)) := by
   induction us generalizing c with
   | nil => simp [induce] at h
@@ -59,22 +61,36 @@ theorem crystallized_on_recognition (respond session converge : Context P → Re
       | filled a src ok sup =>
         cases a
         by_cases hi : src.idx + 1 = (fuse c u).length
-        · simp [hc, hi] at h
-          cases h
-          exact ⟨c, u, src, ⟨ok, sup, hc⟩, hi, rfl⟩
+        · by_cases ho : Overturned (pass (fuse c u))
+          · simp [hc, hi, ho] at h
+            exact ih _ h
+          · simp [hc, hi, ho] at h
+            cases h
+            exact ⟨c, u, src, ⟨ok, sup, hc⟩, hi, ho, rfl⟩
         · simp [hc, hi] at h
           exact ih _ h
 
-/-- A recognition citing the utterance just fused, on a turn that bears on the run, crystallizes
-    the record `crystallize` reads on the context with it and what collection returned for it. -/
+/-- A recognition citing the utterance just fused, on a turn that bears on the run, where what
+    collection returned for it is not `Overturned`, crystallizes the record `crystallize` reads on
+    the context with it and what collection returned for it. -/
 theorem recognition_crystallizes (respond session converge : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (src : Cite (fuse c u)) (hc : ∃ ok sup, closing (fuse c u) = .filled () src ok sup)
-    (hi : src.idx + 1 = (fuse c u).length) :
+    (hi : src.idx + 1 = (fuse c u).length) (hno : ¬ Overturned (pass (fuse c u))) :
     induce respond session converge c (u :: us) =
       .crystallized (crystallize converge (pass (fuse c u))) := by
   obtain ⟨ok, sup, hc⟩ := hc
-  simp [induce, hre, hc, hi]
+  simp [induce, hre, hc, hi, hno]
+
+/-- A recognition whose collection is `Overturned` crystallizes nothing at that step: the sheet is
+    drawn again on the context with what collection returned. -/
+theorem overturned_draws_again (respond session converge : Context P → Response P)
+    (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
+    (ho : Overturned (pass (fuse c u))) :
+    induce respond session converge c (u :: us) =
+      induce respond session converge
+        (pass (fuse c u) ++ [(respond (pass (fuse c u))).val]) us := by
+  simp [induce, hre, ho]
 
 /-- A closing is a filled occurrence that cites a turn the person sent. -/
 theorem closed_by_person (c : Context P) (h : filledValue (closing c) = some ()) :
@@ -104,6 +120,19 @@ theorem live_leaves_only_by_person (c : Context P) (r : Reading) (hr : r ∈ rea
   cases hs : filledValue (setAside c r) with
   | none => simp_all
   | some g => exact ⟨g, rfl⟩
+
+/-- A reading still in play is not among the readings the person set aside. -/
+theorem live_not_set_aside (c : Context P) (r : Reading) (h : r ∈ live c) :
+    r ∉ (setAsideReadings c).map Prod.fst := by
+  simp only [live, List.mem_filter, Option.isNone_iff_eq_none] at h
+  simp only [setAsideReadings, List.mem_map, List.mem_filterMap, not_exists, not_and]
+  intro p ⟨r', _, hp⟩ hpr
+  cases hv : filledValue (setAside c r') with
+  | none => simp [hv] at hp
+  | some g =>
+    simp only [hv, Option.map_some, Option.some.injEq] at hp
+    subst hp hpr
+    simp [hv] at h
 
 theorem live_reading_crossed (c : Context P) (r : Reading) (h : r ∈ live c) :
     (r, row c r) ∈ crossView c := by
