@@ -82,15 +82,25 @@ theorem recognition_crystallizes (respond session converge : Context P → Respo
   obtain ⟨ok, sup, hc⟩ := hc
   simp [induce, hre, hc, hi, hno]
 
-/-- A recognition where the context, with what collection returned for it, is `Overturned`
+/-- A turn that bears on the run and recognizes nothing — no filled closing cites the utterance
+    just fused, or the context with it and what collection returned for it is `Overturned` —
     crystallizes nothing at that step: the sheet is drawn again on that context. -/
-theorem overturned_draws_again (respond session converge : Context P → Response P)
+theorem unrecognized_draws_again (respond session converge : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
-    (ho : Overturned (pass (fuse c u))) :
+    (h : (¬ ∃ (src : Cite (fuse c u)), ∃ ok sup, closing (fuse c u) = .filled () src ok sup ∧
+            src.idx + 1 = (fuse c u).length) ∨
+         Overturned (pass (fuse c u))) :
     induce respond session converge c (u :: us) =
       induce respond session converge
         (pass (fuse c u) ++ [(respond (pass (fuse c u))).val]) us := by
-  simp [induce, hre, ho]
+  rcases h with hn | ho
+  · cases hc : closing (fuse c u) with
+    | open_ _ => simp [induce, hre, hc]
+    | filled a src ok sup =>
+      cases a
+      have hi : src.idx + 1 ≠ (fuse c u).length := fun hi => hn ⟨src, ok, sup, hc, hi⟩
+      simp [induce, hre, hc, hi]
+  · simp [induce, hre, ho]
 
 /-- A closing is a filled occurrence that cites a turn the person sent. -/
 theorem closed_by_person (c : Context P) (h : filledValue (closing c) = some ()) :
