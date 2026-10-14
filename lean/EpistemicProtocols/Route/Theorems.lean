@@ -65,6 +65,29 @@ theorem several_never_invoke (k : Catalog) (c : Context P) (h : 2 ≤ (raised k 
   rw [(invoke_requires k c l hi).1] at h
   simp at h
 
+/-- Where the only fit raised now is plain, the routing policy covers the occasion, and no
+    checkpoint holds, a pass invokes that fit. -/
+theorem invokes_when (k : Catalog) (c : Context P) (l : Line k c) (hr : raised k c = [l])
+    (hp : Plain c l) (hq : PolicyApplies c) (hh : ¬ Holding c) : route k c = .invoke l := by
+  unfold route
+  split
+  · next h => rw [hr] at h; cases h
+  · next l₁ ls h =>
+    rw [hr] at h
+    simp only [List.cons.injEq] at h
+    obtain ⟨rfl, rfl⟩ := h
+    simp [hp, hq, hh]
+
+/-- Where fits are raised now but they are not a lone plain fit under the policy with no
+    checkpoint holding, a pass points at them. -/
+theorem points_otherwise (k : Catalog) (c : Context P) (hne : raised k c ≠ [])
+    (h : ¬ ∃ l, raised k c = [l] ∧ Plain c l ∧ PolicyApplies c ∧ ¬ Holding c) :
+    ∃ hp, route k c = .point (raised k c) hp := by
+  rcases route_cases k c with ⟨-, he⟩ | ⟨l, -, hr, hp, hq, hh⟩ | ⟨hp, hpt⟩
+  · exact absurd he hne
+  · exact absurd ⟨l, hr, hp, hq, hh⟩ h
+  · exact ⟨hp, hpt⟩
+
 /-- A pointer shows exactly the fits raised now — each fit `fits` reads that `Raise` admits, none
     left out and none added. -/
 theorem point_is_raised (k : Catalog) (c : Context P) (ls : List (Line k c)) (hne : ls ≠ [])

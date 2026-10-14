@@ -27,7 +27,7 @@
     ],
     "websiteURL": "https://github.com/jongwony/epistemic-protocols",
     "defaultPrompt": [
-      "Use route to invoke the epistemic protocol this context calls for"
+      "Use route to bring in the epistemic protocol this context calls for"
     ],
     "brandColor": "#2563EB"
   }

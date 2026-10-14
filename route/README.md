@@ -1,6 +1,6 @@
 # Route — /route
 
-Route the accumulated session context to the core epistemic protocol whose deficit it shows, and bring that protocol in.
+After `/route`, you meet the deficit your conversation shows as the core protocol that resolves it, and see why it was brought in, without recalling which protocols exist or which one fits.
 
 > [한국어](./README_ko.md)
 
@@ -61,7 +61,7 @@ These review cases distinguish an unresolved deficit from a settled one. Supply 
 
 | Context at recognition | Expected handling |
 |------------------------|-------------------|
-| A completed result misses the actual setting; an adaptation is proposed but its disposition remains open | Compare the mismatch with the loaded deficits and invoke the one plain fit, or point at each fit when several fit or the fit is not plain |
+| A completed result misses the actual setting; an adaptation is proposed but its disposition remains open | Compare the mismatch with the loaded deficits and take the routing decision — invoke, point, or stay silent, as the outcome table above reads it — before any repair |
 | The same mismatch has a user-selected disposition and the requested adaptation has resolved it; no other deficit remains | Silence is available on the current evidence |
 | One protocol's gate still holds and a different deficit is recognized | Point, never invoke: one line for each fit raised now, while the holding protocol keeps the user's judgment; no automatic switch |
 
