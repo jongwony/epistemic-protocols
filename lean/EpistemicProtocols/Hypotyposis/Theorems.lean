@@ -51,16 +51,13 @@ theorem each_step_continues_or_closes (ai : AITurns P) (c : Context P) (u : Utte
     (us : List (Utterance P)) (o : Outcome P) (h : sketch ai c (u :: us) = o) :
     (∃ c', sketch ai c' us = o) ∨
     (∃ v, filledValue (closing (fuse c u)) = some (.recognize v) ∧
-      o = .recognized (recognizedOn (fuse c u) v)) ∨
-    (filledValue (closing (fuse c u)) = some .withdraw ∧ o = .withdrawn (closedOn (fuse c u))) := by
+      o = .recognized (recognizedOn (fuse c u) v)) := by
   simp only [sketch] at h
   split at h
   · exact .inl ⟨_, h⟩
   · split at h
     · rename_i v hk
-      exact .inr (.inl ⟨v, hk, h.symm⟩)
-    · rename_i hk
-      exact .inr (.inr ⟨hk, h.symm⟩)
+      exact .inr ⟨v, hk, h.symm⟩
     · exact .inl ⟨_, h⟩
 
 theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
@@ -82,23 +79,10 @@ theorem recognized_on_person_closing (ai : AITurns P) (c : Context P) (us : List
   induction us generalizing c with
   | nil => simp [sketch] at h
   | cons u us ih =>
-    rcases each_step_continues_or_closes ai c u us _ h with ⟨c', h'⟩ | ⟨v, hk, h'⟩ | ⟨_, h'⟩
+    rcases each_step_continues_or_closes ai c u us _ h with ⟨c', h'⟩ | ⟨v, hk, h'⟩
     · exact ih c' h'
     · cases h'
       exact ⟨_, v, hk, rfl⟩
-    · cases h'
-
-theorem withdrawn_on_withdraw (ai : AITurns P) (c : Context P) (us : List (Utterance P))
-    (r : Closed P) (h : sketch ai c us = .withdrawn r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .withdraw ∧ r = closedOn c₁ := by
-  induction us generalizing c with
-  | nil => simp [sketch] at h
-  | cons u us ih =>
-    rcases each_step_continues_or_closes ai c u us _ h with ⟨c', h'⟩ | ⟨_, _, h'⟩ | ⟨hk, h'⟩
-    · exact ih c' h'
-    · cases h'
-    · cases h'
-      exact ⟨_, hk, rfl⟩
 
 /-- A filled purpose stands on a turn the person sent. -/
 theorem purpose_by_person (c : Context P) (a : String) (h : filledValue (purpose c) = some a) :

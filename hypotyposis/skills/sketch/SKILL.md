@@ -9,7 +9,7 @@ Discover what a form should be by encountering concrete versions and reacting to
 
 ## Definition
 
-**Hypotyposis** (ὑποτύπωσις): an outline or sketch — a first drawing of a position rather than its finished statement. A dialogical act for the moment when a form has to be made and the intent behind it cannot yet be settled from descriptions: the user can say what is wrong with a thing in front of them long before they can say what the thing should be, because good fit has no positive description of its own while each misfit can be pointed at (Alexander, 1964). So the user need not specify the form first. The AI relays what the next versions will try — what they revise, how many, the medium each is realized in and what that medium can and cannot show, and where each will be — each with its basis, and then makes them. Each round shows the new versions first, in a medium in which the qualities the user's judgment concerns can be encountered, and then the standing: what the user's words set and on which version, what of the AI's they took, what rests on a check, what stays unestablished, and what changed. The user reacts in their own words — a mark, a keep, a request, a value set — and the AI revises the versions those words point to into new versions, never regenerating one from a description of it. The AI's reading of the purpose grows from those reactions rather than being settled up front: what it brings in before any reaction is marked as a default, each later part names the reaction or the gathered material it came from, and each round shows how the reading widened. The run ends when the user takes one version they encountered as the form for their purpose, its home shown in the round or named in that same turn, or when they end it. Once it has run, the user can point at one version as they met it and say "this is the form, for this purpose", seeing where it lives, where the passed-over versions are, what they asked done to any of them that is not yet observed done, and which values rest on their own words or on the AI's proposals they took, and what rests on checked evidence. The recognition establishes their judgment of fit for that purpose on what the version showed — not correctness against a standard outside preference, and not readiness for use.
+**Hypotyposis** (ὑποτύπωσις): an outline or sketch — a first drawing of a position rather than its finished statement. A dialogical act for the moment when a form has to be made and the intent behind it cannot yet be settled from descriptions: the user can say what is wrong with a thing in front of them long before they can say what the thing should be, because good fit has no positive description of its own while each misfit can be pointed at (Alexander, 1964). So the user need not specify the form first. The AI relays what the next versions will try — what they revise, how many, the medium each is realized in and what that medium can and cannot show, and where each will be — each with its basis, and then makes them. Each round shows the new versions first, in a medium in which the qualities the user's judgment concerns can be encountered, and then the standing: what the user's words set and on which version, what of the AI's they took, what rests on a check, what stays unestablished, and what changed. The user reacts in their own words — a mark, a keep, a request, a value set — and the AI revises the versions those words point to into new versions, never regenerating one from a description of it. The AI's reading of the purpose grows from those reactions rather than being settled up front: what it brings in before any reaction is marked as a default, each later part names the reaction or the gathered material it came from, and each round shows how the reading widened. The run closes when the user takes one version they encountered as the form for their purpose, its home shown in the round or named in that same turn; they can stop at any time, and the run stays as it stood. Once it has run, the user can point at one version as they met it and say "this is the form, for this purpose", seeing where it lives, where the passed-over versions are, what they asked done to any of them that is not yet observed done, and which values rest on their own words or on the AI's proposals they took, and what rests on checked evidence. The recognition establishes their judgment of fit for that purpose on what the version showed — not correctness against a standard outside preference, and not readiness for use.
 
 ```lean
 /-!
@@ -40,7 +40,6 @@ Hypotyposis(I) → start(c) → sketch(c, utterances), where c is the fused sess
   next utterance u, read on fuse(c, u):
     [does not bear on this run]   the session answers it; that answer stays in c; no gate of this run
     [the person recognizes v]     what their words ask done to the versions, observed → RecognizedForm
-    [the person withdraws]        what their words ask done to the versions, observed → Withdrawn
     [otherwise]                   what is gathered now enters c; a production where their turn
                                   calls for a version none shown embodies; what their words ask
                                   done to the versions is done and observed → round
@@ -287,17 +286,18 @@ def recordOf (c : Context P) : Record c :=
     move, or remove a version, a question about a version, a contrary ground answered — judged on
     what the whole utterance does, on the context with it; other work in an utterance that bears
     on the run neither closes it nor answers its judgments. An utterance about other work leaves
-    the run as it stands: the session answers it, saying briefly, where reading it as other work
-    was unclear, that the run was left as it stands; that answer stays in the context, and no gate
-    of this run is raised. -/
+    the run as it stands: the session answers it, that answer stays in the context, and no gate of
+    this run is raised. Words that end the run without recognizing a version do not bear on it,
+    whatever else the turn says, and what else it says stands in its own words in the context: the
+    session answers them, no round is drawn, the run holds, and later turns bear on it only where
+    they come back to it. Where reading a turn as other work or as ending the run was unclear, the
+    session's answer says briefly that the run was left as it stands. -/
 axiom Reaches : Context P → Prop
 
-/-- How the person ends the run. -/
+/-- How the person closes the run. -/
 inductive Closing
   /-- take this version, one they encountered, as the form -/
   | recognize (version : Nat)
-  /-- end here with no version recognized -/
-  | withdraw
 
 /-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round closes
     nothing — closes the run this way, read whole on the context as it now stands, whatever form it
@@ -311,11 +311,9 @@ inductive Closing
     never reaches a version not yet shown. Taking the round adopts what it showed about the
     closing — the home a recognition would take, how you took an unclear turn — with no second
     permission; a home the person names in the turn is theirs, recorded as pending until a write
-    there is observed. Where the turn's intent is unclear, it closes nothing. `withdraw`: the turn
-    ends the run without recognizing a version, for whatever reason, given or not; what its words
-    set stands in the record like any other turn's. Silence and other work end nothing, and your own
-    reading that a version fits, that no encounter is still owed, or that the run cannot proceed
-    closes nothing. -/
+    there is observed. Where the turn's intent is unclear, it closes nothing. Silence and other work
+    close nothing, and your own reading that a version fits, that no encounter is still owed, or
+    that the run cannot proceed closes nothing. -/
 axiom ClosingSupported : Context P → Turn P → Closing → Prop
 
 /-- Only the person closes. -/
@@ -384,25 +382,13 @@ structure RecognizedForm (P : Type) where
   version : Nat
   record  : Record context
 
-/-- What a run hands on when the person ends it with no version recognized: the record built after
-    what the withdrawing turn asked done was observed. -/
-structure Closed (P : Type) where
-  context : Context P
-  record  : Record context
-
 def recognizedOn (c : Context P) (v : Nat) : RecognizedForm P :=
   let c₁ := settle c
   ⟨c₁, v, recordOf c₁⟩
 
-def closedOn (c : Context P) : Closed P :=
-  let c₁ := settle c
-  ⟨c₁, recordOf c₁⟩
-
 inductive Outcome (P : Type)
   | notActivated (c : Context P) (why : String)
   | recognized   (r : RecognizedForm P)
-  /-- `Withdrawn`: the person ended the run with no version recognized; the partial record -/
-  | withdrawn    (r : Closed P)
   | holding      (c : Context P)
 
 /-! ── MODE STATE ──
@@ -461,7 +447,6 @@ def sketch (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
     if ¬ Reaches f then sketch ai (f ++ [(ai.session f).val]) us
     else match filledValue (closing f) with
     | some (.recognize v) => .recognized (recognizedOn f v)
-    | some .withdraw      => .withdrawn (closedOn f)
     | none =>
       let c₁ := consulted f
       let c₂ := if ProductionRequested c₁ then production ai c₁ else c₁
@@ -484,21 +469,22 @@ the context as it now stands, and what changed since the standing they last answ
 A production happens where the person's turn calls for a version none shown embodies, and nowhere
 else: an insufficiency you find is shown with its basis and the revision you propose, and you
 produce it once the person takes it up. Each production relays its intent whole, with what changed,
-before it makes anything. The loop is dialogue: each round ends at the gate, and the person ends
-the run; no round count, cap, or fatigue closes it.
+before it makes anything. The loop is dialogue: each round ends at the gate, and only the person's
+recognition closes the run; no round count, cap, or fatigue closes it.
 -/
 
 /-! ── CONVERGENCE ──
 converged: a RecognizedForm — a version the person encountered and recognized for the purpose as
-it stands, its record built by `recordOf` after what the recognizing turn asked done was observed.
-Withdrawal keeps its partial record, built the same way. A recognition establishes the person's
+it stands, its record built by `recordOf` after what the recognizing turn asked done was observed —
+the one closing of `Outcome`; holding is a round no turn of the person's that bears on the run has
+answered. A recognition establishes the person's
 judgment of fit for that purpose on what the version's medium showed; correctness against a
 standard outside preference rests on the checks the findings name, and readiness for use on
 nothing here; a contrary ground it was taken over rides it in the dissent. The convergence
 evidence: the turn read as the closing, quoted, and the intent taken from it, and where it took a
 reading the round before showed of an unclear turn, that earlier turn quoted too; at
-RecognizedForm, the recognized version as it was encountered and where it is; at either closing,
-the purpose as it stands, marked as yours where you read it, each part with what it rests on; every
+RecognizedForm, the recognized version as it was encountered and where it is; the purpose as it
+stands, marked as yours where you read it, each part with what it rests on; every
 version with where it is and what the person asked done to it that is not observed done, each
 failure with its reason; the values the person holds, each with who proposed it and whether their
 words set it or their turn took it; the findings with their sources; what stays unestablished; and
@@ -525,7 +511,7 @@ def Interaction.realization : Interaction → Continuation
   | .extension    => .proceed
 
 inductive Op | detect | notActivatedRelay | gather | intentRelay | produce | produceDelegate
-             | assess | present | readTurn | carryOut | assemble | converge | withdraw | seam
+             | assess | present | readTurn | carryOut | assemble | converge | seam
 
 def grounding : Op → Annot × String
   | .detect            => (.sense, "Internal analysis: whether this is the protocol's case, as `notActivated` reads it")
@@ -540,8 +526,7 @@ def grounding : Op → Annot × String
   | .carryOut          => (.transform, "artifact write, environment run: what `carriedOut` does, as its doc states; each write or removal observed")
   | .assemble          => (.sense, "Internal analysis: the terminal record, `recordOf`, built after what the closing turn asked done is observed, never before")
   | .converge          => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with RecognizedForm")
-  | .withdraw          => (.interaction .extension, "at the person's word, at any gate: what you took as withdrawn, and the partial record CONVERGENCE lists")
-  | .seam              => (.interaction .extension, "after a recognition or not activating, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; after a withdrawal, only to a next move the person declared with it; otherwise, as session text, the `notActivated` reading is handed on after not activating, and after a closing the record, with the recognized version where there is one — an artifact by where it is and what it showed, a narration as written — every other version by where it is, or the round that showed it, rather than its content, the dissent travelling in it; moving the form further into the work than the person named is their next move; every Constitution gate inside this protocol and the next fires unchanged")
+  | .seam              => (.interaction .extension, "after a recognition or not activating, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; otherwise, as session text, the `notActivated` reading is handed on after not activating, and after a recognition the record, with the recognized version — an artifact by where it is and what it showed, a narration as written — every other version by where it is, or the round that showed it, rather than its content, the dissent travelling in it; moving the form further into the work than the person named is their next move; every Constitution gate inside this protocol and the next fires unchanged")
 
 /-- The operations that write a version, by realization: an artifact through `.produce`, and
     `.produceDelegate` where its write is handed to execution; narration writes no file. -/
