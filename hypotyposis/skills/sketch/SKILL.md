@@ -292,8 +292,8 @@ def recordOf (c : Context P) : Record c :=
     ask done to the versions is carried out first, as `carriedOut` says, and what else they say
     stands in its own words in the context; the session answers them, saying where each version is
     as last observed, no round is drawn, the run holds, and later turns bear on it only where they
-    come back to it. Where reading a turn as other work or as ending the run was unclear, the
-    session's answer says briefly that the run was left as it stands. -/
+    come back to it. Where reading a turn as other work, as ending the run, or as recognizing a
+    version was unclear, the session's answer says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
 /-- How the person closes the run. -/
@@ -404,8 +404,8 @@ A step is one arm of a structural recursion over the person's utterances. Your t
 gathers what the versions will be checked against, then makes them (`narrate` for narration, its
 claims checked as it is written; for an artifact, the operations `producedBy` names), and gathers
 what checking them needs; `respond` is the round, as TOOL GROUNDING's
-`present` entry names it; `session` is the session's own answer to an utterance about other work,
-which stays in the context without being a gate of this run.
+`present` entry names it; `session` is the session's own answer to an utterance that does not bear
+on the run, which stays in the context without being a gate of this run.
 -/
 
 /-- Your turns. `narrate` writes each narration version; being yours, it grounds nothing. -/

@@ -240,9 +240,9 @@ axiom dissent : Context P → List String
     this run is raised. Words that end the run without saying that what they understand serves
     their purpose do not bear on it, whatever else the turn says, and what else it says stands in
     its own words in the context: the session answers them, no round is drawn, the run holds, and
-    later turns bear on it only where they come back to it. Where reading a turn as other work or as
-    ending the run was unclear, the session's answer says briefly that the run was left as it
-    stands. -/
+    later turns bear on it only where they come back to it. Where reading a turn as other work, as
+    ending the run, or as saying what they understand serves their purpose was unclear, the
+    session's answer says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round closes
@@ -315,7 +315,8 @@ invocation that say what to understand of it fill the scope (`ScopeSupported`).
 /-! ── PHASE TRANSITIONS ──
 A step is one arm of a structural recursion over the person's utterances. `respond` is the next
 round, as TOOL GROUNDING's `present` entry names it; `session` is the session's own answer to an
-utterance about other work, which stays in the context without being a gate of this run.
+utterance that does not bear on the run, which stays in the context without being a gate of this
+run.
 -/
 
 open Classical in
@@ -412,7 +413,7 @@ Compose each round under TOOL GROUNDING's `present` entry. When grounding an exp
 
 ## Rules
 
-- **User-initiated only**: Activate only on the user's wish to understand a target present in context and quotable, whatever produced it; an explicit decline before activation withholds it; words that end a run leave it holding.
+- **User-initiated only**: Activate only on the user's wish to understand a target present in context and quotable, whatever produced it; an explicit decline before activation withholds it.
 - **User authority**: An acknowledgment of your explanation stands as the person's judgment: it is not probed again, a factual disagreement or new evidence is shown beside it, and it is recorded as acceptance of your explanation, as CONVERGENCE lists.
 - **Round composition**: Compose each round so the reader can act without reassembly — use everyday language, keep each judgment beside its evidence and next-move implication (your own adjudication included, its evidence being the excerpt attached with it), and place analytical context before its gate.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.

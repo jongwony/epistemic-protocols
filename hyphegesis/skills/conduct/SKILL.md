@@ -364,8 +364,8 @@ axiom relay : (c : Context P) → Occ (relayCoord (P := P)) c
     this run is raised. Words that end the run without taking a method do not bear on it, whatever
     else the turn says, and what else it says stands in its own words in the context: the session
     answers them, no map is drawn, the run holds, and later turns bear on it only where they come
-    back to it. Where reading a turn as other work or as ending the run was unclear, the session's
-    answer says briefly that the run was left as it stands. -/
+    back to it. Where reading a turn as other work, as ending the run, or as taking the method was
+    unclear, the session's answer says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your record**: the navigation block over the record where the person's turns behind this
@@ -458,8 +458,8 @@ inform, and an utterance that does not bear on the run triggers no reading. `res
 map (`.map`, then `.mapGate`), or, when the run closes on a taking — or, at `start`, on a relay —
 the map relayed before `emitted` is handed off in the same turn (`.relay`, then `.handoff`); a
 taking closes whatever the same turn changed, which the relayed map's ledger shows; `session` is the
-session's own answer to an utterance about other work, which stays in the context without being a
-gate of this run.
+session's own answer to an utterance that does not bear on the run, which stays in the context
+without being a gate of this run.
 -/
 
 open Classical in
@@ -493,8 +493,7 @@ The convergence evidence is the map as it will be handed off, read on the contex
 and presented once more as a relay in the closing turn — with the change ledger since the map the
 person answered, where there was one, and any tally derived from the rows actually shown — then the
 handoff in the same turn without waiting; the handoff carries what that map showed. Holding is a
-map no turn of the person's that bears on the run has taken, and hands nothing off. Demonstrated,
-not asserted.
+map no turn of the person's that bears on the run has taken. Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──

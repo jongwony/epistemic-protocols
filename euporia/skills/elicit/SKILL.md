@@ -211,12 +211,13 @@ def residual (c : Context P) : List Entry :=
 /-- **Your judgment**: the latest utterance bears on this run — a value, a deferral, a question
     about the surface, a new frame, a resolution. An utterance about other work leaves the run as
     it stands: the session answers it, that answer stays in the context, and no gate of this run is
-    raised. Words that end the run without saying the intent is aligned enough do not bear on it,
-    whatever else the turn says, and what else it says stands in its own words in the context: the
-    session answers them, no surface is drawn, the run holds, and later turns bear on it only where
-    they come back to it. Where reading a turn as other work or as ending the run was unclear, the
-    session's answer says briefly that the run was left as it stands. An AI-guided run the person
-    has not confirmed has not started: nothing they say is recorded into it. -/
+    raised. Words that end the run — a decline of the proposed run included — without saying the
+    intent is aligned enough do not bear on it, whatever else the turn says, and what else it says
+    stands in its own words in the context: the session answers them, no surface is drawn, the run
+    holds, and later turns bear on it only where they come back to it. Where reading a turn as
+    other work, as ending the run, or as saying the intent is aligned enough was unclear, the
+    session's answer says briefly how it took it. An AI-guided run the person has not confirmed
+    has not started: nothing they say is recorded into it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your judgment**: the cited turn says the intent is aligned enough — the aporia is resolved —
@@ -279,7 +280,8 @@ Priority: explicit_arg > recent_intent_seed > surfaced_aporia
 /-! ── PHASE TRANSITIONS ──
 A step is one arm of a structural recursion over the person's utterances. `respond` is the next
 surface, as TOOL GROUNDING's `surface` entry names it; `session` is the session's own answer to an
-utterance about other work, which stays in the context without being a gate of this run.
+utterance that does not bear on the run, which stays in the context without being a gate of this
+run.
 -/
 
 open Classical in

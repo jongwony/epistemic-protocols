@@ -35,8 +35,7 @@ Proplasma(X) → start(c) → preview(c, utterances), where c is the fused sessi
     with what would settle each; your readings and contrary grounds, each with what it bears on
     and rests on → one opening, or a contradiction's working with nothing after it → Stop
   next utterance u, read on fuse(c, u):
-    [does not bear on this run]   the probes their words ask removed, discarded; the session answers
-                                  it; that answer stays in c; no gate of this run
+    [does not bear on this run]   the session answers it; that answer stays in c; no gate of this run
     [the person constitutes d]    harvest → cleanup → DirectionalContrast
     [otherwise]                   what is gathered now enters c, anything they asked to see
                                   observed for real among it; a fan where they ask to see what no
@@ -225,12 +224,11 @@ axiom dissent : Context P → List String
     run neither closes it nor answers its judgments. An utterance about other work leaves the run
     as it stands: the session answers it, that answer stays in the context, and no gate of this run
     is raised. Words that end the run without constituting a direction do not bear on it, whatever
-    else the turn says: the probes they ask removed are discarded first, as `cleanup` says, and what
-    else they say stands in its own words in the context; the session answers them, saying where
-    each probe this run wrote was last observed — removed and verified absent, failed with its
-    reason, or left in place; no round is drawn, the run holds, and later turns bear on it only
-    where they come back to it. Where reading a turn as other work or as ending the run was
-    unclear, the session's answer says briefly that the run was left as it stands. -/
+    else the turn says, and what else it says stands in its own words in the context: the session
+    answers them, saying where each probe this run wrote is, as last observed — only a
+    constitution discards them; no round is drawn, the run holds, and later turns bear on it only
+    where they come back to it. Where reading a turn as other work, as ending the run, or as
+    constituting a direction was unclear, the session's answer says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
 /-- How the person closes the run. -/
@@ -363,8 +361,8 @@ A step is one arm of a structural recursion over the person's utterances. Your t
 `AITurns`: a fan relays the spec — whole, with what changed — before anything is generated, then
 the probes are written (`narrate` for a Vignette; for a Mockup, the operations `instantiatedBy`
 names); `respond` is the round, as TOOL GROUNDING's `present` entry names it; `session` is the
-session's own answer to an utterance about other work, which stays in the context without being a
-gate of this run.
+session's own answer to an utterance that does not bear on the run, which stays in the context
+without being a gate of this run.
 -/
 
 /-- Your turns. `narrate` writes each Vignette probe's narration; being yours, it grounds
@@ -384,10 +382,9 @@ def fan (ai : AITurns P) (c : Context P) : Context P :=
   let c₁ := c ++ [(ai.relay c).val]
   c₁ ++ (ai.narrate c₁).map (·.val) ++ (instantiate c₁).map (·.val)
 
-/-- **Your cleanup**: per probe to be discarded — every probe at a constitution; the probes the
-    person's latest words ask removed when those words end the run; none otherwise — the
-    destruction step read off its realization, then the verification of absence; a probe whose
-    absence was not verified is observed as `discardFailed`. -/
+/-- **Your cleanup**: per probe, the destruction step read off its realization, then the
+    verification of absence; a probe whose absence was not verified is observed as
+    `discardFailed`. -/
 axiom cleanup : Context P → List (Evidence P)
 
 def discard (c : Context P) : Context P := c ++ (cleanup c).map (·.val)
@@ -397,17 +394,15 @@ def constituted (c : Context P) (d : Direction) : DirectionalContrast P :=
   ⟨c₁, purpose c₁, harvestOf c d, discardTrace c₁, dissent c⟩
 
 open Classical in
-/-- A turn that does not bear on the run has the probes it asks removed discarded, then the session
-    answers it, and the run holds; a closing is read from the person's turn before anything is
-    gathered; otherwise what is gathered now enters the context, a fan runs where the turn asks to
-    see what no probe materialized, and the round follows. -/
+/-- A turn that does not bear on the run is answered by the session and leaves the run as it
+    stands; a closing is read from the person's turn before anything is gathered; otherwise what
+    is gathered now enters the context, a fan runs where the turn asks to see what no probe
+    materialized, and the round follows. -/
 def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
     let f := fuse c u
-    if ¬ Reaches f then
-      let f' := discard f
-      preview ai (f' ++ [(ai.session f').val]) us
+    if ¬ Reaches f then preview ai (f ++ [(ai.session f).val]) us
     else match filledValue (closing f) with
     | some (.constitute d) => .contrasted (constituted f d)
     | none =>
@@ -481,8 +476,8 @@ def grounding : Op → Annot × String
   | .present           => (.interaction .constitution, "the round, every round the first included. After a fan, each new probe first, from its realization — a Mockup walked through at its path. Then the map: the purpose as the person said it, or else your reading of it, marked as yours; per axis the purpose turns on, what each direction's future looks like there and what that rests on, as `contrastMap` reads it; the premises every probe shares, as shared; the open unknowns, each with what would settle it; your readings with their basis — an insufficient contrast with the revision you propose, or a reading that the run has reached a case `notActivated` names — the futures already recognizable or the commitment no longer standing among them — each closing nothing; and your contrary grounds, each with what it bears on and what it rests on, a direction whose future no probe materialized among them. Every later round shows what changed on the map, and the whole map when the person asks for it, and answers what they asked — a question about a probe within placeholder discipline, saying what the probe was built to show and never a claim about the world; an analogy you offer says which axis it weights. A correction of the purpose moves the map. Read the person's turn whole; where its intent was unclear, say in one line how you took it, with no question asked back. The round that shows evidence sets it in its cell against the claim your description made and against whatever the person has said that bears on it, saying where each agrees and where it parts. Where they voice a reading or an expectation of a future, or check their understanding against what was shown, lay it beside what the probes show, saying where the two agree and where they part; before reading it as at odds with a probe, read whether it speaks to another purpose, a preference, or an assumption a placeholder cannot reach, and say which, moving the map — a placeholder never settles how a future will be lived. Where their words and evidence — the candidates' material, a source, a result gathered — part on the same axis and premises, or two of their own utterances do — a criterion they stated and a pick they made — show it with its working in one round: their words quoted, the narrowest such material that bears on it, why the two part, and what they got right; a probe, or anything gathered from one, is never that material, and where their words part from one, the laying-beside above governs; a contradiction they keep after its working stays in view as a held contrary ground until it is settled — on a surface that stays in view where the session has one, otherwise briefly beside each round. Where what could not be reached, or a conflict among what was gathered, bears on a direction, say it there. A round that shows a contradiction's working ends on that working, with nothing after it; every other round ends on one opening the person can take — settle a direction, a composition, or one no probe showed; send back any part of the spec; name a candidate to see; ask about a probe, or to see something real observed")
   | .readTurn          => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there — a closing, a purpose, a reading or expectation, a request to see something depicted or observed, a question — read whole against the fused context as it now stands, as `Reaches` and the judgments above read it")
   | .harvest           => (.sense, "Internal analysis: the constituted direction, whether a probe materialized it, the deciding cells as `decidingRows` reads them, and the open unknowns, read from the context before discard")
-  | .cleanup           => (.transform, "environment run: the destruction step — per-probe artifact destruction; a constitution over probes runs it after the harvest; words that end the run run it on the probes they ask removed")
-  | .cleanupVerify     => (.observe, "environment run, artifact read: the verification step closing the same sequence — each path verified absent after its destruction; a disposition observed per probe, and a probe no observation reached declared as not verified; a probe still present is declared with the path to remove by hand, and a direction the person settled stands")
+  | .cleanup           => (.transform, "environment run: the destruction step — per-probe artifact destruction; a constitution over probes runs it after the harvest")
+  | .cleanupVerify     => (.observe, "environment run, artifact read: the verification step closing the same sequence — each path verified absent after its destruction; a disposition observed per probe, and a probe no observation reached declared as not verified; a probe still present is declared with the path to remove by hand, and the direction the person settled stands")
   | .assemble          => (.sense, "Internal analysis: the terminal record built from the harvest and the completed discard trace — after cleanup, never before")
   | .converge          => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with DirectionalContrast")
   | .seam              => (.interaction .extension, "after a constitution or not activating, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; otherwise the record is handed on as session text, the dissent travelling in it; every Constitution gate inside this protocol and the next fires unchanged")

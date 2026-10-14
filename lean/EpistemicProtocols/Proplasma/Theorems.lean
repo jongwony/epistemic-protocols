@@ -31,8 +31,7 @@ theorem relay_before_instantiation (ai : AITurns P) (c : Context P) :
 
 theorem unrelated_adds_no_gate (ai : AITurns P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
-    preview ai c (u :: us) =
-      preview ai (discard (fuse c u) ++ [(ai.session (discard (fuse c u))).val]) us := by
+    preview ai c (u :: us) = preview ai (fuse c u ++ [(ai.session (fuse c u)).val]) us := by
   simp [preview, h]
 
 /-- One step either continues on some context or ends at a closing the person's turn filled. -/
