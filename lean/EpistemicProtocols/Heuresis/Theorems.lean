@@ -49,7 +49,7 @@ theorem resumed_redraws (relay generate respond session : Context P → Response
     utterance. -/
 theorem fresh_invocation_holds (generate respond session : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P))
-    (hk : ¬ (takenAt (fuse c u) c.length = true ∧ (candidates (fuse c u)).isEmpty = false))
+    (hk : ¬ Taken c u)
     (hi : Invoked (fuse c u)) :
     ideate generate respond session c (u :: us) = .holding (fuse c u) := by
   simp only [ideate, hk, hi, ↓reduceDIte, ↓reduceIte]
@@ -59,7 +59,7 @@ theorem fresh_invocation_holds (generate respond session : Context P → Respons
     is drawn at that step. -/
 theorem unreached_step (generate respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P))
-    (hk : ¬ (takenAt (fuse c u) c.length = true ∧ (candidates (fuse c u)).isEmpty = false))
+    (hk : ¬ Taken c u)
     (hi : ¬ Invoked (fuse c u)) (hr : ¬ Reaches (fuse c u)) :
     ideate generate respond session c (u :: us) =
       ideate generate respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
@@ -70,7 +70,7 @@ theorem unreached_step (generate respond session : Context P → Response P) (c 
     reads. -/
 theorem no_empty_pass (generate respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P))
-    (hk : ¬ (takenAt (fuse c u) c.length = true ∧ (candidates (fuse c u)).isEmpty = false))
+    (hk : ¬ Taken c u)
     (hi : ¬ Invoked (fuse c u)) (hr : Reaches (fuse c u))
     (ht : (targets (receive (fuse c u))).isEmpty = true) :
     ideate generate respond session c (u :: us) =
