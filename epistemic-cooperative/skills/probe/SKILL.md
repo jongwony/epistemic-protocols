@@ -346,9 +346,9 @@ def start (catalog : Catalog) (respond : Catalog → Context P → Response P)
 
 /-! ── LOOP ──
 The loop is dialogue: each round ends where the turn yields, and nothing counts down. Every
-utterance that bears on the run and recognizes nothing is read whole by the next pass — a narrower slice of the
-situation, a correction, a candidate set aside, a question, a read beyond the session admitted —
-and the pass reads the situation again on the context as it now stands. No number of rounds ends
+utterance that bears on the run and recognizes nothing is read whole by the next pass — a narrower
+slice of the situation, a correction, a candidate set aside, a question, a read beyond the session
+admitted — and the pass reads the situation again on the context as it now stands. No number of rounds ends
 the probe; the person's recognition does, and without it the round holds.
 -/
 
