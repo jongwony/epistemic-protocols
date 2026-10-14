@@ -25,12 +25,21 @@ theorem silence (respond session endReport : Context P → Response P) (c : Cont
     recollect respond session endReport c [] = .holding c := by
   simp [recollect]
 
-/-- On the person's own invocation of this protocol, the step holds on the context with that
+/-- On the person's own invocation of this protocol, the step holds on the context before that
     turn. -/
 theorem fresh_invocation_holds (respond session endReport : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (h : Invoked (fuse c u)) :
-    recollect respond session endReport c (u :: us) = .holding (fuse c u) := by
+    recollect respond session endReport c (u :: us) = .holding c := by
   simp [recollect, h]
+
+/-- A turn that is no invocation, identifies nothing, does not end this recall, does not bear on
+    it, and carries an empty intention holds the step on the context before that turn. -/
+theorem ai_start_holds (respond session endReport : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u))
+    (hc : closing (fuse c u) = none) (he : ¬ Ends (fuse c u)) (h : ¬ Reaches (fuse c u))
+    (hv : EmptyIntention (fuse c u)) :
+    recollect respond session endReport c (u :: us) = .holding c := by
+  simp [recollect, hi, hc, he, h, hv]
 
 /-- A turn that ends this recall, where it is no invocation and identifies nothing, joins the
     context with the ending report; no pass runs on it. -/
@@ -41,15 +50,16 @@ theorem ending_reports (respond session endReport : Context P → Response P) (c
       recollect respond session endReport (fuse c u ++ [(endReport (fuse c u)).val]) us := by
   simp [recollect, hi, hc, he]
 
-/-- A turn that does not bear on this recall, where it is no invocation, identifies nothing, and
-    does not end the recall, joins the context with the session's answer to it; no pass runs on
-    it. -/
+/-- A turn that does not bear on this recall, where it is no invocation, identifies nothing, does
+    not end the recall, and carries no empty intention, joins the context with the session's
+    answer to it; no pass runs on it. -/
 theorem unreached_step (respond session endReport : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u))
-    (hc : closing (fuse c u) = none) (he : ¬ Ends (fuse c u)) (h : ¬ Reaches (fuse c u)) :
+    (hc : closing (fuse c u) = none) (he : ¬ Ends (fuse c u)) (h : ¬ Reaches (fuse c u))
+    (hv : ¬ EmptyIntention (fuse c u)) :
     recollect respond session endReport c (u :: us) =
       recollect respond session endReport (fuse c u ++ [(session (fuse c u)).val]) us := by
-  simp [recollect, hi, hc, he, h]
+  simp [recollect, hi, hc, he, h, hv]
 
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(search c).map (·.val) ++ (passRecord (c ++ (search c).map (·.val))).map (·.val), by
@@ -87,7 +97,9 @@ theorem invocation_activates (respond session endReport : Context P → Response
         · split
           · exact ih _
           · split
-            · exact ih _
+            · split
+              · simp
+              · exact ih _
             · split
               · next o ho => exact hs _ o ho
               · exact ih _
@@ -142,7 +154,9 @@ private theorem recollect_identified (respond session endReport : Context P → 
       · split at h
         · exact ih _ h
         · split at h
-          · exact ih _ h
+          · split at h
+            · cases h
+            · exact ih _ h
           · split at h
             · next o ho => subst h; exact absurd ho (settle_not_identified _ v)
             · exact ih _ h
