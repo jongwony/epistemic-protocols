@@ -19,7 +19,7 @@ A session whose working directory has since been removed keeps its record under 
 For a record found, bind:
 
 - `Member.locator` to the record's own path under its root — the path the record was found at, never one re-resolved later, since the active partition does not locate a record found in another;
-- the session id from the filename, the working directory from the record's `cwd`, and its recency from the file's modification time; where an index entry survives a record already deleted, keep the path the entry names and take recency from the entry, so the member is still found and is the one Ground cannot open;
+- the session id from the filename, the working directory from the record's `cwd`, and when the work happened from the record's own turn timestamps; the file's modification time only orders candidates and is not when the work happened; where an index entry survives a record already deleted, keep the path the entry names and take recency from the entry, so the member is still found and is the one Ground cannot open;
 - the origin label from the **first** `entrypoint` value in the record — first match wins, as the runtime classifies it;
 - `bridgeSessionId` when a `{"type":"bridge-session"}` line is present.
 
