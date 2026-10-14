@@ -25,12 +25,21 @@ theorem silence (respond session endReport : Context P → Response P) (c : Cont
     recollect respond session endReport c [] = .holding c := by
   simp [recollect]
 
-/-- On the person's own invocation of this protocol, the step holds on the context before that
-    turn. -/
-theorem fresh_invocation_holds (respond session endReport : Context P → Response P)
-    (c : Context P) (u : Utterance P) (us : List (Utterance P)) (h : Invoked (fuse c u)) :
-    recollect respond session endReport c (u :: us) = .holding c := by
+/-- A turn that identifies the presented recognizable closes the step on that identification,
+    whatever else the turn reads as. -/
+theorem identification_first (respond session endReport : Context P → Response P)
+    (c : Context P) (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
+    (h : closing (fuse c u) = some o) :
+    recollect respond session endReport c (u :: us) = o := by
   simp [recollect, h]
+
+/-- On the person's own invocation of this protocol, where the turn identifies nothing, the step
+    holds on the context before that turn. -/
+theorem fresh_invocation_holds (respond session endReport : Context P → Response P)
+    (c : Context P) (u : Utterance P) (us : List (Utterance P))
+    (hc : closing (fuse c u) = none) (h : Invoked (fuse c u)) :
+    recollect respond session endReport c (u :: us) = .holding c := by
+  simp [recollect, hc, h]
 
 /-- A turn that is no invocation, identifies nothing, does not bear on this recall, and carries
     an empty intention holds the step on the context before that turn. -/

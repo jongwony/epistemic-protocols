@@ -1,6 +1,6 @@
 # Anamnesis — /recollect (ἀνάμνησις)
 
-Resolve vague recall into recognized context (ἀνάμνησις: recollection, calling to mind)
+Recognize the past you were reaching for — a conversation, or a line of work, topic, or settled concept across several — in a story resting on records you can reopen, knowing it took place, not that it still holds — `/recollect`.
 
 > [한국어](./README_ko.md)
 
@@ -63,7 +63,7 @@ Activation → An invocation of the user's own, or an empty intention detected (
 Pass       → Read the cue, the whole, and the axes; search within the established boundary; open the leading candidate's records at the span the cue reaches
 Round      → Present the story in the records' words, each excerpt with its source and resume handle, and yield the turn; or, with nothing to present, ask one open question, then offer the wider search with its cost
 Close      → The user identifies it → RecalledContext; nothing further worth reaching for → unresolved within the scope searched
-Otherwise  → More cue, a correction, a wider search admitted (the boundary moves) or declined, a question about what was shown, or a remark or a form instruction on it → the next pass; other work → answered in the session's own words, or, where it points at another past, a new recall; an ending that identifies nothing → answered with the scope searched, and after it only words that reopen the recall reach it; either way the recall stays as it stood; a fresh `/recollect` → a new recall, this one left where it stood; words that continue it start a recall that carries it over
+Otherwise  → More cue, a correction, a wider search admitted (the boundary moves) or declined, a question about what was shown, or a remark or a form instruction on it → the next pass; other work → answered in the session's own words, or, where it points at another past without a name, a new recall; an ending that identifies nothing → answered with the scope searched, and after it only words that reopen the recall reach it; either way the recall stays as it stood; a fresh `/recollect` → a new recall, this one left where it stood; words that continue it start a recall that carries it over
 ```
 
 ## Axes of the Cue

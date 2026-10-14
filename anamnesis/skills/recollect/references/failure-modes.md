@@ -48,14 +48,9 @@ AttributionLoss    : a past statement read as the person's decision because a to
 
 A pass that leaves nothing to present runs in the turn the searches ran in; nothing needs carrying to a later turn.
 
+Which round follows — the open question, the wider search, or the unresolved close — is as SKILL.md's `respond`, `settle`, and `expansion` say.
+
 ```
-before the person has added to the cue
-  -- report what was searched, per root, and which records did not open, then the one open question
-after the person has added to the cue
-  -- a search past the boundary still worth offering: the wider search with what it would read and its cost, against declining it
-  -- nothing further worth reaching for: close unresolved with the scope report SKILL.md's Rules name
-after the person has declined the wider search
-  -- read as SKILL.md's `expansion` reads a decline; then the branches above, read again
 an index that is empty or whose capture failed
   -- the records themselves remain searchable along the cue's axes; the capture outcome says whether the index was validated empty, failed, unfinished, or never written, and that is what the round reports about it
   -- an empty index says nothing about whether the past took place
