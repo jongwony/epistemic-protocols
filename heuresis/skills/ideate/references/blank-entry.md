@@ -24,7 +24,9 @@ options:
     description: "[one-line angle]"
 Or:
 - Name an angle of your own — it is shaped into a frame and opened with the rest
-- Take this field as it stands — offered only once an idea of the user's is on the map
+
+Once an idea of the user's is on the map, a choice of its own, outside the selector:
+- Take this field as it stands
 ```
 
 An idea the user gives here is their own direction, not an example of yours: it lands as their

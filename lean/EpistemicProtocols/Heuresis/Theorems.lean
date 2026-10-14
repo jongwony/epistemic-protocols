@@ -26,28 +26,23 @@ theorem silence (generate respond session : Context P → Response P) (c : Conte
 
 theorem blank_frame_map_first (relay generate respond session : Context P → Response P)
     (c : Context P) (us : List (Utterance P))
-    (h : entry (c ++ (reference c).map (·.val) ++ [(relay (c ++ (reference c).map (·.val))).val])
-      = .blank) :
+    (h : entry (receive c ++ [(relay (receive c)).val]) = .blank) :
     start relay generate respond session c us =
       ideate generate respond session
-        (c ++ (reference c).map (·.val) ++ [(relay (c ++ (reference c).map (·.val))).val] ++
-          [(respond (c ++ (reference c).map (·.val) ++
-            [(relay (c ++ (reference c).map (·.val))).val])).val]) us := by
+        (receive c ++ [(relay (receive c)).val] ++
+          [(respond (receive c ++ [(relay (receive c)).val])).val]) us := by
   simp only [start, h]
 
 /-- A resumed field whose request opens no frame is redrawn before any pass: `start` presents the
     map on the context with the relay, and generates nothing first. -/
 theorem resumed_redraws (relay generate respond session : Context P → Response P)
     (c : Context P) (us : List (Utterance P))
-    (h : entry (c ++ (reference c).map (·.val) ++ [(relay (c ++ (reference c).map (·.val))).val])
-      = .resumed)
-    (ht : (targets (c ++ (reference c).map (·.val) ++
-      [(relay (c ++ (reference c).map (·.val))).val])).isEmpty = true) :
+    (h : entry (receive c ++ [(relay (receive c)).val]) = .resumed)
+    (ht : (targets (receive c ++ [(relay (receive c)).val])).isEmpty = true) :
     start relay generate respond session c us =
       ideate generate respond session
-        (c ++ (reference c).map (·.val) ++ [(relay (c ++ (reference c).map (·.val))).val] ++
-          [(respond (c ++ (reference c).map (·.val) ++
-            [(relay (c ++ (reference c).map (·.val))).val])).val]) us := by
+        (receive c ++ [(relay (receive c)).val] ++
+          [(respond (receive c ++ [(relay (receive c)).val])).val]) us := by
   simp only [start, h, advance, ht, ↓reduceIte]
 
 /-- On a fresh invocation that takes nothing, this run returns holding, on the context with that
@@ -71,7 +66,8 @@ theorem unreached_step (generate respond session : Context P → Response P) (c 
   simp only [ideate, hk, hi, hr, ↓reduceDIte, ↓reduceIte, not_false_eq_true]
 
 /-- A turn that takes nothing, is no fresh invocation, bears on the run, and opens no frame runs no
-    pass: the map is presented again on the context with that turn and the records it named. -/
+    pass: the map is presented again on the context with that turn and the records `reference`
+    reads. -/
 theorem no_empty_pass (generate respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P))
     (hk : ¬ (takenAt (fuse c u) c.length = true ∧ (candidates (fuse c u)).isEmpty = false))
@@ -81,12 +77,6 @@ theorem no_empty_pass (generate respond session : Context P → Response P) (c :
       ideate generate respond session
         (receive (fuse c u) ++ [(respond (receive (fuse c u))).val]) us := by
   simp only [ideate, hk, hi, hr, not_true_eq_false, ↓reduceIte, ↓reduceDIte, advance, ht]
-
-theorem closed_by_person (c : Context P) (h : filledValue (closing c) = some ()) :
-    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
-  cases hc : closing c with
-  | open_ _ => simp [hc, filledValue] at h
-  | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
 
 private theorem taken_by_person (c : Context P) (i : Nat) (h : takenAt c i = true) :
     ∃ s : Cite c, s.idx = i ∧ s.src.val = .person ∧ ClosingSupported c (c[s.idx]'s.lt) () := by
