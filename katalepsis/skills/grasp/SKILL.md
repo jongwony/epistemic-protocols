@@ -26,7 +26,6 @@ Katalepsis(R) → start(c) → grasp(c, utterances), where c is the fused sessio
   next utterance u, read on fuse(c, u) →
     [the utterance does not bear on this run]   the session answers it; that answer stays in the
                                                 context; nothing is consulted; no gate of this run
-    [the person withdraws (WithdrawalSupported)] → Withdrawn
     [the person closes (ClosureSupported)]       → VerifiedUnderstanding
     [otherwise] c' := fuse(c, u) with what `consult` reads now appended, a check's result
       included → present(c')
@@ -235,10 +234,13 @@ axiom dissent : Context P → List String
 
 /-- **Your judgment**: the latest utterance bears on this run — a purpose, a reading of the target,
     an acknowledgment, a wish to see or try something, a request for more depth, a correction of
-    your reading, a question about the map, a closure, a withdrawal — judged on what the whole
-    utterance does, read on the context with it before anything is consulted. An utterance about
-    other work leaves the run as it stands: the session answers it, that answer stays in the
-    context, and no gate of this run is raised. -/
+    your reading, a question about the map, a closure — judged on what the whole utterance does,
+    read on the context with it before anything is consulted. An utterance about other work leaves
+    the run as it stands: the session answers it, that answer stays in the context, and no gate of
+    this run is raised. Words that end the run without saying that what they understand serves
+    their purpose do not bear on it, whatever else the turn says, and what else it says stands in
+    its own words in the context: the session answers them, no round is drawn, the run holds, and
+    later turns bear on it only where they come back to it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round closes
@@ -255,20 +257,7 @@ def closureCoord : Coord P Unit :=
 /-- **Your reading**: the person's closure; `open_` until one reaches it. -/
 axiom closure : (c : Context P) → Occ (closureCoord (P := P)) c
 
-/-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round
-    withdraws nothing — ends the run without saying that what they understand serves their
-    purpose, for whatever reason, given or not; nothing open is delegated. Silence, or turning to
-    other work, ends nothing. Your own reading that the run should end ends nothing. -/
-axiom WithdrawalSupported : Context P → Turn P → Unit → Prop
-
-/-- Only the person withdraws. -/
-def withdrawalCoord : Coord P Unit :=
-  { admits := (·.val = .person), supports := WithdrawalSupported }
-
-/-- **Your reading**: the person's withdrawal; `open_` until one reaches it. -/
-axiom withdrawal : (c : Context P) → Occ (withdrawalCoord (P := P)) c
-
-/-- The record every exit carries, as CONVERGENCE lists it. -/
+/-- The record the closure carries, as CONVERGENCE lists it. -/
 structure Closed (P : Type) where
   context : Context P
   scope   : Occ (scopeCoord (P := P)) context
@@ -289,8 +278,6 @@ structure VerifiedUnderstanding (P : Type) where
 
 inductive Outcome (P : Type)
   | verified  (r : VerifiedUnderstanding P)
-  /-- the partial record: the map as it stood -/
-  | withdrawn (r : Closed P)
   | holding   (c : Context P)
 
 /-- **Your judgment**: the latest utterance, bearing on this run, asks for a check — a wish to see
@@ -336,7 +323,6 @@ def grasp (respond session : Context P → Response P) :
   | c, u :: us =>
     let f := fuse c u
     if ¬ Reaches f then grasp respond session (f ++ [(session f).val]) us
-    else if isFilled (withdrawal f) = true then .withdrawn (closed f)
     else if isFilled (closure f) = true then .verified ⟨closed f⟩
     else
       let c' := consulted f
@@ -353,8 +339,9 @@ earlier answer is held apart from what later ones say. No fixed cap: each round 
 -/
 
 /-! ── CONVERGENCE ──
-converged: a VerifiedUnderstanding the person's utterance closed. Withdrawal keeps its partial
-record. The convergence evidence — the map at closure: each aspect with its standing, what it rests
+converged: a VerifiedUnderstanding the person's utterance closed — the one closing of `Outcome`;
+holding is a round no turn of the person's that bears on the run has answered. The convergence
+evidence — the map at closure: each aspect with its standing, what it rests
 on (the person's own reading with the material it was measured against, in their words; each check
 run, with what it showed and, where it ran on a stand-in, what it left untested; each check named
 and not run, with who named it and what it would settle; the person's account with neither measure
@@ -383,7 +370,7 @@ def Interaction.realization : Interaction → Continuation
   | .constitution => .stop
   | .extension    => .proceed
 
-inductive Op | gather | assess | present | check | readAnswer | converge | withdraw
+inductive Op | gather | assess | present | check | readAnswer | converge
 
 def grounding : Op → Annot × String
   | .gather     => (.observe, "artifact read, artifact search: read-only reads, now, of the target's material and the sources that bear on it — any a turn cites, and any you find — as far as relevant access reaches; name what was reached and what was not, and any conflict among what was gathered")
@@ -392,7 +379,6 @@ def grounding : Op → Annot × String
   | .check      => (.dispatch, "delegate: where `AsksCheck` holds, the check handed to execution with the aspect and what it is to show; it changes no existing state — what it has to write goes to a scratch space outside the target's tree — and a result from a stand-in comes with what it stood for and what it left untested; what it returns enters the context through `consult` as evidence read now, before the round that shows it")
   | .readAnswer => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there, as `Reaches` and the judgments above read it — read whole against the fused context as it now stands")
   | .converge   => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with VerifiedUnderstanding")
-  | .withdraw   => (.interaction .extension, "at the person's word, at any gate: what you took as withdrawn, and the partial record CONVERGENCE lists")
 
 open Classical in
 /-- The operations whose returns `consult` appends to the context: what `.gather` reads, and, where
@@ -424,7 +410,7 @@ Compose each round under TOOL GROUNDING's `present` entry. When grounding an exp
 
 ## Rules
 
-- **User-initiated only**: Activate only on the user's wish to understand a target present in context and quotable, whatever produced it; an explicit decline before activation withholds it; a withdrawal during a run ends it with the map as it stood on record.
+- **User-initiated only**: Activate only on the user's wish to understand a target present in context and quotable, whatever produced it; an explicit decline before activation withholds it; words that end a run leave it holding, the map as it stood.
 - **User authority**: An acknowledgment of your explanation stands as the person's judgment: it is not probed again, a factual disagreement or new evidence is shown beside it, and it is recorded as acceptance of your explanation, as CONVERGENCE lists.
 - **Round composition**: Compose each round so the reader can act without reassembly — use everyday language, keep each judgment beside its evidence and next-move implication (your own adjudication included, its evidence being the excerpt attached with it), and place analytical context before its gate.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
