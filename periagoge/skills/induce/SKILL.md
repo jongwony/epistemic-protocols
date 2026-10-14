@@ -1,6 +1,6 @@
 ---
 name: induce
-description: "Several concrete cases at hand seem to share something no one has named yet: the user can then name it, say which cases it takes in and leaves out, and recognize it as serving their goal."
+description: "Concrete cases seem to share something unnamed, or that a name in use no longer says: the user can then name it, say which cases it takes in and leaves out, and recognize it as serving their goal."
 ---
 
 # Periagoge Protocol
