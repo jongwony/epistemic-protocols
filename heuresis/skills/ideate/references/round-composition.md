@@ -8,8 +8,8 @@ User-facing emit (round presentations, frame maps, convergence traces, gate opti
 
 ## When some of what is in view belongs to a later round or a trace rather than this one
 
-The map is the one `respond` in SKILL.md lays out. Keep the next-move implication beside the map (which frames remain to open, where a branch could be dug, what is parked, what signals remain unaddressed, your contrary grounds, whether to continue or take the field) so the user can recognize the decision without context-switching.
+What the map shows and what sits beside it is SKILL.md's "The map".
 
 ## When this protocol's own phases bear on where a sentence sits relative to a gate
 
-Output the map (frames and branches with their candidates, unexplored frames, unaddressed signals, contrary grounds) as text before presenting via Cognitive Partnership Move (Constitution). The gate itself contains only the essential question — continue (which frames, or which branch to dig) or take the field as it stands.
+The map is output as text before the gate is presented via Cognitive Partnership Move (Constitution); the gate itself carries only its question, as SKILL.md's "The map" says.

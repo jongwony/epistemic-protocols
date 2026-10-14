@@ -48,39 +48,39 @@ theorem resumed_redraws (relay generate respond session : Context P → Response
         (c ++ (reference c).map (·.val) ++ [(relay (c ++ (reference c).map (·.val))).val] ++
           [(respond (c ++ (reference c).map (·.val) ++
             [(relay (c ++ (reference c).map (·.val))).val])).val]) us := by
-  simp only [start, h, ht, ↓reduceIte]
+  simp only [start, h, advance, ht, ↓reduceIte]
 
-/-- A fresh invocation of this protocol ends this run's reading: the run holds on the context with
-    that utterance, and the run it starts reads it. -/
+/-- On a fresh invocation that takes nothing, this run returns holding, on the context with that
+    utterance. -/
 theorem fresh_invocation_holds (generate respond session : Context P → Response P)
-    (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hi : Invoked (fuse c u)) :
+    (c : Context P) (u : Utterance P) (us : List (Utterance P))
+    (hk : ¬ (takenAt (fuse c u) c.length = true ∧ (candidates (fuse c u)).isEmpty = false))
+    (hi : Invoked (fuse c u)) :
     ideate generate respond session c (u :: us) = .holding (fuse c u) := by
-  simp [ideate, hi]
+  simp only [ideate, hk, hi, ↓reduceDIte, ↓reduceIte]
 
-/-- A turn that is no fresh invocation and does not bear on the run joins the context with the
-    session's answer to it; no record it names is read, no pass runs, and no map is drawn at that
-    step. -/
+/-- A turn that takes nothing, is no fresh invocation, and does not bear on the run joins the
+    context with the session's answer to it; no record it names is read, no pass runs, and no map
+    is drawn at that step. -/
 theorem unreached_step (generate respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u))
-    (hr : ¬ Reaches (fuse c u)) :
+    (u : Utterance P) (us : List (Utterance P))
+    (hk : ¬ (takenAt (fuse c u) c.length = true ∧ (candidates (fuse c u)).isEmpty = false))
+    (hi : ¬ Invoked (fuse c u)) (hr : ¬ Reaches (fuse c u)) :
     ideate generate respond session c (u :: us) =
       ideate generate respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
-  simp [ideate, hi, hr]
+  simp only [ideate, hk, hi, hr, ↓reduceDIte, ↓reduceIte, not_false_eq_true]
 
-/-- A turn that bears on the run, takes no field with candidates in it at that utterance, and
-    opens no frame runs no pass: the map is presented again on the context with that turn and the
-    records it named. -/
+/-- A turn that takes nothing, is no fresh invocation, bears on the run, and opens no frame runs no
+    pass: the map is presented again on the context with that turn and the records it named. -/
 theorem no_empty_pass (generate respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u))
-    (hr : Reaches (fuse c u))
-    (hk : ¬ (takenAt (receive (fuse c u)) c.length = true ∧
-      (candidates (receive (fuse c u))).isEmpty = false))
+    (u : Utterance P) (us : List (Utterance P))
+    (hk : ¬ (takenAt (fuse c u) c.length = true ∧ (candidates (fuse c u)).isEmpty = false))
+    (hi : ¬ Invoked (fuse c u)) (hr : Reaches (fuse c u))
     (ht : (targets (receive (fuse c u))).isEmpty = true) :
     ideate generate respond session c (u :: us) =
       ideate generate respond session
         (receive (fuse c u) ++ [(respond (receive (fuse c u))).val]) us := by
-  simp only [ideate, hi, hr, hk, not_true_eq_false, ↓reduceIte, ↓reduceDIte,
-    advance, ht]
+  simp only [ideate, hk, hi, hr, not_true_eq_false, ↓reduceIte, ↓reduceDIte, advance, ht]
 
 theorem closed_by_person (c : Context P) (h : filledValue (closing c) = some ()) :
     ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
@@ -101,34 +101,34 @@ private theorem ideate_field (generate respond session : Context P → Response 
     (us : List (Utterance P)) (f : DiverseCandidateField P)
     (h : ideate generate respond session c us = .field f) :
     ∃ (c₀ : Context P) (u : Utterance P),
-      f.context = receive (fuse c₀ u) ∧ takenAt f.context c₀.length = true := by
+      f.context = fuse c₀ u ∧ takenAt f.context c₀.length = true := by
   induction us generalizing c with
   | nil => simp [ideate] at h
   | cons u us ih =>
     simp only [ideate] at h
     split at h
-    · cases h
+    · next hk =>
+      cases h
+      exact ⟨c, u, rfl, hk.1⟩
     · split at h
-      · exact ih _ h
+      · cases h
       · split at h
-        · next hk =>
-          cases h
-          exact ⟨c, u, rfl, hk.1⟩
+        · exact ih _ h
         · exact ih _ h
 
 /-- Every field a run yields is taken by the person at the utterance it closes on: the context it
-    is read on is that utterance fused, with the records it named read after it, and it cites that
-    utterance — a turn they sent that says they take the field. An earlier taking, and your reading
-    that the field is wide enough, take nothing. -/
+    is read on is that utterance fused, with nothing it names read, and it cites that utterance — a
+    turn they sent that says they take the field. An earlier taking, and your reading that the
+    field is wide enough, take nothing. -/
 theorem field_on_person_taking (relay generate respond session : Context P → Response P)
     (c : Context P) (us : List (Utterance P)) (f : DiverseCandidateField P)
     (h : start relay generate respond session c us = .field f) :
     ∃ (c₀ : Context P) (u : Utterance P) (s : Cite f.context),
-      f.context = receive (fuse c₀ u) ∧ s.idx = c₀.length ∧ s.src.val = .person ∧
+      f.context = fuse c₀ u ∧ s.idx = c₀.length ∧ s.src.val = .person ∧
       ClosingSupported f.context (f.context[s.idx]'s.lt) () := by
   have key : ∀ c₁, ideate generate respond session c₁ us = .field f →
       ∃ (c₀ : Context P) (u : Utterance P) (s : Cite f.context),
-        f.context = receive (fuse c₀ u) ∧ s.idx = c₀.length ∧ s.src.val = .person ∧
+        f.context = fuse c₀ u ∧ s.idx = c₀.length ∧ s.src.val = .person ∧
         ClosingSupported f.context (f.context[s.idx]'s.lt) () := by
     intro c₁ h₁
     obtain ⟨c₀, u, hc, ht⟩ := ideate_field generate respond session c₁ us f h₁
@@ -139,9 +139,7 @@ theorem field_on_person_taking (relay generate respond session : Context P → R
   split at h
   · exact key _ h
   · exact key _ h
-  · split at h
-    · exact key _ h
-    · exact key _ h
+  · exact key _ h
 
 theorem parked_by_person (c : Context P) (p : ParkedFollowUp c) :
     (c[p.request.idx]'p.request.lt).origin = .person :=

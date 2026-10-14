@@ -27,11 +27,7 @@ Or:
 - Take this field as it stands — offered only once an idea of the user's is on the map
 ```
 
-The frames selected, and any angle the user names, are the frames the first pass opens; the
-rest stay on the map as unexplored. An idea the user gives here is their own direction, not an
-example of yours: it lands as their candidate under the frame it fits, and frame-first is
-untouched. An answer on the map that opens nothing presents the map again rather than running
-an empty pass; where it explicitly asks for the field while no candidate exists, the map says
-plainly that there is nothing to take yet. A turn that only leaves or only turns to other work gets
-the session's answer and no map; what it says beside about the field stands and shows as a
-change on the next map drawn.
+An idea the user gives here is their own direction, not an example of yours: it lands as their
+candidate under the frame it fits, and frame-first is untouched. How the frame map and its gate
+are otherwise shown is SKILL.md's "The map"; a turn that does not bear on the run is met as
+`Reaches` says.
