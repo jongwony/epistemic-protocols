@@ -560,7 +560,7 @@ Activate where a mapping is being relied on and what it licenses about a case is
 
 A source or target account this session can reach — code, documents, a repository, a published source — is read as evidence inside the audit, whether or not the reader already holds it; the audit never waits for the reader to bring an account first, and never asks them to judge a correspondence. Where what the reader wants is only to come to hold an account, with no mapping being relied on, that is explanation rather than this audit, and the AI-guided path does not activate. Absence of evidence that a mapping is being relied on establishes neither eligibility nor its lack; where the accumulated context does not settle it, say which reading is being used and continue.
 
-Skip AI-guided activation when what the mapping licenses is already settled in context, or no mapping is being relied on. An essence merely sensed across accumulated instances, with no located abstraction yet, is a different deficit; a located abstraction tested against its own cases is self-grounding. Framework selection, factual context insufficiency, and whether an already-produced result applies in its actual context remain their own primary deficits.
+Skip AI-guided activation when what the mapping licenses is already settled in context, or no mapping is being relied on. Fitting a candidate abstraction to what the person means by their cases is a different deficit, whether or not a name for it is already in use; fitting the conclusions an abstraction supports about its own cases to evidence is self-grounding. Framework selection, factual context insufficiency, and whether an already-produced result applies in its actual context remain their own primary deficits.
 
 ### Evidence loading
 
