@@ -55,7 +55,7 @@ after the person has added to the cue
   -- a search past the boundary still worth offering: the wider search with what it would read and its cost, against declining it
   -- nothing further worth reaching for: close unresolved with the scope searched per root and the causes the evidence supports
 after the person has declined the wider search
-  -- that extension is no longer admissible; the search inside the boundary goes on, and where nothing there is left worth reaching for, the unresolved close names the extension declined
+  -- that extension is no longer admissible and the boundary stands where it was; the next pass searches inside it, and the recall closes unresolved only as the AI's own close does — nothing to present, the cue added to, and no other extension worth offering
 an index that is empty or whose capture failed
   -- the records themselves remain searchable along the cue's axes; the capture outcome says whether the index was validated empty, failed, unfinished, or never written, and that is what the round reports about it
   -- an empty index says nothing about whether the past took place

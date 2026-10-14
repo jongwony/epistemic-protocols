@@ -63,7 +63,7 @@ Activation → An invocation of the user's own, or an empty intention detected (
 Pass       → Read the cue, the whole, and the axes; search within the established boundary; open the leading candidate's records at the span the cue reaches
 Round      → Present the story in the records' words, each excerpt with its source and resume handle, and yield the turn; or, with nothing to present, ask one open question, then offer the wider search with its cost
 Close      → The user identifies it → RecalledContext; nothing further worth reaching for → unresolved within the scope searched
-Otherwise  → More cue, a correction, or a declined wider search → the next pass, inside the boundary; other work, or an ending that identifies nothing → the recall stays as it stood, answered with the scope searched
+Otherwise  → More cue, a correction, or a declined wider search → the next pass, inside the boundary; other work → answered in the session's own words; an ending that identifies nothing → answered with the scope searched; either way the recall stays as it stood
 ```
 
 ## Axes of the Cue
