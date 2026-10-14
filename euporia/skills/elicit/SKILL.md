@@ -216,10 +216,10 @@ def residual (c : Context P) : List Entry :=
     stands in its own words in the context, a value it sets standing in the record as any turn's
     does: the session answers them, no surface is drawn, the run holds, and later turns bear on it
     only where they come back to it; your own reading that the person is done ends nothing. Where a
-    turn taken as other work or as ending the run could also be read as saying the intent is
-    aligned enough, or as bearing on the run otherwise, the session's answer says briefly how it
-    took it. An AI-guided run the person has not confirmed has not started: nothing they say is
-    recorded into it. -/
+    turn taken as other work or as ending the run could also be read as the other, as saying the
+    intent is aligned enough, or as bearing on the run otherwise, the session's answer says briefly
+    how it took it. An AI-guided run the person has not confirmed has not started: nothing they say
+    is recorded into it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your judgment**: the cited turn says the intent is aligned enough — the aporia is resolved —

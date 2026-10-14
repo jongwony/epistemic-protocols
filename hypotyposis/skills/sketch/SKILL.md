@@ -295,8 +295,8 @@ def recordOf (c : Context P) : Record c :=
     person asked done to it that is not observed done, with the reason where it failed; no round is
     drawn, the run holds, and later turns bear on it only where they come back to it; your own
     reading that the person is done ends nothing. Where a turn taken as other work or as ending the
-    run could also be read as recognizing a version, or as bearing on the run otherwise, the
-    session's answer says briefly how it took it. -/
+    run could also be read as the other, as recognizing a version, or as bearing on the run
+    otherwise, the session's answer says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
 /-- How the person closes the run. -/
@@ -532,7 +532,7 @@ def grounding : Op → Annot × String
   | .carryOut          => (.transform, "artifact write, environment run: what `carriedOut` does, as its doc states; each write or removal observed")
   | .assemble          => (.sense, "Internal analysis: the terminal record, `recordOf`, built after what the closing turn asked done is observed, never before")
   | .converge          => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with RecognizedForm")
-  | .seam              => (.interaction .extension, "after a recognition or not activating, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; otherwise, as session text, the `notActivated` reading is handed on after not activating, and after a recognition the record, with the recognized version — an artifact by where it is and what it showed, a narration as written — every other version by where it is, or the round that showed it, rather than its content, the dissent travelling in it; moving the form further into the work than the person named is their next move; every Constitution gate inside this protocol and the next fires unchanged")
+  | .seam              => (.interaction .extension, "after a recognition or not activating, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; after words that end the run, only to a next move the person declared with them; otherwise, as session text, the `notActivated` reading is handed on after not activating, and after a recognition the record, with the recognized version — an artifact by where it is and what it showed, a narration as written — every other version by where it is, or the round that showed it, rather than its content, the dissent travelling in it; moving the form further into the work than the person named is their next move; every Constitution gate inside this protocol and the next fires unchanged")
 
 /-- The operations that write a version, by realization: an artifact through `.produce`, and
     `.produceDelegate` where its write is handed to execution; narration writes no file. -/

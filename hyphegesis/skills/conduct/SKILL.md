@@ -366,8 +366,8 @@ axiom relay : (c : Context P) → Occ (relayCoord (P := P)) c
     sets standing in the record as any turn's does: the session answers them, no map is drawn, the
     run holds, and later turns bear on it only where they come back to it; your own reading that
     the person is done ends nothing. Where a turn taken as other work or as ending the run could
-    also be read as taking the method, or as bearing on the run otherwise, the session's answer
-    says briefly how it took it. -/
+    also be read as the other, as taking the method, or as bearing on the run otherwise, the
+    session's answer says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your record**: the navigation block over the record where the person's turns behind this
