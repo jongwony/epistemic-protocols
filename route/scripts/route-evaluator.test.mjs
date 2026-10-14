@@ -114,9 +114,10 @@ test("loadConfig refuses a file that is absent, unreadable, or not https", () =>
 
 test("cards are built from declared material, and say nothing about each other", () => {
   const criteria = buildCriteria(PROTOCOLS);
-  // Rule #2: each protocol's own declared description is the sole source of
-  // what deficit it resolves. A field here telling two protocols apart would
-  // be the hand-kept routing table that rule refuses.
+  // /route's contract (`Entry`, `catalog`): each protocol's own declared
+  // description is the sole source of what deficit it resolves. A field here
+  // telling two protocols apart would be the curated routing table that
+  // contract reads none of.
   for (const [name, value] of Object.entries(criteria)) {
     if (name === "none") continue;
     const keys = Object.keys(value);
@@ -172,14 +173,15 @@ test("a runner-up below the cutoff is left out; none is never a name", () => {
   assert.deepEqual(namesFrom({}, CONFIG), []);
 });
 
-test("the advisory is labelled, modal, and demands a check — and is not a Route nudge", () => {
+test("the advisory is labelled, modal, and demands a check — and is not a Route pointer", () => {
   const line = renderAdvisory(["inquire", "ground"]);
   assert.ok(line.startsWith(LABEL));
   assert.match(line, /may fit/);
   assert.match(line, /Verify each is loaded and fits the full context before invoking \/route/);
   assert.match(line, /nothing has been invoked/);
-  // Route's own output shape, and any claim to be it, stays out: Rule #1
-  // makes `↗ /command — reason` a thing produced by invoking Route.
+  // Route's own output shape, and any claim to be it, stays out: the
+  // contract's pointer line, `↗ /command — reading`, is what a /route pass
+  // shows.
   assert.doesNotMatch(line, /↗/);
   assert.doesNotMatch(line, /—\s*reason/);
   assert.doesNotMatch(line, /Route (recommends|suggests|routed)/i);
