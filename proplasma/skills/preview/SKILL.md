@@ -224,13 +224,12 @@ axiom dissent : Context P → List String
     run neither closes it nor answers its judgments. An utterance about other work leaves the run
     as it stands: the session answers it, that answer stays in the context, and no gate of this run
     is raised. Words that end the run without constituting a direction do not bear on it, whatever
-    else the turn says, and what else it says stands in its own words in the context, a purpose it
-    sets standing as any turn's does: the session answers them, saying where each probe this run
-    wrote is, as last observed; no round is drawn, the run holds, and later turns bear on it only
-    where they come back to it; your own reading that the person is done ends nothing. Where a turn
-    taken as other work or as ending the run could also be read as the other, as constituting a
-    direction, or as bearing on the run otherwise, the session's answer says briefly how it took
-    it. -/
+    else the turn says, and what else it says stands in its own words in the context: the session
+    answers them, saying where each probe this run wrote is, as last observed; no round is drawn,
+    the run holds, and later turns bear on it only where they come back to it; your own reading that
+    the person is done ends nothing. Where a turn taken as other work or as ending the run could
+    also be read as the other, as constituting a direction, or as bearing on the run otherwise, the
+    session's answer says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
 /-- How the person closes the run. -/
@@ -425,7 +424,8 @@ Every round re-judges the whole run against the whole context: nothing counts do
 waits for a later gate. A fan happens where the person's turn asks to see something no probe has
 materialized, and nowhere else: an insufficiency you find is shown with its basis and the revision
 you propose, and you fan over it once the person takes it up. Each fan relays the spec whole, with
-what changed, before it generates. The loop is dialogue: each round ends at the gate.
+what changed, before it generates. The loop is dialogue: each round ends at the gate, and no round
+count or cap closes it.
 -/
 
 /-! ── CONVERGENCE ──
@@ -481,7 +481,7 @@ def grounding : Op → Annot × String
   | .cleanupVerify     => (.observe, "environment run, artifact read: the verification step closing the same sequence — each path verified absent after its destruction; a disposition observed per probe, and a probe no observation reached declared as not verified; a probe still present is declared with the path to remove by hand, and the direction the person settled stands")
   | .assemble          => (.sense, "Internal analysis: the terminal record built from the harvest and the completed discard trace — after cleanup, never before")
   | .converge          => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with DirectionalContrast")
-  | .seam              => (.interaction .extension, "after a constitution or not activating, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; after words that end the run, only to a next move the person declared with them; otherwise the record is handed on as session text, the dissent travelling in it; every Constitution gate inside this protocol and the next fires unchanged")
+  | .seam              => (.interaction .extension, "after a constitution or not activating, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; otherwise, after a constitution, the record is handed on as session text, the dissent travelling in it; every Constitution gate inside this protocol and the next fires unchanged")
 
 /-- The operations that write a fan's probes, by tier: a Mockup through `.instantiate`, and
     `.instantiateDelegate` where delegated; a Vignette writes no file. -/
