@@ -36,42 +36,31 @@ theorem unrelated_adds_no_gate (respond session : Context P → Response P) (c :
       grasp respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
   simp [grasp, h]
 
-theorem withdraw_closes_unclosed (respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hr : Reaches (fuse c u))
-    (h : isFilled (withdrawal (fuse c u)) = true) :
-    grasp respond session c (u :: us) = .withdrawn (closed (fuse c u)) := by
-  simp [grasp, hr, h]
-
 theorem closure_verifies (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
-    (hw : isFilled (withdrawal (fuse c u)) = false)
     (hc : isFilled (closure (fuse c u)) = true) :
     grasp respond session c (u :: us) = .verified ⟨closed (fuse c u)⟩ := by
-  simp [grasp, hre, hw, hc]
+  simp [grasp, hre, hc]
 
 theorem unclosed_presents_again (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
-    (hw : isFilled (withdrawal (fuse c u)) = false)
     (hc : isFilled (closure (fuse c u)) = false) :
     grasp respond session c (u :: us) =
       grasp respond session
         (consulted (fuse c u) ++ [(respond (consulted (fuse c u))).val]) us := by
-  simp [grasp, hre, hw, hc]
+  simp [grasp, hre, hc]
 
 theorem each_step_continues_or_closes (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
     (h : grasp respond session c (u :: us) = o) :
     (∃ c', grasp respond session c' us = o) ∨
-    (isFilled (withdrawal (fuse c u)) = true ∧ o = .withdrawn (closed (fuse c u))) ∨
     (isFilled (closure (fuse c u)) = true ∧ o = .verified ⟨closed (fuse c u)⟩) := by
   simp only [grasp] at h
   split at h
   · exact .inl ⟨_, h⟩
   · split at h
-    · exact .inr (.inl ⟨by assumption, h.symm⟩)
-    · split at h
-      · exact .inr (.inr ⟨by assumption, h.symm⟩)
-      · exact .inl ⟨_, h⟩
+    · exact .inr ⟨by assumption, h.symm⟩
+    · exact .inl ⟨_, h⟩
 
 theorem verified_by_person_closure (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : VerifiedUnderstanding P)
@@ -80,26 +69,10 @@ theorem verified_by_person_closure (respond session : Context P → Response P) 
   induction us generalizing c with
   | nil => simp [grasp] at h
   | cons u us ih =>
-    rcases each_step_continues_or_closes respond session c u us _ h with
-        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨hc, h'⟩
+    rcases each_step_continues_or_closes respond session c u us _ h with ⟨c', h'⟩ | ⟨hc, h'⟩
     · exact ih c' h'
-    · cases h'
     · cases h'
       exact ⟨_, hc, rfl⟩
-
-theorem withdrawn_by_person_withdrawal (respond session : Context P → Response P)
-    (c : Context P) (us : List (Utterance P)) (r : Closed P)
-    (h : grasp respond session c us = .withdrawn r) :
-    ∃ c₀, isFilled (withdrawal c₀) = true ∧ r = closed c₀ := by
-  induction us generalizing c with
-  | nil => simp [grasp] at h
-  | cons u us ih =>
-    rcases each_step_continues_or_closes respond session c u us _ h with
-        ⟨c', h'⟩ | ⟨hw, h'⟩ | ⟨_, h'⟩
-    · exact ih c' h'
-    · cases h'
-      exact ⟨_, hw, rfl⟩
-    · cases h'
 
 theorem verified_at_an_utterance (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : VerifiedUnderstanding P)
@@ -108,26 +81,10 @@ theorem verified_at_an_utterance (respond session : Context P → Response P) (c
   induction us generalizing c with
   | nil => simp [grasp] at h
   | cons u us ih =>
-    rcases each_step_continues_or_closes respond session c u us _ h with
-        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, h'⟩
-    · exact ih c' h'
-    · cases h'
-    · cases h'
-      exact ⟨c, u, rfl⟩
-
-theorem withdrawn_at_an_utterance (respond session : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : Closed P)
-    (h : grasp respond session c us = .withdrawn r) :
-    ∃ (c₀ : Context P) (u : Utterance P), r.context = fuse c₀ u := by
-  induction us generalizing c with
-  | nil => simp [grasp] at h
-  | cons u us ih =>
-    rcases each_step_continues_or_closes respond session c u us _ h with
-        ⟨c', h'⟩ | ⟨_, h'⟩ | ⟨_, h'⟩
+    rcases each_step_continues_or_closes respond session c u us _ h with ⟨c', h'⟩ | ⟨_, h'⟩
     · exact ih c' h'
     · cases h'
       exact ⟨c, u, rfl⟩
-    · cases h'
 
 theorem map_rows_every_aspect (c : Context P) :
     (map c).map (·.1) = aspects c := by
@@ -149,9 +106,6 @@ theorem scope_only_by_person {c : Context P} {s : Cite c}
 
 theorem closed_only_by_person {c : Context P} {s : Cite c}
     (ok : (closureCoord (P := P)).admits s.src) : s.src.val = .person := ok
-
-theorem withdrawn_only_by_person {c : Context P} {s : Cite c}
-    (ok : (withdrawalCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
 theorem unasked_consult_only_gathers (c : Context P) (h : ¬ AsksCheck c) :
     consult c = gathered c := by

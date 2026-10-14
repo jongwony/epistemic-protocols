@@ -12,8 +12,8 @@ the `.mapGate` entry of TOOL GROUNDING, and `Interaction.realization`). Where th
 not settle the method, the first map is presented, then `.mapGate`, and the turn is yielded:
 `.mapGate` is a Constitution interaction, which `Interaction.realization` maps to `stop`, so no
 line of the method starts before a taking. The person may say what the map got wrong, anywhere on
-it, or take the method as shown or with what the same words change. Withdrawal stays open to the
-person in their own words and is not among the gate's moves.
+it, or take the method as shown or with what the same words change. Stopping stays open to the
+person in their own words, as a turn that leaves the run holding, and is not among the gate's moves.
 
 This grader judges the transition alone. What the map contains is `method-written-out`'s, and the
 contrary grounds it carries are `contrary-grounds-shown`'s.

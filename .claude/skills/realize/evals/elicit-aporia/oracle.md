@@ -43,8 +43,9 @@ applies:
 
 A yes/no question about a suggested value is answered with the table's value (which implies the
 yes or the no). A question spanning two rows gets both rows' answers on its line. Never use the
-words "withdraw", "skip", "stop", or "your call": withdrawal is not exercised by this oracle (it
-ends the run without a resolution), and "your call" would be a grant this case does not test.
+words "withdraw", "skip", "stop", or "your call": ending the run is not exercised by this oracle
+(words that end it leave it holding, unresolved), and "your call" would be a grant this case does
+not test.
 
 ### Table T — the hidden intended endpoint
 

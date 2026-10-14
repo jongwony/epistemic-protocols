@@ -39,16 +39,13 @@ private theorem step (ai : AITurns P) (c : Context P) (u : Utterance P) (us : Li
     (o : Outcome P) (h : preview ai c (u :: us) = o) :
     (∃ c', preview ai c' us = o) ∨
     (∃ d, filledValue (closing (fuse c u)) = some (.constitute d) ∧
-      o = .contrasted (constituted (fuse c u) d)) ∨
-    (filledValue (closing (fuse c u)) = some .withdraw ∧ o = .withdrawn (closed (fuse c u))) := by
+      o = .contrasted (constituted (fuse c u) d)) := by
   simp only [preview] at h
   split at h
   · exact .inl ⟨_, h⟩
   · split at h
     · rename_i d hk
-      exact .inr (.inl ⟨d, hk, h.symm⟩)
-    · rename_i hk
-      exact .inr (.inr ⟨hk, h.symm⟩)
+      exact .inr ⟨d, hk, h.symm⟩
     · exact .inl ⟨_, h⟩
 
 theorem contrasted_on_constitute (ai : AITurns P) (c : Context P) (us : List (Utterance P))
@@ -58,23 +55,10 @@ theorem contrasted_on_constitute (ai : AITurns P) (c : Context P) (us : List (Ut
   induction us generalizing c with
   | nil => simp [preview] at h
   | cons u us ih =>
-    rcases step ai c u us _ h with ⟨c', h'⟩ | ⟨d, hk, h'⟩ | ⟨_, h'⟩
+    rcases step ai c u us _ h with ⟨c', h'⟩ | ⟨d, hk, h'⟩
     · exact ih c' h'
     · cases h'
       exact ⟨_, d, hk, rfl, rfl⟩
-    · cases h'
-
-theorem withdrawn_on_withdraw (ai : AITurns P) (c : Context P) (us : List (Utterance P))
-    (r : Closed P) (h : preview ai c us = .withdrawn r) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .withdraw ∧ r = closed c₁ := by
-  induction us generalizing c with
-  | nil => simp [preview] at h
-  | cons u us ih =>
-    rcases step ai c u us _ h with ⟨c', h'⟩ | ⟨_, _, h'⟩ | ⟨hk, h'⟩
-    · exact ih c' h'
-    · cases h'
-    · cases h'
-      exact ⟨_, hk, rfl⟩
 
 theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
     ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by

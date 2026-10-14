@@ -23,7 +23,7 @@ When a target is complex — a large change, code someone else wrote, a dense pa
 | Direction | AI talks, user listens | AI shows the map; the user moves it — accepting, asking to see, or pushing back |
 | Entry point | AI decides what to explain | The user's stated purpose, or AI's reading of it, marked as AI's and corrected in one line |
 | Confirmation | Assumed after explanation | Each aspect says what it rests on: the user's own reading borne out by the target, a result seen together, or only AI's explanation |
-| Ending | Undefined | The user says it is understood enough for their purpose; the map, with what is still to be checked and how, and any AI doubt, is the record |
+| Ending | Undefined | The user says what they understand now serves their purpose; the map, with what is still to be checked and how, and any AI doubt, is the record |
 
 ## Protocol Flow
 
@@ -35,8 +35,8 @@ Explain  → Each aspect in one fitting representation; the user's move
            answered with its material — a check they ask for runs and its result
            is shown; no verdict without material: what would settle it is named
            (gate interaction)
-Close    → The user says it is understood enough; the map at that moment is the
-           record, with any dissent
+Close    → The user says what they understand now serves their purpose; the
+           map at that moment is the record, with any dissent
 ```
 
 ## When to Use

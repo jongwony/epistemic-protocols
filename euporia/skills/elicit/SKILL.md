@@ -9,7 +9,7 @@ Resolve abstract aporia by surfacing the decisions an intent turns on until the 
 
 ## Definition
 
-**Euporia** (εὐπορία): A dialogical act of opening a way through abstract aporia — the person holds a direction but cannot name up front which decisions it turns on. The AI traces those decision coordinates from the person's own material, from their words, and from the decision structure of the domain the intent sits in, and surfaces each with where it comes from and what leaving it open changes. What is surfaced is focus: re-read every turn, it decides nothing. Only the person's words move a value from focus into the record, and each recorded value carries who proposed it and how it came to stand; what is still open is carried as residual. The run closes when the person says the intent is aligned enough — every coordinate need not be filled — or when they withdraw. The resolution establishes the person's recognized intent, not the factual correctness of its parts.
+**Euporia** (εὐπορία): A dialogical act of opening a way through abstract aporia — the person holds a direction but cannot name up front which decisions it turns on. The AI traces those decision coordinates from the person's own material, from their words, and from the decision structure of the domain the intent sits in, and surfaces each with where it comes from and what leaving it open changes. What is surfaced is focus: re-read every turn, it decides nothing. Only the person's words move a value from focus into the record, and each recorded value carries who proposed it and how it came to stand; what is still open is carried as residual. The run closes when the person says the intent is aligned enough — every coordinate need not be filled; they can stop at any time, and the run stays as it stood. The resolution establishes the person's recognized intent, not the factual correctness of its parts.
 
 ```lean
 /-!
@@ -25,12 +25,11 @@ Euporia(I) → start(c) → elicit(c, utterances), where c is the fused session 
   surface(c): the read-back of the intent as understood, with its sources → Stop
   next utterance u: c' := fuse(c, u), every reading below taken afresh on c' →
     [the utterance does not bear on this run]      the session answers it; no gate of this run
-    [the person withdraws]                         → Withdrawn
     [the person says the intent is aligned enough] → ResolvedEndpoint
     [otherwise]                                    → surface(c')
   no utterance: the gate holds; nothing is taken
   after a resolution: the next move the person declared — the seed's task included — is the
-    session's to take up; after a withdrawal: only a next move the person declares with it
+    session's to take up
 -/
 
 /-! ── MORPHISM ──
@@ -210,18 +209,24 @@ def residual (c : Context P) : List Entry :=
   (coordinates c).filter (fun x => !isFilled (operative c x))
 
 /-- **Your judgment**: the latest utterance bears on this run — a value, a deferral, a question
-    about the surface, a new frame, a withdrawal, a resolution. An utterance about other work
-    leaves the run as it stands: the session answers it, that answer stays in the context, and no
-    gate of this run is raised. An AI-guided run the person has not confirmed has not started:
-    nothing they say is recorded into it. -/
+    about the surface, a new frame, a resolution. An utterance about other work leaves the run as
+    it stands: the session answers it, that answer stays in the context, and no gate of this run is
+    raised. Words that end the run — a decline of the proposed run included — without saying the
+    intent is aligned enough do not bear on it, whatever else the turn says, and what else it says
+    stands in its own words in the context: the session answers them, no surface is drawn, the run
+    holds, and later turns bear on it only where they come back to it; your own reading that the
+    person is done ends nothing. Where a turn taken as other work or as ending the run could also be
+    read as the other, as saying the intent is aligned enough, or as bearing on the run otherwise,
+    the session's answer says briefly how it took it. An AI-guided run the person has not confirmed
+    has not started: nothing they say is recorded into it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your judgment**: the cited turn says the intent is aligned enough — the aporia is resolved —
     read against the context as it now stands. It closes the run: coordinates need not all be
-    filled, and what is open is residual. Filled coordinates, or your own reading, close nothing.
-    Whether an earlier resolution still reaches what is now at issue is read on the current
-    context: a later question may reopen the alignment, ask only about a fact, or concern other
-    work. -/
+    filled, and what is open is residual. Where the turn's intent is unclear, it closes nothing.
+    Filled coordinates, or your own reading, close nothing. Whether an earlier resolution still
+    reaches what is now at issue is read on the current context: a later question may reopen the
+    alignment, ask only about a fact, or concern other work. -/
 axiom ResolutionSupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person settles the intent. -/
@@ -236,22 +241,7 @@ axiom resolution : (c : Context P) → Occ (resolutionCoord (P := P)) c
     empty when there were none. -/
 axiom dissent : Context P → List String
 
-/-- **Your judgment**: the cited turn withdraws — the person stops here without resolving the
-    intent, and nothing open is delegated — read against the context as it now stands. Stopping
-    needs nothing else; the values carried into the partial record stand under the record rule
-    alone. Whether an earlier withdrawal still reaches this run is read on the current context: a
-    withdrawal from an earlier run, or a declined proposal, does not close a new one. Your own
-    reading that the run should end closes nothing. -/
-axiom WithdrawalSupported : Context P → Turn P → Unit → Prop
-
-/-- Only the person withdraws. -/
-def withdrawalCoord : Coord P Unit :=
-  { admits := (·.val = .person), supports := WithdrawalSupported }
-
-/-- **Your reading**: the person's withdrawal; `open_` until one reaches it. -/
-axiom withdrawal : (c : Context P) → Occ (withdrawalCoord (P := P)) c
-
-/-- The record every exit carries: the context, the recorded values with who proposed each and
+/-- The record the resolution carries: the context, the recorded values with who proposed each and
     how it came to stand, what is still open, and the dissent attached to the closure. -/
 structure Closed (P : Type) where
   context  : Context P
@@ -273,8 +263,6 @@ def endpoint (c : Context P) : ResolvedEndpoint P := { closure := closed c }
 
 inductive Outcome (P : Type)
   | resolved  (r : ResolvedEndpoint P)
-  /-- the partial record; what is open stays open -/
-  | withdrawn (r : Closed P)
   | holding   (c : Context P)
 
 /-! ── A-BINDING ──
@@ -283,7 +271,7 @@ Priority: explicit_arg > recent_intent_seed > surfaced_aporia
   /elicit "intent"   → I = the utterance, with the context it lands in
   /elicit (alone)    → I = the most recent intent seed in the session
   "I want to..."     → I = the utterance under discussion (AI-detected path: the first surface
-                       confirms or declines the run; a decline is a withdrawal)
+                       confirms or declines the run; a decline leaves it unstarted)
 -/
 
 /-! ── MODE STATE ──
@@ -293,7 +281,8 @@ Priority: explicit_arg > recent_intent_seed > surfaced_aporia
 /-! ── PHASE TRANSITIONS ──
 A step is one arm of a structural recursion over the person's utterances. `respond` is the next
 surface, as TOOL GROUNDING's `surface` entry names it; `session` is the session's own answer to an
-utterance about other work, which stays in the context without being a gate of this run.
+utterance that does not bear on the run, which stays in the context without being a gate of this
+run.
 -/
 
 open Classical in
@@ -303,7 +292,6 @@ def elicit (respond session : Context P → Response P) :
   | c, u :: us =>
     let c' := fuse c u
     if ¬ Reaches c' then elicit respond session (c' ++ [(session c').val]) us
-    else if isFilled (withdrawal c') = true then .withdrawn (closed c')
     else if isFilled (resolution c') = true then .resolved (endpoint c')
     else elicit respond session (c' ++ [(respond c').val]) us
 
@@ -318,11 +306,11 @@ earlier answer is held apart from what later ones say. No fixed cap: each surfac
 -/
 
 /-! ── CONVERGENCE ──
-converged: a ResolvedEndpoint the person's utterance closed. Withdrawal keeps its partial record.
-Convergence evidence: at the resolution, present the read-back of the intent in the person's
-language and the trace — each coordinate → where it came from → what stands on it, in the words of
-the turn that set it → who proposed it and how it stood — beside the residual and the dissent
-attached to the closure. Demonstrated, not asserted.
+converged: a ResolvedEndpoint the person's utterance closed; holding is a surface no turn of the
+person's that bears on the run has answered. Convergence evidence: at the resolution, present the
+read-back of the intent in the person's language and the trace — each coordinate → where it came
+from → what stands on it, in the words of the turn that set it → who proposed it and how it stood —
+beside the residual and the dissent attached to the closure. Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -342,17 +330,16 @@ def Interaction.realization : Interaction → Continuation
   | .constitution => .stop
   | .extension    => .proceed
 
-inductive Op | detect | read | trace | surface | readAnswer | converge | withdraw | seam
+inductive Op | detect | read | trace | surface | readAnswer | converge | seam
 
 def grounding : Op → Annot × String
   | .detect       => (.sense, "Internal analysis, on the AI-guided path only: whether the person has fixed which decisions the intent turns on, read from the utterance, their material, and the domain's decision structure; an invocation of /elicit declares the deficit and is not judged")
   | .read         => (.observe, "artifact read, artifact search, record read: read-only reads of the person's own material where the intent turns on it")
   | .trace        => (.sense, "Internal analysis: the live inventory over the whole fused context and the domain's decision structure, each coordinate with where it comes from and what leaving it open changes")
-  | .surface      => (.interaction .constitution, "a plain one-sentence read-back of the intent as understood, every round the first included, with its sources and each recorded value marked by who proposed it and how it stood; each open coordinate the round shows, with its question, where it comes from — the person's material cited, their words quoted as said without an unstated mental model, or the domain's decision structure marked as yours — what leaving it open changes, and any default as your proposal; your contrary grounds before the answer slots. Guidance for the showing: coordinates the domain raises come after the ones the person's material and words raise, as open questions rather than filled examples; a deferred coordinate returns in the same wording with the same basis, marked as returning. The answer may give values, defer, say the intent is aligned enough, or withdraw, in any form; an answer beyond the slots joins the context whole")
-  | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on this run, and what it does there — the values it makes stand, a withdrawal, a resolution — read whole against the fused context as it now stands, whatever form it takes")
+  | .surface      => (.interaction .constitution, "a plain one-sentence read-back of the intent as understood, every round the first included, with its sources and each recorded value marked by who proposed it and how it stood; where the intent of the person's turn was unclear, how you took it, in one line; each open coordinate the round shows, with its question, where it comes from — the person's material cited, their words quoted as said without an unstated mental model, or the domain's decision structure marked as yours — what leaving it open changes, and any default as your proposal; your contrary grounds before the answer slots. Guidance for the showing: coordinates the domain raises come after the ones the person's material and words raise, as open questions rather than filled examples; a deferred coordinate returns in the same wording with the same basis, marked as returning. The answer may give values, defer, or say the intent is aligned enough, in any form; an answer beyond the slots joins the context whole")
+  | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on this run, and what it does there — the values it makes stand, a resolution — read whole against the fused context as it now stands, whatever form it takes")
   | .converge     => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with ResolvedEndpoint")
-  | .withdraw     => (.interaction .extension, "at the person's word, at any gate: what you took as withdrawn, and the partial record — the recorded values with who proposed each and how it stood, and the residual; nothing open is delegated")
-  | .seam         => (.interaction .extension, "after a resolution, proceed to the next move the person declared — the task the seed asked for, or other work they named; after a withdrawal, only to a next move the person declared with it, never the seed's task; cite that source; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam         => (.interaction .extension, "after a resolution, proceed to the next move the person declared — the task the seed asked for, or other work they named; cite that source; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Intent resolution emergent via session context.
@@ -369,7 +356,7 @@ Euporia surfaces the decision coordinates an intent turns on without adjudicatin
 
 ## Mode Activation
 
-`/elicit` remains directly invocable: the invocation declares the deficit the Definition's `aporia` names, and the first surface shows the intent as understood with its sources — the user may say at once that it is aligned enough. On the AI-guided path the first surface is a proposal the user confirms or declines; a decline is a withdrawal, and until the user confirms, the run has not started. Skip AI-guided activation when the user explicitly asks to proceed without surfacing, or when the same utterance was resolved or withdrawn in this session.
+`/elicit` remains directly invocable: the invocation declares the deficit the Definition's `aporia` names, and the first surface shows the intent as understood with its sources — the user may say at once that it is aligned enough. On the AI-guided path the first surface is a proposal the user confirms or declines; until the user confirms, the run has not started, and a decline leaves it unstarted. Skip AI-guided activation when the user explicitly asks to proceed without surfacing, or when the same utterance was resolved in this session, or the user declined or ended a run on it.
 
 ## Protocol
 
