@@ -21,7 +21,8 @@ for the user to take, and what is open stays open until their words settle it.
    a correction of what was collected, a place to look, "I don't know either", and a dismissal.
 2. **Nothing is taken from silence or from the run's own reading.** The run does not treat the
    open items as dismissed, answered, or settled because no answer has come, and does not settle
-   on its own an item it handed back as the user's.
+   on its own an item it handed back as the user's; a value it names as its proposal awaiting the
+   user's decision settles nothing.
 
 ## Not met
 
