@@ -38,31 +38,30 @@ test("directive carries the firing conditions and stays short", () => {
   //     before that deficit is addressed (a9b47430).
   assert.match(DIRECTIVE, /at the prompt or mid-turn while preparing a response or action/);
   assert.match(DIRECTIVE, /before addressing that deficit/);
-  // (b) monitor mode, with the one narrowing condition defined in place: a
-  //     gate holds until its own contract takes an answer at it, closes it,
-  //     or entrusts the prompt to the session; leftover skill prose holds no
-  //     gate. "active" is not the directive's vocabulary: what narrows
-  //     /route is a holding gate, read from the contract, not an invocation
-  //     that has not yet converged.
+  // (b) the order at a holding gate, defined in place: a gate holds until
+  //     its own contract takes an answer at it, closes it, or entrusts the
+  //     prompt to the session. "active" is not the directive's vocabulary:
+  //     what holds is a gate, read from the contract, not
+  //     an invocation that has not yet converged.
   assert.match(DIRECTIVE, /A presented gate holds until its protocol's contract takes an answer at it, closes it, or entrusts the prompt to the session\./);
   // (b') the prompt is that protocol's to read first, by its own contract —
   //     a reader once invoked the protocol a new prompt asked for while a
   //     gate still stood, without that gate's contract having read it at
-  //     all. Both branches of what the reading leaves stay named: a gate
-  //     the reading closed or entrusted holds no longer and routing is
-  //     ordinary, one still holding is monitored. "Invoked the same way"
-  //     because a reader once wrote the finding line in /route's place
+  //     all. What /route does with what the reading leaves — how what it
+  //     brings in composes with a gate that still holds — is the skill's,
+  //     so the directive names no mode. "Invoked the same way"
+  //     because a reader once wrote a pointer line in /route's place
   //     without invoking it.
-  assert.match(DIRECTIVE, /A holding protocol reads the prompt first; \/route, invoked the same way, routes what that reading leaves/);
-  assert.match(DIRECTIVE, /monitoring where one still holds, routing as usual where none does/);
+  assert.match(DIRECTIVE, /Each holding protocol reads the prompt first; \/route, invoked the same way, routes what that reading leaves\./);
+  assert.doesNotMatch(DIRECTIVE, /monitor/);
   assert.doesNotMatch(DIRECTIVE, /\bactive\b/);
   assert.doesNotMatch(DIRECTIVE, /leaves open|returns there|parked/);
   assert.doesNotMatch(DIRECTIVE, /checkpoint/);
   assert.doesNotMatch(DIRECTIVE, /\bSkip\b/);
-  assert.match(DIRECTIVE, /Converged prose holds no gate/);
-  // (b'') a converged protocol's residual is context /route reads next: the
-  //     chain across protocols is composed here, not inside any protocol.
-  assert.match(DIRECTIVE, /\/route reads a residual from convergence or deactivation at the next prompt/);
+  // (b'') what a protocol leaves when it converges is context like any
+  //     other, read at the next recognition; the directive carries no
+  //     separate residual rule.
+  assert.doesNotMatch(DIRECTIVE, /residual/);
   // (c) no default of silence: what to do when nothing fits is /route's own
   //     silence branch, and a standing "otherwise stay silent" read as the
   //     burden of proof sitting on invocation
@@ -72,9 +71,9 @@ test("directive carries the firing conditions and stays short", () => {
 
 test("the directive carries the conditions, not what follows from them", () => {
   // The per-prompt payload is the one cost charged on every turn, so it
-  // states when to call /route and stops there. The finding line's shape,
-  // how many may be emitted, and what monitor mode may not do are the
-  // skill's, loaded by the call this directive asks for. Keeping them here
+  // states when to call /route and stops there. The pointer line's shape,
+  // and when a pass invokes, points, or stays silent, are the skill's,
+  // loaded by the call this directive asks for. Keeping them here
   // charged every prompt for text that arrives with the skill anyway.
   assert.doesNotMatch(DIRECTIVE, /↗/);
   assert.doesNotMatch(DIRECTIVE, /at most one/);
@@ -89,10 +88,10 @@ test("the directive carries the conditions, not what follows from them", () => {
 });
 
 test("the directive names no protocol — the condition is stated, /route matches", () => {
-  // A protocol named here would be the hand-kept routing table Rule #2
-  // refuses. `/route` is now the only command the directive carries: the
-  // finding's shape left with the rest of the skill's own material, taking
-  // its `/command` placeholder with it.
+  // A protocol named here would be the curated routing table /route's
+  // contract reads none of. `/route` is now the only command the directive
+  // carries: the pointer line's shape left with the rest of the skill's own
+  // material, taking its `/command` placeholder with it.
   const commands = DIRECTIVE.match(/\/[a-z-]+/g) ?? [];
   assert.deepEqual(commands.filter((c) => c !== "/route"), []);
 });

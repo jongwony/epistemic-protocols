@@ -1,7 +1,7 @@
 {
   "name": "route",
-  "version": "0.22.1",
-  "description": "Route the accumulated session context to the core protocol whose deficit it shows — /route (a per-prompt hook directive triggers it)",
+  "version": "0.23.0",
+  "description": "Meet the deficit your context shows as the core protocol that resolves it, and see why, without recalling which exist — /route (a per-prompt hook directive triggers it)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -18,7 +18,7 @@
   "interface": {
     "displayName": "Route",
     "shortDescription": "Route accumulated context to the matching core protocol — /route",
-    "longDescription": "Route the accumulated session context to the core protocol whose deficit it shows — /route (a per-prompt hook directive triggers it)",
+    "longDescription": "Meet the deficit your context shows as the core protocol that resolves it, and see why, without recalling which exist — /route (a per-prompt hook directive triggers it)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [
@@ -27,7 +27,7 @@
     ],
     "websiteURL": "https://github.com/jongwony/epistemic-protocols",
     "defaultPrompt": [
-      "Use route to invoke the epistemic protocol this context calls for"
+      "Use route to bring in the epistemic protocol this context calls for"
     ],
     "brandColor": "#2563EB"
   }
