@@ -15,8 +15,8 @@ picture, an example, a metaphor — that best carries its essence for this perso
 what their words show they know, and go deeper when they ask"; the cheapest check is offered "an
 offer, never a question for them to answer"; and "A round that shows a contradiction's working
 ends on that working, with nothing after it; every other round ends on one opening the person can
-take — respond to the map, ask to see or try something, go on, or say it is enough". The list form
-probed by design, so it is not scored here.
+take — respond to the map, ask to see or try something, go on, or say that what they understand
+now serves their purpose". The list form probed by design, so it is not scored here.
 
 ## Met
 
