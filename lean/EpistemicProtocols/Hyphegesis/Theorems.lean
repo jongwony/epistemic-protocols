@@ -37,20 +37,18 @@ theorem unrelated_holds_gate (respond session : Context P → Response P) (c : C
 
 theorem untaken_redraws (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
-    (hw : isFilled (withdrawal (fuse c u)) = false)
     (hr : isFilled (resolution (observe (fuse c u))) = false) :
     conduct respond session c (u :: us) =
       conduct respond session
         (observe (fuse c u) ++ [(respond (observe (fuse c u))).val]) us := by
-  simp [conduct, hre, hw, hr]
+  simp [conduct, hre, hr]
 
 theorem taking_closes_on_its_turn (respond session : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
-    (hw : isFilled (withdrawal (fuse c u)) = false)
     (hr : isFilled (resolution (observe (fuse c u))) = true) :
     conduct respond session c (u :: us) =
       .conducted (observe (fuse c u)) (respond (observe (fuse c u))) := by
-  simp [conduct, hre, hw, hr]
+  simp [conduct, hre, hr]
 
 theorem observe_extends (c : Context P) : c <+: observe c := by
   simp only [observe]
@@ -60,8 +58,6 @@ theorem each_step_continues_or_closes (respond session : Context P → Response 
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
     (h : conduct respond session c (u :: us) = o) :
     (∃ c', c <+: c' ∧ conduct respond session c' us = o) ∨
-    (isFilled (withdrawal (fuse c u)) = true ∧
-      o = .withdrawn (closed (fuse c u))) ∨
     (isFilled (resolution (observe (fuse c u))) = true ∧
       o = .conducted (observe (fuse c u)) (respond (observe (fuse c u)))) := by
   have fused : ∀ t : List (Turn P), c <+: fuse c u ++ t := fun t =>
@@ -72,11 +68,9 @@ theorem each_step_continues_or_closes (respond session : Context P → Response 
   split at h
   · exact .inl ⟨_, fused _, h⟩
   · split at h
-    · exact .inr (.inl ⟨by assumption, h.symm⟩)
-    · split at h
-      · rename_i hr
-        exact .inr (.inr ⟨hr, h.symm⟩)
-      · exact .inl ⟨_, grows _, h⟩
+    · rename_i hr
+      exact .inr ⟨hr, h.symm⟩
+    · exact .inl ⟨_, grows _, h⟩
 
 theorem conducted_by_person (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (c₁ : Context P) (t : Response P)
@@ -86,10 +80,9 @@ theorem conducted_by_person (respond session : Context P → Response P) (c : Co
   | nil => simp [conduct] at h
   | cons u us ih =>
     rcases each_step_continues_or_closes respond session c u us _ h with
-        ⟨c', hp, h'⟩ | ⟨_, h'⟩ | ⟨hr, h'⟩
+        ⟨c', hp, h'⟩ | ⟨hr, h'⟩
     · have := ih c' h'
       exact ⟨hp.trans this.1, this.2⟩
-    · cases h'
     · cases h'
       exact ⟨(List.prefix_append c [u.val]).trans (observe_extends _), hr, rfl⟩
 
@@ -101,23 +94,8 @@ theorem map_shown_never_relays (respond session : Context P → Response P) (c :
   | nil => simp [conduct] at h
   | cons u us ih =>
     rcases each_step_continues_or_closes respond session c u us _ h with
-        ⟨c', -, h'⟩ | ⟨_, h'⟩ | ⟨_, h'⟩
+        ⟨c', -, h'⟩ | ⟨_, h'⟩
     · exact ih c' h'
-    · cases h'
-    · cases h'
-
-theorem withdrawn_by_person (respond session : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : Closed P)
-    (h : conduct respond session c us = .withdrawn r) :
-    ∃ c₀, isFilled (withdrawal c₀) = true ∧ r = closed c₀ := by
-  induction us generalizing c with
-  | nil => simp [conduct] at h
-  | cons u us ih =>
-    rcases each_step_continues_or_closes respond session c u us _ h with
-        ⟨c', -, h'⟩ | ⟨hw, h'⟩ | ⟨_, h'⟩
-    · exact ih c' h'
-    · cases h'
-      exact ⟨_, hw, rfl⟩
     · cases h'
 
 theorem start_closes_only_by_person (respond session : Context P → Response P) (c : Context P)
@@ -125,10 +103,8 @@ theorem start_closes_only_by_person (respond session : Context P → Response P)
     (∀ c₁ t, start respond session c us = .conducted c₁ t →
       c <+: c₁ ∧ isFilled (resolution c₁) = true) ∧
     (∀ c₁ t, start respond session c us = .relayed c₁ t →
-      c₁ = observe c ∧ isFilled (relay c₁) = true) ∧
-    (∀ r, start respond session c us = .withdrawn r →
-      ∃ c₀, isFilled (withdrawal c₀) = true ∧ r = closed c₀) := by
-  refine ⟨?_, ?_, ?_⟩
+      c₁ = observe c ∧ isFilled (relay c₁) = true) := by
+  refine ⟨?_, ?_⟩
   · intro c₁ t h
     simp only [start] at h
     split at h
@@ -142,15 +118,9 @@ theorem start_closes_only_by_person (respond session : Context P → Response P)
       cases h
       exact ⟨rfl, hr⟩
     · exact absurd h (map_shown_never_relays respond session _ us c₁ t)
-  · intro r h
-    simp only [start] at h
-    split at h
-    · cases h
-    · exact withdrawn_by_person respond session _ us r h
 
-theorem withdrawal_and_holding_hand_off_nothing (r : Closed P) (c : Context P) :
-    handedOffBy (.withdrawn r) = none ∧ handedOffBy (.holding c : Outcome P) = none :=
-  ⟨rfl, rfl⟩
+theorem holding_hands_off_nothing (c : Context P) : handedOffBy (.holding c : Outcome P) = none :=
+  rfl
 
 theorem closure_hands_off (c : Context P) (t : Response P) :
     handedOffBy (.conducted c t) = some .handoff ∧ handedOffBy (.relayed c t) = some .handoff :=
@@ -160,13 +130,12 @@ theorem handoff_only_by_person (respond session : Context P → Response P) (c :
     (us : List (Utterance P)) (h : handedOffBy (start respond session c us) = some .handoff) :
     (∃ c₁ : Context P, c <+: c₁ ∧ isFilled (resolution c₁) = true) ∨
       isFilled (relay (observe c)) = true := by
-  have ⟨hc, hr, _⟩ := start_closes_only_by_person respond session c us
+  have ⟨hc, hr⟩ := start_closes_only_by_person respond session c us
   cases ho : start respond session c us with
   | conducted c₁ t => exact .inl ⟨c₁, hc c₁ t ho⟩
   | relayed c₁ t =>
     have ⟨e, f⟩ := hr c₁ t ho
     exact .inr (e ▸ f)
-  | withdrawn r => rw [ho] at h; simp [handedOffBy] at h
   | holding c₁ => rw [ho] at h; simp [handedOffBy] at h
 
 theorem handoff_carries_obligations (c : Context P) :
@@ -177,11 +146,6 @@ theorem handoff_carries_obligations (c : Context P) :
       (emitted c).pointer = pointer c ∧ (emitted c).source = source c ∧
       (emitted c).dissent = dissent c :=
   ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
-
-theorem withdrawal_keeps_partial_record (c : Context P) :
-    (closed c).record = record c ∧ (closed c).residual = residual c ∧
-      (closed c).deferred = deferred c ∧ (closed c).dissent = dissent c :=
-  ⟨rfl, rfl, rfl, rfl⟩
 
 private theorem mem_recordOf {c : Context P} {x : Coordinate}
     {o : Occ (heldCoord (P := P) x) c} {r : Recorded c} (h : r ∈ recordOf x o) :
@@ -237,9 +201,6 @@ theorem taken_only_by_person {c : Context P} {s : Cite c}
 
 theorem relayed_only_by_person {c : Context P} {s : Cite c}
     (ok : (relayCoord (P := P)).admits s.src) : s.src.val = .person := ok
-
-theorem withdrawn_only_by_person {c : Context P} {s : Cite c}
-    (ok : (withdrawalCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
 theorem feasibility_by_observation {c : Context P} {k : String} {s : Cite c}
     (ok : (feasibilityCoord (P := P) k).admits s.src) : s.src.val = .external := ok
