@@ -1,4 +1,4 @@
-# Blank entry — frame-first gate before any concrete candidate
+# The frame map — frame-first gate before any concrete candidate
 
 Read whenever the gate is the frame map — no frame opened yet — before it is presented. This
 is the frame-first law: the frame map's template and the requirement it satisfies. What each
@@ -9,7 +9,7 @@ While no frame has been opened, the frame map is presented via Cognitive Partner
 direction of divergence, not a specific idea, preserving ownership and mitigating
 early-example fixation.
 
-**Blank path — present the frame map before any concrete candidate:**
+**The frame map — present it before any concrete candidate:**
 
 ```
 question: "Which angles do you want open first?"
