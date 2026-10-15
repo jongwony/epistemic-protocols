@@ -381,11 +381,12 @@ closure. Demonstrated, not asserted.
 /-! ── TOOL GROUNDING ──
 What each operation of this contract does. An interaction with the person is one of two kinds,
 and its kind fixes how it continues once its text is presented. A Constitution settles a judgment
-through the person's turn. An Extension settles none for the person: it passes on a result its
-cited ground fixes, acts within a grant the person gave, or carries reversible work forward on a
-judgment the AI states and returns it with an account of how the request was read, what was
-judged on what basis, and how far the work went; that judgment stays the AI's proposal until the
-person takes it.
+through the person's turn, or through a grant that turn gave, whose exercise stays a choice made
+under it. An Extension settles none for the person: it passes on a result its cited ground
+fixes, or carries reversible work forward on a judgment the AI states, which stays the AI's
+proposal until the person takes it. Work carried forward, on a grant or a stated judgment or as
+clear work, returns with an account of how the request was read, what was judged on what basis,
+and how far the work went.
 -/
 
 inductive Interaction | constitution | extension
