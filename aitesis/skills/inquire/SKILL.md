@@ -9,7 +9,7 @@ Collect every piece of context the AI can reach on its own, then hand back what 
 
 ## Definition
 
-**Aitesis** (αἴτησις): A dialogical act of collecting context to the limit of the AI's own reach before the person is asked for anything. The AI infers what the prospect leaves uncertain, pushes each uncertainty through every source it can read or run on its own until none is left, and writes down for each what that reached — a fact that settles it, a finding whose ground it declares short, or nothing — with the sources it tried and those it could not reach named, beside any finding that answers no uncertainty raised. Once everything reachable is reached, what remains open is handed back as the person's own unknown, shown so they can recognize it: where collected material conflicts, the AI names what conflicts with what; where a decision blocks further collection, it names which collection waits on it. Which open uncertainty is the person's is the AI's reading, shown for their recognition and correction; a decision the work rests on stays open until the person's own turn gives it, and the AI never makes it. The beneficiary is the person's epistemic state; the AI's collection is the instrument, and what it spares the person is recalling everything the work rests on. Only a cited source or the person's own words moves a value into the record. The run completes when collection ends: what is still open does not block completion and is not settled by it, and work that rests on an open item waits for the person's words. The run keeps reading later utterances — one that bears on it opens collection again and a new completion — and silence leaves the last completion standing. Stopping in the middle of a collection is the harness's interrupt, not an outcome of this contract. Completion establishes the collected context the work ahead reads, with what is still open named — not the factual correctness of its parts, and not the readiness of work that rests on what is open.
+**Aitesis** (αἴτησις): A dialogical act of collecting context to the limit of the AI's own reach before the person is asked for anything. The AI infers what the prospect leaves uncertain, pushes each uncertainty through every source it can read or run on its own until none is left, and writes down for each what that reached — a fact that settles it, a finding whose ground it declares short, or nothing — with the sources it tried and those it could not reach named, beside any finding that answers no uncertainty raised. Once everything reachable is reached, what remains open is handed back as the person's own unknown, shown so they can recognize it: where collected material conflicts, the AI names what conflicts with what; where a decision blocks further collection, it names which collection waits on it. Which open uncertainty is the person's is the AI's reading, shown for their recognition and correction; a decision the work rests on stays open until the person's own turn gives it, and the AI never makes it. The beneficiary is the person's epistemic state; the AI's collection is the instrument, and what it spares the person is recalling everything the work rests on. Only a cited source or the person's own words moves a value into the record. The run completes when collection ends: what is still open does not block completion and is not settled by it: work that needs an open item answered waits for the person's words, and reversible work carried forward on the AI's stated reading of one stays the AI's proposal until the person takes it. The run keeps reading later utterances — one that bears on it opens collection again and a new completion — and silence leaves the last completion standing. Stopping in the middle of a collection is the harness's interrupt, not an outcome of this contract. Completion establishes the collected context the work ahead reads, with what is still open named — not the factual correctness of its parts, and not the readiness of work that rests on what is open.
 
 ```lean
 /-!
@@ -32,9 +32,9 @@ Aitesis(X) → start(c) → inquire(c, utterances), where c is the fused session
                                                run; the last completion stands
     [otherwise]                                → collect(c') → after every collection …
   no utterance: the last completion stands — silence settles nothing, what is open stays open,
-    and work that rests on an open item waits for the person's words
+    and work that needs an open item answered waits for the person's words
   after completion: the next move the person declared — the prospect's own work, as far as it
-    rests on nothing open —, an adopted policy, or a grant
+    needs no open item answered —, an adopted policy, or a grant
   mid-collection stop: the harness's interrupt — a delegation point, not an outcome
 -/
 
@@ -315,7 +315,7 @@ def closed (c : Context P) : Closed P :=
     reading. `SufficientContext`: the collected context the work ahead reads — the facts settled
     with their sources, what is still open with its reach, shown with the person's recognition not
     yet established, the detections, and the dissent. What is open is not settled by it; work that
-    rests on an open item waits. -/
+    needs an open item answered waits for that answer. -/
 structure SufficientContext (P : Type) where
   closure : Closed P
 
@@ -378,7 +378,10 @@ closure. Demonstrated, not asserted.
 
 /-! ── TOOL GROUNDING ──
 What each operation of this contract does. An interaction with the person is one of two kinds,
-and its kind fixes how it continues once its text is presented.
+and its kind fixes how it continues once its text is presented. A Constitution settles a judgment
+through the person's turn. An Extension settles none for the person: it passes on a result its
+cited ground fixes, or carries reversible work forward on a judgment the AI states, which stays
+the AI's proposal until the person takes it.
 -/
 
 inductive Interaction | constitution | extension
@@ -403,7 +406,7 @@ def grounding : Op → Annot × String
   | .surface    => (.interaction .extension, "once everything reachable is reached, every open uncertainty handed back as the person's own unknown with its reach — the sources tried and those not reached, by name, with what each needs; what was found and where it falls short; where collected material conflicts, what conflicts with what; where a decision blocks further collection, which collection waits on it; what an answer would change; which of them is the person's to settle, as your reading for their correction — never a decision you made for them; each settled one with its provenance — the evidence and where it was read, or the person's words, with your earlier candidate marked as yours; the detections, each with its source; your contrary grounds; the turn is not held")
   | .readAnswer => (.sense, "Internal analysis: the latest utterance read whole against the prospect and the fused context as it now stands — whether it bears on this run, and what it does there: settles, corrects, points to a source, says the person does not know either, dismisses, or exposes a new uncertainty")
   | .converge   => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with SufficientContext")
-  | .seam       => (.interaction .extension, "after completion, proceed to the next move the person declared — the prospect's own work, as far as it rests on nothing open —, an adopted policy, or a grant, citing that source; work that rests on an open item waits for the person's words; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam       => (.interaction .extension, "after completion, proceed to the next move the person declared — the prospect's own work, as far as it needs no open item answered —, an adopted policy, or a grant, citing that source; work that needs an open item answered waits for the person's words, and reversible work carried forward on the AI's stated reading of one stays the AI's proposal; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
@@ -446,6 +449,6 @@ Frame the uncertainty currently in play rather than emitting a completion tally.
 - **Focus and record**: As the Definition's MORPHISM invariant, `Settles`, and `record` state.
 - **What is shown**: Where collected material conflicts, name what conflicts with what; where a decision blocks further collection, name which collection waits on it. Which open uncertainty is the user's is the AI's reading, shown for their recognition and correction; the AI never chooses a decision the user holds.
 - **Collection yields evidence or nothing, never a disposition**: An observation that resolved nothing attaches its null result and collection moves on. Only the user's words settle what is theirs or dismiss an uncertainty.
-- **Completion**: Completion is the end of collection. It settles nothing open, and work that rests on an open item waits for the user's words; the AI's own reading of what is open completes nothing and settles nothing.
+- **Completion**: Completion is the end of collection. It settles nothing open: work that needs an open item answered waits for the user's words, and reversible work carried forward on the AI's stated reading of one stays the AI's proposal until the user takes it; the AI's own reading of what is open completes nothing and settles nothing.
 - **Boundary named, not crossed**: For every open uncertainty, say what was tried, what was not reached and what it needs, what was found, and where it falls short; leave its disposition to the user.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction forward until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
