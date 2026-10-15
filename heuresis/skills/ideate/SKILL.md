@@ -281,23 +281,26 @@ axiom dissent : Context P → List String
 
 /-- **Your reading** of the latest answer: the frames the next pass opens — at the frame map, the
     frames selected and any the person named, shaped into frames; at a round, the named unexplored
-    frames, a new angle shaped into frames, or a branch under an open frame or candidate the
-    person asked to deepen. An excluded frame is never among them. A continue that names nothing
-    takes every unexplored frame except one the person parked; the person naming it opens it. On
-    a Seeded entry's first pass, the frames the request itself names and at least one derived
-    frame, how many being yours; the rest stay unexplored. At a Blank entry's start, the frames the
-    request itself names — "angles: pricing and pacing" — and none where it names none, so the
-    frame map is presented. At a Resumed entry's resuming step, the frames the request names or
-    asks to deepen — an opened frame it names is deepened by a branch under it, never reopened; a
-    request that only continues opens none, and a request the earlier field already answered — a
-    gate answer bound as the request by a bare invocation — is not applied again, so the field
-    resumes as last shown. A turn that corrects the entry opens what the corrected entry's opening
-    opens: Seeded, its first pass, the seeds promoted; Resumed, none, the earlier field's map
-    redrawn; Blank, the frames the request names, else none. Candidates a pass under the earlier
-    reading produced stay in the context with their origins and are never removed; under a Resumed
-    correction the map shows them as this run's, marked as from that pass. Empty when the answer
-    opens nothing — a deferral alone, an idea of the person's own, a question, a correction of
-    anything but the entry, a pick among candidates, or a continue with nothing left to open. -/
+    frames, a new angle shaped into frames, or a branch under an open frame or candidate the person
+    asked to deepen. An excluded frame is never among them. A continue that names nothing takes
+    every unexplored frame except one the person parked; the person naming it opens it. On a Seeded
+    entry's first pass, the frames the request itself names and at least one derived frame, how many
+    being yours; the rest stay unexplored. At a Blank entry's start, the frames the request itself
+    names — "angles: pricing and pacing" — and none where it names none, so the frame map is
+    presented. At a Resumed entry's resuming step, the frames the request names or asks to deepen —
+    an opened frame it names is deepened by a branch under it, never reopened; a request that only
+    continues opens none, and a request the earlier field already answered — a gate answer bound as
+    the request by a bare invocation — is not applied again, so the field resumes as last shown. A
+    turn that corrects the entry opens what the corrected entry's opening opens — Seeded, its first
+    pass, the seeds promoted; Resumed, none, the earlier field's map redrawn; Blank, the frames the
+    request names, else none — except that once a pass under the earlier reading has shown
+    candidates, a correction to Blank opens none and the next map is the round map, saying plainly
+    that frame-first no longer applies to this field and offering the frames the request names, with
+    the unexplored ones, as continue targets. Candidates a pass under the earlier reading produced
+    stay in the context with their origins and are never removed; under a Resumed correction the map
+    shows them as this run's, marked as from that pass. Empty when the answer opens nothing — a
+    deferral alone, an idea of the person's own, a question, a correction of anything but the entry,
+    a pick among candidates, or a continue with nothing left to open. -/
 axiom targets : Context P → List Frame
 
 /-- **Your judgment**: the cited turn — the person's latest utterance — takes the field, read from
@@ -535,6 +538,7 @@ At the taking, show the field's trace: the topic, then the whole map as drawn ab
 
 - `Unexplored` covers derived frames, not every conceivable angle.
 - A chain reference gives up the blank path's independent-ideation-first benefit; no mitigation is claimed.
+- A misread entry that already showed candidates gives up the frame-first benefit for that field; a correction to Blank cannot restore it.
 - Signals are read from what the person said and the material they named; a concern never put into words is not among them.
 - The rendered field carries the final unaddressed snapshot, not the full signal take/discard ledger; that ledger remains recoverable only from the round presentations the session context holds.
 
