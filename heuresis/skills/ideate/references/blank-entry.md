@@ -1,13 +1,13 @@
 # The frame map — frame-first gate before any concrete candidate
 
-Read whenever the gate is the frame map — no frame opened yet — before it is presented. This
-is the frame-first law: the frame map's template and the requirement it satisfies. What each
-answer opens is `targets` in SKILL.md.
+Read whenever the gate is the frame map — no candidate of yours seen yet — before it is
+presented. This is the frame-first law: the frame map's template and the requirement it
+satisfies. What each answer opens is `targets` in SKILL.md.
 
-While no frame has been opened, the frame map is presented via Cognitive Partnership Move
-(Constitution) BEFORE any concrete candidate of yours is generated — abstract frames only, so the user picks a
-direction of divergence, not a specific idea, preserving ownership and mitigating
-early-example fixation.
+While the person has seen no candidate of yours, the frame map is presented via Cognitive
+Partnership Move (Constitution) BEFORE any concrete candidate of yours is generated — abstract
+frames only, so the user picks a direction of divergence, not a specific idea, preserving
+ownership and mitigating early-example fixation.
 
 **The frame map — present it before any concrete candidate:**
 
