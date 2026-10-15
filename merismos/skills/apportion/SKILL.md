@@ -960,8 +960,10 @@ Demonstrated, not asserted.
 What each operation of this contract does. An interaction with the person is one of two kinds,
 and its kind fixes how it continues once its text is presented. A Constitution settles a judgment
 through the person's turn. An Extension settles none for the person: it passes on a result its
-cited ground fixes, or carries reversible work forward on a judgment the AI states, which stays
-the AI's proposal until the person takes it.
+cited ground fixes, acts within a grant the person gave, or carries reversible work forward on a
+judgment the AI states and returns it with an account of how the request was read, what was
+judged on what basis, and how far the work went; that judgment stays the AI's proposal until the
+person takes it.
 -/
 
 inductive Interaction | constitution | extension
