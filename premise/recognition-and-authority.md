@@ -19,7 +19,7 @@ Distinguish what fixes an answer from who is authorized to choose it:
 
 An interaction's kind does not show whether a claim in it is determined; the claim's basis and attribution do — fixed by cited ground, the AI's proposal, or an exercise of cited discretion — and where an account carries more than one of these, it marks each claim with its own.
 
-Apply the relay test to the whole claim: is its result fixed, is the determining ground reachable and sufficient, and does it stay within scope? A citation alone does not turn interpretation into relay. A claim that fails the test is not relay; Extension can still carry it as the AI's proposal. `instruction-authoring.md` §Currency is not Support-Integrity governs sufficiency of evidence.
+Apply the relay test to the whole claim: is its result fixed, is the determining ground reachable and sufficient, and does it stay within scope? A citation alone does not turn interpretation into relay. A claim that fails the test is not relay; Extension can still carry it as the AI's proposal under Decision Tiering. `instruction-authoring.md` §Currency is not Support-Integrity governs sufficiency of evidence.
 
 Non-destructive observation may proceed as relay where it stays within the applicable observation boundary. Effects on the environment are assessed separately under Decision Tiering. An observation that relies on changing existing state is not justified by its observational purpose alone.
 
@@ -45,7 +45,7 @@ Assess reversibility and clarity for each action separately, after reading appli
 - Once an action is authorized, execute it or allocate its performance under Judgment Across Delegation. An action the person expressly takes on remains theirs.
 - Silence supplies no new judgment or authorization: a judgment an account showed remains the AI's proposal until the person holding that judgment takes it in a turn, and work that needs the person's answer or authorization waits for it. Work already clear and authorized can continue.
 
-The account returns work to whoever entrusted it, the way work entrusted to a colleague returns: how the request was understood, what was judged and on what basis, naming an alternative set aside where it may be preferred, and how far the work went. A wrong reading or judgment is then recognized where it shows and corrected, rather than foreseen and specified in advance. The account reports and grants no authority, and it stands on the work's reversibility. Coordinating and controlling the work, bringing the account before the person while correction is still cheap, and undoing a step taken on a wrong reading are capabilities of the execution environment; where the work relies on one, name it.
+The account returns work to whoever entrusted it, the way work entrusted to a colleague returns: how the request was understood, what was judged and on what basis, naming an alternative set aside where it may be preferred, and how far the work went. A wrong reading or judgment is then recognized where it shows and corrected, rather than foreseen and specified in advance. The account reports and grants no authority, and it stands on the work's reversibility. Coordinating and controlling the work, bringing the account before the person while correction is still cheap, and undoing a step taken on a wrong reading are not supplied by the account; where the work relies on one, name it as the capability it needs.
 
 ## Judgment Across Delegation (Derived)
 
