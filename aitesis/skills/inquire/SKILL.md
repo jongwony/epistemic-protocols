@@ -9,7 +9,7 @@ Collect every piece of context the AI can reach on its own, then hand back what 
 
 ## Definition
 
-**Aitesis** (αἴτησις): A dialogical act of collecting context to the limit of the AI's own reach before the person is asked for anything. The AI infers what the prospect leaves uncertain, pushes each uncertainty through every source it can read or run on its own until none is left, and writes down for each what that reached — a fact that settles it, a finding whose ground it declares short, or nothing — with the sources it tried and those it could not reach named, beside any finding that answers no uncertainty raised. Once everything reachable is reached, what remains open is handed back as the person's own unknown, shown so they can recognize it: where collected material conflicts, the AI names what conflicts with what; where a decision blocks further collection, it names which collection waits on it. Which open uncertainty is the person's is the AI's reading, shown for their recognition and correction; a decision the work rests on stays open until the person's own turn gives it, and the AI never makes it. The beneficiary is the person's epistemic state; the AI's collection is the instrument, and what it spares the person is recalling everything the work rests on. Only a cited source or the person's own words moves a value into the record. The run completes when collection ends: what is still open does not block completion and is not settled by it: work that rests on an open item and cannot be undone, or needs one answered, waits for the person's words, and reversible work carried forward on a judgment the AI states about one stays the AI's proposal until the person takes it. The run keeps reading later utterances — one that bears on it opens collection again and a new completion — and silence leaves the last completion standing. Stopping in the middle of a collection is the harness's interrupt, not an outcome of this contract. Completion establishes the collected context the work ahead reads, with what is still open named — not the factual correctness of its parts, and not the readiness of work that rests on what is open.
+**Aitesis** (αἴτησις): A dialogical act of collecting context to the limit of the AI's own reach before the person is asked for anything. The AI infers what the prospect leaves uncertain, pushes each uncertainty through every source it can read or run on its own until none is left, and writes down for each what that reached — a fact that settles it, a finding whose ground it declares short, or nothing — with the sources it tried and those it could not reach named, beside any finding that answers no uncertainty raised. Once everything reachable is reached, what remains open is handed back as the person's own unknown, shown so they can recognize it: where collected material conflicts, the AI names what conflicts with what; where a decision blocks further collection, it names which collection waits on it. Which open uncertainty is the person's is the AI's reading, shown for their recognition and correction; a decision the work rests on stays open until the person's own turn gives it, and the AI never makes it, and a value it proposes and marks as its own is not that decision. The beneficiary is the person's epistemic state; the AI's collection is the instrument, and what it spares the person is recalling everything the work rests on. Only a cited source or the person's own words moves a value into the record. The run completes when collection ends: what is still open does not block completion and is not settled by it: work that rests on an open item and cannot be undone, or needs one answered, waits for the person's words, and reversible work carried forward on a judgment the AI states about one stays the AI's proposal until the person takes it. The run keeps reading later utterances — one that bears on it opens collection again and a new completion — and silence leaves the last completion standing. Stopping in the middle of a collection is the harness's interrupt, not an outcome of this contract. Completion establishes the collected context the work ahead reads, with what is still open named — not the factual correctness of its parts, and not the readiness of work that rests on what is open.
 
 ```lean
 /-!
@@ -176,8 +176,8 @@ def Settled.isHeld : Settled → Bool
     observed, or a decision of the person's that another source relays, such as a recorded
     decision, a commit, or a peer's report — settles a fact: that the decision exists is a fact. A
     decision the work rests on that the person holds — a value, a preference, a scope — stays open
-    with its reach until the person's own turn gives it; you never choose it, and evidence informs
-    it without settling it. It stands only on that turn: in their own words (`set`), or by taking a
+    with its reach until the person's own turn gives it; you never choose it — a value you propose and mark as
+    yours is not a choice — and evidence informs it without settling it. It stands only on that turn: in their own words (`set`), or by taking a
     candidate put forward before (`adopted`) — where you put it forward, only if it was visible as
     yours, with what decides it and your contrary grounds, before that turn. A question, a request to look, a deferral, or a bare mention settles nothing.
     A held value changes only by the person's later words: evidence against it is shown, and the
@@ -383,10 +383,11 @@ What each operation of this contract does. An interaction with the person is one
 and its kind fixes how it continues once its text is presented. A Constitution settles a judgment
 through the person's turn. An Extension settles none for the person: it passes on a result its
 cited ground fixes, or carries reversible work forward on a judgment the AI states, which stays
-the AI's proposal until the person takes it. Work carried forward, on a grant or a stated
-judgment or as clear work, returns with an account of how the request was read, what was judged
-on what basis — naming an alternative set aside where it may be preferred — and how far the work
-went.
+the AI's proposal until the person takes it. Whether work goes forward this way or waits for the
+person's answer is the AI's judgment in the situation, and work that cannot be undone waits for
+the authorization it needs. Work carried forward, on a grant or a stated judgment or as clear
+work, returns with an account of how the request was read, what was judged on what basis —
+naming an alternative set aside where it may be preferred — and how far the work went.
 -/
 
 inductive Interaction | constitution | extension

@@ -318,10 +318,11 @@ What each operation of this contract does. An interaction with the person is one
 and its kind fixes how it continues once its text is presented. A Constitution settles a judgment
 through the person's turn. An Extension settles none for the person: it passes on a result its
 cited ground fixes, or carries reversible work forward on a judgment the AI states, which stays
-the AI's proposal until the person takes it. Work carried forward, on a grant or a stated
-judgment or as clear work, returns with an account of how the request was read, what was judged
-on what basis — naming an alternative set aside where it may be preferred — and how far the work
-went.
+the AI's proposal until the person takes it. Whether work goes forward this way or waits for the
+person's answer is the AI's judgment in the situation, and work that cannot be undone waits for
+the authorization it needs. Work carried forward, on a grant or a stated judgment or as clear
+work, returns with an account of how the request was read, what was judged on what basis —
+naming an alternative set aside where it may be preferred — and how far the work went.
 -/
 
 inductive Interaction | constitution | extension
