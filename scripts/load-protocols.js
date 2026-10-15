@@ -53,7 +53,7 @@ const CANONICAL_PROTOCOL_SET = [
 // with a ```lean fence enters the path by being listed here. Listing a skill
 // changes nothing else — it stays a utility to every other consumer of this
 // module.
-const LEAN_CONTRACT_UTILITIES = Object.freeze(['epistemic-cooperative/skills/probe']);
+const LEAN_CONTRACT_UTILITIES = Object.freeze(['epistemic-cooperative/skills/probe', 'route/skills/route']);
 
 // Per-call memoization cache. discoverPlugins() instantiates a fresh cache
 // so callers within a single process pay one read per plugin.json regardless

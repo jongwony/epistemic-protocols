@@ -32,9 +32,7 @@ try {
 const resume = args.includes('resume');
 if (process.env.FAKE_CODEX_LOG) appendFileSync(process.env.FAKE_CODEX_LOG, JSON.stringify({
   kind,
-  codexKey: Boolean(process.env.CODEX_API_KEY),
-  openaiKey: Boolean(process.env.OPENAI_API_KEY),
-  accessToken: Boolean(process.env.CODEX_ACCESS_TOKEN),
+  credentialVars: Object.keys(process.env).filter((k) => /^(OPENAI|CODEX)_/.test(k) && k !== 'CODEX_HOME').sort(),
   home: process.env.CODEX_HOME || null,
   authLink,
   resume,
@@ -92,13 +90,11 @@ process.exit(0);
     REALIZE_RESULTS_DIR: join(root, 'results'),
     REALIZE_WORK_DIR: join(root, 'work'),
     FAKE_CODEX_LOG: join(root, 'codex.log'),
-    // The login a login-mode run borrows. The harness reads CODEX_HOME for it, as codex does.
+    // The login a codex run borrows. The harness reads CODEX_HOME for it, as codex does.
     CODEX_HOME: join(root, 'userhome'),
   };
   mkdirSync(env.CODEX_HOME);
   writeFileSync(join(env.CODEX_HOME, 'auth.json'), '{"fake":"login"}\n');
-  delete env.CODEX_API_KEY;
-  delete env.REALIZE_CODEX_AUTH;
   return { root, env };
 }
 
@@ -153,12 +149,7 @@ test('Codex setup neither receives nor stores credentials', () => {
   try {
     const setup = invoke(env, 'setup', 'inquire');
     assert.equal(setup.status, 0, setup.stderr || setup.stdout);
-    assert.deepEqual(logged(root).map(({ codexKey, openaiKey, accessToken }) => (
-      { codexKey, openaiKey, accessToken }
-    )), [
-      { codexKey: false, openaiKey: false, accessToken: false },
-      { codexKey: false, openaiKey: false, accessToken: false },
-    ]);
+    assert.deepEqual(logged(root).map(({ credentialVars }) => credentialVars), [[], []]);
     assert.deepEqual(filesNamed(join(root, 'state'), 'auth.json'), []);
   } finally {
     rmSync(root, { recursive: true, force: true });
@@ -167,9 +158,6 @@ test('Codex setup neither receives nor stores credentials', () => {
 
 test('run and report fail closed when a requested Codex cell does not complete', () => {
   const { root, env } = fixture();
-  env.CODEX_API_KEY = 'codex-secret';
-  env.OPENAI_API_KEY = 'openai-secret';
-  env.CODEX_ACCESS_TOKEN = 'access-secret';
   env.FAKE_CODEX_MODE = 'incomplete';
   try {
     assert.equal(invoke(env, 'setup', 'inquire').status, 0);
@@ -184,11 +172,9 @@ test('run and report fail closed when a requested Codex cell does not complete',
     assert.match(report.stdout, /Missing requested cells/);
 
     const calls = logged(root);
-    assert.deepEqual(calls.map(({ kind, codexKey, openaiKey, accessToken }) => (
-      { kind, codexKey, openaiKey, accessToken }
-    )), [
-      { kind: 'list', codexKey: false, openaiKey: false, accessToken: false },
-      { kind: 'exec', codexKey: true, openaiKey: false, accessToken: false },
+    assert.deepEqual(calls.map(({ kind, credentialVars }) => ({ kind, credentialVars })), [
+      { kind: 'list', credentialVars: [] },
+      { kind: 'exec', credentialVars: [] },
     ]);
     assert.deepEqual(filesNamed(join(root, 'state'), 'auth.json'), []);
   } finally {
@@ -198,7 +184,6 @@ test('run and report fail closed when a requested Codex cell does not complete',
 
 test('a complete requested cell reports transition and manual scopes separately', () => {
   const { root, env } = fixture();
-  env.CODEX_API_KEY = 'codex-secret';
   env.FAKE_CODEX_MODE = 'complete';
   try {
     assert.equal(invoke(env, 'setup', 'inquire').status, 0);
@@ -217,7 +202,6 @@ test('a complete requested cell reports transition and manual scopes separately'
 
 test('Proceed is scored from its witness without grading artifact quality', () => {
   const { root, env } = fixture();
-  env.CODEX_API_KEY = 'codex-secret';
   env.FAKE_CODEX_MODE = 'mutate';
   env.REALIZE_CASES = 'inquire-fully-specified';
   try {
@@ -257,11 +241,12 @@ function loginLock(env) {
   return join(tmpdir(), `epistemic-realize-codex-login-${key}.lock`);
 }
 
-test('login mode links the existing login for each exec only, and never copies it', () => {
+test('a codex run links the existing login for each exec only, and never copies it', () => {
   const { root, env } = fixture();
   env.REALIZE_CASES = 'inquire-underspecified,inquire-fully-specified';
-  env.REALIZE_CODEX_AUTH = 'login';
   env.CODEX_API_KEY = 'codex-secret';
+  env.OPENAI_API_KEY = 'openai-secret';
+  env.CODEX_ACCESS_TOKEN = 'access-secret';
   env.FAKE_CODEX_MODE = 'complete';
   const source = join(env.CODEX_HOME, 'auth.json');
   try {
@@ -275,11 +260,11 @@ test('login mode links the existing login for each exec only, and never copies i
     assert.equal(execs.length, 2);
     for (const c of execs) {
       assert.equal(c.authLink, source, 'each exec sees a symlink to the real login');
-      assert.equal(c.codexKey, false, 'no API key reaches a child in login mode');
     }
     for (const c of calls.filter((call) => call.kind !== 'exec')) {
       assert.equal(c.authLink, null, `${c.kind} runs with no credential in its home`);
     }
+    for (const c of calls) assert.deepEqual(c.credentialVars, [], `no key in the run process reaches ${c.kind}`);
     assert.deepEqual(authEntries(root), [], 'no link survives the run');
     assert.equal(existsSync(loginLock(env)), false, 'the run releases its lock');
     assert.equal(readFileSync(source, 'utf8'), '{"fake":"login"}\n');
@@ -289,10 +274,9 @@ test('login mode links the existing login for each exec only, and never copies i
   }
 });
 
-test('login mode stops the run and keeps a file codex left in place of the link', () => {
+test('a codex run stops and keeps a file codex left in place of the login link', () => {
   const { root, env } = fixture();
   env.REALIZE_ARMS = 'bare,protocol';
-  env.REALIZE_CODEX_AUTH = 'login';
   env.FAKE_CODEX_MODE = 'replace-auth';
   try {
     assert.equal(invoke(env, 'setup', 'inquire').status, 0);
@@ -314,9 +298,8 @@ test('login mode stops the run and keeps a file codex left in place of the link'
   }
 });
 
-test('login-mode runs sharing one login do not overlap, and a stale lock is taken over', () => {
+test('codex runs sharing one login do not overlap, and a stale lock is taken over', () => {
   const { root, env } = fixture();
-  env.REALIZE_CODEX_AUTH = 'login';
   env.FAKE_CODEX_MODE = 'complete';
   const lock = loginLock(env);
   try {
@@ -325,7 +308,7 @@ test('login-mode runs sharing one login do not overlap, and a stale lock is take
     writeFileSync(lock, `${process.pid}\n`);
     const held = invoke(env, 'run', 'inquire');
     assert.notEqual(held.status, 0);
-    assert.match(held.stderr, /another login-mode run holds/);
+    assert.match(held.stderr, /another codex run holds/);
     assert.equal(logged(root).filter((c) => c.kind === 'exec').length, 0);
 
     // Held by a process that has exited.
@@ -336,6 +319,21 @@ test('login-mode runs sharing one login do not overlap, and a stale lock is take
     assert.equal(existsSync(lock), false);
   } finally {
     rmSync(lock, { force: true });
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('a codex run with no login on the machine stops before any exec and names how to sign in', () => {
+  const { root, env } = fixture();
+  env.FAKE_CODEX_MODE = 'complete';
+  try {
+    assert.equal(invoke(env, 'setup', 'inquire').status, 0);
+    rmSync(join(env.CODEX_HOME, 'auth.json'));
+    const run = invoke(env, 'run', 'inquire');
+    assert.notEqual(run.status, 0);
+    assert.match(run.stderr, /no codex login at .*codex login --device-auth/);
+    assert.equal(logged(root).filter((c) => c.kind === 'exec').length, 0);
+  } finally {
     rmSync(root, { recursive: true, force: true });
   }
 });
@@ -364,7 +362,6 @@ test('teardown and the exit-trap command remove a leftover login link', () => {
 
 test('a scripted multi-turn case resumes one session and reports every turn', () => {
   const { root, env } = fixture();
-  env.CODEX_API_KEY = 'codex-secret';
   env.FAKE_CODEX_MODE = 'complete';
   env.REALIZE_CASES = 'grasp-adjudicable';
   try {
@@ -395,7 +392,6 @@ test('a scripted multi-turn case resumes one session and reports every turn', ()
 
 test('a turn that changes the tree ends the script and fails preservation', () => {
   const { root, env } = fixture();
-  env.CODEX_API_KEY = 'codex-secret';
   env.FAKE_CODEX_MODE = 'mutate-on-resume';
   env.REALIZE_CASES = 'grasp-unattachable';
   try {
@@ -425,7 +421,6 @@ test('a conduct cell records its tree as an observation and scores no transition
     ['mutate', { gate: true, relay: true, taking: [true], turns: '1/2' }],
   ]) {
     const { root, env } = fixture();
-    env.CODEX_API_KEY = 'codex-secret';
     env.FAKE_CODEX_MODE = mode;
     env.FAKE_CODEX_MUTATE_FILE = 'exporters/csv_export.py';
     env.REALIZE_CASES = 'conduct-map-gate,conduct-taking-with-change,conduct-relay';
@@ -504,7 +499,6 @@ console.log(JSON.stringify({ type: 'result', is_error: false, total_cost_usd: 0.
 
 test('a numbered listing of the target counts as reading it', () => {
   const { root, env } = fixture();
-  env.CODEX_API_KEY = 'codex-secret';
   env.FAKE_CODEX_MODE = 'complete';
   env.REALIZE_CASES = 'grasp-adjudicable';
   env.FAKE_CODEX_COMMAND = "/bin/bash -lc 'nl -ba app/limiter.py'";

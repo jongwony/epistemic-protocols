@@ -7,7 +7,7 @@
 //
 //   node outcome.mjs plan --runner claude|codex --model M [--effort E] [--case C] [--variants v,..]
 //                         [--reps N] [--arms bare,protocol] [--budget USD] [--timeout S]
-//                         [--codex-auth api-key|login] [--run NAME] [--dry-run]
+//                         [--run NAME] [--dry-run]
 //   node outcome.mjs setup <run>
 //   node outcome.mjs turn <run> <cell> --open | --go | --reply <file>
 //   node outcome.mjs note <run> <cell>
@@ -167,7 +167,7 @@ function cmdPlan(argv) {
   const cells = cellList(plan);
   const lines = [
     `run        : ${plan.run}`,
-    `runner     : ${plan.runner}${plan.runner === 'codex' ? ` (auth ${plan.codexAuth})` : ''}`,
+    `runner     : ${plan.runner}${plan.runner === 'codex' ? ' (auth: this machine\'s codex login)' : ''}`,
     `model      : ${plan.model}${plan.effort ? ` (effort ${plan.effort})` : ''}`,
     `case       : ${plan.case} — variants ${plan.variants.join(', ')}`,
     `arms × reps: ${plan.arms.join(', ')} × ${plan.reps}`,
@@ -377,32 +377,24 @@ function runCodexTurn(plan, c, cell, message, outPrefix) {
     ? ['-a', 'never', 'exec', 'resume', ...common, '-c', 'sandbox_mode="workspace-write"', cell.sessionId, message]
     : ['-a', 'never', 'exec', ...common, '--sandbox', 'workspace-write', '--cd', cell.work, message];
   const env = { ...childEnv(process.env), CODEX_HOME: home };
-  if (plan.codexAuth === 'api-key') {
-    if (!process.env.CODEX_API_KEY) die('CODEX_API_KEY is not set; supply it to this process only, or plan with --codex-auth login');
-    env.CODEX_API_KEY = process.env.CODEX_API_KEY;
-  }
   const opts = { cwd: cell.work, env, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, timeout: plan.timeoutS * 1000 };
-  let r; let link = 'n/a';
-  if (plan.codexAuth === 'login') {
-    // The login is linked into the home only for the span of this one exec — never copied, since
-    // a ChatGPT login rotates its refresh token and a copy would strand the real one.
-    let st;
-    try { st = statSync(LOGIN_SOURCE); } catch { die(`login mode needs an existing codex login at ${LOGIN_SOURCE}`); }
-    if (!st.isFile()) die(`${LOGIN_SOURCE} is not a regular file`);
-    const rel = relative(STATE, LOGIN_SOURCE);
-    if (!rel.startsWith('..') && !isAbsolute(rel)) die(`${LOGIN_SOURCE} lies inside the disposable state directory`);
-    if (!acquireLoginLock()) die(`another run holds this codex login (${LOGIN_LOCK}); wait for it`);
-    try {
-      if (authState(home) !== 'absent') unlinkSync(authPath(home));
-      symlinkSync(LOGIN_SOURCE, authPath(home));
-      try { r = spawnSync('codex', args, opts); } finally {
-        link = authState(home);
-        if (link === 'link' || link === 'foreign-link') unlinkSync(authPath(home));
-      }
-    } finally { releaseLoginLock(); }
-  } else {
-    r = spawnSync('codex', args, opts);
-  }
+  let r; let link;
+  // The login is linked into the home only for the span of this one exec — never copied, since
+  // a ChatGPT login rotates its refresh token and a copy would strand the real one.
+  let st;
+  try { st = statSync(LOGIN_SOURCE); } catch { die(`no codex login at ${LOGIN_SOURCE}; sign in on this machine with \`codex login --device-auth\``); }
+  if (!st.isFile()) die(`${LOGIN_SOURCE} is not a regular file`);
+  const rel = relative(STATE, LOGIN_SOURCE);
+  if (!rel.startsWith('..') && !isAbsolute(rel)) die(`${LOGIN_SOURCE} lies inside the disposable state directory`);
+  if (!acquireLoginLock()) die(`another run holds this codex login (${LOGIN_LOCK}); wait for it`);
+  try {
+    if (authState(home) !== 'absent') unlinkSync(authPath(home));
+    symlinkSync(LOGIN_SOURCE, authPath(home));
+    try { r = spawnSync('codex', args, opts); } finally {
+      link = authState(home);
+      if (link === 'link' || link === 'foreign-link') unlinkSync(authPath(home));
+    }
+  } finally { releaseLoginLock(); }
   writeFileSync(`${outPrefix}.jsonl`, r.stdout || '');
   writeFileSync(`${outPrefix}.err`, `${r.stderr || ''}${r.error ? `\n${r.error.message}` : ''}${r.status ? `\nexit=${r.status}` : ''}`);
   writeJson(`${outPrefix}.plugins.json`, plugins);
@@ -432,9 +424,9 @@ function runCodexTurn(plan, c, cell, message, outPrefix) {
   if (want ? plugins.installedSkillSha256 !== srcDigest : plugins.installedSkillSha256 !== null) {
     reasons.push(want ? 'installed SKILL.md differs from the source (re-run setup)' : 'a protocol SKILL.md is installed in the bare home');
   }
-  if (plan.codexAuth === 'login' && link !== 'link') reasons.push(`login link was ${link} after the exec`);
+  if (link !== 'link') reasons.push(`login link was ${link} after the exec`);
   const extra = { plugins: plugins.installed, installedSkillSha256: plugins.installedSkillSha256, rolloutSkillInjections: injections, loginLinkAfter: link, fileChanges: parsed.fileChanges };
-  if (plan.codexAuth === 'login' && link !== 'link') {
+  if (link !== 'link') {
     // Recorded first, then fatal: the next exec would run against whatever codex left there.
     return { parsed, id: parsed.threadId, reasons, extra, fatal: link === 'file' ? strayMessage([authPath(home)]) : `the login link in ${home} was ${link} after the exec` };
   }

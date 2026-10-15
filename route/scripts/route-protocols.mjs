@@ -104,8 +104,8 @@ function soleSkill(dir) {
  * one keeps its row, with the deficit alone.
  *
  * The frontmatter `description` is read too, and stays off the table: the
- * table's job is to trigger. It is the text Rule #2 names as the sole source
- * of what deficit a protocol resolves, so anything that has to tell two
+ * table's job is to trigger. It is the text /route's contract (`Entry`) names
+ * as the sole source of what deficit a protocol resolves, so anything that has to tell two
  * protocols apart reads it from here rather than being told the difference.
  */
 function readProtocol(skillFile) {
