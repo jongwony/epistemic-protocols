@@ -47,8 +47,8 @@ test('validatePlan fills the defaults a paired run uses', () => {
   const { plan, errors } = validatePlan({ runner: 'claude', model: 'claude-sonnet-5' }, cases);
   assert.deepEqual(errors, []);
   assert.deepEqual(
-    [plan.arms, plan.variants, plan.reps, plan.budgetUsd, plan.effort, plan.codexAuth],
-    [['bare', 'protocol'], ['under', 'full'], 2, 3, null, null]);
+    [plan.arms, plan.variants, plan.reps, plan.budgetUsd, plan.effort],
+    [['bare', 'protocol'], ['under', 'full'], 2, 3, null]);
 });
 
 test('validatePlan reports every argument error at once and keeps runner-specific flags apart', () => {
@@ -59,13 +59,14 @@ test('validatePlan reports every argument error at once and keeps runner-specifi
   }
   assert.ok(validatePlan({ runner: 'claude', model: 'm', effort: 'high' }, cases).errors.some((e) => /--effort applies only/.test(e)));
   assert.ok(validatePlan({ runner: 'claude', model: 'm', typo: '1' }, cases).errors.some((e) => /unknown flag --typo/.test(e)));
+  assert.ok(validatePlan({ runner: 'codex', model: 'm', effort: 'high', 'codex-auth': 'api-key' }, cases).errors.some((e) => /unknown flag --codex-auth/.test(e)));
 });
 
 // ------------------------------------------------------------------ isolation and traces
 
 test('childEnv removes credential-bearing and enclosing-session variables and keeps the rest', () => {
-  const env = childEnv({ PATH: '/bin', HOME: '/h', HTTPS_PROXY: 'p', CLAUDE_CODE_SESSION_ID: 's', CODEX_API_KEY: 'k',
-    CODEX_AUTH_JSON_B64: 'b', OPENAI_API_KEY: 'o', GH_TOKEN: 't', MY_SECRET: 'x', ANTHROPIC_BASE_URL: 'u' });
+  const env = childEnv({ PATH: '/bin', HOME: '/h', HTTPS_PROXY: 'p', CLAUDE_CODE_SESSION_ID: 's',
+    GH_TOKEN: 't', MY_SECRET: 'x', ANTHROPIC_BASE_URL: 'u' });
   assert.deepEqual(Object.keys(env).sort(), ['HOME', 'HTTPS_PROXY', 'PATH']);
 });
 

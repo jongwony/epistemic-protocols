@@ -9,7 +9,6 @@ import { join } from 'node:path';
 export const RUNNERS = ['claude', 'codex'];
 export const ARMS = ['bare', 'protocol'];
 export const EFFORTS = ['minimal', 'low', 'medium', 'high', 'xhigh'];
-export const CODEX_AUTH = ['api-key', 'login'];
 
 // ------------------------------------------------------------------ arguments
 
@@ -36,7 +35,7 @@ const posInt = (v) => (/^[1-9]\d*$/.test(String(v)) ? Number(v) : null);
 const posNum = (v) => (/^\d+(\.\d+)?$/.test(String(v)) && Number(v) > 0 ? Number(v) : null);
 
 export const PLAN_FLAGS = ['runner', 'model', 'effort', 'case', 'variants', 'reps', 'arms', 'budget',
-  'timeout', 'codex-auth', 'run', 'dry-run'];
+  'timeout', 'run', 'dry-run'];
 
 // Checks a plan's arguments against what the design supports and what the case declares.
 // Returns every error at once, so one invocation reports the whole argument set.
@@ -65,12 +64,6 @@ export function validatePlan(flags, { cases = [], variantsOf = () => [] } = {}) 
     errors.push('--budget applies only to the claude runner: codex exec has no spend cap, bound a turn with --timeout');
   }
 
-  let codexAuth = null;
-  if (runner === 'codex') {
-    codexAuth = flags['codex-auth'] ?? 'api-key';
-    if (!CODEX_AUTH.includes(codexAuth)) errors.push(`--codex-auth must be one of ${CODEX_AUTH.join('|')}`);
-  } else if (flags['codex-auth'] !== undefined) errors.push('--codex-auth applies only to the codex runner');
-
   const caseName = flags.case ?? 'inquire-rate-limiter';
   if (!cases.includes(caseName)) errors.push(`--case ${JSON.stringify(caseName)} not found; available: ${cases.join(', ') || '(none)'}`);
   const declared = cases.includes(caseName) ? variantsOf(caseName) : [];
@@ -95,7 +88,7 @@ export function validatePlan(flags, { cases = [], variantsOf = () => [] } = {}) 
   if (errors.length) return { plan: null, errors };
   return {
     errors,
-    plan: { run, runner, model, effort, case: caseName, variants, reps, arms, budgetUsd, timeoutS, codexAuth },
+    plan: { run, runner, model, effort, case: caseName, variants, reps, arms, budgetUsd, timeoutS },
   };
 }
 
@@ -125,11 +118,11 @@ export const sha256 = (data) => createHash('sha256').update(data).digest('hex');
 // ------------------------------------------------------------------ environment
 
 // Credential-bearing and enclosing-session variables. A subject child and a plugin-integrity
-// call receive none of them; the one credential a codex exec needs is added back explicitly.
+// call receive none of them, so no stray key can change how a child authenticates.
 const STRIPPED = [/^CLAUDE/, /^ANTHROPIC/, /^CCR_/, /^AWS_/, /^CLOUDSDK_AUTH/, /^GIT_CONFIG_/,
   /^GIT_ASKPASS$/, /^SESSION_INGRESS_URL$/, /^SBX_TELEMETRY_SOCKET$/, /^TRACEPARENT$/, /^CODEX_/,
   /^OPENAI_/, /^SLACK/, /^LINEAR/, /^GEMINI/, /^TAVILY/, /^TYPESAFE/, /^GH_TOKEN$/, /^GITHUB_TOKEN$/,
-  /TOKEN/, /SECRET/, /API_KEY/, /_B64$/];
+  /TOKEN/, /SECRET/, /API_KEY/];
 
 export function childEnv(env) {
   return Object.fromEntries(Object.entries(env).filter(([k]) => !STRIPPED.some((re) => re.test(k))));

@@ -69,7 +69,7 @@ them; a question about whether a gate fired belongs there.
 S=.claude/skills/outcome/scripts/outcome.mjs
 node $S plan --runner claude --model <model> --reps 2 --dry-run   # argument check only
 node $S plan --runner claude --model <model> --reps 2
-node $S plan --runner codex --model gpt-6-luna --effort xhigh --codex-auth login   # or api-key (default)
+node $S plan --runner codex --model gpt-6-luna --effort xhigh   # borrows this machine's codex login
 node $S setup <run>                            # codex: bare and protocol homes
 node $S turn <run> <cell> --open               # then --reply <file> | --go, as the oracle says
 node $S note <run> <cell>                      # closes the cell; fill the items, then run again
