@@ -33,49 +33,35 @@ theorem identification_first (respond session : Context P → Response P)
     recollect respond session c (u :: us) = o := by
   simp [recollect, h]
 
-/-- On the person's own invocation that starts a fresh recall (`Invoked`), where the turn
-    identifies nothing, the step holds on the context before that turn. -/
-theorem fresh_invocation_holds (respond session : Context P → Response P)
+/-- A turn that identifies nothing and reaches a recall other than this one leaves this recall
+    holding, with the turn kept in the context. -/
+theorem elsewhere_holds (respond session : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P))
-    (hc : closing (fuse c u) = none) (h : Invoked (fuse c u)) :
-    recollect respond session c (u :: us) = .holding c := by
+    (hc : closing (fuse c u) = none) (h : Elsewhere (fuse c u)) :
+    recollect respond session c (u :: us) = .holding (fuse c u) := by
   simp [recollect, hc, h]
 
-/-- A turn that is no invocation, identifies nothing, does not bear on this recall, and carries
-    an empty intention holds the step on the context before that turn. -/
-theorem ai_start_holds (respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u))
-    (hc : closing (fuse c u) = none) (h : ¬ Reaches (fuse c u))
-    (hv : EmptyIntention (fuse c u)) :
-    recollect respond session c (u :: us) = .holding c := by
-  simp [recollect, hi, hc, h, hv]
-
-/-- A turn that is no invocation, identifies nothing, does not bear on this recall, and carries no
-    empty intention — other work, or words that end this recall — joins the context with the
-    session's answer to it; no pass runs on it, and the recursion goes on reading the later
-    utterances. -/
+/-- A turn of this recall that identifies nothing and does not bear on it — other work, or words
+    that end this recall — joins the context with the session's answer to it; no pass runs on
+    it, and the recursion goes on reading the later utterances. -/
 theorem unreached_step (respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u))
-    (hc : closing (fuse c u) = none) (h : ¬ Reaches (fuse c u))
-    (hv : ¬ EmptyIntention (fuse c u)) :
+    (u : Utterance P) (us : List (Utterance P))
+    (hc : closing (fuse c u) = none) (he : ¬ Elsewhere (fuse c u)) (h : ¬ Reaches (fuse c u)) :
     recollect respond session c (u :: us) =
       recollect respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
-  simp [recollect, hi, hc, h, hv]
+  simp [recollect, hc, he, h]
 
-/-- A turn that is no invocation, identifies nothing, and bears on this recall runs a pass on it;
-    then your own close fires, or `respond` presents a round and the recursion goes on. -/
+/-- A turn of this recall that identifies nothing and bears on it runs a pass and a round: your
+    own close fires, or `respond` presents a round and the recursion goes on. -/
 theorem reaching_passes_again (respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u))
-    (hc : closing (fuse c u) = none) (h : Reaches (fuse c u)) :
+    (u : Utterance P) (us : List (Utterance P))
+    (hc : closing (fuse c u) = none) (he : ¬ Elsewhere (fuse c u)) (h : Reaches (fuse c u)) :
     recollect respond session c (u :: us) =
-      match settle (pass (fuse c u)) with
-      | some o => o
-      | none => recollect respond session
-          (pass (fuse c u) ++ [(respond (pass (fuse c u))).val]) us := by
-  rcases hs : settle (pass (fuse c u)) with _ | o <;> simp [recollect, hi, hc, h, hs]
+      round respond (fun d => recollect respond session d us) (pass (fuse c u)) := by
+  simp [recollect, hc, he, h]
 
 /-- A start that continues an earlier recall closes on the person's identification of what that
-    recall presented, where the latest utterance makes it, before any pass runs. -/
+    recall presented, where the person's latest turn makes it, before any pass runs. -/
 theorem start_identification_first (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (o : Outcome P) (ha : Activated c) (h : closing c = some o) :
     start respond session c us = o := by
@@ -93,7 +79,7 @@ private theorem step_cases (respond session : Context P → Response P)
     (h : recollect respond session c (u :: us) = r) :
     (∃ d, r = .holding d) ∨ closing (fuse c u) = some r ∨ (∃ d, settle d = some r) ∨
       ∃ d, recollect respond session d us = r := by
-  simp only [recollect] at h
+  simp only [recollect, round] at h
   repeat' split at h
   all_goals first
     | exact Or.inl ⟨_, h.symm⟩
@@ -136,16 +122,17 @@ theorem invocation_activates (respond session : Context P → Response P) (c : C
   simp only [ha, ↓reduceIte]
   split
   · next o ho => exact hc _ o ho
-  · split
+  · unfold round
+    split
     · next o ho => exact hs _ o ho
     · exact key _ _
 
-/-- A closing that identifies cites a turn the person sent, the latest of its context, that
-    identifies the presented recognizable, and carries the doubts read on the context before that
+/-- A closing that identifies cites a turn the person sent, with no later person turn in its
+    context, that identifies the presented recognizable, and carries the doubts read on the context before that
     turn. -/
 theorem identified_by_person (c : Context P) (v : RecalledContext P)
     (h : closing c = some (.identified v)) :
-    ∃ s : Cite c, s.idx = v.identifiedAt ∧ s.idx + 1 = c.length ∧
+    ∃ s : Cite c, s.idx = v.identifiedAt ∧ NoPersonAfter c s.idx = true ∧
       (c[s.idx]'s.lt).origin = .person ∧ AnswerSupported c (c[s.idx]'s.lt) () ∧
       v.dissent = dissent (c.take s.idx) v.recognizable := by
   unfold closing at h
@@ -186,22 +173,22 @@ private theorem recollect_identified (respond session : Context P → Response P
     · exact ih _ hre
 
 /-- Every recall a run identifies closes on the person's answer: an identified outcome comes only
-    from a closing, never from your own close after a pass, and the answer it rests on cites the
-    latest utterance of the context it closes on — a turn the person sent that identifies the
+    from a closing, never from your own close after a pass, and the answer it rests on cites a
+    turn of the context it closes on that no later person turn follows — a turn the person sent that identifies the
     presented recognizable. The story beside it rests on opened records, which are not the
     person's (`claim_is_evidence`). -/
 theorem identified_only_by_person (respond session : Context P → Response P)
     (c : Context P) (us : List (Utterance P)) (v : RecalledContext P)
     (h : start respond session c us = .identified v) :
     ∃ (c₀ : Context P) (s : Cite c₀), closing c₀ = some (.identified v) ∧
-      s.idx = v.identifiedAt ∧ s.idx + 1 = c₀.length ∧ (c₀[s.idx]'s.lt).origin = .person ∧
+      s.idx = v.identifiedAt ∧ NoPersonAfter c₀ s.idx = true ∧ (c₀[s.idx]'s.lt).origin = .person ∧
       AnswerSupported c₀ (c₀[s.idx]'s.lt) () ∧ v.dissent = dissent (c₀.take s.idx) v.recognizable := by
   have hc : ∃ c₀ : Context P, closing c₀ = some (.identified v) := by
     unfold start at h
     split at h
     · split at h
       · next o ho => subst h; exact ⟨c, ho⟩
-      · simp only at h
+      · unfold round at h
         split at h
         · next o ho => subst h; exact absurd ho (settle_not_identified _ v)
         · exact recollect_identified respond session _ us v h
