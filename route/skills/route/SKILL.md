@@ -140,20 +140,20 @@ axiom catalog : Context P → Catalog
 axiom declaredEnd : Entry → Option String
 
 /-- **Your judgment**: the context, as it now stands, shows this present deficit instance —
-    `reading` is your statement of it — and it is the situation the entry's description names,
-    read against the object it concerns and the ground that can settle it, resting on the cited
-    turns `grounds`. No protocol present in the context serves it: a protocol still running in
-    the context serves the deficit instance it was brought in for, and not every deficit that
-    comes up while it runs; one a next move the person declared is bringing in serves the
-    instance that move names; an invocation that has ended without settling it is not service,
-    and a protocol's text in context is not service. A proposed question, assumption, or repair
-    is pending work on the deficit and does not supply its result. A deficit already recognized
-    stays a fit until current evidence settles it or defeats it; where settling it needs the
-    person's determination, evidence that is not the person's may defeat the fit and supplies
-    nothing in its place, and it is read apart from the action the latest utterance requests.
-    Where several fit, an end a description states is further evidence of fit; it defeats a fit
-    only on current evidence that it is incompatible with what the context seeks, and an end a
-    description does not state defeats nothing. -/
+    `reading` is your statement of it — and it is the situation the entry's description names, read
+    against the object it concerns and the ground that can settle it, resting on the cited turns
+    `grounds`. No protocol present in the context serves it: a protocol still running in the
+    context serves the deficit instance it was brought in for and what its own contract takes up
+    from the turns since, and not every deficit that comes up while it runs; one a next move the
+    person declared is bringing in serves the instance that move names; an invocation that has
+    ended without settling it is not service, and a protocol's text in context is not service. A
+    proposed question, assumption, or repair is pending work on the deficit and does not supply its
+    result. A deficit already recognized stays a fit until current evidence settles it or defeats
+    it; where settling it needs the person's determination, evidence that is not the person's may
+    defeat the fit and supplies nothing in its place, and it is read apart from the action the
+    latest utterance requests. Where several fit, an end a description states is further evidence
+    of fit; it defeats a fit only on current evidence that it is incompatible with what the context
+    seeks, and an end a description does not state defeats nothing. -/
 axiom FitSupported : (c : Context P) → Entry → String → List (Cite c) → Prop
 
 /-- One fit: a catalog entry, Route's reading of the present deficit instance it resolves, and
@@ -332,11 +332,12 @@ def handoff {k : Catalog} {c : Context P} (o : ProtocolInvocation k c) : Option 
 *: product — (D₁ × D₂) → (R₁ × R₂). Route's part in it is bringing one protocol in at a
 recognition point, by how the fits raised there compose with each other and with the work
 underway (`lead`); the path and order between the participating protocols are judged from the
-context there and shown in Route's reading, never fixed here. Each participating
-protocol keeps its own scope, checkpoints, and completion; Route places nothing inside one and
-answers or closes none. What the invoked protocol leaves enters the context, and the work it was
-brought in to inform — a run whose checkpoint still holds included — goes on with it under that
-work's own contract; the next recognition point reads it like any other context.
+context there and shown in Route's reading, never fixed here. Route adds nothing to any
+protocol's contract and arbitrates no checkpoint: each protocol keeps its own scope, checkpoints,
+and completion, and its own gates govern what they hold. What the invoked protocol leaves enters
+the context, and the work it was brought in to inform — a run whose checkpoint still holds
+included — goes on with it under that work's own contract; the next recognition point reads it
+like any other context.
 -/
 
 end

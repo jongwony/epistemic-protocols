@@ -52,7 +52,7 @@ test("directive carries the firing conditions and stays short", () => {
   //     so the directive names no mode. "Invoked the same way"
   //     because a reader once wrote a pointer line in /route's place
   //     without invoking it.
-  assert.match(DIRECTIVE, /A holding protocol reads the prompt first; \/route, invoked the same way, routes what that reading leaves\./);
+  assert.match(DIRECTIVE, /Each holding protocol reads the prompt first; \/route, invoked the same way, routes what that reading leaves\./);
   assert.doesNotMatch(DIRECTIVE, /monitor/);
   assert.doesNotMatch(DIRECTIVE, /\bactive\b/);
   assert.doesNotMatch(DIRECTIVE, /leaves open|returns there|parked/);

@@ -86,6 +86,17 @@ theorem invokes_when (k : Catalog) (c : Context P) (e : Entry) (hl : lead k c = 
     · next he => rw [hl] at he; cases he
   exact ⟨hne, _, hroute⟩
 
+/-- Where `lead` brings in no protocol whose fits raised now are each plain under the policy, and a
+    fit raised now has a pointer that adds something, a pass points at exactly those fits. -/
+theorem points_otherwise (k : Catalog) (c : Context P)
+    (h : ¬ ∃ e, lead k c = some e ∧ raisedFor k c e ≠ [] ∧ (∀ m ∈ raisedFor k c e, Plain c m) ∧
+      PolicyApplies c e)
+    (hp : pointed k c ≠ []) : ∃ hne, route k c = .point (pointed k c) hne := by
+  rcases route_cases k c with ⟨e, hne, -, hl, hm, hq, -⟩ | hpt | ⟨-, hpe⟩
+  · exact absurd ⟨e, hl, hne, hm, hq⟩ h
+  · exact hpt
+  · exact absurd hpe hp
+
 /-- An invocation shows every fit raised now: each is among the lines it hands over or among the
     fits it shows beside them. -/
 theorem invoke_shows_every_raised (k : Catalog) (c : Context P) (e : Entry)

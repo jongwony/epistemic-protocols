@@ -21,7 +21,7 @@ import { isMain, parsePayload } from "./route-protocols.mjs";
 // for is what loads them.
 const DIRECTIVE = [
   "[route] When a request is not fully explicit — intent or context only the user can supply — or you recognize a deficit a loaded core protocol resolves, at the prompt or mid-turn while preparing a response or action, invoke /route, the skill call itself, each time, before addressing that deficit, even when its prose is already in context.",
-  "A presented gate holds until its protocol's contract takes an answer at it, closes it, or entrusts the prompt to the session. A holding protocol reads the prompt first; /route, invoked the same way, routes what that reading leaves.",
+  "A presented gate holds until its protocol's contract takes an answer at it, closes it, or entrusts the prompt to the session. Each holding protocol reads the prompt first; /route, invoked the same way, routes what that reading leaves.",
 ].join("\n");
 
 function render(raw) {

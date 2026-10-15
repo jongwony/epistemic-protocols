@@ -25,7 +25,7 @@ The table triggers; it does not match. The two ends of each morphism — the def
 |---------|------|
 | Invoke one protocol, Route's reading shown first — the fits raised beside it included, with when each comes in | Route judges which protocol to bring in now by how the fits raised now compose with each other and with the work underway — a gate still holding the user's judgment included, which stays theirs — its fits are each plain, and the routing policy the skill declares covers invoking it. The user, seeing that reading, can interrupt or rewind |
 | One pointer line per fit whose pointer adds something (`↗ /command — reading`) | Otherwise — no protocol to bring in now, a fit not plain (a rival for the same deficit, say), or the policy not covering it; a pointer already before the user, unanswered with nothing new since, is not shown again |
-| Silence | Neither: nothing fits, none is to be brought up again now — the skill's `Raise` reads what the user turned away and what they asked not to be raised — or every pointer would repeat one already before them |
+| Silence | Neither: nothing fits, none is to be brought up again now — the skill's `Raise` reads what the user turned away and what they asked not to be raised — or no pointer would add anything: each repeats one already before them, or would take them off work in hand more than it helps |
 
 ## What this plugin does not do
 
