@@ -24,9 +24,8 @@ theorem silence (generate respond session : Context P → Response P) (c : Conte
     ideate generate respond session c [] = .holding c := by
   simp [ideate]
 
-/-- A blank or resumed start whose request opens no frame presents the map before any pass — on a
-    blank entry, the frame map: `start` presents it on the context with the relay, and generates
-    nothing first. -/
+/-- A blank or resumed start whose request opens no frame presents the map before any pass:
+    `start` presents it on the context with the relay, and generates nothing first. -/
 theorem opening_map_first (relay generate respond session : Context P → Response P)
     (c : Context P) (us : List (Utterance P))
     (h : entry (receive c ++ [(relay (receive c)).val]) = .blank ∨
@@ -95,9 +94,7 @@ private theorem ideate_field (generate respond session : Context P → Response 
       exact ⟨c, u, rfl, hk.1⟩
     · split at h
       · cases h
-      · split at h
-        · exact ih _ h
-        · exact ih _ h
+      · split at h <;> exact ih _ h
 
 /-- Every field a run yields is taken by the person at the utterance it closes on: the context it
     is read on is that utterance fused, with nothing it names read, and it cites that utterance — a
@@ -119,10 +116,7 @@ theorem field_on_person_taking (relay generate respond session : Context P → R
     exact ⟨c₀, u, s, hc, hi, hp, hs⟩
   unfold start at h
   simp only at h
-  split at h
-  · exact key _ h
-  · exact key _ h
-  · exact key _ h
+  split at h <;> exact key _ h
 
 theorem parked_by_person (c : Context P) (p : ParkedFollowUp c) :
     (c[p.request.idx]'p.request.lt).origin = .person :=
