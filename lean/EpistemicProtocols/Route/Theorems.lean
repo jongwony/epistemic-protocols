@@ -19,7 +19,8 @@ variable {P : Type}
     meaning and exist so that no judgment can assume what nothing inhabits. -/
 
 instance : Nonempty Catalog :=
-  ⟨{ entries := [], self := { skill := "", description := "" }, excludes := by simp }⟩
+  ⟨{ entries := [], self := { skill := "", description := "" }, excludes := by simp,
+     distinct := List.nodup_nil }⟩
 
 /-- The three outcomes of one pass: an invocation of the protocol `lead` brings in, each of its
     fits raised now plain, under the policy; one pointer line for each fit whose pointer adds
