@@ -66,9 +66,9 @@ theorem invoke_requires (k : Catalog) (c : Context P) (e : Entry) (ls : List (Li
 
 /-- Where `lead` brings a protocol in, it has fits raised now, each of them plain, and the routing
     policy covers invoking it, a pass invokes it, handing over exactly those fits and showing the
-    fits raised now for other protocols beside them. No checkpoint is among these premises, and no
-    count of protocols: a checkpoint that still holds the person's judgment, and fits for other
-    protocols, bear on an invocation only through `lead`. -/
+    fits raised now for other protocols beside them. No checkpoint is among these premises: a
+    checkpoint that still holds the person's judgment bears on an invocation only through
+    `lead`. -/
 theorem invokes_when (k : Catalog) (c : Context P) (e : Entry) (hl : lead k c = some e)
     (hne : raisedFor k c e ≠ []) (hm : ∀ m ∈ raisedFor k c e, Plain c m)
     (hq : PolicyApplies c e) :
