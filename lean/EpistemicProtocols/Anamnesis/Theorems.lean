@@ -61,6 +61,18 @@ theorem unreached_step (respond session : Context P → Response P) (c : Context
       recollect respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
   simp [recollect, hi, hc, h, hv]
 
+/-- A turn that is no invocation, identifies nothing, and bears on this recall runs a pass on it;
+    then your own close fires, or `respond` presents a round and the recursion goes on. -/
+theorem reaching_passes_again (respond session : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u))
+    (hc : closing (fuse c u) = none) (h : Reaches (fuse c u)) :
+    recollect respond session c (u :: us) =
+      match settle (pass (fuse c u)) with
+      | some o => o
+      | none => recollect respond session
+          (pass (fuse c u) ++ [(respond (pass (fuse c u))).val]) us := by
+  rcases hs : settle (pass (fuse c u)) with _ | o <;> simp [recollect, hi, hc, h, hs]
+
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(search c).map (·.val) ++ (passRecord (c ++ (search c).map (·.val))).map (·.val), by
     simp [pass]⟩
