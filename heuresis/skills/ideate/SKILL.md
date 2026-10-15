@@ -286,15 +286,15 @@ axiom targets : Context P → List Frame
 
 /-- **Your judgment**: the cited turn — the person's latest utterance — takes the field, read from
     the whole turn rather than from a keyword: "this is the field, let's take it", a taking that
-    also says what comes next. It takes the field as the map it answered
-    showed it, your proposed exclusions on it included, together with what the person's own turns
-    since that map changed — the taking turn's included — each as far as its words reach. A turn
-    answering a map with no candidate on it takes nothing; where its ideas land is `candidates`. A
-    turn asking for material not yet on the map to join first does not yet take the field: it asks
-    for a map not yet shown; nor does a turn that chooses frames together with taking — the frames
-    open. Words that end the run or turn elsewhere without taking the field do
-    not take it. A pick among candidates, a judgment on one, or a correction does not by itself
-    take the field. -/
+    also says what comes next. It takes the field as the map it answered showed it, your proposed
+    exclusions on it included, together with what the person's own turns since that map changed —
+    the taking turn's included — each as far as its words reach. A turn answering a map with no
+    candidate on it takes nothing; where its ideas land is `candidates`. A turn asking for material
+    not yet on the map to join first does not yet take the field: it asks for a map not yet shown;
+    nor does a turn that chooses frames together with taking — the frames open. Words that end the
+    run or turn elsewhere without taking the field do not take it. Where the turn's intent is
+    unclear, it takes nothing. A pick among candidates, a judgment on one, or a correction does not
+    by itself take the field. -/
 axiom ClosingSupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person takes the field. -/
@@ -311,11 +311,14 @@ axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
 axiom Invoked : Context P → Prop
 
 /-- **Your judgment**: the latest utterance bears on this run. A turn that only turns to other
-    work or only ends the run does not bear on it: the session answers it, no map is drawn, and no
-    pass runs; what that turn says beside about the field — an exclusion, an idea, a park, a record
-    named as material — stands in the context. With nothing to take, a taking said together with
-    other work or an ending goes with that work or ending. Later turns bear on a holding run only
-    where they come back to it. -/
+    work does not bear on it, and words that end the run without taking the field do not bear on
+    it, whatever else the turn says; what else such a turn says — an exclusion, an idea, a park, a
+    record named as material — stands in its own words in the context. The session answers it, no
+    map is drawn, no pass runs, the run holds, and later turns bear on it only where they come back
+    to it; your own reading that the person is done ends nothing. With nothing to take, a taking
+    said together with other work or an ending goes with that work or ending. Where a turn taken as
+    other work or as ending the run could also be read as the other, as taking the field, or as
+    bearing on the run otherwise, the session's answer says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
 /-- Once it has run, the person can look over one map of their idea field — each frame and the
@@ -434,7 +437,7 @@ only and never reorders or discourages either answer.
 -/
 
 /-! ── CONVERGENCE ──
-field — the one closing of `Outcome`: the person's taking, with candidates in the field. The taking
+field: the person's taking, with candidates in the field. The taking
 is the completion itself, not a judgment layered on a built object, and it takes the field with the
 map's dissent in view. holding is not a closing: no turn of the person's has taken the field, or a
 fresh invocation ended this run's reading and the field stays resumable. An ending, a withdrawal,
@@ -464,7 +467,7 @@ def Interaction.realization : Interaction → Continuation
 
 inductive Op | bind | readReference | classify | extractSignals | classifyRelay | deriveFrames
              | qframes | generate | present | qround | readAnswer | shapeFrames | park | converge
-             | seam | holdReply
+             | seam
 
 def grounding : Op → Annot × String
   | .bind           => (.sense, "Internal analysis: the invocation utterance and a chain reference it names, as U-BINDING says; nothing unnamed is scanned")
@@ -482,7 +485,6 @@ def grounding : Op → Annot × String
   | .park           => (.interaction .extension, "something the person set aside for later acknowledged as parked, quoting their request; declared in the field; its durable record is the host's")
   | .converge       => (.interaction .extension, "DiverseCandidateField — its trace, as \"The map\" describes")
   | .seam           => (.interaction .extension, "after the person takes the field, proceed only to the next move the person declared, an adopted routing policy, or a grant of theirs, citing that source; the field crosses whole, every origin, branch, park, signal, and doubt intact, and the seam never selects, ranks, or trims it; every Constitution gate here and in what comes next fires unchanged")
-  | .holdReply      => (.interaction .extension, "within the session's answer to a turn read as other work or as an ending where that reading was unclear: that this run was left as it stands")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Candidate-field resolution emergent via session context.
@@ -505,9 +507,9 @@ Present the classification as a short basis-cited relay: the inferred entry, why
 
 ### The map
 
-Every map is in everyday language and is drawn from the context each time. It shows the whole field: the frames and the branches dug under them, the candidates under each with their origins, the unexplored frames, the frames out of scope with the person's turn quoted — a frame brought back in shown as brought back, citing that turn — your proposed exclusions marked as yours, each by name, what is parked with the person's request quoted, every signal still unaddressed, and your doubts. Mark every change since the map the person answered: this round's candidates, exclusions and proposals taken, signals changed, readings you re-made, and what a turn that did not bear on the run said about the field. Material the person named that is not yet on the map — awaiting its read, or on a frame map a frame to open — shows as pending. When the map grows large, compress earlier material to branches and counts, the density yours to judge, while those changes and every proposed exclusion show in full; the taking's trace is never compressed. On a Resumed entry, redraw the earlier field's map — the whole field as last shown, with the person's later turns that bear on it, and the material it compressed still reachable.
+Every map is in everyday language and is drawn from the context each time. It shows the whole field: the frames and the branches dug under them, the candidates under each with their origins, the unexplored frames, the frames out of scope with the person's turn quoted — a frame brought back in shown as brought back, citing that turn — your proposed exclusions marked as yours, each by name, what is parked with the person's request quoted, every signal still unaddressed, and your doubts. Mark every change since the map the person answered: this round's candidates, exclusions and proposals taken, signals changed, readings you re-made, and what a turn that did not bear on the run said about the field. Where the intent of the person's turn was unclear, say in one line how you took it. Material the person named that is not yet on the map — awaiting its read, or on a frame map a frame to open — shows as pending. When the map grows large, compress earlier material to branches and counts, the density yours to judge, while those changes and every proposed exclusion show in full; the taking's trace is never compressed. On a Resumed entry, redraw the earlier field's map — the whole field as last shown, with the person's later turns that bear on it, and the material it compressed still reachable.
 
-Where the person asked about the map, answer it first, from the map, before the gate; nothing in the answer ranks or chooses. A request for your pick or a ranking is answered there too: say that choosing follows the taking, and rank nothing. Where reading a turn as other work or as an ending was unclear, the session's answer carries what `holdReply` names.
+Where the person asked about the map, answer it first, from the map, before the gate; nothing in the answer ranks or chooses. A request for your pick or a ranking is answered there too: say that choosing follows the taking, and rank nothing.
 
 While no frame has been opened, the gate is the frame map and its selector — abstract frames, before any candidate of yours, in the template `references/blank-entry.md` carries — and once a candidate of the person's is on the map, "Take this field as it stands" is offered as a choice of its own, outside the multi-select frame selector; an answer that chooses frames together with it reads as `ClosingSupported` says. Before every gate that offers taking the field — every round gate, and such a frame map — say first what continuing would cost to review and what taking keeps, naming your proposed exclusions that taking would take. Where the person explicitly asks for the field while no candidate exists, say plainly that there is nothing to take yet. Where named material waits on the frame map for a frame to open, the gate says so plainly.
 
