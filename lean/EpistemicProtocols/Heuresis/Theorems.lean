@@ -24,29 +24,19 @@ theorem silence (generate respond session : Context P → Response P) (c : Conte
     ideate generate respond session c [] = .holding c := by
   simp [ideate]
 
-/-- A blank request that names no frame presents the frame map before any pass: `start` presents
-    it on the context with the relay, and generates nothing first. -/
-theorem blank_frame_map_first (relay generate respond session : Context P → Response P)
+/-- A blank or resumed start whose request opens no frame presents the map before any pass — on a
+    blank entry, the frame map: `start` presents it on the context with the relay, and generates
+    nothing first. -/
+theorem opening_map_first (relay generate respond session : Context P → Response P)
     (c : Context P) (us : List (Utterance P))
-    (h : entry (receive c ++ [(relay (receive c)).val]) = .blank)
+    (h : entry (receive c ++ [(relay (receive c)).val]) = .blank ∨
+      entry (receive c ++ [(relay (receive c)).val]) = .resumed)
     (ht : (targets (receive c ++ [(relay (receive c)).val])).isEmpty = true) :
     start relay generate respond session c us =
       ideate generate respond session
         (receive c ++ [(relay (receive c)).val] ++
           [(respond (receive c ++ [(relay (receive c)).val])).val]) us := by
-  simp only [start, h, advance, ht, ↓reduceIte]
-
-/-- A resumed field whose request opens no frame is redrawn before any pass: `start` presents the
-    map on the context with the relay, and generates nothing first. -/
-theorem resumed_redraws (relay generate respond session : Context P → Response P)
-    (c : Context P) (us : List (Utterance P))
-    (h : entry (receive c ++ [(relay (receive c)).val]) = .resumed)
-    (ht : (targets (receive c ++ [(relay (receive c)).val])).isEmpty = true) :
-    start relay generate respond session c us =
-      ideate generate respond session
-        (receive c ++ [(relay (receive c)).val] ++
-          [(respond (receive c ++ [(relay (receive c)).val])).val]) us := by
-  simp only [start, h, advance, ht, ↓reduceIte]
+  rcases h with h | h <;> simp only [start, h, advance, ht, ↓reduceIte]
 
 /-- On a fresh invocation that takes nothing, this run returns holding, on the context before that
     utterance. -/

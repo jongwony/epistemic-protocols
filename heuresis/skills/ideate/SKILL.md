@@ -159,9 +159,8 @@ inductive Entry
 
 /-- **Your reading** of the invocation: which entry it is — inferred, never asked, and read on the
     context as it now stands, so a turn of the person's that corrects the relayed reading — "no,
-    carry on with yesterday's field" — re-scopes this run's field, as MODE STATE says. The next map
-    is drawn as the corrected entry draws it: corrected to Resumed, the earlier field's map is
-    redrawn, and no candidate is promoted again. -/
+    carry on with yesterday's field" — re-scopes this run's field, as MODE STATE says; what that
+    turn opens is `targets`. -/
 axiom entry : Context P → Entry
 
 inductive SignalSource | utterance | chain
@@ -222,7 +221,8 @@ structure Exclusion (c : Context P) where
 axiom excluded : (c : Context P) → List (Exclusion c)
 
 /-- **Your reading**: frames you read as outside a boundary the person stated — your proposal
-    until the person takes it, as `excluded` says. -/
+    until the person takes it, as `excluded` says. One the person declines is no longer a proposal
+    and is not taken with the field. -/
 axiom proposedExclusions : Context P → List Frame
 
 def Excluded (c : Context P) (f : Frame) : Prop := ∃ e ∈ excluded c, e.frame = f
@@ -284,14 +284,20 @@ axiom dissent : Context P → List String
     frames, a new angle shaped into frames, or a branch under an open frame or candidate the
     person asked to deepen. An excluded frame is never among them. A continue that names nothing
     takes every unexplored frame except one the person parked; the person naming it opens it. On
-    a Seeded entry's first pass, at least one derived frame, how many being yours; the rest stay
-    unexplored. At a Blank entry's start, the frames the request itself names — "angles: pricing
-    and pacing" — and none where it names none, so the frame map is presented. At a Resumed entry's
-    resuming step, the frames the
-    request names or asks to deepen — an opened frame it names is deepened by a branch under it,
-    never reopened; a request that only continues opens none. Empty when the answer opens nothing —
-    a deferral alone, an idea of the person's own, a question, a correction, a pick among
-    candidates, or a continue with nothing left to open. -/
+    a Seeded entry's first pass, the frames the request itself names and at least one derived
+    frame, how many being yours; the rest stay unexplored. At a Blank entry's start, the frames the
+    request itself names — "angles: pricing and pacing" — and none where it names none, so the
+    frame map is presented. At a Resumed entry's resuming step, the frames the request names or
+    asks to deepen — an opened frame it names is deepened by a branch under it, never reopened; a
+    request that only continues opens none, and a request the earlier field already answered — a
+    gate answer bound as the request by a bare invocation — is not applied again, so the field
+    resumes as last shown. A turn that corrects the entry opens what the corrected entry's opening
+    opens: Seeded, its first pass, the seeds promoted; Resumed, none, the earlier field's map
+    redrawn; Blank, the frames the request names, else none. Candidates a pass under the earlier
+    reading produced stay in the context with their origins and are never removed; under a Resumed
+    correction the map shows them as this run's, marked as from that pass. Empty when the answer
+    opens nothing — a deferral alone, an idea of the person's own, a question, a correction of
+    anything but the entry, a pick among candidates, or a continue with nothing left to open. -/
 axiom targets : Context P → List Frame
 
 /-- **Your judgment**: the cited turn — the person's latest utterance — takes the field, read from
@@ -411,8 +417,8 @@ def takenAt (c : Context P) (i : Nat) : Bool :=
 def Taken (c : Context P) (u : Utterance P) : Prop :=
   takenAt (fuse c u) c.length = true ∧ (candidates (fuse c u)).isEmpty = false
 
-/-- A turn that bears on the run and takes nothing: the map again where it opens nothing, else a
-    pass over what it opens. -/
+/-- A turn that bears on the run and takes nothing, or the opening step of a Blank or Resumed
+    start: the map where it opens nothing, else a pass over what it opens. -/
 def advance (generate respond : Context P → Response P) (c : Context P) : Context P :=
   if (targets c).isEmpty then c ++ [(respond c).val] else pass generate respond c
 
@@ -429,8 +435,6 @@ def ideate (generate respond session : Context P → Response P) :
     else if ¬ Reaches c' then ideate generate respond session (c' ++ [(session c').val]) us
     else ideate generate respond session (advance generate respond (receive c')) us
 
-/-- On a Resumed entry no candidate is promoted again and no opened frame is reopened; the map is
-    redrawn as the Protocol section's "The map" describes. -/
 def start (relay generate respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
   let c₀ := receive c
@@ -517,7 +521,7 @@ Present the classification as a short basis-cited relay: the inferred entry, why
 
 ### The map
 
-Every map is in everyday language and is drawn from the context each time. It shows the whole field: the frames and the branches dug under them, the candidates under each with their origins, the unexplored frames, the frames out of scope with the person's turn quoted — a frame brought back in shown as brought back, citing that turn — your proposed exclusions marked as yours, each by name, what is parked with the person's request quoted, every signal still unaddressed, and your doubts. Mark every change since the map the person answered: this round's candidates, exclusions and proposals taken, signals changed, readings you re-made, and what a turn that did not bear on the run said about the field. Where the intent of the person's turn was unclear, say in one line how you took it. Material the person named that is not yet on the map — awaiting its read, or on a frame map a frame to open — shows as pending. When the map grows large, compress earlier material to branches and counts, the density yours to judge, while those changes and every proposed exclusion show in full; the taking's trace is never compressed. On a Resumed entry, redraw the earlier field's map — the whole field as last shown, with the person's later turns that bear on it, and the material it compressed still reachable.
+Every map is in everyday language and is drawn from the context each time. It shows the whole field: the frames and the branches dug under them, the candidates under each with their origins, the unexplored frames, the frames out of scope with the person's turn quoted — a frame brought back in shown as brought back, citing that turn — your proposed exclusions marked as yours, each by name, what is parked with the person's request quoted (exclusions and parks carried in named material shown as `Entry` says), every signal still unaddressed, and your doubts. Mark every change since the map the person answered: this round's candidates, exclusions and proposals taken, signals changed, readings you re-made, and what a turn that did not bear on the run said about the field. Where the intent of the person's turn was unclear, say in one line how you took it. Material the person named that is not yet on the map — awaiting its read, or on a frame map a frame to open — shows as pending. When the map grows large, compress earlier material to branches and counts, the density yours to judge, while those changes and every proposed exclusion show in full; the taking's trace is never compressed. On a Resumed entry, redraw the earlier field's map — the whole field as last shown, with the person's later turns that bear on it, and the material it compressed still reachable.
 
 Where the person asked about the map, answer it first, from the map, before the gate; nothing in the answer ranks or chooses. A request for your pick or a ranking is answered there too: say that choosing follows the taking, and rank nothing.
 

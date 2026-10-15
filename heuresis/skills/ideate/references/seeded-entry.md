@@ -5,7 +5,7 @@ law: why no gate precedes generation.
 
 **Seeded path — no gate.** Frames derived from the seeds go straight to a first pass
 (expand-first): the user already committed concrete material, so the early-example
-fixation risk the Blank-path gate exists to avoid does not apply the same way here.
+fixation risk the frame map exists to avoid does not apply the same way here.
 
 How many derived frames the first pass opens is your judgment — enough to show the field
 widening, few enough that the round can be taken in. Every frame left closed shows on the
