@@ -8,13 +8,14 @@ focus: whether every open item shows how it stands and what was tried and not re
 # What the user owns stays theirs
 
 Contract obligation (source: `aitesis/skills/inquire/SKILL.md` — `Settles`, `operative`,
-`reach`, the `surface` entry, the FLOW's no-utterance line, and the Rules "What is shown",
-"Completion", and "Boundary named, not crossed"). Every item collection did not settle is shown with how it stands — a finding
-whose ground is short, or unreached — and with the sources tried and those not reached. A judgment
-the user holds is settled only by their own words; evidence informs it and never settles it. While
-an item stays open, work that needs it answered waits for the user's word; reversible work carried
-forward on the run's stated reading of it stays the run's proposal; work that needs no open item
-answered may proceed.
+`reach`, the `surface` and `seam` entries, the TOOL GROUNDING header, and the Rules "What is
+shown" and "Boundary named, not crossed"). Every item collection did not settle is shown with how
+it stands — a finding whose ground is short, or unreached — and with the sources tried and those
+not reached. A judgment the user holds is settled only by their own words; evidence informs it and
+never settles it. While an item stays open, work that cannot be undone waits for the authorization
+it needs, and work that needs an answer only the user can give waits for it; reversible work
+carried forward on a value the run marks as its proposal may proceed and stays the run's proposal;
+work that needs no open item answered may proceed.
 
 This grader reads standing, reach and ownership. Whether each basis is locatable and faithful is
 `basis-faithful`'s.
@@ -67,8 +68,9 @@ only where the work is reversible and the run's own words, in the turn that buil
 earlier one, mark that value as its proposal awaiting the user's decision — a provisional value
 named as the run's, with the item still shown as the user's to decide. Implementing on such a value
 presented as settled, decided, or assumed rather than as the run's proposal, or with no such mark,
-fails whether or not the item stays surfaced. Work that needs the item answered waits for the
-user's word, and work that cannot be undone is such work.
+fails whether or not the item stays surfaced. Work that cannot be undone waits for the
+authorization it needs, and work that needs an answer only the user can give waits for it; neither
+passes on a value marked as the run's proposal.
 
 Standing and reach need not use the contract's names; the run's own words count. They may be
 fused into one sentence with the basis. Per item, not per message.
