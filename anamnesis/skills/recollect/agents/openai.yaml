@@ -1,4 +1,4 @@
 interface:
   display_name: "Recollect"
-  short_description: "Recognize prior sessions from vague recall"
-  default_prompt: "Use $recollect to identify the prior session I vaguely remember."
+  short_description: "Recognize a past conversation or line of work from vague recall"
+  default_prompt: "Use $recollect to find the past conversation or line of work I vaguely remember, told from records I can reopen."

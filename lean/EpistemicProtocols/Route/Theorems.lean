@@ -23,10 +23,10 @@ instance : Nonempty Catalog :=
      distinct := List.nodup_nil }⟩
 
 /-- The three outcomes of one pass: an invocation of the protocol `lead` brings in, each of its
-    fits raised now plain, under the policy; one pointer line for each fit whose pointer adds
+    fits raised now plain, allowed; one pointer line for each fit whose pointer adds
     something; or silence, where neither holds. -/
 private theorem route_cases (k : Catalog) (c : Context P) :
-    (∃ e hne hn, lead k c = some e ∧ (∀ m ∈ raisedFor k c e, Plain c m) ∧ PolicyApplies c e ∧
+    (∃ e hne hn, lead k c = some e ∧ (∀ m ∈ raisedFor k c e, Plain c m) ∧ Allowed c e ∧
       route k c = .invoke e (raisedFor k c e) hne hn (raisedBeside k c e)) ∨
     (∃ hne, route k c = .point (pointed k c) hne) ∨
     (route k c = .silence ∧ pointed k c = []) := by
@@ -49,12 +49,12 @@ private theorem route_cases (k : Catalog) (c : Context P) :
 /-- A pass invokes a protocol only where `lead` brings it in, the lines it hands over are exactly
     the fits raised now that name it — each a fit `fits` reads that `Raise` admits, each plain —,
     the fits it shows beside them are exactly the fits raised now for other protocols, and the
-    routing policy covers invoking it. -/
+    person has not withheld invoking it. -/
 theorem invoke_requires (k : Catalog) (c : Context P) (e : Entry) (ls : List (Line k c))
     (hne : ls ≠ []) (hn : ∀ l ∈ ls, l.entry = e) (bs : List (Line k c))
     (h : route k c = .invoke e ls hne hn bs) :
     lead k c = some e ∧ ls = raisedFor k c e ∧ bs = raisedBeside k c e ∧
-      (∀ m ∈ ls, m ∈ fits k c ∧ Raise c m ∧ Plain c m) ∧ PolicyApplies c e := by
+      (∀ m ∈ ls, m ∈ fits k c ∧ Raise c m ∧ Plain c m) ∧ Allowed c e := by
   rcases route_cases k c with ⟨e₁, _, _, hl, hm, hq, h₁⟩ | ⟨_, hpt⟩ | ⟨hs, -⟩
   · rw [h₁] at h
     cases h
@@ -66,13 +66,13 @@ theorem invoke_requires (k : Catalog) (c : Context P) (e : Entry) (ls : List (Li
   · rw [hs] at h; cases h
 
 /-- Where `lead` brings a protocol in, it has fits raised now, each of them plain, and the routing
-    policy covers invoking it, a pass invokes it, handing over exactly those fits and showing the
+    person has not withheld invoking it, a pass invokes it, handing over exactly those fits and showing the
     fits raised now for other protocols beside them. No checkpoint is among these premises: a
     checkpoint that still holds the person's judgment bears on an invocation only through
     `lead`. -/
 theorem invokes_when (k : Catalog) (c : Context P) (e : Entry) (hl : lead k c = some e)
     (hne : raisedFor k c e ≠ []) (hm : ∀ m ∈ raisedFor k c e, Plain c m)
-    (hq : PolicyApplies c e) :
+    (hq : Allowed c e) :
     ∃ hne hn, route k c = .invoke e (raisedFor k c e) hne hn (raisedBeside k c e) := by
   have hroute : route k c = .invoke e (raisedFor k c e) hne
       (fun l hl => by simpa using (List.mem_filter.mp hl).2) (raisedBeside k c e) := by
@@ -87,11 +87,11 @@ theorem invokes_when (k : Catalog) (c : Context P) (e : Entry) (hl : lead k c = 
     · next he => rw [hl] at he; cases he
   exact ⟨hne, _, hroute⟩
 
-/-- Where `lead` brings in no protocol whose fits raised now are each plain under the policy, and a
+/-- Where `lead` brings in no protocol whose fits raised now are each plain and invoking it allowed, and a
     fit raised now has a pointer that adds something, a pass points at exactly those fits. -/
 theorem points_otherwise (k : Catalog) (c : Context P)
     (h : ¬ ∃ e, lead k c = some e ∧ raisedFor k c e ≠ [] ∧ (∀ m ∈ raisedFor k c e, Plain c m) ∧
-      PolicyApplies c e)
+      Allowed c e)
     (hp : pointed k c ≠ []) : ∃ hne, route k c = .point (pointed k c) hne := by
   rcases route_cases k c with ⟨e, hne, -, hl, hm, hq, -⟩ | hpt | ⟨-, hpe⟩
   · exact absurd ⟨e, hl, hne, hm, hq⟩ h

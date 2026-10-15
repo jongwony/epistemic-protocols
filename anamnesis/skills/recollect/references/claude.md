@@ -19,7 +19,7 @@ A session whose working directory has since been removed keeps its record under 
 For a record found, bind:
 
 - `Member.locator` to the record's own path under its root — the path the record was found at, never one re-resolved later, since the active partition does not locate a record found in another;
-- the session id from the filename, the working directory from the record's `cwd`, and its recency from the file's modification time; where an index entry survives a record already deleted, keep the path the entry names and take recency from the entry, so the member is still found and is the one Ground cannot open;
+- the session id from the filename, the working directory from the record's `cwd`, and when the work happened from what the record says of it — its session start and its turns' timestamps; where an index entry survives a record already deleted, keep the path the entry names and take the time from its `started_at` and `last_turn_at`, so the member is still found and is the one Ground cannot open; its `date:`, like times from file metadata, only orders candidates;
 - the origin label from the **first** `entrypoint` value in the record — first match wins, as the runtime classifies it;
 - `bridgeSessionId` when a `{"type":"bridge-session"}` line is present.
 
@@ -68,7 +68,7 @@ Read this section when the recall may reach work done in a cloud session, and wh
 - The `cse_`/`session_` spellings are one identifier (§Bridge handle). The current session's own remote id is the environment variable `CLAUDE_CODE_REMOTE_SESSION_ID`.
 - `CLAUDE_CODE_SESSION_ID`, the current session's transcript filename, and the `session_id` field on every event are the container-local uuid, which does not outlive the container. In a cloud container the current session's local record and its catalog entry are one member: name it by its remote id and emit the cloud handle below for it, never a resume handle.
 - A cloud transcript carries no `bridge-session` line, so the `bridgeSessionId` rule above does not fire; take the id from the catalog.
-- Bind `Member.locator` to the `session_<suffix>` id under the cloud-session root, and recency from the catalog's updated time.
+- Bind `Member.locator` to the `session_<suffix>` id under the cloud-session root; the catalog's created time is the session's start and its events' timestamps, once opened, say when the work happened; the updated time only orders candidates.
 - No capture receipt reaches a cloud member: its `reach` is empty and every `SourceScan` count unknown. Cloud members are not submitted to the outcome reader.
 
 **Speakers.**

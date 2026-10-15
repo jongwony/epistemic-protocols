@@ -1,7 +1,7 @@
 {
   "name": "anamnesis",
-  "version": "3.6.2",
-  "description": "Resolve vague recall into recognized context — one session, or a line of work, topic, or settled concept across several — /recollect (ἀνάμνησις: a recollecting)",
+  "version": "3.7.0",
+  "description": "Recognize the past you reached for — a session, line of work, topic, or concept — in a story on records you can reopen: it took place, not that it still holds — /recollect (ἀνάμνησις: a recollecting)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Anamnesis",
-    "shortDescription": "Resolve vague recall into recognized context — /recollect",
-    "longDescription": "Resolve vague recall into recognized context — one session, or a line of work, topic, or settled concept across several — /recollect",
+    "shortDescription": "Recognize the past you reached for — a session, line of work, topic, or concept — in a story on records you can reopen: it took place, not that it still holds — /recollect (ἀνάμνησις: a recollecting)",
+    "longDescription": "Recognize the past you reached for — a session, line of work, topic, or concept — in a story on records you can reopen: it took place, not that it still holds — /recollect (ἀνάμνησις: a recollecting)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

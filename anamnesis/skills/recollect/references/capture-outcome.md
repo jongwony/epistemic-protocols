@@ -1,8 +1,8 @@
 # Capture outcome reading
 
-- After a pass's searches, collect each distinct session the searches actually read or tried to read, including records examined without a match, with the runtime reference's store-root and session-ID binding. A search that reached no session has no session capture evidence.
-- Resolve `{skill-root}` from the installed directory containing this `SKILL.md`. For each session, bind the runtime label, the store root the record was found under, the session ID obtained from that record, and its record locator. Submit the identified sessions together to the shared reader; the reader output enters the context as the evidence each `Qualification` cites — a member's, and the scope's for records that matched nothing.
-- For a batch, supply a JSON array on stdin whose entries contain `runtime` (`claude` or `codex`), `root` (the absolute store-root path), and `session_id` (the unmodified session ID). Include exactly the sessions identified in the searched scope. Read the corresponding JSON array from stdout and associate each result by its returned runtime, root, and session ID:
+- The sessions to submit are those whose capture outcomes SKILL.md's `search` reads in this pass — among the sessions its searches read or tried to read, records examined without a match included — each with the runtime reference's store-root and session-ID binding; cloud members as the Claude reference says. A search that reached no session has no session capture evidence.
+- Resolve `{skill-root}` from the installed directory containing this `SKILL.md`. For each session, bind the runtime label, the store root the record was found under, the session ID obtained from that record, and its record locator. Submit them together to the shared reader; the reader output enters the context as the evidence each `Qualification` cites — a member's, and the scope's for records that matched nothing.
+- For a batch, supply a JSON array on stdin whose entries contain `runtime` (`claude` or `codex`), `root` (the absolute store-root path), and `session_id` (the unmodified session ID). Include exactly those sessions. Read the corresponding JSON array from stdout and associate each result by its returned runtime, root, and session ID:
 
 ```bash
 node "{skill-root}/scripts/hypomnesis-outcome.mjs" --batch
