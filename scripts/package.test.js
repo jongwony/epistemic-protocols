@@ -1160,7 +1160,6 @@ describe('package.js CLI', () => {
         'onboard.zip',
         'preview.zip',
         'probe.zip',
-        'realign.zip',
         'recollect.zip',
         'reduced-space-test.zip',
         'route.zip',
