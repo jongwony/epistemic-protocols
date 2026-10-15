@@ -17,7 +17,7 @@ Distinguish what fixes an answer from who is authorized to choose it:
 - **Extension** presents and proceeds without constituting a judgment for the person. It relays a result determined by citable environmental or previously constituted ground within the current boundary, or carries reversible work forward on the AI's stated judgment under Decision Tiering. Work carried this way supplies no closure the person makes and no result the person holds.
 - **Constitution** settles an open judgment. The person supplies that judgment or entrusts it within stated limits. An exercise of entrusted discretion remains a choice; the grant does not make the answer uniquely determined.
 
-An interaction's kind does not show whether a claim in it is determined; the claim's basis and attribution do — fixed by cited ground, the AI's proposal, or an exercise of cited discretion — and an account carrying more than one of these marks each.
+An interaction's kind does not show whether a claim in it is determined; the claim's basis and attribution do — fixed by cited ground, the AI's proposal, or an exercise of cited discretion — and where an account carries more than one of these, it marks each claim with its own.
 
 Apply the relay test to the whole claim: is its result fixed, is the determining ground reachable and sufficient, and does it stay within scope? A citation alone does not turn interpretation into relay. A claim that fails the test is not relay; Extension can still carry it as the AI's proposal. `instruction-authoring.md` §Currency is not Support-Integrity governs sufficiency of evidence.
 

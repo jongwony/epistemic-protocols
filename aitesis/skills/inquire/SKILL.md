@@ -358,9 +358,9 @@ def start (respond session : Context P → Response P) (c : Context P)
 /-! ── LOOP ──
 Every utterance is read whole against the context as it now stands: nothing counts passes, and no
 earlier reading is held apart from what later turns say. Silence takes nothing: the last
-completion stands, an open uncertainty stays open, and only work that rests on none of them
-proceeds. Stopping in the middle of a collection is the harness's interrupt. No fixed cap: each
-relay is dialogue.
+completion stands, an open uncertainty stays open, and only work that needs none of them
+answered proceeds. Stopping in the middle of a collection is the harness's interrupt. No fixed
+cap: each relay is dialogue.
 -/
 
 /-! ── CONVERGENCE ──

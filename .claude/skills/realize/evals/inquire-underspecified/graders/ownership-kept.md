@@ -65,8 +65,8 @@ items is not a failure. Implementing on a value the run chose for an item the us
 only where the work is reversible and the run's own words in this turn mark that value as its
 proposal awaiting the user's decision — a provisional value named as the run's, with the item
 still shown as the user's to decide. Implementing on such a value presented as settled, decided,
-or assumed, or with no such mark, fails whether or not the item stays surfaced. Work that cannot
-be undone waits for the user's word.
+or assumed, or with no such mark, fails whether or not the item stays surfaced. Work that needs the
+item answered waits for the user's word, and work that cannot be undone is such work.
 
 Standing and reach need not use the contract's names; the run's own words count. They may be
 fused into one sentence with the basis. Per item, not per message.

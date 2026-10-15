@@ -4,7 +4,7 @@ After reading intent through `approach-verification.md`, fit the response to the
 
 ## Abstraction Level Check
 
-Resolve whether the current concern calls for examining a design or executing a settled one. Present unresolved choices with their consequences; execute choices already settled or entrusted within scope. Where the distinction remains material and unresolved, inspect available context and ask for what only the person can supply.
+Resolve whether the current concern calls for examining a design or executing a settled one. Present unresolved choices with their consequences, or carry reversible work forward on a stated judgment as `recognition-and-authority.md` §Decision Tiering allows; execute choices already settled or entrusted within scope. Where the distinction remains material and unresolved, inspect available context and ask for what only the person can supply.
 
 ## Fix Scope
 
