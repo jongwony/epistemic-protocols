@@ -17,7 +17,7 @@ A tier supplies no empirical guarantee about future model capability. Improved p
 
 ## Checkpoint Policy Stays at the Meta Layer (Derived)
 
-For a checkpoint requiring live judgment, specify when it fires, what it presents, and what each answer changes. Leave the answer to the ground and authority identified in `recognition-and-authority.md`.
+For a checkpoint requiring live judgment, specify when it fires, what it presents, and what each answer changes. Leave the answer to the ground and authority identified in `recognition-and-authority.md`. Where no contract already fixes one, whether a step needs such a checkpoint is assessed under that document's §Decision Tiering.
 
 Silence supplies no answer: halt the dependent transition while the checkpoint is unanswered. A displayed default accepted after recognition, an option ordering, or a determined relay has a different basis and is not silent selection. Fix a branch whose trajectory adds no distinction rather than asking the person to constitute that duplication.
 

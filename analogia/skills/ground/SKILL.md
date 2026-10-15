@@ -509,7 +509,15 @@ conclusions answered. Demonstrated, not asserted.
 
 /-! ── TOOL GROUNDING ──
 What each operation of this contract does. An interaction with the person is one of two kinds,
-and its kind fixes how it continues once its text is presented.
+and its kind fixes how it continues once its text is presented. A Constitution settles a judgment
+through the person's turn. An Extension settles none for the person: it passes on a result its
+cited ground fixes, or carries reversible work forward on a judgment the AI states, which stays
+the AI's proposal until the person takes it. Beyond the Constitution operations a contract
+annotates, whether work goes forward this way or waits for the person's answer is the AI's
+judgment in the situation, and work that cannot be undone waits for the authorization it needs.
+Work carried forward, on a grant or a stated judgment or as clear work, returns with an account
+of how the request was read, what was judged on what basis — naming an alternative set aside
+where it may be preferred — and how far the work went.
 -/
 
 inductive Interaction | constitution | extension
@@ -539,7 +547,7 @@ def grounding : Op → Annot × String
   | .surface          => (.interaction .extension, "the assessment with its trace, the places reached and not, what is open as the person's own unknown, and what a later turn would change; no verdict answer is required")
   | .converge         => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with the assessment")
   | .readAnswer       => (.sense, "Internal analysis: the latest utterance read whole against R and the fused context as it now stands — whether it bears on the audit")
-  | .seam             => (.interaction .extension, "the next move the person requests, an adopted policy, or a grant, citing that source: where the requested work rests on anything not licensed within limits — a Blocked or Undetermined conclusion, a Licensed one beyond its stated limits, or, while the question waits, the mapping itself, unaudited — show what it rests on and hold that work; the hold binds the work, not a turn, and only the person's later words directing that work, after its grounds or unaudited basis were shown, release it — 'go ahead' can suffice in context; a release neither adopts the conclusion nor changes its warrant, and an unrelated reply or silence directs nothing; this protocol declares no wired outbound edge and names no other protocol, and every Constitution gate fires unchanged")
+  | .seam             => (.interaction .extension, "the next move the person requests, an adopted policy, or a grant, citing that source: where the requested work rests on anything not licensed within limits — a Blocked or Undetermined conclusion, a Licensed one beyond its stated limits, or, while the question waits, the mapping itself, unaudited — show what it rests on; such work that cannot be undone, or that needs the person's answer, waits for their later words directing it after its grounds or unaudited basis were shown — 'go ahead' can suffice in context — and reversible work may go forward on the AI's stated judgment, shown as resting there and staying the AI's proposal; neither a direction nor going forward adopts the conclusion or changes its warrant, and an unrelated reply or silence directs nothing; this protocol declares no wired outbound edge and names no other protocol, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.

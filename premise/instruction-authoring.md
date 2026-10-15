@@ -82,7 +82,7 @@ Two instructions conflict when both are live, bind at the same situation, and ca
 
 Do not infer from a run under conflicting instructions that either instruction independently governed it. Re-derive the obligation and remove the conflicting prescription rather than preserving two apparent authorities through cosmetic reconciliation. A more specific repair rule governs its own domain; `gate-design.md` governs adversarial guard consistency.
 
-When an instruction conflicts with live context, derive who may settle the conflict from `recognition-and-authority.md`. Relay a response already fixed by citable ground, exercise an applicable grant within its limits, and leave an unentrusted judgment with its holder. `approach-verification.md` applies this to contradicted task premises.
+When an instruction conflicts with live context, derive who may settle the conflict from `recognition-and-authority.md`. Relay a response already fixed by citable ground, exercise an applicable grant within its limits, and leave an unentrusted judgment with its holder; reversible work can still go forward on a stated judgment where `recognition-and-authority.md` §Decision Tiering allows. `approach-verification.md` applies this to contradicted task premises.
 
 ## Currency is not Support-Integrity (Derived)
 

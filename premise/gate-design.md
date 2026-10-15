@@ -46,7 +46,7 @@ Demonstrate completion by mapping each identified deficit instance to its resolu
 
 ## Loop Continuity under Bounded Regret (Derived)
 
-Continue relay work within its authorized scope. Stop the dependent transition where the contract requires an unanswered constitutive checkpoint. Distinguish a finding that needs to be visible from a choice that needs to be asked.
+Continue Extension work — relay, or reversible work on a stated judgment under `recognition-and-authority.md` §Decision Tiering — within its authorized scope. Stop the dependent transition where the contract requires an unanswered constitutive checkpoint. Distinguish a finding that needs to be visible from a choice that needs to be asked.
 
 Assess the combined consequences of related commitments as well as each item separately. Where their interaction raises an unresolved question about the plan's direction, surface that question at plan level. Do not assume that combined risk equals a sum or exceeds it by a fixed rule.
 

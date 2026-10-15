@@ -8,12 +8,12 @@ A protocol defines what to present, what a response constitutes, and when the in
 
 ## Interaction Kind Factorization (Axiom)
 
-Separate the abstract interaction design from its concrete realization. Give each case one relay/constitution classification under the authority test; represent a conditionally determined case as a narrower relay case rather than a second conflicting classification of the same case.
+Separate the abstract interaction design from its concrete realization. Give each case one Extension/Constitution classification under the authority test; represent a conditionally determined case as a narrower relay case rather than a second conflicting classification of the same case.
 
 Informed acceptance is constitutive even when the person accepts the proposal unchanged. An earlier grant can authorize a downstream choice within scope without supplying an answer to a checkpoint whose contract still requires that response. Assess the consequences of a missed interaction from its actual recovery path; its label alone supplies no bound.
 
 **Option-set-level relay test**: before presenting a decision gate, determine whether its alternatives remain genuinely viable under the applicable ground. If a citable fact, prior decision, or convention already fixes the direction, present that result and basis as relay. Distinct edit shapes do not necessarily reopen a settled direction.
 
-An AI preference among viable alternatives does not collapse the set. If choosing requires a value judgment, use an applicable grant or leave it with its holder. A verification gate can deliberately include one correct answer and is outside this decision-set test.
+An AI preference among viable alternatives does not collapse the set. If choosing requires a value judgment, use an applicable grant or leave it with its holder; reversible work can still go forward on the AI's stated preference where `recognition-and-authority.md` §Decision Tiering allows. A verification gate can deliberately include one correct answer and is outside this decision-set test.
 
 `gate-design.md` governs trajectory equivalence and off-axis options; `recognition-and-authority.md` governs the recognizable consequences and authority for the resulting judgment.

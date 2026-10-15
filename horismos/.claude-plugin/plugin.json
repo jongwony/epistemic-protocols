@@ -1,7 +1,7 @@
 {
   "name": "horismos",
   "description": "See the decisions a task rests on — what each costs if wrong, what settled it, what stays open and who settles it — /bound (ὁρισμός: a bounding)",
-  "version": "5.8.0",
+  "version": "5.9.0",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
