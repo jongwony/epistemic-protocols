@@ -381,12 +381,12 @@ closure. Demonstrated, not asserted.
 /-! ── TOOL GROUNDING ──
 What each operation of this contract does. An interaction with the person is one of two kinds,
 and its kind fixes how it continues once its text is presented. A Constitution settles a judgment
-through the person's turn, or through a grant that turn gave, whose exercise stays a choice made
-under it. An Extension settles none for the person: it passes on a result its cited ground
-fixes, or carries reversible work forward on a judgment the AI states, which stays the AI's
-proposal until the person takes it. Work carried forward, on a grant or a stated judgment or as
-clear work, returns with an account of how the request was read, what was judged on what basis,
-and how far the work went.
+through the person's turn. An Extension settles none for the person: it passes on a result its
+cited ground fixes, or carries reversible work forward on a judgment the AI states, which stays
+the AI's proposal until the person takes it. Work carried forward, on a grant or a stated
+judgment or as clear work, returns with an account of how the request was read, what was judged
+on what basis — naming an alternative set aside where it may be preferred — and how far the work
+went.
 -/
 
 inductive Interaction | constitution | extension
@@ -452,7 +452,7 @@ Frame the uncertainty currently in play rather than emitting a completion tally.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — use everyday language, keep the judgment beside its nearest evidence and next-move implication, and place analytical context before the relay.
 - **Option-set relay test**: Handing back is a relay: it presents and proceeds. The user's answer, when it comes, is read whole; it is not a gate this protocol holds, and silence settles and dismisses nothing.
 - **Focus and record**: As the Definition's MORPHISM invariant, `Settles`, and `record` state.
-- **What is shown**: Where collected material conflicts, name what conflicts with what; where a decision blocks further collection, name which collection waits on it. Which open uncertainty is the user's is the AI's reading, shown for their recognition and correction; the AI never chooses a decision the user holds.
+- **What is shown**: Where collected material conflicts, name what conflicts with what; where a decision blocks further collection, name which collection waits on it. Which open uncertainty is the user's is the AI's reading, shown for their recognition and correction; the AI never chooses a decision the user holds, and a value it proposes and marks as its own is not such a choice.
 - **Collection yields evidence or nothing, never a disposition**: An observation that resolved nothing attaches its null result and collection moves on. Only the user's words settle what is theirs or dismiss an uncertainty.
 - **Completion**: Completion is the end of collection. It settles nothing open: work that rests on an open item and cannot be undone, or needs one answered, waits for the user's words, and reversible work carried forward on a judgment the AI states about one stays the AI's proposal until the user takes it; the AI's own reading of what is open completes nothing and settles nothing.
 - **Boundary named, not crossed**: For every open uncertainty, say what was tried, what was not reached and what it needs, what was found, and where it falls short; leave its disposition to the user.

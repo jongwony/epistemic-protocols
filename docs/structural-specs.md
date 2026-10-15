@@ -60,8 +60,8 @@ Every TOOL GROUNDING line carries a parenthetical annotation classifying the ope
 
 | Annotation | Meaning | Realization |
 |------------|---------|-------------|
-| `(constitution)` | User-facing interaction where a constitutive user judgment is required — given in the user's turn, or exercised within a grant that turn gave | Present the text, then stop for the user's turn |
-| `(extension)` | Presentation that settles no judgment for the user: a result its cited ground fixes, or reversible work carried forward on the AI's stated judgment, that judgment staying the AI's proposal until the user takes it; work carried forward, on a grant or a stated judgment or as clear work, returns with an account of how the request was read, what was judged on what basis, and how far the work went | Present the text, then proceed |
+| `(constitution)` | User-facing interaction where a constitutive user judgment is required | Present the text, then stop for the user's turn |
+| `(extension)` | Presentation that settles no judgment for the user: a result its cited ground fixes, or reversible work carried forward on the AI's stated judgment, that judgment staying the AI's proposal until the user takes it; work carried forward, on a grant or a stated judgment or as clear work, returns with an account of how the request was read, what was judged on what basis — naming an alternative set aside where it may be preferred — and how far the work went | Present the text, then proceed |
 
 `(constitution)` / `(extension)` are the sole TOOL GROUNDING interaction annotations. `Qc` and `Qs` name gate shapes; they do not replace the annotation class. In a Lean block they are `.interaction .constitution` and `.interaction .extension`, and the realization column is `Interaction.realization` in the shared vocabulary; a DSL block states it in a `-- Realization:` header line.
 
