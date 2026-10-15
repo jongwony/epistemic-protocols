@@ -26,7 +26,6 @@ Katalepsis(R) → start(c) → grasp(c, utterances), where c is the fused sessio
   next utterance u, read on fuse(c, u) →
     [the utterance does not bear on this run]   the session answers it; that answer stays in the
                                                 context; nothing is consulted; no gate of this run
-    [the person withdraws (WithdrawalSupported)] → Withdrawn
     [the person closes (ClosureSupported)]       → VerifiedUnderstanding
     [otherwise] c' := fuse(c, u) with what `consult` reads now appended, a check's result
       included → present(c')
@@ -235,17 +234,24 @@ axiom dissent : Context P → List String
 
 /-- **Your judgment**: the latest utterance bears on this run — a purpose, a reading of the target,
     an acknowledgment, a wish to see or try something, a request for more depth, a correction of
-    your reading, a question about the map, a closure, a withdrawal — judged on what the whole
-    utterance does, read on the context with it before anything is consulted. An utterance about
-    other work leaves the run as it stands: the session answers it, that answer stays in the
-    context, and no gate of this run is raised. -/
+    your reading, a question about the map, a closure — judged on what the whole utterance does,
+    read on the context with it before anything is consulted. An utterance about other work leaves
+    the run as it stands: the session answers it, that answer stays in the context, and no gate of
+    this run is raised. Words that end the run without saying that what they understand serves
+    their purpose do not bear on it, whatever else the turn says, and what else it says stands in
+    its own words in the context: the session answers them, no round is drawn, the run holds, and
+    later turns bear on it only where they come back to it; your own reading that the person is done
+    ends nothing. Where a turn taken as other work or as ending the run could also be read as the
+    other, as saying what they understand serves their purpose, or as bearing on the run otherwise,
+    the session's answer says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round closes
     nothing — says that what they now understand of the target serves their purpose, read on the
-    context as it now stands. An acknowledgment of an explanation is not that. The map's
-    standings, or your own reading, close nothing, and no standing holds the closure back. Setting
-    one aspect aside does not close the run; a set-aside aspect stays on the map as it stood. -/
+    context as it now stands. An acknowledgment of an explanation is not that. Where the turn's
+    intent is unclear, it closes nothing. The map's standings, or your own reading, close nothing,
+    and no standing holds the closure back. Setting one aspect aside does not close the run; a
+    set-aside aspect stays on the map as it stood. -/
 axiom ClosureSupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person closes the run. -/
@@ -255,20 +261,7 @@ def closureCoord : Coord P Unit :=
 /-- **Your reading**: the person's closure; `open_` until one reaches it. -/
 axiom closure : (c : Context P) → Occ (closureCoord (P := P)) c
 
-/-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round
-    withdraws nothing — ends the run without saying that what they understand serves their
-    purpose, for whatever reason, given or not; nothing open is delegated. Silence, or turning to
-    other work, ends nothing. Your own reading that the run should end ends nothing. -/
-axiom WithdrawalSupported : Context P → Turn P → Unit → Prop
-
-/-- Only the person withdraws. -/
-def withdrawalCoord : Coord P Unit :=
-  { admits := (·.val = .person), supports := WithdrawalSupported }
-
-/-- **Your reading**: the person's withdrawal; `open_` until one reaches it. -/
-axiom withdrawal : (c : Context P) → Occ (withdrawalCoord (P := P)) c
-
-/-- The record every exit carries, as CONVERGENCE lists it. -/
+/-- The record the closure carries, as CONVERGENCE lists it. -/
 structure Closed (P : Type) where
   context : Context P
   scope   : Occ (scopeCoord (P := P)) context
@@ -289,8 +282,6 @@ structure VerifiedUnderstanding (P : Type) where
 
 inductive Outcome (P : Type)
   | verified  (r : VerifiedUnderstanding P)
-  /-- the partial record: the map as it stood -/
-  | withdrawn (r : Closed P)
   | holding   (c : Context P)
 
 /-- **Your judgment**: the latest utterance, bearing on this run, asks for a check — a wish to see
@@ -326,7 +317,8 @@ invocation that say what to understand of it fill the scope (`ScopeSupported`).
 /-! ── PHASE TRANSITIONS ──
 A step is one arm of a structural recursion over the person's utterances. `respond` is the next
 round, as TOOL GROUNDING's `present` entry names it; `session` is the session's own answer to an
-utterance about other work, which stays in the context without being a gate of this run.
+utterance that does not bear on the run, which stays in the context without being a gate of this
+run.
 -/
 
 open Classical in
@@ -336,7 +328,6 @@ def grasp (respond session : Context P → Response P) :
   | c, u :: us =>
     let f := fuse c u
     if ¬ Reaches f then grasp respond session (f ++ [(session f).val]) us
-    else if isFilled (withdrawal f) = true then .withdrawn (closed f)
     else if isFilled (closure f) = true then .verified ⟨closed f⟩
     else
       let c' := consulted f
@@ -353,8 +344,9 @@ earlier answer is held apart from what later ones say. No fixed cap: each round 
 -/
 
 /-! ── CONVERGENCE ──
-converged: a VerifiedUnderstanding the person's utterance closed. Withdrawal keeps its partial
-record. The convergence evidence — the map at closure: each aspect with its standing, what it rests
+converged: a VerifiedUnderstanding the person's utterance closed; holding is a round no turn of the
+person's that bears on the run has answered. The convergence evidence — the map at closure: each
+aspect with its standing, what it rests
 on (the person's own reading with the material it was measured against, in their words; each check
 run, with what it showed and, where it ran on a stand-in, what it left untested; each check named
 and not run, with who named it and what it would settle; the person's account with neither measure
@@ -383,16 +375,15 @@ def Interaction.realization : Interaction → Continuation
   | .constitution => .stop
   | .extension    => .proceed
 
-inductive Op | gather | assess | present | check | readAnswer | converge | withdraw
+inductive Op | gather | assess | present | check | readAnswer | converge
 
 def grounding : Op → Annot × String
   | .gather     => (.observe, "artifact read, artifact search: read-only reads, now, of the target's material and the sources that bear on it — any a turn cites, and any you find — as far as relevant access reaches; name what was reached and what was not, and any conflict among what was gathered")
   | .assess     => (.sense, "Internal analysis: the purpose reading, the live inventory of aspects and each one's row on the map, over the whole fused context as it now stands")
-  | .present    => (.interaction .constitution, "the round, every round the first included. The first round is the map: the purpose as the person said it, or else your reading of it, marked as yours — where nothing grounds a useful reading, the target's main aspects, with the purpose line saying so; the aspects the purpose turns on, in the order it turns on them with that basis on the purpose line, an edge the person has not voiced among them where the material grounds one, each with its essence, the material it rests on and its standing; and your contrary grounds with their basis. A correction of the purpose moves the map. Every later round shows what changed on the map, and the whole map when the person asks for it; where the session has a surface that stays in view, the map can stay there as well. A contrary ground you hold stays in view until it is settled — on the surface that stays in view where the session has one, otherwise briefly beside each round. Explain each aspect in the one representation — a picture, an example, a metaphor — that best carries its essence for this person; leave out what their words show they know, and go deeper when they ask. Read the person's turn whole. The round that shows a check's result sets it beside the aspect, against the claim your explanation made and against whatever the person has said that bears on it, saying where each agrees and where it parts; agreement and parting alike — their words revealing a contradiction or simply being wrong included — are what the map is filled from. Before reading their words as a misreading, read whether they aim at another purpose: say that reading as a candidate with its basis and move the map, adding no question; if the person sets it aside, their words are read again as a reading of the target. A reading or application of their own is measured against the material: an adjudication follows only where you have material to attach; where there is none, give no verdict: say you have nothing to check the account against and name what would settle it. Where what they said and a `Measure` part on the same scope and premises, or two of their own utterances do, show it with its working in one round: their words quoted; the narrowest `Measure` where one bears on it, never your own explanation — scoped to what that material settles; why the two part; what they got right; and another reading beside it where the material allows. A contradiction whose working was shown and that the person keeps is not worked again: it stays in view as a held contrary ground, is worked again only on new material, and the round ends on its opening. A contradiction inside the target is a finding about it, judged for a side only with settling material outside it; your own earlier explanation against a `Measure` is yours to correct, quoting it, as relay. An objection you raise yourself is relay: shown with its basis, and the run continues. Where what you could not reach, or a conflict among what you gathered, bears on an aspect or on a judgment the person is making, say it there. Where a judgment the person is about to make turns on an aspect resting on your explanation, offer to run the cheapest check that would show it and to show its result — an offer, never a question for them to answer; offer it again only on new evidence or a changed purpose. An aspect the person set aside is not explained or offered again unless they return to it. Other work in the utterance neither closes this run nor answers its judgments. A round that shows a contradiction's working ends on that working, with nothing after it; every other round ends on one opening the person can take — respond to the map, ask to see or try something, go on, or say it is enough.")
+  | .present    => (.interaction .constitution, "the round, every round the first included. The first round is the map: the purpose as the person said it, or else your reading of it, marked as yours — where nothing grounds a useful reading, the target's main aspects, with the purpose line saying so; the aspects the purpose turns on, in the order it turns on them with that basis on the purpose line, an edge the person has not voiced among them where the material grounds one, each with its essence, the material it rests on and its standing; and your contrary grounds with their basis. A correction of the purpose moves the map. Every later round shows what changed on the map, and the whole map when the person asks for it; where the session has a surface that stays in view, the map can stay there as well. A contrary ground you hold stays in view until it is settled — on the surface that stays in view where the session has one, otherwise briefly beside each round. Explain each aspect in the one representation — a picture, an example, a metaphor — that best carries its essence for this person; leave out what their words show they know, and go deeper when they ask. Read the person's turn whole; where its intent was unclear, say in one line how you took it. The round that shows a check's result sets it beside the aspect, against the claim your explanation made and against whatever the person has said that bears on it, saying where each agrees and where it parts; agreement and parting alike — their words revealing a contradiction or simply being wrong included — are what the map is filled from. Before reading their words as a misreading, read whether they aim at another purpose: say that reading as a candidate with its basis and move the map, adding no question; if the person sets it aside, their words are read again as a reading of the target. A reading or application of their own is measured against the material: an adjudication follows only where you have material to attach; where there is none, give no verdict: say you have nothing to check the account against and name what would settle it. Where what they said and a `Measure` part on the same scope and premises, or two of their own utterances do, show it with its working in one round: their words quoted; the narrowest `Measure` where one bears on it, never your own explanation — scoped to what that material settles; why the two part; what they got right; and another reading beside it where the material allows. A contradiction whose working was shown and that the person keeps is not worked again: it stays in view as a held contrary ground, is worked again only on new material, and the round ends on its opening. A contradiction inside the target is a finding about it, judged for a side only with settling material outside it; your own earlier explanation against a `Measure` is yours to correct, quoting it, as relay. An objection you raise yourself is relay: shown with its basis, and the run continues. Where what you could not reach, or a conflict among what you gathered, bears on an aspect or on a judgment the person is making, say it there. Where a judgment the person is about to make turns on an aspect resting on your explanation, offer to run the cheapest check that would show it and to show its result — an offer, never a question for them to answer; offer it again only on new evidence or a changed purpose. An aspect the person set aside is not explained or offered again unless they return to it. Other work in the utterance neither closes this run nor answers its judgments. A round that shows a contradiction's working ends on that working, with nothing after it; every other round ends on one opening the person can take — respond to the map, ask to see or try something, go on, or say that what they understand now serves their purpose.")
   | .check      => (.dispatch, "delegate: where `AsksCheck` holds, the check handed to execution with the aspect and what it is to show; it changes no existing state — what it has to write goes to a scratch space outside the target's tree — and a result from a stand-in comes with what it stood for and what it left untested; what it returns enters the context through `consult` as evidence read now, before the round that shows it")
   | .readAnswer => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there, as `Reaches` and the judgments above read it — read whole against the fused context as it now stands")
   | .converge   => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with VerifiedUnderstanding")
-  | .withdraw   => (.interaction .extension, "at the person's word, at any gate: what you took as withdrawn, and the partial record CONVERGENCE lists")
 
 open Classical in
 /-- The operations whose returns `consult` appends to the context: what `.gather` reads, and, where
@@ -424,7 +415,7 @@ Compose each round under TOOL GROUNDING's `present` entry. When grounding an exp
 
 ## Rules
 
-- **User-initiated only**: Activate only on the user's wish to understand a target present in context and quotable, whatever produced it; an explicit decline before activation withholds it; a withdrawal during a run ends it with the map as it stood on record.
+- **User-initiated only**: Activate only on the user's wish to understand a target present in context and quotable, whatever produced it; an explicit decline before activation withholds it.
 - **User authority**: An acknowledgment of your explanation stands as the person's judgment: it is not probed again, a factual disagreement or new evidence is shown beside it, and it is recorded as acceptance of your explanation, as CONVERGENCE lists.
 - **Round composition**: Compose each round so the reader can act without reassembly — use everyday language, keep each judgment beside its evidence and next-move implication (your own adjudication included, its evidence being the excerpt attached with it), and place analytical context before its gate.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.

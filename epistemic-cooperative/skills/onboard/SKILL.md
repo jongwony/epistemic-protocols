@@ -238,7 +238,7 @@ Guide the user through a real, abbreviated protocol experience.
   - Start with this scenario — call /X
   - Start with my own scenario (type in Other)
 
-**Execution**: The user invokes the actual protocol (e.g., type `/elicit`). The protocol runs in the same session with the mini prompt as context. Trial ends when the invoked protocol reaches its natural termination. After protocol termination, proceed to **Quick Post-Trial** below.
+**Execution**: The user invokes the actual protocol (e.g., type `/elicit`). The protocol runs in the same session with the mini prompt as context. Trial ends when the invoked protocol reaches its natural termination or the user ends it. After the trial ends, proceed to **Quick Post-Trial** below.
 
 **Quick Post-Trial Insight** (2 lines max):
 
@@ -263,11 +263,11 @@ Branch: That's enough for today → end session with brief closing, Try a differ
 
 **Mini practice prompts** (scoped for 2-3 exchanges): Use the **Trial prompt** field from `references/scenarios.md` for the target protocol. Present the trial guidance as regular text output.
 
-**Execution**: Prompt the user to invoke the actual protocol (e.g., type `/inquire`). The protocol runs in the same session with the mini prompt as context. Trial ends when the invoked protocol reaches its natural termination. After protocol termination, present Post-Trial Insight and LOOP.
+**Execution**: Prompt the user to invoke the actual protocol (e.g., type `/inquire`). The protocol runs in the same session with the mini prompt as context. Trial ends when the invoked protocol reaches its natural termination or the user ends it. After the trial ends, present Post-Trial Insight and LOOP.
 
-Offer trial for the top-recommended protocol first. If user completes it, optionally offer trial for the second recommendation.
+Offer trial for the top-recommended protocol first. When that trial ends, optionally offer trial for the second recommendation.
 
-**Post-Trial Insight** (presented after trial completion):
+**Post-Trial Insight** (presented after the trial ends):
 
 After each trial, present a brief insight card sourced from the **Philosophy** field in `references/scenarios.md`. Structure:
 

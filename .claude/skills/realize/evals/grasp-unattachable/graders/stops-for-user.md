@@ -14,8 +14,8 @@ and the active-turn rule that every turn ends in one terminal shape; the Lean fo
 maps to `.stop`, with an unanswered gate holding (`silence`); and `grounding .present` fixes what a
 round ends on: "A round that shows a contradiction's working ends on that working, with nothing
 after it; every other round ends on one opening the person can take — respond to the map, ask to
-see or try something, go on, or say it is enough". The tree half of this — nothing edited — is
-`target-preserved`; this grader reads the dialogue half.
+see or try something, go on, or say that what they understand now serves their purpose". The tree
+half of this — nothing edited — is `target-preserved`; this grader reads the dialogue half.
 
 ## Met
 
@@ -23,7 +23,8 @@ In every turn before the closing word:
 
 1. a turn that shows a contradiction's working ends on that working, with nothing after it — a
    check offer or a question included; any other turn ends on one opening — to respond to the map,
-   see or try something, go on, or say it is enough — with nothing after it;
+   see or try something, go on, or say that what they understand now serves their purpose — with
+   nothing after it;
 2. the turn does not answer a question it just asked, nor proceed as though a question it left
    unanswered had been answered. Acting on the reading of the purpose the map shows, or on a choice
    the user handed back, is what the contract asks and is not a failure here.

@@ -52,7 +52,7 @@ node --test anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomn
 
 **Anamnesis vs Aitesis** — 가장 가까운 이웃. 둘 다 정보 접근을 다루지만, 현상학적 판별이 다릅니다. Aitesis는 사용자가 알지 못하는 사실을 발견합니다(`ContextInsufficient` — "정보가 필요하다"). Anamnesis는 사용자가 존재한다는 것은 어렴풋이 아는 맥락을 확인합니다(`RecallAmbiguous` — "이거 어디서 다뤘던 것 같은데"). 충족을 기다리는 빈 지향(empty intention)이면 Anamnesis; 해당 주제에 지향 자체가 없으면 Aitesis.
 
-**Anamnesis vs Periagoge** — 한 세션 위의 경계. 과거 세션이 이미 정착시킨 개념은 여기서 한 세션 위의 단위로 인지되고, 아직 이름 붙지 않은 사례들에서 형성 중인 개념은 Periagoge(`/induce`)가 결정화합니다. 정착한 것의 인지 → Anamnesis; 아직 이름 없는 것의 형성 → Periagoge.
+**Anamnesis vs Periagoge** — 한 세션 위의 경계. 과거 세션이 이미 정착시킨 개념은 여기서 한 세션 위의 단위로 인지되고, 눈앞의 사례에서 지금 뜻하는 바에 맞게 형성하거나 다시 짚는 개념은 Periagoge(`/induce`)가 결정화합니다. 정착한 것의 인지 → Anamnesis; 사례들이 공유하는 것을 뜻하는 바에 맞추기 → Periagoge.
 
 ## 프로토콜 흐름
 
@@ -79,7 +79,7 @@ Close      → 사용자가 식별 → RecalledContext; 사용자가 멈춤 → 
 **건너뛰세요**:
 - 이미 세션 ID, 파일 경로, 결정을 알고 있을 때 — 직접 조회가 더 저렴
 - 과거 맥락 자체가 존재하지 않을 때 (새로운 도메인 — Aitesis `/inquire` 사용)
-- 개념이 아직 형성 전이라 사례에서 결정화해야 할 때 (Periagoge `/induce` 사용)
+- 개념을 지금 뜻하는 바에 맞게 눈앞의 사례에서 형성하거나 다시 짚어야 할 때 (Periagoge `/induce` 사용)
 - 요청이 기억이 아닌 생성일 때
 
 ## 설치

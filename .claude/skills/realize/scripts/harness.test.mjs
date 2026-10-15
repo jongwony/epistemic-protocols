@@ -380,7 +380,7 @@ test('a scripted multi-turn case resumes one session and reports every turn', ()
       assert.equal(c.resume, true);
       assert.equal(c.session, 'test-thread');
     }
-    assert.match(execs[5].message, /I'm done here/);
+    assert.match(execs[5].message, /enough for what I needed/);
 
     const report = invoke(env, 'report', 'grasp', '--markdown');
     assert.equal(report.status, 0, report.stderr || report.stdout);
