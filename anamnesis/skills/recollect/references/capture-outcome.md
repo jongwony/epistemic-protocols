@@ -1,7 +1,7 @@
 # Capture outcome reading
 
 - After a pass's searches, collect each distinct session the searches actually read or tried to read, including records examined without a match, with the runtime reference's store-root and session-ID binding. A search that reached no session has no session capture evidence.
-- Resolve `{skill-root}` from the installed directory containing this `SKILL.md`. For each session, bind the runtime label, the store root the record was found under, the session ID obtained from that record, and its record locator. Submit together to the shared reader the local sessions the searches examined, matched or not, whose outcomes the context does not already hold — cloud members as the Claude reference says; the reader output enters the context as the evidence each `Qualification` cites — a member's, and the scope's for records that matched nothing.
+- Resolve `{skill-root}` from the installed directory containing this `SKILL.md`. For each session, bind the runtime label, the store root the record was found under, the session ID obtained from that record, and its record locator. Submit together to the shared reader the sessions whose capture outcomes SKILL.md's `search` reads in this pass — cloud members as the Claude reference says; the reader output enters the context as the evidence each `Qualification` cites — a member's, and the scope's for records that matched nothing.
 - For a batch, supply a JSON array on stdin whose entries contain `runtime` (`claude` or `codex`), `root` (the absolute store-root path), and `session_id` (the unmodified session ID). Include exactly those sessions. Read the corresponding JSON array from stdout and associate each result by its returned runtime, root, and session ID:
 
 ```bash

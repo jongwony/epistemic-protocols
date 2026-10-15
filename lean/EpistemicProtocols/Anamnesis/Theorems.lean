@@ -33,8 +33,8 @@ theorem identification_first (respond session : Context P → Response P)
     recollect respond session c (u :: us) = o := by
   simp [recollect, h]
 
-/-- On the person's own invocation of this protocol, where the turn identifies nothing, the step
-    holds on the context before that turn. -/
+/-- On the person's own invocation that starts a fresh recall (`Invoked`), where the turn
+    identifies nothing, the step holds on the context before that turn. -/
 theorem fresh_invocation_holds (respond session : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P))
     (hc : closing (fuse c u) = none) (h : Invoked (fuse c u)) :
@@ -52,7 +52,8 @@ theorem ai_start_holds (respond session : Context P → Response P) (c : Context
 
 /-- A turn that is no invocation, identifies nothing, does not bear on this recall, and carries no
     empty intention — other work, or words that end this recall — joins the context with the
-    session's answer to it; no pass runs on it, and the recall goes on holding. -/
+    session's answer to it; no pass runs on it, and the recursion goes on reading the later
+    utterances. -/
 theorem unreached_step (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u))
     (hc : closing (fuse c u) = none) (h : ¬ Reaches (fuse c u))
@@ -72,6 +73,13 @@ theorem reaching_passes_again (respond session : Context P → Response P) (c : 
       | none => recollect respond session
           (pass (fuse c u) ++ [(respond (pass (fuse c u))).val]) us := by
   rcases hs : settle (pass (fuse c u)) with _ | o <;> simp [recollect, hi, hc, h, hs]
+
+/-- A start that continues an earlier recall closes on the person's identification of what that
+    recall presented, where the latest utterance makes it, before any pass runs. -/
+theorem start_identification_first (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (o : Outcome P) (ha : Activated c) (h : closing c = some o) :
+    start respond session c us = o := by
+  simp [start, ha, h]
 
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(search c).map (·.val) ++ (passRecord (c ++ (search c).map (·.val))).map (·.val), by
@@ -127,8 +135,10 @@ theorem invocation_activates (respond session : Context P → Response P) (c : C
   unfold start
   simp only [ha, ↓reduceIte]
   split
-  · next o ho => exact hs _ o ho
-  · exact key _ _
+  · next o ho => exact hc _ o ho
+  · split
+    · next o ho => exact hs _ o ho
+    · exact key _ _
 
 /-- A closing that identifies cites a turn the person sent, the latest of its context, that
     identifies the presented recognizable, and carries the doubts read on the context before that
@@ -189,14 +199,16 @@ theorem identified_only_by_person (respond session : Context P → Response P)
   have hc : ∃ c₀ : Context P, closing c₀ = some (.identified v) := by
     unfold start at h
     split at h
-    · simp only at h
-      split at h
-      · next o ho => subst h; exact absurd ho (settle_not_identified _ v)
-      · exact recollect_identified respond session _ us v h
+    · split at h
+      · next o ho => subst h; exact ⟨c, ho⟩
+      · simp only at h
+        split at h
+        · next o ho => subst h; exact absurd ho (settle_not_identified _ v)
+        · exact recollect_identified respond session _ us v h
     · cases h
   obtain ⟨c₀, hc₀⟩ := hc
-  obtain ⟨s, h₁, h₂, h₃, h₄, h₅⟩ := identified_by_person c₀ v hc₀
-  exact ⟨c₀, s, hc₀, h₁, h₂, h₃, h₄, h₅⟩
+  obtain ⟨s, hs⟩ := identified_by_person c₀ v hc₀
+  exact ⟨c₀, s, hc₀, hs⟩
 
 theorem answer_by_person {c : Context P} {s : Cite c}
     (ok : (answerCoord (P := P)).admits s.src) : s.src.val = .person := ok
