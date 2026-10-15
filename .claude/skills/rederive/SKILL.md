@@ -26,7 +26,7 @@ One skill per run, whose formal block is Lean or becomes Lean in the run: a core
    - the contributor corrects or replaces part of it → fuse the utterance and derive again;
    - the correction moves the pre-understanding (a source, a decide, a reading of use) → gather again where it moved, then derive;
    - the contributor stops → the run ends; what was gathered and derived is recorded on the protocol chart;
-   - no utterance → nothing is taken; whether the run waits or goes on past the gate is judged from its context, and going on follows *Without the contributor* below.
+   - no utterance → nothing is taken as a decide; whether the run waits or goes on past the gate is judged from its context, and going on follows *Without the contributor* below.
 
    **Re-entry.** A later finding — in the reading, the sketch, the sketch consult, dogfood, or the review — is triaged by what it does to a taken part: one that moves the ground of a taken part returns the run to the earliest step that part depends on and then to this gate, naming the part it moves; one that applies a taken part is a fix. Findings are presented grouped by the part they bear on, not as an item list. Parts whose ground did not move stand; a pass that moves no ground re-opens nothing.
 
