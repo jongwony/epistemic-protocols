@@ -58,7 +58,7 @@ The unifying figure is the **consumer that cannot re-derive**: an isolated subag
 
 The reference face is favored by three forces — transcription cost (a copy spends tokens), staleness (a copy diverges from the source it duplicated), and fidelity (re-encoding an authoritative form is lossy). The copy face is governed by loss-avoidance alone.
 
-This is the shared root of several existing positions rather than a new mechanism: Detection with Authority's relay mode forwards environmental facts with cited basis (a citation, not a re-constitution); the Task Externalization Boundary externalizes only the problem-to-solve and framing shifts (what the substrate cannot re-derive); Subagent Context Isolation has the coordinator point while the executor fetches its own context. On the receive side the move appears as forwarding a tool's native output unit verbatim instead of re-bucketing it into an imposed schema; on the send side as passing a pointer instead of inlining content. Both are the same move across the same boundary.
+This is the shared root of several existing positions rather than a new mechanism: Detection with Authority's relay forwards environmental facts with cited basis (a citation, not a re-constitution); the Task Externalization Boundary externalizes only the problem-to-solve and framing shifts (what the substrate cannot re-derive); Subagent Context Isolation has the coordinator point while the executor fetches its own context. On the receive side the move appears as forwarding a tool's native output unit verbatim instead of re-bucketing it into an imposed schema; on the send side as passing a pointer instead of inlining content. Both are the same move across the same boundary.
 
 **Operational test**: "Can the consumer re-derive this from shared substrate with its own tools?" Yes → reference; no → copy. A copy where reference would serve pays tokens, risks staleness, and may lose fidelity; a reference where copy is required loses the non-re-derivable content outright.
 
@@ -84,7 +84,7 @@ Epistemic dialogue protocols coexist with a harness's built-in execution command
 - Silence or turning to unrelated work closes nothing and selects no branch. Which steps wait for the person's answer is judged under `premise/recognition-and-authority.md` §Decision Tiering.
 - At an execution handoff, name the required capability and stop there.
 
-Circular protocol interactions are healthy dialogue rather than a hang, and the gate is what makes them so: a cycle re-entering a Constitution gate yields the turn each time, so it advances only when the user answers and cannot spin on its own.
+A protocol cycle that re-enters a Constitution gate is healthy dialogue rather than a hang: the gate yields the turn each time, so the cycle advances only when the user answers and cannot spin on its own.
 
 ## Plugin Encapsulation
 

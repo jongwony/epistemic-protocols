@@ -10,7 +10,7 @@ Resolve whether the current concern calls for examining a design or executing a 
 
 Derive a repair from the defect and the authorized outcome. Select the scope that resolves the cause and preserves the relevant contracts; a small diff is not evidence that the cause was addressed. `instruction-authoring.md` §Where a Repair Lands governs this derivation.
 
-Keep unrelated work outside the repair unless already authorized. When competing repair directions remain and choosing among them requires an unentrusted value judgment, present their consequences for selection. A broader repair within a settled direction does not itself create a new decision gate.
+Keep unrelated work outside the repair unless already authorized. When competing repair directions remain and choosing among them requires an unentrusted value judgment, that judgment stays with its holder: present their consequences for selection, or carry a reversible repair forward on a stated judgment as `recognition-and-authority.md` §Decision Tiering allows. A broader repair within a settled direction does not itself create a new decision gate.
 
 ## Ask Granularity
 
