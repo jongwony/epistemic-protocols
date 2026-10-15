@@ -285,8 +285,8 @@ axiom dissent : Context P → List String
 axiom targets : Context P → List Frame
 
 /-- **Your judgment**: the cited turn — the person's latest utterance — takes the field, read from
-    the whole turn rather than from a keyword: a stop said of the field, "this is the field, let's
-    take it", a taking that also says what comes next. It takes the field as the map it answered
+    the whole turn rather than from a keyword: "this is the field, let's take it", a taking that
+    also says what comes next. It takes the field as the map it answered
     showed it, your proposed exclusions on it included, together with what the person's own turns
     since that map changed — the taking turn's included — each as far as its words reach. A turn
     answering a map with no candidate on it takes nothing; where its ideas land is `candidates`. A
@@ -306,7 +306,8 @@ axiom closing : (c : Context P) → Occ (closeCoord (P := P)) c
 
 /-- **Your reading**: the latest utterance is the person's own invocation of this protocol. It
     ends this run's reading, holding; the run it starts reads it and resumes the earlier field
-    where the request asks to continue — the earlier field is never discarded. -/
+    where the request is read as continuing it, as U-BINDING says — the earlier field is never
+    discarded. -/
 axiom Invoked : Context P → Prop
 
 /-- **Your judgment**: the latest utterance bears on this run. A turn that only turns to other
@@ -345,9 +346,9 @@ bind(U) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ chain_ref
 Priority: explicit_arg > colocated_expr > prev_user_turn > chain_ref
   /ideate "topic or fragments"               → U = the argument
   /ideate (alone)                            → U = the person's previous message; one turn, not a
-                                               scan — unless a run of this protocol already answered
-                                               it: then no new request binds, and the latest field,
-                                               taken or holding, resumes as last shown
+                                               scan. Whether it starts a new topic or resumes the
+                                               latest field, taken or holding, is read from the
+                                               accumulated context
   "give me some ideas ... /ideate"           → U = the text before the trigger
   "using what was just found above, /ideate" → U also carries the named material; it folds in as
                                                seeds under the origin it came with
@@ -466,11 +467,11 @@ inductive Op | bind | readReference | classify | extractSignals | classifyRelay 
              | seam | holdReply
 
 def grounding : Op → Annot × String
-  | .bind           => (.sense, "Internal analysis: the invocation utterance and a chain reference it names, or on a bare resume the latest field this protocol drew in the session, as U-BINDING says; nothing unnamed is scanned")
+  | .bind           => (.sense, "Internal analysis: the invocation utterance and a chain reference it names, as U-BINDING says; nothing unnamed is scanned")
   | .readReference  => (.observe, "Tool read, conditional: the records `reference` names, and nothing else; what it returns enters with its external origin")
   | .classify       => (.sense, "Internal analysis: the entry, Blank, Seeded, or Resumed, inferred from the invocation and what it binds; zero entry questions")
   | .extractSignals => (.sense, "Internal analysis: signals — concerns, weaknesses, requirements — read from the bound request, named material, and what the person says later, each tagged by its source; never scored or ranked")
-  | .classifyRelay  => (.interaction .extension, "the inferred entry and its basis, quoting the utterance fragment where there is one, why the field reads thin, and the signals with their sources; relay, not a gate")
+  | .classifyRelay  => (.interaction .extension, "the inferred entry and its basis, quoting the utterance fragment where there is one — on a bare invocation, whether it reads as a new topic or a resume — stated as your reading, which the person can correct; why the field reads thin, and the signals with their sources; relay, not a gate")
   | .deriveFrames   => (.sense, "Internal analysis: the generation frames — seed-anchored and novel on Seeded, novel and abstract on Blank; a resumed field's frames and branches carry over")
   | .qframes        => (.interaction .constitution, "the frame map while no frame has been opened, as \"The map\" describes; read references/blank-entry.md before presenting")
   | .generate       => (.sense, "Internal generation: parallel over the frames the pass opens; a host may realize it through isolated parallel agents, and the meaning does not depend on that; no elimination, ranking, or scoring")
@@ -523,11 +524,11 @@ At the taking, show the field's trace: the topic, then the whole map as drawn ab
 
 ## Rules
 
-- **User-initiated, zero entry questions**: `/ideate` activates only on direct invocation (Layer 1); `Entry` (Blank, Seeded, or Resumed) is inferred from the request alone — never asked. The classification is a relay, not a gate.
+- **User-initiated, zero entry questions**: `/ideate` activates only on direct invocation (Layer 1); `Entry` (Blank, Seeded, or Resumed) is inferred from the request as U-BINDING binds it — never asked. The classification is a relay, not a gate.
 - **Frame-first ownership**: Whenever the gate is the frame map, read `references/blank-entry.md` before presenting abstract frames or any concrete candidate. Preserve every candidate's origin thereafter; an idea the person contributes to this field at any turn is their own candidate, under the frame it fits.
 - **The person takes the field**: Only the person's own latest turn takes the field, as `ClosingSupported` reads it, and only with candidates in the field. A pick among candidates, a judgment on one, or a correction does not take the field; it is read for the frames it opens and the ideas and signals it adds, and the gate stays. A turn that does not bear on the run is met as `Reaches` says.
 - **Out of scope, never erased**: A frame the person puts out of scope stays in the field with its branches and candidates, citing their turn, and is never widened until their later words bring it back in; applying a boundary they stated to particular frames is your proposal until they take it — both as `excluded` says.
-- **Named material only**: heuresis reads the request, material the person explicitly names at invocation or at any later turn — a prior protocol's output in the session, or a record outside it such as an issue or a document, read by a tool — and what the person says as the run goes on. The request binds as U-BINDING says. It never scans unnamed material — the wider session, codebase, or rules — and never reverse-traces hidden decision coordinates from externalized substrate; the run's own earlier turns about the field, and on a bare resume the latest field this protocol drew, are the field's context, not unnamed material.
+- **Named material only**: heuresis reads the request, material the person explicitly names at invocation or at any later turn — a prior protocol's output in the session, or a record outside it such as an issue or a document, read by a tool — and what the person says as the run goes on. The request binds as U-BINDING says. It never scans unnamed material — the wider session, codebase, or rules — and never reverse-traces hidden decision coordinates from externalized substrate; the run's own earlier turns about the field, and an earlier field this protocol drew that the invocation resumes, are the field's context, not unnamed material.
 - **Chain semantics**: Named material folds in as seeds, each keeping the origin tag it carries or else the origin of the turn it was read from — `external` for a record a tool read; naming it is the person's adoption, recorded apart. When and under which frame each item lands is `candidates`; an invocation is read for what it reaches, as U-BINDING says. The ownership trade-off is declared under Known Limitations.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged.
 - **Width and depth both widen**: A request for more on an open frame or on one candidate opens a branch under it, registered with its parent, and the next pass fills it; nothing is ranked or chosen. Only what the person themselves sets aside for later parks, citing their turn, and is carried in the field.

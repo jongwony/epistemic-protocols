@@ -10,7 +10,7 @@ Greek εὕρεσις denotes finding, discovery, or invention/conception broadl
 
 ## What is Heuresis?
 
-A protocol for the moment **before any selection is made, when the candidate field itself is thin** — empty, or already narrowed onto one option before the underlying goal called for it. It infers whether you're starting blank, already hold a few fragments, or are continuing a field from before, from the invocation alone (no entry questions), opens abstract frames for you to pick before showing any concrete idea on a blank start, then generates candidates in parallel across the frames you open — never eliminating, ranking, or choosing among them. You take the field whenever it serves you.
+A protocol for the moment **before any selection is made, when the candidate field itself is thin** — empty, or already narrowed onto one option before the underlying goal called for it. It infers whether you're starting blank, already hold a few fragments, or are continuing a field from before, from the invocation — a bare `/ideate` from the conversation before it — with no entry questions, opens abstract frames for you to pick before showing any concrete idea on a blank start, then generates candidates in parallel across the frames you open — never eliminating, ranking, or choosing among them. You take the field whenever it serves you.
 
 ### The Core Problem
 
@@ -18,7 +18,7 @@ Some candidate fields are underexpanded (`CandidateFieldUnderexpanded`): the goa
 
 ### The Solution
 
-**Divergence over Selection**: infer blank, seeded, or resumed entry from the utterance alone, then fork — blank entries see an abstract frame map before any concrete idea exists (ownership stays with you, and nothing anchors your own thinking early); seeded entries expand straight from what you already gave, since the anchoring risk doesn't apply the same way to material you supplied yourself. Each round generates candidates in parallel across the open frames, every candidate tagged with its origin (you, the AI, or the source chained material came from), nothing discarded or ranked. There is no round quota — your own taking is what bounds the field, and only a field with candidates in it can be taken: before any candidate exists there is nothing to take yet, and saying you are done, or turning to other work, leaves the run where it stood.
+**Divergence over Selection**: infer blank, seeded, or resumed entry without asking, then fork — blank entries see an abstract frame map before any concrete idea exists (ownership stays with you, and nothing anchors your own thinking early); seeded entries expand straight from what you already gave, since the anchoring risk doesn't apply the same way to material you supplied yourself. Each round generates candidates in parallel across the open frames, every candidate tagged with its origin (you, the AI, or the source chained material came from), nothing discarded or ranked. There is no round quota — your own taking is what bounds the field, and only a field with candidates in it can be taken: before any candidate exists there is nothing to take yet, and saying you are done, or turning to other work, leaves the run where it stood.
 
 ### Difference from Other Protocols
 
