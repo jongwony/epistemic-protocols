@@ -21,90 +21,86 @@ variable {P : Type}
 instance : Nonempty Catalog :=
   ⟨{ entries := [], self := { skill := "", description := "" }, excludes := by simp }⟩
 
-/-- The three outcomes of one pass: an invocation of the one protocol every fit raised now names,
-    each fit plain, under the policy, composing with the work underway; one pointer line for each
-    fit whose pointer adds something; or silence, where neither holds. -/
+/-- The three outcomes of one pass: an invocation of the protocol `lead` brings in, each of its
+    fits raised now plain, under the policy; one pointer line for each fit whose pointer adds
+    something; or silence, where neither holds. -/
 private theorem route_cases (k : Catalog) (c : Context P) :
-    (∃ e ls hne hn, route k c = .invoke e ls hne hn ∧ ls = raised k c ∧
-      (∀ m ∈ ls, m.entry = e ∧ Plain c m) ∧ PolicyApplies c e ∧ Composes c e) ∨
+    (∃ e hne hn, lead k c = some e ∧ (∀ m ∈ raisedFor k c e, Plain c m) ∧ PolicyApplies c e ∧
+      route k c = .invoke e (raisedFor k c e) hne hn (raisedBeside k c e)) ∨
     (∃ hne, route k c = .point (pointed k c) hne) ∨
     (route k c = .silence ∧ pointed k c = []) := by
+  have hp : (∃ hne, pointers k c = .point (pointed k c) hne) ∨
+      (pointers k c = .silence ∧ pointed k c = []) := by
+    unfold pointers
+    split
+    · next h => exact Or.inr ⟨rfl, h⟩
+    · next p ps h => exact Or.inl ⟨by rw [h]; exact List.cons_ne_nil p ps, by simp only [h]⟩
   unfold route
   split
-  · next h =>
-    refine Or.inr (Or.inr ⟨rfl, ?_⟩)
-    unfold pointed; rw [h]; rfl
-  · next l ls h =>
+  · next e he =>
     split
-    · next hi =>
-      exact Or.inl ⟨l.entry, l :: ls, List.cons_ne_nil l ls, fun m hm => (hi.1 m hm).1, rfl,
-        h.symm, hi.1, hi.2.1, hi.2.2⟩
-    · split
-      · next hp => exact Or.inr (Or.inr ⟨rfl, hp⟩)
-      · next p ps hp => exact Or.inr (Or.inl ⟨by rw [hp]; exact List.cons_ne_nil p ps, by simp only [hp]⟩)
+    · next h =>
+      exact Or.inl ⟨e, h.1, fun l hl => by simpa using (List.mem_filter.mp hl).2, he, h.2.1,
+        h.2.2, rfl⟩
+    · exact Or.inr hp
+  · exact Or.inr hp
 
-/-- A pass invokes a protocol only where the lines it hands over are exactly the fits raised now —
-    each a fit `fits` reads that `Raise` admits, each plain, each naming that protocol —, the
-    routing policy covers invoking it, and bringing it in composes with the work underway. -/
+/-- A pass invokes a protocol only where `lead` brings it in, the lines it hands over are exactly
+    the fits raised now that name it — each a fit `fits` reads that `Raise` admits, each plain —,
+    the fits it shows beside them are exactly the fits raised now for other protocols, and the
+    routing policy covers invoking it. -/
 theorem invoke_requires (k : Catalog) (c : Context P) (e : Entry) (ls : List (Line k c))
-    (hne : ls ≠ []) (hn : ∀ l ∈ ls, l.entry = e) (h : route k c = .invoke e ls hne hn) :
-    ls = raised k c ∧ (∀ m ∈ ls, m ∈ fits k c ∧ Raise c m ∧ Plain c m ∧ m.entry = e) ∧
-      PolicyApplies c e ∧ Composes c e := by
-  rcases route_cases k c with ⟨e₁, ls₁, _, _, h₁, hr, hm, hq, hc⟩ | ⟨_, hpt⟩ | ⟨hs, -⟩
+    (hne : ls ≠ []) (hn : ∀ l ∈ ls, l.entry = e) (bs : List (Line k c))
+    (h : route k c = .invoke e ls hne hn bs) :
+    lead k c = some e ∧ ls = raisedFor k c e ∧ bs = raisedBeside k c e ∧
+      (∀ m ∈ ls, m ∈ fits k c ∧ Raise c m ∧ Plain c m) ∧ PolicyApplies c e := by
+  rcases route_cases k c with ⟨e₁, _, _, hl, hm, hq, h₁⟩ | ⟨_, hpt⟩ | ⟨hs, -⟩
   · rw [h₁] at h
     cases h
-    refine ⟨hr, fun m hmem => ?_, hq, hc⟩
-    have hraised : m ∈ raised k c := hr ▸ hmem
-    unfold raised at hraised
-    have hf := List.mem_filter.mp hraised
-    exact ⟨hf.1, by simpa using hf.2, (hm m hmem).2, (hm m hmem).1⟩
+    refine ⟨hl, rfl, rfl, fun m hmem => ?_, hq⟩
+    have hf := List.mem_filter.mp hmem
+    have hr := List.mem_filter.mp (by unfold raised at hf; exact hf.1 : m ∈ (fits k c).filter _)
+    exact ⟨hr.1, by simpa using hr.2, hm m hmem⟩
   · rw [hpt] at h; cases h
   · rw [hs] at h; cases h
 
-/-- Where the fits raised now all name one protocol, each of them plain, the routing policy covers
-    invoking it, and bringing it in composes with the work underway, a pass invokes it, handing
-    over exactly those fits. No checkpoint is among these premises: one that still holds the
-    person's judgment bears on an invocation only through `Composes`. -/
-theorem invokes_when (k : Catalog) (c : Context P) (e : Entry) (hne : raised k c ≠ [])
-    (hm : ∀ m ∈ raised k c, m.entry = e ∧ Plain c m) (hq : PolicyApplies c e)
-    (hc : Composes c e) :
-    ∃ ls hne hn, route k c = .invoke e ls hne hn ∧ ls = raised k c := by
-  obtain ⟨l, ls, h⟩ : ∃ l ls, raised k c = l :: ls := by
-    cases hr : raised k c with
-    | nil => exact absurd hr hne
-    | cons l ls => exact ⟨l, ls, rfl⟩
-  have hl : l.entry = e := (hm l (by rw [h]; exact List.mem_cons_self ..)).1
-  subst hl
-  have hi : (∀ m ∈ l :: ls, m.entry = l.entry ∧ Plain c m) ∧ PolicyApplies c l.entry ∧
-      Composes c l.entry := ⟨fun m hmem => hm m (by rw [h]; exact hmem), hq, hc⟩
-  have hroute : route k c = .invoke l.entry (l :: ls) (List.cons_ne_nil l ls)
-      (fun m hm' => (hi.1 m hm').1) := by
+/-- Where `lead` brings a protocol in, it has fits raised now, each of them plain, and the routing
+    policy covers invoking it, a pass invokes it, handing over exactly those fits and showing the
+    fits raised now for other protocols beside them. No checkpoint is among these premises, and no
+    count of protocols: a checkpoint that still holds the person's judgment, and fits for other
+    protocols, bear on an invocation only through `lead`. -/
+theorem invokes_when (k : Catalog) (c : Context P) (e : Entry) (hl : lead k c = some e)
+    (hne : raisedFor k c e ≠ []) (hm : ∀ m ∈ raisedFor k c e, Plain c m)
+    (hq : PolicyApplies c e) :
+    ∃ hne hn, route k c = .invoke e (raisedFor k c e) hne hn (raisedBeside k c e) := by
+  have hroute : route k c = .invoke e (raisedFor k c e) hne
+      (fun l hl => by simpa using (List.mem_filter.mp hl).2) (raisedBeside k c e) := by
     unfold route
     split
-    · next h' => rw [h] at h'; cases h'
-    · next l' ls' h' =>
-      rw [h] at h'
-      cases h'
+    · next e₁ he =>
+      rw [hl] at he
+      cases he
       split
       · rfl
-      · next hni => exact absurd hi hni
-  exact ⟨l :: ls, _, _, hroute, h.symm⟩
+      · next hni => exact absurd ⟨hne, hm, hq⟩ hni
+    · next he => rw [hl] at he; cases he
+  exact ⟨hne, _, hroute⟩
 
-/-- Where two fits raised now name different protocols, a pass invokes neither. -/
-theorem two_protocols_never_invoke (k : Catalog) (c : Context P) (l m : Line k c)
-    (hl : l ∈ raised k c) (hm : m ∈ raised k c) (hd : l.entry ≠ m.entry) (e : Entry)
-    (ls : List (Line k c)) (hne : ls ≠ []) (hn : ∀ x ∈ ls, x.entry = e) :
-    route k c ≠ .invoke e ls hne hn := by
-  intro hi
-  have hr := (invoke_requires k c e ls hne hn hi).1
-  rw [← hr] at hl hm
-  exact hd ((hn l hl).trans (hn m hm).symm)
+/-- An invocation shows every fit raised now: each is among the lines it hands over or among the
+    fits it shows beside them. -/
+theorem invoke_shows_every_raised (k : Catalog) (c : Context P) (e : Entry)
+    (ls : List (Line k c)) (hne : ls ≠ []) (hn : ∀ l ∈ ls, l.entry = e) (bs : List (Line k c))
+    (h : route k c = .invoke e ls hne hn bs) : ∀ l, l ∈ raised k c ↔ l ∈ ls ∨ l ∈ bs := by
+  obtain ⟨-, rfl, rfl, -, -⟩ := invoke_requires k c e ls hne hn bs h
+  intro l
+  unfold raisedFor raisedBeside
+  by_cases he : l.entry = e <;> simp [List.mem_filter, he]
 
 /-- A pointer shows exactly the fits whose pointer adds something — each fit `fits` reads that
     `Raise` and `Fresh` admit, none left out and none added. -/
 theorem point_is_pointed (k : Catalog) (c : Context P) (ls : List (Line k c)) (hne : ls ≠ [])
     (h : route k c = .point ls hne) : ∀ l, l ∈ ls ↔ l ∈ fits k c ∧ Raise c l ∧ Fresh c l := by
-  rcases route_cases k c with ⟨_, _, _, _, h₁, -⟩ | ⟨_, hpt⟩ | ⟨hs, -⟩
+  rcases route_cases k c with ⟨_, _, _, _, _, _, h₁⟩ | ⟨_, hpt⟩ | ⟨hs, -⟩
   · rw [h₁] at h; cases h
   · rw [hpt] at h
     cases h
@@ -117,7 +113,7 @@ theorem point_is_pointed (k : Catalog) (c : Context P) (ls : List (Line k c)) (h
 /-- A pass is silent only where no fit raised now has a pointer that adds something. -/
 theorem silence_leaves_nothing_fresh (k : Catalog) (c : Context P) (h : route k c = .silence) :
     pointed k c = [] := by
-  rcases route_cases k c with ⟨_, _, _, _, h₁, -⟩ | ⟨_, hpt⟩ | ⟨-, hp⟩
+  rcases route_cases k c with ⟨_, _, _, _, _, _, h₁⟩ | ⟨_, hpt⟩ | ⟨-, hp⟩
   · rw [h₁] at h; cases h
   · rw [hpt] at h; cases h
   · exact hp
@@ -129,33 +125,33 @@ theorem none_raised_silent (k : Catalog) (c : Context P) (h : ∀ l ∈ fits k c
   have hr : raised k c = [] := by
     unfold raised
     exact List.filter_eq_nil_iff.mpr (fun l hl => by simpa using h l hl)
-  unfold route
-  split
-  · rfl
-  · next l ls hl => rw [hr] at hl; cases hl
+  rcases route_cases k c with ⟨e, hne, _, _, _, _, _⟩ | ⟨hne, _⟩ | ⟨hs, -⟩
+  · exact absurd (by unfold raisedFor; rw [hr]; rfl) hne
+  · exact absurd (by unfold pointed; rw [hr]; rfl) hne
+  · exact hs
 
 /-- The protocol a pass names for its hand-off comes only from an invocation: `invokedBy` names
     that invocation's protocol, every line of which names it, and a pointer or silence names
     none. -/
 private theorem only_invoke_dispatches (k : Catalog) (c : Context P) (o : ProtocolInvocation k c)
     (e : Entry) (h : invokedBy o = some e) :
-    ∃ ls hne hn, o = .invoke e ls hne hn := by
+    ∃ ls hne hn bs, o = .invoke e ls hne hn bs := by
   cases o with
-  | invoke e₁ ls hne hn =>
+  | invoke e₁ ls hne hn bs =>
     simp only [invokedBy, Option.some.injEq] at h
     subst h
-    exact ⟨ls, hne, hn, rfl⟩
+    exact ⟨ls, hne, hn, bs, rfl⟩
   | point ls hne => simp [invokedBy] at h
   | silence => simp [invokedBy] at h
 
 /-- `handoff` dispatches through `.invoke` exactly for an invocation; a pointer and silence hand
     nothing off. -/
 theorem handoff_only_invoke (k : Catalog) (c : Context P) (o : ProtocolInvocation k c) :
-    (handoff o = some .invoke ↔ ∃ e ls hne hn, o = .invoke e ls hne hn) ∧
+    (handoff o = some .invoke ↔ ∃ e ls hne hn bs, o = .invoke e ls hne hn bs) ∧
       (∀ op, handoff o = some op → op = .invoke) := by
   cases o with
-  | invoke e ls hne hn =>
-    exact ⟨⟨fun _ => ⟨e, ls, hne, hn, rfl⟩, fun _ => rfl⟩,
+  | invoke e ls hne hn bs =>
+    exact ⟨⟨fun _ => ⟨e, ls, hne, hn, bs, rfl⟩, fun _ => rfl⟩,
       fun op h => by simp [handoff, invokedBy] at h; exact h.symm⟩
   | point ls hne => simp [handoff, invokedBy]
   | silence => simp [handoff, invokedBy]
@@ -164,7 +160,7 @@ theorem handoff_only_invoke (k : Catalog) (c : Context P) (o : ProtocolInvocatio
     is not the name of the catalog's own entry. -/
 theorem invokes_only_catalog (k : Catalog) (c : Context P) (e : Entry)
     (h : invokedBy (route k c) = some e) : e ∈ k.entries ∧ e.skill ≠ k.self.skill := by
-  obtain ⟨ls, hne, hn, ho⟩ := only_invoke_dispatches k c _ e h
+  obtain ⟨ls, hne, hn, -, -⟩ := only_invoke_dispatches k c _ e h
   obtain ⟨l, hl⟩ := List.exists_mem_of_ne_nil ls hne
   rw [← hn l hl]
   exact ⟨l.mem, k.excludes _ l.mem⟩
