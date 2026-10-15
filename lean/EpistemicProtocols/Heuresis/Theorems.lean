@@ -20,93 +20,103 @@ variable {P : Type}
 instance : Nonempty Entry := ⟨.blank⟩
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 
-theorem silence (generate respond : Context P → Response P) (c : Context P) :
-    ideate generate respond c [] = .holding c := by
+theorem silence (generate respond session : Context P → Response P) (c : Context P) :
+    ideate generate respond session c [] = .holding c := by
   simp [ideate]
 
-theorem blank_frame_map_first (relay generate respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P))
-    (h : entry (c ++ (reference c).map (·.val) ++ [(relay (c ++ (reference c).map (·.val))).val])
-      = .blank) :
-    start relay generate respond c us =
-      ideate generate respond
-        (c ++ (reference c).map (·.val) ++ [(relay (c ++ (reference c).map (·.val))).val] ++
-          [(respond (c ++ (reference c).map (·.val) ++
-            [(relay (c ++ (reference c).map (·.val))).val])).val]) us := by
-  simp only [start, h]
+/-- A blank or resumed start whose request opens no frame presents the map before any pass:
+    `start` presents it on the context with the relay, and generates nothing first. -/
+theorem opening_map_first (relay generate respond session : Context P → Response P)
+    (c : Context P) (us : List (Utterance P))
+    (h : entry (receive c ++ [(relay (receive c)).val]) = .blank ∨
+      entry (receive c ++ [(relay (receive c)).val]) = .resumed)
+    (ht : (targets (receive c ++ [(relay (receive c)).val])).isEmpty = true) :
+    start relay generate respond session c us =
+      ideate generate respond session
+        (receive c ++ [(relay (receive c)).val] ++
+          [(respond (receive c ++ [(relay (receive c)).val])).val]) us := by
+  rcases h with h | h <;> simp only [start, h, advance, ht, ↓reduceIte]
 
-theorem no_empty_pass (generate respond : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hk : filledValue (closing (receive c u)) = none)
-    (ht : (targets (receive c u)).isEmpty = true) :
-    ideate generate respond c (u :: us) =
-      ideate generate respond (receive c u ++ [(respond (receive c u)).val]) us := by
-  simp [ideate, hk, ht]
+/-- On a fresh invocation that takes nothing, this run returns holding, on the context before that
+    utterance. -/
+theorem fresh_invocation_holds (generate respond session : Context P → Response P)
+    (c : Context P) (u : Utterance P) (us : List (Utterance P))
+    (hk : ¬ Taken c u)
+    (hi : Invoked (fuse c u)) :
+    ideate generate respond session c (u :: us) = .holding c := by
+  simp only [ideate, hk, hi, ↓reduceDIte, ↓reduceIte]
 
-theorem closed_by_person (c : Context P) (k : Closing) (h : filledValue (closing c) = some k) :
-    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
+/-- A turn that takes nothing, is no fresh invocation, and does not bear on the run joins the
+    context with the session's answer to it; no record it names is read, no pass runs, and no map
+    is drawn at that step. -/
+theorem unreached_step (generate respond session : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P))
+    (hk : ¬ Taken c u)
+    (hi : ¬ Invoked (fuse c u)) (hr : ¬ Reaches (fuse c u)) :
+    ideate generate respond session c (u :: us) =
+      ideate generate respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
+  simp only [ideate, hk, hi, hr, ↓reduceDIte, ↓reduceIte, not_false_eq_true]
+
+/-- A turn that takes nothing, is no fresh invocation, bears on the run, and opens no frame runs no
+    pass: the map is presented again on the context with that turn and the records `reference`
+    reads. -/
+theorem no_empty_pass (generate respond session : Context P → Response P) (c : Context P)
+    (u : Utterance P) (us : List (Utterance P))
+    (hk : ¬ Taken c u)
+    (hi : ¬ Invoked (fuse c u)) (hr : Reaches (fuse c u))
+    (ht : (targets (receive (fuse c u))).isEmpty = true) :
+    ideate generate respond session c (u :: us) =
+      ideate generate respond session
+        (receive (fuse c u) ++ [(respond (receive (fuse c u))).val]) us := by
+  simp only [ideate, hk, hi, hr, not_true_eq_false, ↓reduceIte, ↓reduceDIte, advance, ht]
+
+private theorem taken_by_person (c : Context P) (i : Nat) (h : takenAt c i = true) :
+    ∃ s : Cite c, s.idx = i ∧ s.src.val = .person ∧ ClosingSupported c (c[s.idx]'s.lt) () := by
+  unfold takenAt at h
   cases hc : closing c with
-  | open_ _ => simp [hc, filledValue] at h
-  | filled a src ok _ => exact ⟨src, ok, src.ok.trans ok⟩
-
-private theorem stop_by_person (c : Context P) (h : filledValue (closing c) = some .stop) :
-    ∃ s : Cite c, s.src.val = .person ∧ ClosingSupported c (c[s.idx]'s.lt) .stop := by
-  cases hc : closing c with
-  | open_ _ => simp [hc, filledValue] at h
+  | open_ _ => simp [hc] at h
   | filled a src ok sup =>
-    simp only [hc, filledValue, Option.some.injEq] at h
-    subst h
-    exact ⟨src, ok, sup⟩
+    simp only [hc, decide_eq_true_eq] at h
+    exact ⟨src, h, ok, sup⟩
 
-private theorem ideate_assembles (generate respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (o : Outcome P) (h : ideate generate respond c us = o)
-    (ho : (∃ f, o = .field f) ∨ (∃ e, o = .early e)) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .stop ∧ assemble c₁ = o := by
+private theorem ideate_field (generate respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (f : DiverseCandidateField P)
+    (h : ideate generate respond session c us = .field f) :
+    ∃ (c₀ : Context P) (u : Utterance P),
+      f.context = fuse c₀ u ∧ takenAt f.context c₀.length = true := by
   induction us generalizing c with
-  | nil => simp [ideate] at h; subst h; rcases ho with ⟨_, h⟩ | ⟨_, h⟩ <;> cases h
+  | nil => simp [ideate] at h
   | cons u us ih =>
     simp only [ideate] at h
     split at h
-    · next hk => exact ⟨_, hk, h⟩
-    · subst h; rcases ho with ⟨_, h⟩ | ⟨_, h⟩ <;> cases h
-    · subst h; rcases ho with ⟨_, h⟩ | ⟨_, h⟩ <;> cases h
+    · next hk =>
+      cases h
+      exact ⟨c, u, rfl, hk.1⟩
     · split at h
-      · exact ih _ h
-      · exact ih _ h
+      · cases h
+      · split at h <;> exact ih _ h
 
-private theorem start_assembles (relay generate respond : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (o : Outcome P) (h : start relay generate respond c us = o)
-    (ho : (∃ f, o = .field f) ∨ (∃ e, o = .early e)) :
-    ∃ c₁ : Context P, filledValue (closing c₁) = some .stop ∧ assemble c₁ = o := by
+/-- Every field a run yields is taken by the person at the utterance it closes on: the context it
+    is read on is that utterance fused, with nothing it names read, and it cites that utterance — a
+    turn they sent that says they take the field. An earlier taking, and your reading that the
+    field is wide enough, take nothing. -/
+theorem field_on_person_taking (relay generate respond session : Context P → Response P)
+    (c : Context P) (us : List (Utterance P)) (f : DiverseCandidateField P)
+    (h : start relay generate respond session c us = .field f) :
+    ∃ (c₀ : Context P) (u : Utterance P) (s : Cite f.context),
+      f.context = fuse c₀ u ∧ s.idx = c₀.length ∧ s.src.val = .person ∧
+      ClosingSupported f.context (f.context[s.idx]'s.lt) () := by
+  have key : ∀ c₁, ideate generate respond session c₁ us = .field f →
+      ∃ (c₀ : Context P) (u : Utterance P) (s : Cite f.context),
+        f.context = fuse c₀ u ∧ s.idx = c₀.length ∧ s.src.val = .person ∧
+        ClosingSupported f.context (f.context[s.idx]'s.lt) () := by
+    intro c₁ h₁
+    obtain ⟨c₀, u, hc, ht⟩ := ideate_field generate respond session c₁ us f h₁
+    obtain ⟨s, hi, hp, hs⟩ := taken_by_person f.context c₀.length ht
+    exact ⟨c₀, u, s, hc, hi, hp, hs⟩
   unfold start at h
   simp only at h
-  split at h
-  · exact ideate_assembles generate respond _ us o h ho
-  · exact ideate_assembles generate respond _ us o h ho
-
-/-- Every field a run assembles — a candidate field, or an early exit with none — closes on the
-    person's Stop: the context it closes on cites a turn they sent that says it of the field. Your
-    reading that the field is wide enough closes nothing. -/
-theorem assembled_on_person_stop (relay generate respond : Context P → Response P)
-    (c : Context P) (us : List (Utterance P)) :
-    (∀ f, start relay generate respond c us = .field f →
-      ∃ s : Cite f.context, s.src.val = .person ∧
-        ClosingSupported f.context (f.context[s.idx]'s.lt) .stop) ∧
-    (∀ e, start relay generate respond c us = .early e →
-      ∃ s : Cite e.context, s.src.val = .person ∧
-        ClosingSupported e.context (e.context[s.idx]'s.lt) .stop) := by
-  constructor
-  · intro f h
-    obtain ⟨c₁, hk, ha⟩ := start_assembles relay generate respond c us _ h (.inl ⟨f, rfl⟩)
-    unfold assemble at ha
-    split at ha
-    · cases ha
-    · cases ha; exact stop_by_person c₁ hk
-  · intro e h
-    obtain ⟨c₁, hk, ha⟩ := start_assembles relay generate respond c us _ h (.inr ⟨e, rfl⟩)
-    unfold assemble at ha
-    split at ha
-    · cases ha; exact stop_by_person c₁ hk
-    · cases ha
+  split at h <;> exact key _ h
 
 theorem parked_by_person (c : Context P) (p : ParkedFollowUp c) :
     (c[p.request.idx]'p.request.lt).origin = .person :=
@@ -129,12 +139,5 @@ theorem field_has_candidates (r : DiverseCandidateField P) : candidates r.contex
   intro h
   have := r.nonempty
   simp [h] at this
-
-theorem early_all_unaddressed (r : EarlyExit P) (s : Signal) (hs : s ∈ signals r.context) :
-    Unaddressed r.context s := by
-  have he : candidates r.context = [] := List.isEmpty_iff.mp r.empty
-  refine ⟨hs, ?_⟩
-  rintro ⟨x, hx, _⟩
-  simp [he] at hx
 
 end Heuresis

@@ -18,7 +18,6 @@
 | `/gate-check` | 자문 검증 결정 게이트 — 독립 판정자가 작업이 아니라 초안 옵션 집합 자체를 판정하고, 그 인용 근거를 검증한 뒤에야 사용자에게 도달 | 초안대로의 게이트, 릴레이로 제시되는 확정 옵션, 재구성된 옵션 집합, 또는 검사가 닫지 못한 경우 수리 공간·다툼 있는 읽기·어느 쪽도 답이 아닌 두 집합 |
 | `/white-bear` | 프로즈 감사 — 불필요한 경쟁-대상 언급 (금지 프레이밍, 대체된-경로 언급, 부정 앵커링) | JSON findings (읽기 전용) |
 | `/zero-shot` | 프로즈 감사 — 앵커링 예시 대신 원칙 진술 | JSON findings (읽기 전용) |
-| `/realign` | 3-horizon 융합으로 프로젝트 가이드 direction line 도출 | 프로젝트 가이드에 기록된 fused direction line |
 
 ## 스킬
 
@@ -76,8 +75,7 @@ epistemic-cooperative/
     ├── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
     ├── gate-check/SKILL.md       # /gate-check 자문 검증 결정 게이트
     ├── white-bear/SKILL.md       # /white-bear 경쟁-대상 언급 프로즈 감사
-    ├── zero-shot/SKILL.md        # /zero-shot 앵커링 예시 프로즈 감사
-    └── realign/SKILL.md          # /realign 프로젝트 가이드 direction line 융합
+    └── zero-shot/SKILL.md        # /zero-shot 앵커링 예시 프로즈 감사
 ```
 
 ## 사용 시기
@@ -91,7 +89,6 @@ epistemic-cooperative/
 | 뭔가 어긋났는데 무엇이 막혀 있는지 아직 이름 붙이지 못할 때 | `/probe` |
 | 초안된 옵션 집합이 사용자에게 닿기 전에 검사할 때 | `/gate-check` |
 | 프로즈의 금지 프레이밍·앵커링 예시를 감사할 때 | `/white-bear`, `/zero-shot` |
-| 프로젝트 가이드 direction line 을 다시 도출할 때 | `/realign` |
 ## 사용법
 
 ```

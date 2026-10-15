@@ -74,7 +74,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 |----------|---------|-------------|-----------------|
 | [Aitesis](./aitesis) | `/inquire` | A task rests on missing context or unchecked assumptions, and you need to see what remains unknown | You can recognize what was settled and from where, what rests on weak or unreached ground, and what only you decide |
 | [Euporia](./euporia) | `/elicit` | You know roughly what you want but can't yet say which decisions it turns on — and your own material (codebase, rules, past sessions) and the domain's usual decisions hold the clues | You can say "this is my intent, aligned enough" — each recorded value stands on your own words, and what you left open is carried |
-| [Heuresis](./heuresis) | `/ideate` | You have no candidates yet, or the field narrowed too early — widen it before choosing any | — |
+| [Heuresis](./heuresis) | `/ideate` | You have no candidates yet, or the field narrowed too early — widen it before choosing any | You can look over one map of your idea field — each frame and the branches dug under it, every candidate with where it came from, what stays unexplored, and what you set out of scope or aside — and take that field forward, with nothing in it chosen or ranked; choosing among it is a separate act |
 | [Proplasma](./proplasma) | `/preview` | You're about to commit to one of several directions, but you can't judge them from their descriptions — you'd have to see them first | You can say what each direction means for your purpose, whether that rests on a probe you saw, a description, your own account, or evidence, and which one you take |
 | [Hypotyposis](./hypotyposis) | `/sketch` | You have to make something and can't say what it should be, but you'd recognize it on sight | You can point at a version as you met it and say "this is the form, for this purpose", and see where it and the passed-over versions are |
 | [Analogia](./analogia) | `/ground` | You're carrying a framework, an analogy, or an earlier design over to a case, or checking an abstraction against its own cases, and it isn't clear what that comparison actually supports | You can say what carries each conclusion, what was checked and found, what would break it, and whether it holds, is blocked, or remains undetermined |
@@ -107,14 +107,12 @@ Skills that act at their own decision points — around the protocols, on the wo
 | **Auditing instruction prose** | |
 | `/white-bear` | Prose that tells the agent what not to do — find prohibition framing and negated anchoring that keep the wrong target in view |
 | `/zero-shot` | Prose that anchors on examples where a principle would generalize — find and name those spots |
-| **Steering the project** | |
-| `/realign` | The project guide's direction line no longer matches where the work is going — fuse the inscribed line, outside signals, and your present understanding |
 
 ### [Route](./route)
 
 > **Experimental.** The hook set and the injected wording can change between releases, and the optional advisory channel is unvalidated — see [route/README.md](./route/README.md) before depending on either.
 
-Context-driven protocol routing. A session-start hook places the installed-protocol deficit table and the [premise](./premise) index at the head of context, once per context epoch; a per-prompt hook places a short directive beside each prompt. When the accumulated context shows a deficit exactly one installed core protocol resolves, the agent invokes that protocol, nudges when several fit, and stays silent when none does. The invoked protocol's own first gate keeps your judgment where it was.
+Context-driven protocol routing. A session-start hook places the installed-protocol deficit table and the [premise](./premise) index at the head of context, once per context epoch; a per-prompt hook places a short directive beside each prompt. With it, you meet the deficit your conversation shows as the core protocol that resolves it, and see why it was brought in, without recalling which protocols exist: the agent shows its reading and invokes the protocol a plain fit names, composing it with the work in hand, otherwise points at each fit, one line each, or stays silent; another protocol's gate that holds your judgment stays yours while that happens.
 
 ## What the checks cover
 

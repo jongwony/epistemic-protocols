@@ -15,13 +15,13 @@ import { isMain, parsePayload } from "./route-protocols.mjs";
 // The firing conditions live here and nowhere else: SKILL.md loads only after
 // the skill is invoked, so this directive is the surface present at decision
 // time. It is the one payload charged on every prompt, so it carries the
-// conditions and nothing that follows from them: the shape of a finding line,
-// how many may be emitted, and what monitor mode may not do are SKILL.md's,
-// and the /route call this directive asks for is what loads them.
+// conditions and nothing that follows from them: the shape of a pointer line,
+// when a pass invokes, points, or stays silent, and how an invocation composes
+// with a gate that still holds are SKILL.md's, and the /route call this directive asks
+// for is what loads them.
 const DIRECTIVE = [
   "[route] When a request is not fully explicit — intent or context only the user can supply — or you recognize a deficit a loaded core protocol resolves, at the prompt or mid-turn while preparing a response or action, invoke /route, the skill call itself, each time, before addressing that deficit, even when its prose is already in context.",
-  "A presented gate holds until its protocol's contract takes an answer at it, closes it, or entrusts the prompt to the session. A holding protocol reads the prompt first; /route, invoked the same way, routes what that reading leaves: monitoring where one still holds, routing as usual where none does.",
-  "Converged prose holds no gate; /route reads a residual from convergence or deactivation at the next prompt.",
+  "A presented gate holds until its protocol's contract takes an answer at it, closes it, or entrusts the prompt to the session. Each holding protocol reads the prompt first; /route, invoked the same way, routes what that reading leaves.",
 ].join("\n");
 
 function render(raw) {

@@ -133,7 +133,7 @@ This gate is mandatory even if the narrative seems obvious — theme choice and 
 2. Treat the user's experiential input as Horizon B — the lived origin
 3. Fuse: preserve Horizon B's voice and the arc the user actually supplied; let Horizon A inform which protocol/utility is named in the closing sentence
 4. Bullets remain anchored to Horizon A (commit-mapping); only Background absorbs Horizon B
-5. Per-horizon trace (preserved / transformed / dropped) renders as a single line before the fused candidate at Phase 5 — naming what each horizon contributed, what was transformed in fusion, and what was dropped. The trace surfaces fusion accountability, matching the trace-visibility pattern in `/realign`.
+5. Per-horizon trace (preserved / transformed / dropped) renders as a single line before the fused candidate at Phase 5 — naming what each horizon contributed, what was transformed in fusion, and what was dropped. The trace surfaces fusion accountability.
 6. Iteration is expected: each loop pass refines whatever dimension the prior pass left under-specified. Continue looping until Apply or Skip — do not pre-empt convergence by treating the first fusion as final.
 
 ### Phase 6: Apply + surface
