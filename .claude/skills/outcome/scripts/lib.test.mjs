@@ -65,7 +65,7 @@ test('validatePlan reports every argument error at once and keeps runner-specifi
 
 test('childEnv removes credential-bearing and enclosing-session variables and keeps the rest', () => {
   const env = childEnv({ PATH: '/bin', HOME: '/h', HTTPS_PROXY: 'p', CLAUDE_CODE_SESSION_ID: 's', CODEX_API_KEY: 'k',
-    CODEX_AUTH_JSON_B64: 'b', OPENAI_API_KEY: 'o', GH_TOKEN: 't', MY_SECRET: 'x', ANTHROPIC_BASE_URL: 'u' });
+    SNAPSHOT_B64: 'b', OPENAI_API_KEY: 'o', GH_TOKEN: 't', MY_SECRET: 'x', ANTHROPIC_BASE_URL: 'u' });
   assert.deepEqual(Object.keys(env).sort(), ['HOME', 'HTTPS_PROXY', 'PATH']);
 });
 
