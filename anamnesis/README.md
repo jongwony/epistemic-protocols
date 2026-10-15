@@ -1,6 +1,6 @@
 # Anamnesis — /recollect (ἀνάμνησις)
 
-Resolve vague recall into recognized context (ἀνάμνησις: recollection, calling to mind)
+Recognize the past you were reaching for — a conversation, or a line of work, topic, or settled concept across several — in a story resting on records you can reopen, knowing it took place, not that it still holds — `/recollect`.
 
 > [한국어](./README_ko.md)
 
@@ -60,7 +60,8 @@ node --test anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomn
 Activation → An invocation of the user's own, or an empty intention detected (silent)
 Pass       → Read the cue, the whole, and the axes; search within the established boundary; open the leading candidate's records at the span the cue reaches
 Round      → Present the story in the records' words, each excerpt with its source and resume handle, and yield the turn; or, with nothing to present, ask one open question, then offer the wider search with its cost
-Close      → The user identifies it → RecalledContext; the user stops → what was searched; nothing further worth reaching for → unresolved within the scope searched; anything else is more cue → the next pass
+Close      → The user identifies it → RecalledContext; nothing further worth reaching for → unresolved within the scope searched
+Otherwise  → More cue, a correction, a wider search admitted (the boundary moves) or declined, a question about what was shown, or a remark or a form instruction on it → the next pass, even where the same turn points at another past, which the round names for you to take up; other work → answered in the session's own words, or, where it points at another past without a name, a new recall; words that end the recall without identifying anything, whatever else the turn says → answered with the scope searched — within the reply that leaves this recall where it stood when the turn also points at another past or invokes a fresh recall, otherwise in the session's own words — and after them only words that reopen the recall reach it; either way the recall stays as it stood; a `/recollect`, bare or with its own words, or words that continue an earlier recall → read from what came before as continuing the recall they point to — held, or closed unresolved — or as a fresh one, which leaves this one where it stood, and the first response says how it was read; an invocation that also identifies what was shown closes it as identified first
 ```
 
 ## Axes of the Cue
