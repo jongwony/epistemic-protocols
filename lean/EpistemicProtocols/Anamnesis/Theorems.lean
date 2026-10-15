@@ -21,53 +21,45 @@ variable {P : Type}
 instance : Nonempty Cue := ⟨⟨"", .session, []⟩⟩
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 
-theorem silence (respond session endReport : Context P → Response P) (c : Context P) :
-    recollect respond session endReport c [] = .holding c := by
+theorem silence (respond session : Context P → Response P) (c : Context P) :
+    recollect respond session c [] = .holding c := by
   simp [recollect]
 
 /-- A turn that identifies the presented recognizable closes the step on that identification,
     whatever else the turn reads as. -/
-theorem identification_first (respond session endReport : Context P → Response P)
+theorem identification_first (respond session : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
     (h : closing (fuse c u) = some o) :
-    recollect respond session endReport c (u :: us) = o := by
+    recollect respond session c (u :: us) = o := by
   simp [recollect, h]
 
 /-- On the person's own invocation of this protocol, where the turn identifies nothing, the step
     holds on the context before that turn. -/
-theorem fresh_invocation_holds (respond session endReport : Context P → Response P)
+theorem fresh_invocation_holds (respond session : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P))
     (hc : closing (fuse c u) = none) (h : Invoked (fuse c u)) :
-    recollect respond session endReport c (u :: us) = .holding c := by
+    recollect respond session c (u :: us) = .holding c := by
   simp [recollect, hc, h]
 
 /-- A turn that is no invocation, identifies nothing, does not bear on this recall, and carries
     an empty intention holds the step on the context before that turn. -/
-theorem ai_start_holds (respond session endReport : Context P → Response P) (c : Context P)
+theorem ai_start_holds (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u))
     (hc : closing (fuse c u) = none) (h : ¬ Reaches (fuse c u))
     (hv : EmptyIntention (fuse c u)) :
-    recollect respond session endReport c (u :: us) = .holding c := by
+    recollect respond session c (u :: us) = .holding c := by
   simp [recollect, hi, hc, h, hv]
 
 /-- A turn that is no invocation, identifies nothing, does not bear on this recall, and carries no
-    empty intention joins the context with the session's answer to it; no pass runs on it. -/
-theorem unreached_step (respond session endReport : Context P → Response P) (c : Context P)
+    empty intention — other work, or words that end this recall — joins the context with the
+    session's answer to it; no pass runs on it, and the recall goes on holding. -/
+theorem unreached_step (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u))
     (hc : closing (fuse c u) = none) (h : ¬ Reaches (fuse c u))
     (hv : ¬ EmptyIntention (fuse c u)) :
-    recollect respond session endReport c (u :: us) =
-      recollect respond session endReport (fuse c u ++ [(session (fuse c u)).val]) us := by
+    recollect respond session c (u :: us) =
+      recollect respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
   simp [recollect, hi, hc, h, hv]
-
-/-- A turn that is no invocation, identifies nothing, bears on this recall, and ends it joins the
-    context with the ending report; no pass runs on it. -/
-theorem ending_reports (respond session endReport : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hi : ¬ Invoked (fuse c u))
-    (hc : closing (fuse c u) = none) (h : Reaches (fuse c u)) (he : Ends (fuse c u)) :
-    recollect respond session endReport c (u :: us) =
-      recollect respond session endReport (fuse c u ++ [(endReport (fuse c u)).val]) us := by
-  simp [recollect, hi, hc, h, he]
 
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(search c).map (·.val) ++ (passRecord (c ++ (search c).map (·.val))).map (·.val), by
@@ -76,11 +68,11 @@ theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
 /-- One step's outcome takes one of four forms, whatever order the step reads its turn in: it
     holds, it is the person's closing, it is your own close after a pass, or the recursion goes
     on with the remaining utterances. -/
-private theorem step_cases (respond session endReport : Context P → Response P)
+private theorem step_cases (respond session : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (r : Outcome P)
-    (h : recollect respond session endReport c (u :: us) = r) :
+    (h : recollect respond session c (u :: us) = r) :
     (∃ d, r = .holding d) ∨ closing (fuse c u) = some r ∨ (∃ d, settle d = some r) ∨
-      ∃ d, recollect respond session endReport d us = r := by
+      ∃ d, recollect respond session d us = r := by
   simp only [recollect] at h
   repeat' split at h
   all_goals first
@@ -89,9 +81,9 @@ private theorem step_cases (respond session endReport : Context P → Response P
     | (subst h; exact Or.inr (Or.inl (by assumption)))
     | (subst h; exact Or.inr (Or.inr (Or.inl ⟨_, by assumption⟩)))
 
-theorem invocation_activates (respond session endReport : Context P → Response P) (c : Context P)
+theorem invocation_activates (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (h : Invoked c) :
-    start respond session endReport c us ≠ .notActivated c := by
+    start respond session c us ≠ .notActivated c := by
   have hs : ∀ (d : Context P) (o : Outcome P), settle d = some o → o ≠ .notActivated c := by
     intro d o ho
     unfold settle at ho
@@ -107,13 +99,13 @@ theorem invocation_activates (respond session endReport : Context P → Response
       · cases ho
     · cases ho
   have key : ∀ (us : List (Utterance P)) (d : Context P),
-      recollect respond session endReport d us ≠ .notActivated c := by
+      recollect respond session d us ≠ .notActivated c := by
     intro us
     induction us with
     | nil => intro d; simp [recollect]
     | cons u us ih =>
       intro d hr
-      rcases step_cases respond session endReport d u us _ hr with
+      rcases step_cases respond session d u us _ hr with
         ⟨_, he⟩ | hcl | ⟨_, hse⟩ | ⟨_, hre⟩
       · cases he
       · exact hc _ _ hcl rfl
@@ -157,14 +149,14 @@ private theorem settle_not_identified (c : Context P) (v : RecalledContext P) :
   unfold settle
   split <;> simp
 
-private theorem recollect_identified (respond session endReport : Context P → Response P)
+private theorem recollect_identified (respond session : Context P → Response P)
     (c : Context P) (us : List (Utterance P)) (v : RecalledContext P)
-    (h : recollect respond session endReport c us = .identified v) :
+    (h : recollect respond session c us = .identified v) :
     ∃ c₀ : Context P, closing c₀ = some (.identified v) := by
   induction us generalizing c with
   | nil => simp [recollect] at h
   | cons u us ih =>
-    rcases step_cases respond session endReport c u us _ h with
+    rcases step_cases respond session c u us _ h with
       ⟨_, he⟩ | hcl | ⟨_, hse⟩ | ⟨_, hre⟩
     · cases he
     · exact ⟨_, hcl⟩
@@ -176,9 +168,9 @@ private theorem recollect_identified (respond session endReport : Context P → 
     latest utterance of the context it closes on — a turn the person sent that identifies the
     presented recognizable. The story beside it rests on opened records, which are not the
     person's (`claim_is_evidence`). -/
-theorem identified_only_by_person (respond session endReport : Context P → Response P)
+theorem identified_only_by_person (respond session : Context P → Response P)
     (c : Context P) (us : List (Utterance P)) (v : RecalledContext P)
-    (h : start respond session endReport c us = .identified v) :
+    (h : start respond session c us = .identified v) :
     ∃ (c₀ : Context P) (s : Cite c₀), closing c₀ = some (.identified v) ∧
       s.idx = v.identifiedAt ∧ s.idx + 1 = c₀.length ∧ (c₀[s.idx]'s.lt).origin = .person ∧
       AnswerSupported c₀ (c₀[s.idx]'s.lt) () ∧ v.dissent = dissent (c₀.take s.idx) v.recognizable := by
@@ -188,7 +180,7 @@ theorem identified_only_by_person (respond session endReport : Context P → Res
     · simp only at h
       split at h
       · next o ho => subst h; exact absurd ho (settle_not_identified _ v)
-      · exact recollect_identified respond session endReport _ us v h
+      · exact recollect_identified respond session _ us v h
     · cases h
   obtain ⟨c₀, hc₀⟩ := hc
   obtain ⟨s, h₁, h₂, h₃, h₄, h₅⟩ := identified_by_person c₀ v hc₀

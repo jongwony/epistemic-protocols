@@ -1,6 +1,6 @@
 # Wholes above one record — relations, assembly
 
-Read when the whole the person means stands above one record — a line of work, a topic worked out in scattered pieces, or a concept prior work already settled. This is runtime-normative contract, not commentary. It supplies how found records are joined into one recognizable at that scope. Everything else — `Recognizable`, `Claim`, the story, the presentation, identification (`answer`), the ending (`Ends`), what bears on the recall (`Reaches`), the closes — is typed in SKILL.md and is the same at every scope; this file adds no type the SKILL.md block does not already carry. Grounding at this scope is one read per member: each member's own record, opened at the span the cue reaches.
+Read when the whole the person means stands above one record — a line of work, a topic worked out in scattered pieces, or a concept prior work already settled. This is runtime-normative contract, not commentary. It supplies how found records are joined into one recognizable at that scope. Everything else — `Recognizable`, `Claim`, the story, the presentation, identification (`answer`), what bears on the recall and what an ending does (`Reaches`), the closes — is typed in SKILL.md and is the same at every scope; this file adds no type the SKILL.md block does not already carry. Grounding at this scope is one read per member: each member's own record, opened at the span the cue reaches.
 
 ```
 ── WHOLES ABOVE ONE RECORD ──
