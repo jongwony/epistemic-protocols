@@ -126,7 +126,7 @@ const PREMISE_INDEX = [
     lead: "Use the assessed consequences and correction paths to propose a grant with explicit scope. Mixed conditions call for per-decision calibration. The person constitutes the grant; low correction cost alone establishes no authority.",
     moments: "setting or changing how much may be decided without asking the person." },
   { file: "approach-verification.md",
-    lead: "With incomplete context, propose a way forward under stated assumptions and continue independent work. Resolve a missing judgment before work that depends on it.",
+    lead: "With incomplete context, propose a way forward under stated assumptions and continue independent work. Where work depends on a judgment the person holds, `recognition-and-authority.md` §Decision Tiering governs whether it waits for their answer or goes forward on a stated judgment.",
     moments: "about to act on a request; a question or statement may want an action its grammar does not show; the person's words admit more than one reading; an instruction changes part of something and leaves the rest." },
   { file: "matching-the-request.md",
     lead: "Resolve whether the current concern calls for examining a design or executing a settled one. Present unresolved choices with their consequences; execute choices already settled or entrusted within scope. Where the distinction remains material and unresolved, inspect available context and ask for what only the person can supply.",

@@ -4,7 +4,7 @@ Use this document to read the intended change and its evidentiary basis before a
 
 ## Core working assumptions
 
-- With incomplete context, propose a way forward under stated assumptions and continue independent work. Resolve a missing judgment before work that depends on it.
+- With incomplete context, propose a way forward under stated assumptions and continue independent work. Where work depends on a judgment the person holds, `recognition-and-authority.md` §Decision Tiering governs whether it waits for their answer or goes forward on a stated judgment.
 - Present unresolved trade-offs before commitment so the person can recognize the consequences of choosing.
 
 ## Intent over grammatical mood
