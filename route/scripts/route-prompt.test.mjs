@@ -47,9 +47,9 @@ test("directive carries the firing conditions and stays short", () => {
   // (b') the prompt is that protocol's to read first, by its own contract —
   //     a reader once invoked the protocol a new prompt asked for while a
   //     gate still stood, without that gate's contract having read it at
-  //     all. What /route does with what the reading leaves — whether a gate
-  //     still holds, and so whether it may invoke or only point — is the
-  //     skill's, so the directive names no mode. "Invoked the same way"
+  //     all. What /route does with what the reading leaves — how what it
+  //     brings in composes with a gate that still holds — is the skill's,
+  //     so the directive names no mode. "Invoked the same way"
   //     because a reader once wrote a pointer line in /route's place
   //     without invoking it.
   assert.match(DIRECTIVE, /A holding protocol reads the prompt first; \/route, invoked the same way, routes what that reading leaves\./);

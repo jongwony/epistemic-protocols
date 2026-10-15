@@ -114,7 +114,7 @@ Skills that act at their own decision points — around the protocols, on the wo
 
 > **Experimental.** The hook set and the injected wording can change between releases, and the optional advisory channel is unvalidated — see [route/README.md](./route/README.md) before depending on either.
 
-Context-driven protocol routing. A session-start hook places the installed-protocol deficit table and the [premise](./premise) index at the head of context, once per context epoch; a per-prompt hook places a short directive beside each prompt. With it, you meet the deficit your conversation shows as the core protocol that resolves it, and see why it was brought in, without recalling which protocols exist: the agent shows its reading and invokes a lone plain fit, otherwise points at each fit it raises now, one line each, or stays silent; another protocol's gate that holds your judgment is never taken from you.
+Context-driven protocol routing. A session-start hook places the installed-protocol deficit table and the [premise](./premise) index at the head of context, once per context epoch; a per-prompt hook places a short directive beside each prompt. With it, you meet the deficit your conversation shows as the core protocol that resolves it, and see why it was brought in, without recalling which protocols exist: the agent shows its reading and invokes the protocol a plain fit names, composing it with the work in hand, otherwise points at each fit, one line each, or stays silent; another protocol's gate that holds your judgment stays yours while that happens.
 
 ## What the checks cover
 
