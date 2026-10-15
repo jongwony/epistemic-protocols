@@ -107,8 +107,6 @@ Skills that act at their own decision points — around the protocols, on the wo
 | **Auditing instruction prose** | |
 | `/white-bear` | Prose that tells the agent what not to do — find prohibition framing and negated anchoring that keep the wrong target in view |
 | `/zero-shot` | Prose that anchors on examples where a principle would generalize — find and name those spots |
-| **Steering the project** | |
-| `/realign` | The project guide's direction line no longer matches where the work is going — fuse the inscribed line, outside signals, and your present understanding |
 
 ### [Route](./route)
 
