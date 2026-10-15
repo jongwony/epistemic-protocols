@@ -8,8 +8,8 @@ User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and
 
 ## When some of what is in view belongs to a later round or a trace rather than this one
 
-Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later rounds.
+Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to text before the open coordinates, convergence traces, or later rounds.
 
-## When this protocol's own phases bear on where a sentence sits relative to a gate
+## When this protocol's own phases bear on where a sentence sits relative to the open coordinates
 
-What the surface carries is TOOL GROUNDING's `surface` entry. What this adds is placement: that material is text before the gate, presented via Cognitive Partnership Move (Constitution), and the question contains only the answer slots.
+What the surface carries is TOOL GROUNDING's `surface` entry. What this adds is placement: the read-back, its evidence, and the account of anything carried forward come first; what the person still holds — the open coordinates with their questions — comes last, where they can answer it.

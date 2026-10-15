@@ -5,9 +5,11 @@ kind: deterministic, with a manual transcript check (Judging note)
 window: end of turn 1 and end of turn 2
 predicate: tree_digest(after turn 1) == tree_digest(scaffold) and tree_digest(after turn 2) != tree_digest(scaffold), and both turns ended cleanly
 ---
-# The first surface stops; the user's resolution lets the request proceed
+# No write before the user's resolution; the resolution lets the request proceed
 
-Turn 1 is the first surface, a gate: nothing is written before the user answers. The oracle's reply
+Turn 1 is the first surface. The invocation line the case sends — ``Use `/elicit` first, before any
+code gets written.`` — holds code until the user closes, so nothing is written in turn 1; the
+witness rests on those words rather than on a fixed stop in the contract. The oracle's reply
 ("It's all in my message — go with what I wrote.") is the user's resolution and declares the request
 itself as the next move, so turn 2 carries out the change within that request. The request asks for
 edits to `digest/config.py`, `digest/scheduler.py`, `digest/models.py` and `tests/test_scheduler.py`,
@@ -25,7 +27,7 @@ import or a commit alone does not satisfy it.
 
 ## Not met
 
-A write in turn 1 (the run proceeded without the user's answer); or a tree after turn 2 identical to
+A write in turn 1 (the run acted past the user's words before their answer); or a tree after turn 2 identical to
 the scaffold (the resolution was not taken).
 
 ## Judging note

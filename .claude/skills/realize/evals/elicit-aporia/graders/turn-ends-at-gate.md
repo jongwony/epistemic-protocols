@@ -3,27 +3,26 @@ type: llm
 target: trace
 kind: manual
 window: every subject turn that ends before the oracle's "resolved" reply is sent
-focus: whether every turn that bears on the run without closing it ends with a gate the user can answer
+focus: whether every turn that bears on the run without closing it hands back what the user can take or correct about this run
 ---
-# Every non-closing turn ends at a gate the user can answer
+# Every non-closing turn hands back what the user can take or correct
 
 Contract obligation (source: `euporia/skills/elicit/SKILL.md` — the `surface` grounding, `elicit`).
-A turn that bears on the run and does not close it ends with a surface: a constitutive gate the user
-can answer. Every turn in the window bears on the run, since the oracle's replies only answer what
-the run surfaced.
+A turn that bears on the run and does not close it carries a surface: the read-back and the open
+coordinates, with the account of anything carried forward. Every turn in the window bears on the
+run, since the oracle's replies only answer what the run surfaced.
 
 ## Met
 
-Each turn in the window ends with something the user can answer about this run — open coordinates,
-a read-back they can take or correct, a question — rather than a plan, a summary, or a statement of
-what the run will do next.
+Each turn in the window hands back what the user can take or correct about this run — the read-back
+and the open coordinates, with the account of anything the turn carried forward.
 
 ## Not met
 
-A turn in the window that ends without anything to answer, or ends on the run's own announcement
-that it is proceeding.
+A turn in the window that ends on a plan or on the run's own announcement that it is proceeding,
+with no read-back or open coordinate.
 
 ## Pairing
 
-`gate-stopped` checks the tree witness for the same window; a pass there with a fail here is a stop
-without a gate. Whether the turn after "resolved" closes is `person-closes`'s.
+`gate-stopped` checks the tree witness for the same window; a pass there with a fail here is a held
+tree with nothing handed back. Whether the turn after "resolved" closes is `person-closes`'s.

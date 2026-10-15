@@ -15,14 +15,16 @@ intent is that move.
 ## Met
 
 What the run does after the closing record — implementing, or stating what it will do — carries out
-the closed intent and nothing beyond it: no change the record does not hold, and none to what the
-oracle left as it is (performance, code structure).
+the closed intent and nothing beyond it: no change the record does not hold, unless it is named in
+the account as the run's own proposal, and none to what the oracle left as it is (performance, code
+structure).
 
 ## Not met
 
-After closing, the run implements a value the record does not hold (an unseen default, its own
-choice on a residual coordinate), or widens the work beyond the request (refactoring, tooling,
-performance work the oracle declined).
+After closing, the run implements a value the record does not hold — an unseen default, its own
+choice on a residual coordinate — silently or as if it were recorded, or widens the work beyond the
+request (refactoring, tooling, performance work the oracle declined). Such a value may be used only
+as the run's own proposal, named as such in its account.
 
 ## Judging note
 
