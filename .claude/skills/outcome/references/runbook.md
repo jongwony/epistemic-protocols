@@ -11,13 +11,12 @@ carries what a person (or an agent) walking the cells needs at each step.
   `CLAUDE_CODE_OAUTH_TOKEN` (obtained as `/realize`'s runbook describes), or an `ANTHROPIC_*`
   route already configured on the machine. Every other `CLAUDE*` variable is removed.
   `--budget` caps each turn's spend so a runaway turn stops.
-- **Codex authentication** is chosen at plan time. `--codex-auth api-key` (the default) forwards
-  `CODEX_API_KEY` from the running process to each `codex exec` child and to nothing else.
-  `--codex-auth login` borrows the login at `$CODEX_HOME/auth.json` (default
-  `~/.codex/auth.json`) by symlinking it into the arm's home for the span of one exec, then
-  checking and removing the link. It is never copied: a ChatGPT login rotates its refresh token,
-  and a copy would strand the real one. A regular `auth.json` found in a home is named and left
-  alone.
+- **Codex authentication** is the codex login already on this machine; `codex login
+  --device-auth` signs one in. Each `codex exec` child borrows the login at
+  `$CODEX_HOME/auth.json` (default `~/.codex/auth.json`) by symlinking it into the arm's home for
+  the span of one exec, then checking and removing the link. It is never copied: a ChatGPT login
+  rotates its refresh token, and a copy would strand the real one. A regular `auth.json` found in
+  a home is named and left alone.
 
 `plan` writes `results/<run>/run.json` and scaffolds every cell's work tree from the case's
 `/realize` scaffold. `setup <run>` builds, for Codex, two homes — `bare` with no plugin,
@@ -85,8 +84,8 @@ A cell's treatment integrity is checked on every turn:
   through `--plugin-dir`.
 - **Codex:** before the turn, `codex plugin list` in the arm's home shows the plugin enabled
   exactly on the protocol arm, and the installed `SKILL.md` matches this checkout's; the turn
-  produced `thread.started` and `turn.completed`; in login mode the link was still the same link
-  when the exec returned. A broken link stops the run after recording the turn. The session
+  produced `thread.started` and `turn.completed`; the login link was still the same link when
+  the exec returned. A broken link stops the run after recording the turn. The session
   rollout is copied into the cell's records, since the next cell's reset removes it from the
   home. Network is enabled inside the workspace-write sandbox so that Codex cells, like Claude
   cells, can install packages.

@@ -25,9 +25,9 @@ Node 22+ and the selected runner (`claude` or `codex`) on PATH. `setup.sh` check
 active runner and refuses rather than failing halfway.
 
 Claude needs one human step once: obtaining a token against the target-specific
-isolated config directory. Codex needs `CODEX_API_KEY` only while `run.sh` is active, or,
-with `REALIZE_CODEX_AUTH=login`, a codex login already on the machine; setup neither
-consumes nor stores either.
+isolated config directory. Codex needs a codex login already on the machine (`codex login
+--device-auth` signs one in), borrowed only while `run.sh` is active; setup neither
+consumes nor stores it.
 
 ```bash
 CLAUDE_CONFIG_DIR=~/.claude-eval/inquire claude setup-token
@@ -63,18 +63,17 @@ For the Codex Luna xhigh profile:
 
 ```bash
 REALIZE_RUNNER=codex ./setup.sh inquire
-CODEX_API_KEY="$(...)" REALIZE_RUNNER=codex ./run.sh inquire
-REALIZE_CODEX_AUTH=login REALIZE_RUNNER=codex ./run.sh inquire   # borrow this machine's login instead
+REALIZE_RUNNER=codex ./run.sh inquire        # borrows this machine's codex login
 REALIZE_RUNNER=codex node ./harness.mjs report inquire
 REALIZE_RUNNER=codex ./teardown.sh inquire
 ```
 
 Codex setup creates disposable `bare` and `protocol` homes with no `auth.json` or login
 step. The protocol home installs this checkout as a local marketplace and installs only
-the selected plugin. The bare home has no marketplace or plugin state. `run` removes
-`OPENAI_API_KEY` and `CODEX_ACCESS_TOKEN` from child environments and supplies
-`CODEX_API_KEY` only to `codex exec`; plugin setup and integrity checks receive no
-credential.
+the selected plugin. The bare home has no marketplace or plugin state. Every `OPENAI_*` and
+`CODEX_*` variable is removed from every child environment, so a key in the run process
+cannot change how a child authenticates; plugin setup and integrity checks receive no
+credential, and `codex exec` receives only the login link below.
 
 Codex supports only the `bare` and `protocol` arms because it has no deployed analogue
 of Claude's output-style treatment. Codex case worktrees live under the system temporary
@@ -87,17 +86,15 @@ also compares the installed cache's `SKILL.md` and `references/` digests to the 
 immediately before spending a run; an edit made after setup fails closed
 with an instruction to rerun setup instead of measuring stale treatment bytes.
 
-### Login mode
+### The login link
 
-`REALIZE_CODEX_AUTH=login` authenticates each `codex exec` child with the login already at
-`$CODEX_HOME/auth.json` (default `~/.codex/auth.json`) instead of an API key. What keeps the
-homes disposable:
+Each `codex exec` child authenticates with the login already at `$CODEX_HOME/auth.json`
+(default `~/.codex/auth.json`). What keeps the homes disposable:
 
 - **The link lives for one child.** It is created in the arm's home immediately before a
   `codex exec` and removed immediately after, before the tree digest, the next cell's
   plugin integrity check, or grading. Setup, `codex plugin list` and the report therefore
-  meet a home with no credential, exactly as in API-key mode, and no API key reaches any
-  child.
+  meet a home with no credential.
 - **A link, never a copy.** A ChatGPT login rotates its refresh token. A refresh written
   into a copy would retire the token the real file still holds and sign the user out; a
   refresh written through the link lands in the real file. The login itself is never read,
@@ -108,7 +105,7 @@ homes disposable:
   not by the run, the exit trap, setup or teardown. Moving it back is the owner's call.
 - **No overlap.** Cells are spawned synchronously, so one run has at most one child holding
   the login. A lock under the system temporary directory, keyed by the login's path, refuses
-  a second login-mode run — another checkout's included — until the first finishes; a lock
+  a second Codex run — another checkout's included — until the first finishes; a lock
   whose holder has exited is taken over. An interactive codex session using the same login
   is outside the lock, which is the same condition as two terminals signed in at once.
 - **Removed on every exit path.** The run clears links in `finally` and on `SIGINT` /
@@ -116,7 +113,7 @@ homes disposable:
   harness that never reached its own cleanup; `teardown.sh` does it at every depth.
 
 A cell's home also loses everything but its config, installed plugin and `auth.json` slot
-before the cell starts, in either mode: a multi-turn cell keeps its session on disk so it
+before the cell starts: a multi-turn cell keeps its session on disk so it
 can be resumed, and nothing one cell wrote should be readable by the next.
 
 ## Where isolation lives
@@ -165,7 +162,7 @@ Codex is deliberately local-only here. Official OpenAI documentation requires th
 Codex GitHub Action's credential proxy when a workflow checks out or runs
 repository-controlled code; this harness does not yet have an action-backed adapter
 that preserves its per-cell JSONL contract. The workflow therefore never exposes an
-OpenAI API key to the checked-out harness.
+OpenAI credential to the checked-out harness.
 
 Isolation is nearly free there: a fresh runner has no marketplace plugins, so the
 baseline arm is empty by construction rather than by arrangement. The isolated config
