@@ -499,9 +499,8 @@ def start (respond session converge : Context P → Response P) (c : Context P)
 /-! ── CONVERGENCE ──
 crystallized — the one closing of `Outcome`, the person's; the trace it carries is its structure's
 fields. notActivated and holding are not closings: the first is your reading before any sheet, the
-second a run that has not crystallized. The convergence
-evidence: the turn read as the closing, in its own words, with the goal and the candidate it
-recognized.
+second a run that has not crystallized. The convergence evidence: the turn read as the closing, in
+its own words, with the goal and the candidate it recognized.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -531,7 +530,6 @@ def Interaction.realization : Interaction → Continuation
 
 inductive Op | detect | collect | judge | sheet | readTurn | declare | converge | seam
 
-/-- No Constitution entry: whether a turn halts is the harness's baseline. -/
 def grounding : Op → Annot × String
   | .detect   => (.sense, "Internal analysis: whether this is the protocol's case, as `notActivated` reads it, over the utterance and the context")
   | .collect  => (.observe, "artifact read, artifact search; external fetch (conditional: the domain lies outside the person's artifacts), its URL cited where used: what `collect` reads, as its doc states")
