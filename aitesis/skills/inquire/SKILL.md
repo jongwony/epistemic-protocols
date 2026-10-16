@@ -309,7 +309,7 @@ def closed (c : Context P) : Closed P :=
 
 /-- Once it has run, the person can recognize, for each thing the work ahead rests on, what was
     settled and from which source, what the AI found only on ground it declares short or could not
-    reach, what it put forward as its own proposal, and what is theirs alone to decide — and can
+    reach, what it put forward as its own candidate, and what is theirs alone to decide — and can
     answer their share or correct that reading. `SufficientContext`: the collected context the
     work ahead reads — the facts settled with their sources, what is still open with its reach,
     shown with the person's recognition not yet established, the detections, and the dissent. What
@@ -408,7 +408,7 @@ def grounding : Op → Annot × String
   | .surface    => (.interaction .extension, "once everything reachable is reached, every open uncertainty handed back as the person's own unknown with its reach — the sources tried and those not reached, by name, with what each needs; what was found and where it falls short; where collected material conflicts, what conflicts with what; where a decision blocks further collection, which collection waits on it; what an answer would change; which of them is the person's to settle, as your reading for their correction; each settled one with its provenance — the evidence and where it was read, or the person's words, with your earlier candidate marked as yours; the detections, each with its source; your contrary grounds; the turn is not held")
   | .readAnswer => (.sense, "Internal analysis: the latest utterance read whole against the prospect and the fused context as it now stands — whether it bears on this run, and what it does there: settles, corrects, points to a source, says the person does not know either, dismisses, or exposes a new uncertainty")
   | .converge   => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with SufficientContext")
-  | .seam       => (.interaction .extension, "after completion, proceed to the next move the person declared, citing that turn; what is still open stays open; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam       => (.interaction .extension, "after completion, proceed to the next move the person declared, citing that turn; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
