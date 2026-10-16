@@ -28,12 +28,12 @@
   {
     "id": "singleton-inquire",
     "outcome": "singleton",
-    "prompt": "Set up the deploy for the new service.",
+    "prompt": "Before we touch the deploy for the new service — what do we actually know about where it runs and how it rolls back, and what only I can tell you?",
     "expected": [
       "inquire"
     ],
-    "adjudicated": true,
-    "note": "Confirmed, and readable from the prompt alone: 'set up the deploy' names an execution whose target environment, rollback and acceptable downtime are unstated and held only by the user. That is ContextInsufficient before execution. /bound was considered and rejected - the gap is user-held fact, not an unscoped task awaiting delegation; /conduct likewise, since what is missing is inputs, not the order of moves."
+    "adjudicated": false,
+    "note": "The person asks what the work rests on before it moves: the intent to have its ground collected is in the utterance, so /inquire's deficit is recognized from what they said rather than inferred from the task's kind. A bare instruction to do the work names a task kind and is not this trigger. /bound stays rejected for the same reason as before — the gap is user-held fact, not an unscoped task awaiting delegation; /conduct likewise, since what is missing is inputs, not the order of moves."
   },
   {
     "id": "singleton-ground",
