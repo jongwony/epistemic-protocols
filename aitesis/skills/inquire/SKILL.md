@@ -308,7 +308,7 @@ def closed (c : Context P) : Closed P :=
     detections := detections c, dissent := dissent c }
 
 /-- Once it has run, the person can recognize, for each thing the work ahead rests on, what was
-    settled and from which source, what it found only on ground it declares short or could not
+    settled and from which source, what the AI found only on ground it declares short or could not
     reach, what it put forward as its own proposal, and what is theirs alone to decide — and can
     answer their share or correct that reading. `SufficientContext`: the collected context the
     work ahead reads — the facts settled with their sources, what is still open with its reach,
@@ -368,9 +368,9 @@ pair (ContextInsufficient(u) → how it stands) — a settled one with its citat
 value, who proposed it and how it stood; a corrected fact citing both the earlier and the later
 turn; an open one with its reach — naming what conflicts with what and which collection waits
 on which decision — marked as shown to the person with their recognition not yet established
-unless a later turn of theirs showed it, beside any value you put forward for it, marked as yours;
-a dismissed one with the person's words and how it stood then — beside the detections and
-the dissent attached to the closure. Demonstrated, not asserted.
+unless a later turn of theirs showed it; a dismissed one with the
+person's words and how it stood then — beside the detections and the dissent attached to the
+closure. Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -405,7 +405,7 @@ def grounding : Op → Annot × String
   | .scan       => (.sense, "Internal analysis: the inventory — what the prospect rests on that the fused context leaves uncertain, what collection returned included; no fixed taxonomy")
   | .collect    => (.observe, "artifact read, artifact search, record read, external fetch, environment run: every read and run you can make on your own without changing existing state, to the limit of your reach, removing afterwards what you created only to look; what the context already holds from a source is not fetched again unless an utterance or evidence says it changed; what each returns enters the context as an evidence turn; an observation that needs to change existing state, a permission, or another's authority is named with what it needs and handed off, never run as collection")
   | .read       => (.sense, "Internal analysis: how each uncertainty stands — settled with its citation, ground short with its candidate, or unreached — and its reach, read on the context as it now stands")
-  | .surface    => (.interaction .extension, "once everything reachable is reached, every open uncertainty handed back as the person's own unknown with its reach — the sources tried and those not reached, by name, with what each needs; what was found and where it falls short; where collected material conflicts, what conflicts with what; where a decision blocks further collection, which collection waits on it; what an answer would change; which of them is the person's to settle, as your reading for their correction; for each open one, the value you judge it at where you put one forward, marked as yours with what decides it and your contrary grounds; each settled one with its provenance — the evidence and where it was read, or the person's words, with your earlier candidate marked as yours; the detections, each with its source; your contrary grounds; the turn is not held")
+  | .surface    => (.interaction .extension, "once everything reachable is reached, every open uncertainty handed back as the person's own unknown with its reach — the sources tried and those not reached, by name, with what each needs; what was found and where it falls short; where collected material conflicts, what conflicts with what; where a decision blocks further collection, which collection waits on it; what an answer would change; which of them is the person's to settle, as your reading for their correction; each settled one with its provenance — the evidence and where it was read, or the person's words, with your earlier candidate marked as yours; the detections, each with its source; your contrary grounds; the turn is not held")
   | .readAnswer => (.sense, "Internal analysis: the latest utterance read whole against the prospect and the fused context as it now stands — whether it bears on this run, and what it does there: settles, corrects, points to a source, says the person does not know either, dismisses, or exposes a new uncertainty")
   | .converge   => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with SufficientContext")
   | .seam       => (.interaction .extension, "after completion, proceed to the next move the person declared — the prospect's own work —, an adopted policy, or a grant, citing that source; what is still open stays open: judge each open item first, and you may carry reversible work forward on that value as your proposal; beyond that, work goes forward or waits as this section's header states; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
@@ -431,7 +431,7 @@ When a prospect touches architecture decisions, API or protocol design, persiste
 
 ### User-facing realization
 
-Present what TOOL GROUNDING's `surface` entry names in everyday language and proceed. Where collected material conflicts, name what conflicts with what; where a decision blocks further collection, name which collection waits on it; say which open items read as the user's to settle, as a reading they can correct, and which items the AI found without full warrant; name each source it could not reach, with what it needs, so the user can point at one it missed; name a detection as one, on its own line. State what the protocol takes if an answer comes — a fact, a correction, taking a value it put forward, a place to look, "I don't know either", a dismissal — without holding the turn for it and without a fixed menu. Keep every item open to free-response correction.
+Present what TOOL GROUNDING's `surface` entry names in everyday language and proceed. Where collected material conflicts, name what conflicts with what; where a decision blocks further collection, name which collection waits on it; say which open items read as the user's to settle, as a reading they can correct, and which items the AI found without full warrant; name each source it could not reach, with what it needs, so the user can point at one it missed; name a detection as one, on its own line. State what the protocol takes if an answer comes — a fact, a correction, a place to look, "I don't know either", a dismissal — without holding the turn for it and without a fixed menu. Keep every item open to free-response correction.
 
 Frame the uncertainty currently in play rather than emitting a completion tally. Read `references/round-composition.md` before composing when terminology must remain stable across the session, wording must be carried unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside a relay.
 
