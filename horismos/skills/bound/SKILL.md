@@ -318,7 +318,8 @@ def awaits {c : Context P} (r : BoundaryEssence c) : Bool :=
     the person accepted it: once a later correction opens an item, the earlier acceptance no longer
     reaches the boundary as it now stands, the opened item awaits the person, and what they already
     disposed stands on their own turns. An acceptance from an earlier run does not set this one,
-    and one given before any map was shown accepts nothing. -/
+    and one given before any map was shown accepts nothing. Words that only end the run accept
+    nothing, and take no proposal of yours. -/
 axiom AcceptanceSupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person accepts the boundary. -/
@@ -334,7 +335,8 @@ axiom acceptance : (c : Context P) → Occ (acceptanceCoord (P := P)) c
     none of it leaves the run as it stands: the session answers it, that answer stays in the
     context, a holding run keeps holding, and a boundary that stands keeps standing. Words that end
     the run are read like any other turn, and the turn that answers them says how it took them;
-    your own reading that the person is done ends nothing. -/
+    whether a boundary that stands still reaches later work is read from the context where the
+    ending stands; your own reading that the person is done ends nothing. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your reading**: a turn of the person's is still owed before the boundary stands — read on the
@@ -548,7 +550,7 @@ def grounding : Op → Annot × String
   | .round        => (.interaction .extension, "the whole map — the person's own lines as theirs, your additions marked as proposals, each decision with its evidence, what depends on it and what getting it wrong costs, and any entrustment's reach, every later act that cannot be undone in view — what the map did not look at — every source observation did not reach, by name — the choices still open beside the round's question, your contrary grounds, where you hold any, before the answer, and the way to accept the boundary as it stands kept recognizable; labels defined where they are used")
   | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on the boundary, and what it does there — dispositions, corrections, an opening, an acceptance — read whole against the fused context, whatever form it takes; a reading not yet settled — by this reply or a later one — makes the person's turn owed: the run holds and a round serves it, committing nothing; a request to see something is served by the turn that shows it")
   | .converge     => (.interaction .extension, "DefinedBoundary as it stands — its map, its record with who put each disposition forward and how it stood, cited facts, the residual — declared empty where nothing is open — with why each open item bears and who settles it, and its limits — every source observation did not reach, by name — every later act that cannot be undone that an entrustment on it reaches, in view, and the dissent attached to it — a contrary ground the person has not closed over is never first shown here, it makes their turn owed; with the way to reopen it; where it answers a request to see something, the requested content beside the boundary as it stands, pointing to what was already shown where nothing changed; where nothing awaited the person, say so")
-  | .seam         => (.interaction .extension, "where the boundary newly stands or what stands has changed, proceed to the next move the person declared, citing that turn; a boundary standing again unchanged does not run that move again; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam         => (.interaction .extension, "where the boundary newly stands or what stands has changed, proceed to the next move the person declared, citing that turn — where the turn that sets it also ends the run, only a next move declared with it; a boundary standing again unchanged does not run that move again; this protocol declares no wired outbound edge, and every checkpoint whose own contract requires the person's response still fires")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution remains context-bound.
@@ -614,6 +616,6 @@ end Horismos
 - **Prior-map provenance**: Read an earlier boundary through the turns it cites. Its citation still points at the same source; whether that source still supports the settlement is judged against the context that now stands, and an unreachable or unsupported setting is advisory. An earlier decision relayed from a record is a cited fact, not a disposition of this run — whether it fixes a decision's content or who settles it.
 - **After closure**: Never rewrite or veto a user's disposition. Attach your contrary grounds to the boundary where the user set it over them, raise a disposition again only on new evidence, and show that evidence before any dependent step that cannot be undone.
 - **Settlement across delegation**: Carry and read the source-defined question, judgment holder, limits, dependencies, and residual at downstream use; work reassignment and a summary supply no additional grant.
-- **Closing**: Keep the way to accept the boundary as it stands recognizable in every round, with every irreversible AI-delegation proposal in view. The boundary stands where no turn of the user's is owed (your `owed` reading) and they accept it or no item awaits their disposition; silence and other work leave the run as it stood, words that end the run are read like any other reply and answered with how they were taken, and scan exhaustion or a visit count supplies no acceptance.
+- **Closing**: Keep the way to accept the boundary as it stands recognizable in every round, with every irreversible AI-delegation proposal in view. The boundary stands where no turn of the user's is owed (your `owed` reading) and they accept it or no item awaits their disposition; silence and other work leave the run as it stood, words that end the run are read as `Reaches` states, and scan exhaustion or a visit count supplies no acceptance.
 - **Ambiguous response routing**: Read mixed responses whole; when materially different futures remain viable, continue and present those readings and their consequences. Commit nothing from an unresolved reading. Never ask the user to classify their own words into the disposition forms.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
