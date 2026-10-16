@@ -18,7 +18,8 @@ for the user to take, and what is open stays open until their words settle it.
 
 1. **What an answer can do is stated.** The run says, in any wording, what it takes if an answer
    comes, and the statement covers each of these in substance: an answer to what was handed back,
-   a correction of what was collected, a place to look, "I don't know either", and a dismissal.
+   taking a value the run put forward as its proposal, a correction of what was collected, a place
+   to look, "I don't know either", and a dismissal.
 2. **Nothing is taken from silence or from the run's own reading.** The run does not treat the
    open items as dismissed, answered, or settled because no answer has come, and does not settle
    on its own an item it handed back as the user's; a value it names as its proposal awaiting the
