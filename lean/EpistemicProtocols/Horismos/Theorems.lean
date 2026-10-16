@@ -25,12 +25,12 @@ variable (respond session : Context P → Response P)
 /-- Silence settles nothing: with no further utterance the run stands as it was — a holding run
     keeps holding, a boundary that stands keeps standing. -/
 theorem silence (c : Context P) (o : Outcome P) : bound respond session c o [] = o := by
-  cases o <;> simp [bound]
+  simp [bound]
 
 /-- The run opens by reading the invoking context with what observation returned: where nothing
     awaits the person and no turn of theirs is owed, the boundary stands at once and the first turn
-    shows it (`converge`); otherwise the run holds with the first round in its context. No
-    boundary stood before the run, and no acceptance is read before a map is shown. -/
+    shows it (`converge`); otherwise the run holds with the first round in its context; no
+    acceptance is read before a map is shown. -/
 theorem start_reads_first (c : Context P) (us : List (Utterance P)) :
     start respond session c us =
       bound respond session (observed c ++ [(respond (observed c)).val])
@@ -170,7 +170,7 @@ theorem defined_by_acceptance_or_nothing_awaiting (c : Context P) (o : Outcome P
       (isFilled (acceptance c₀) = true ∨ awaits (readout c₀) = false) ∧
       b = closeAt c₀ s₀ (readout c₀) := by
   induction us generalizing c o with
-  | nil => cases o <;> simp [bound] at h; exact ho b (by rw [h])
+  | nil => simp only [bound] at h; exact ho b h
   | cons u us ih =>
     simp only [bound] at h
     split at h
