@@ -27,7 +27,7 @@ Periagoge(A) → start(c) → induce(c, utterances), where c is the fused sessio
     basis; AI-guided activation stays silent; otherwise → sheet
   next utterance u, read on fuse(c, u):
     [does not bear on this run]                                the session answers it; that answer
-                                                               stays in c; no sheet of this run
+                                                               stays in c; the run stays as it stands
     [the person recognizes the goal and the candidate]         what is collected now enters c; where
                                                                c holds a case no sheet has shown
                                                                and no turn of the person's brought
@@ -37,7 +37,7 @@ Periagoge(A) → start(c) → induce(c, utterances), where c is the fused sessio
                                                                → crystallized
     [otherwise]                                                what is collected now enters c → the sheet again
   no utterance: nothing is taken; the run holds
-  after a crystallization: the next move the `seam` entry names
+  after a crystallization or not activating: the next move the `seam` entry names
 -/
 
 /-! ── MORPHISM ──
@@ -499,7 +499,7 @@ def start (respond session converge : Context P → Response P) (c : Context P)
 /-! ── CONVERGENCE ──
 crystallized — the one closing of `Outcome`, the person's; the trace it carries is its structure's
 fields. notActivated and holding are not closings: the first is your reading before any sheet, the
-second a run no turn of the person's has closed. The convergence
+second a run no recognition of the person's has crystallized. The convergence
 evidence: the turn read as the closing, in its own words, with the goal and the candidate it
 recognized.
 -/
@@ -572,7 +572,7 @@ Then one move to ask about, in words — the one whose answer would most change 
 
 The user may answer in their own words, and one answer may reach several parts of the sheet: read it whole, apply it as far as its words reach, leave what it does not reach as it stood, and show what a correction disturbs. An utterance about other work leaves the run as it stands, and words that end the run without recognizing the abstraction leave it holding, whatever else the turn says; neither draws a sheet, and the sheet returns when the user comes back to it. A reading leaves the cross view only by the user's words setting it aside, and comes back when their words bring it back, with their earlier ground shown beside it. Only the user closes the run, by recognizing the goal and the candidate as the sheet they answered showed them and as they changed them since, with no second permission and your doubts riding along without refusing it; where a turn that bears on the run recognizes nothing by the closing judgment in the block above (`ClosingSupported`) or by `Overturned`, draw the sheet again with every change no sheet has shown yet; where it is `Overturned`, the case that overturned it leads that sheet, said to be why the recognition was not taken, and the move asks about that case.
 
-At a recognition, before proceeding, quote the recognizing turn and declare beside it the trace as you read it on the context with that turn, said to be your reading — first what changed since the sheet the recognition answered: the user's moves, and what you produced at the recognition that they have not seen, marked as yours; then the goal and who set it; the candidate, with what its reading's row takes in and leaves out, and a case on the boundary with the user's words; the cross view; every case unfolded, folded on that sheet or not, with who brought it; the readings set aside with the user's grounds; every line with who proposed it and, where a turn of the user's reached it, how it stood; the doubts, the user's answers to them standing in their own turns, quoted; and the open trace. The open items are the live readings the candidate does not take and the points still open, those the recognizing turn raised included; each carries the user's own words about it from a turn of theirs that still reaches it, and an item no such turn reaches is shown as open — undisposed. After a recognition, go on to the next move the user declared, citing that turn.
+At a recognition, before proceeding, quote the recognizing turn and declare beside it the trace as you read it on the context with that turn, said to be your reading — first what changed since the sheet the recognition answered: the user's moves, and what you produced at the recognition that they have not seen, marked as yours; then the goal and who set it; the candidate, with what its reading's row takes in and leaves out, and any case on the boundary with the user's words; the cross view; every case unfolded, folded on that sheet or not, with who brought it; the readings set aside with the user's grounds; every line with who proposed it and, where a turn of the user's reached it, how it stood; the doubts, the user's answers to them standing in their own turns, quoted; and the open trace. The open items are the live readings the candidate does not take and the points still open, those the recognizing turn raised included; each carries the user's own words about it from a turn of theirs that still reaches it, and an item no such turn reaches is shown as open — undisposed.
 
 Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, material belongs to another round or trace, or the order of the sheet bears on where a sentence sits.
 
