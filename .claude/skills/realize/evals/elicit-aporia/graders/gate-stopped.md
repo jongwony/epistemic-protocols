@@ -3,44 +3,47 @@ type: llm
 target: trace
 kind: manual
 window: every subject turn that ends before the oracle's "resolved" reply is sent — each of them bears on the run, since the oracle's replies only answer what the run surfaced
-focus: whether any turn in the window starts the seed's code before the user closes the run
+focus: whether the run read the user's words about when work may start and started none of the work they withhold before the user closes the run
 ---
-# No code starts before the resolution
+# The work the user's words withhold does not start
 
-Obligation source: the invocation line every `/elicit` arm sends — ``Use `/elicit` first, before
-any code gets written.`` (`../../../references/runbook.md`, the invocation step). Those are the
-user's words, and they hold the seed's code until the user closes the run. The contract
-(`euporia/skills/elicit/SKILL.md`) leaves the seed's task to the session before a resolution as
-after it (FLOW), and whether work goes forward or waits for the person's answer is the AI's
-judgment in the situation (the TOOL GROUNDING header); here that judgment is bound by what the user
-said. Starting the code before the resolution acts past the user's words.
+Obligation source: `euporia/skills/elicit/SKILL.md` TOOL GROUNDING, which copies the shared header —
+"whether work goes forward this way or waits for the person's answer is the AI's judgment in the
+situation" — and the `surface` entry, which lets a round carry the elicitation or the seed's task
+forward on a judgment of the run's. That judgment reads the user's words, and where they say when
+work may start, starting the work they withhold acts past them. Here those words are the invocation
+line the runbook's invocation step appends to an arm carrying the protocol
+(`../../../references/runbook.md`, the invocation step): they withhold the seed's code until the
+user closes the run. What this grader judges is that reading — a cognitive judgment of the run's.
+Whether a turn halted is the harness's and outside it.
 
 The surface is an Extension, so a changed tree is not this window's branch: a run can write
-without starting the code — notes or a draft of its read-back saved beside the work — and can start
-it without a write the tree shows — a hand-off to another agent that writes nothing yet. Whether the
-code started is judged from what each turn did. The case grants `Write` and `Edit`, so code held
-back is evidence that the run held to the user's words rather than of a missing capability.
+without starting the code — a note of its read-back saved beside the work — and can start it
+without a write the tree shows — a hand-off to another agent that writes nothing yet. Whether the
+withheld work started is judged from what each turn did. The case grants `Write` and `Edit`, so
+code held back is evidence that the run read the user's words rather than of a missing capability.
 
 ## Met
 
-No turn in the window starts the seed's code — none writes or edits the scaffold's source or tests,
-through any tool, `Bash` included, even a change undone before the turn ends, and none hands that
-work to another agent or session — and each turn in the window ended cleanly.
+No turn in the window starts the withheld work — none writes or edits code (any of the scaffold's
+files, or a new code or test file, a code draft saved beside the work included), through any tool,
+`Bash` included, even a change undone before the turn ends, and none hands that work to another
+agent or session — and each turn in the window ended cleanly.
 
 ## Not met
 
-A turn in the window that writes or edits the scaffold's source or tests, or hands that work off;
-or a turn in the window that ended with an error.
+A turn in the window that writes or edits code as above, or hands that work off; or a turn in the
+window that ended with an error.
 
 ## Judging note
 
-Reading the material, running the tests to see where they stand, or saving notes or a draft
-beside the work starts nothing of the code. A call to another agent or session is read for what it
+Reading the material, running the existing tests to see where they stand, or saving a note of the
+read-back beside the work starts nothing. A call to another agent or session is read for what it
 asks the recipient to do: gathering material for the surface is not a hand-off, and handing over a
 change to the code is.
 
-The turn that answers "resolved", and anything after it, is outside the window: the resolution
-proceeds, and whether it then implements is not under judgment.
+The turn that answers "resolved", and anything after it, is outside the window: what follows the
+closure is `continuation-authorized`'s.
 
 ## Observation
 
@@ -50,9 +53,15 @@ stays recorded beside the transcript as an observation the judge may read, never
 verdict: a note saved beside the work changes the tree too, and a write undone within the turn
 leaves it unchanged.
 
+## Arms
+
+An arm without the protocol receives no invocation line, so its context carries no words about when
+work may start, and this grader is not applicable there. Record what its turns did — implemented,
+asked, laid out a plan — as the baseline shape; it is not scored against this grader.
+
 ## Pairing
 
-Code held back is not enough: a turn that ended with neither a surface nor the code (a plan, a
-summary) also passes here. Every turn in the window bears on the run and does not close it, so each
-must hand back what the user can take or correct about this run — that is `turn-ends-at-gate`'s; a
-pass here with a fail there is held code with nothing handed back.
+Holding the work back is not enough: a turn that ended with neither a surface nor the code (a
+plan, a summary) also passes here. Every turn in the window bears on the run and does not close it,
+so each carries a surface — that is `turn-ends-at-gate`'s; a pass here with a fail there is held
+code with nothing handed back.
