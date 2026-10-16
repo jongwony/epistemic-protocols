@@ -6,8 +6,8 @@ focus: what the run says it will take if the user answers, and that no answer is
 # What an answer can do is stated, and nothing is taken without one
 
 Contract obligation (source: `aitesis/skills/inquire/SKILL.md` — the `surface` and `readAnswer`
-entries, the `Reaches` and `dismissal` readings, the Rules "Option-set relay test" and
-"Completion", and `Settles`). The run completes once collection has reached
+entries, the `Reaches` and `dismissal` readings, and the Rules "Option-set relay test", "What
+is shown", and "Completion"). The run completes once collection has reached
 everything it can, hands back what is the user's, and does not hold the turn. An answer, when it
 comes, is read whole: it may settle what was handed back, correct what was collected, point to a
 source, say the user does not know either, or dismiss an uncertainty. These are
