@@ -417,8 +417,8 @@ a round — that stays in the context.
     context does not already hold, or holds only from before a change the person's words or
     evidence report — a capture outcome read as unfinished is not held, so each pass reads it
     again — the searches toward the cue along its axes, within the established boundary and past it
-    where a search there is worth running now — never an extension the person declined, as
-    `expansion` reads a decline, the opening of each member of the leading recognizable at the span the cue reaches (for
+    where a search there is worth running now (never an extension the person declined, as
+    `expansion` reads a decline), the opening of each member of the leading recognizable at the span the cue reaches (for
     an artifact, the change history of that span) and, where its records do not open, of the
     candidates `found` lists in turn until one's records open or none is left, and the capture outcome of every record a search examined, one that matched
     nothing included. A remark, a form instruction, or a decline adds nothing new to read. Each
