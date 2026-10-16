@@ -456,10 +456,6 @@ def snapshotFrom (c : Context P) (r : BoundaryEssence c) (limits : String) (dis 
   { context := c, map := r.map, record := r.map.flatMap recordOf, residual := residualOf r.map,
     limits := limits, dissent := dis }
 
-def snapshotOf (c : Context P) : Snapshot P :=
-  let r := readout c
-  snapshotFrom c r r.limits (dissent c)
-
 /-- The boundary where it stands: the map, record, and residual as read at `c`, where its citations
     point, and what the turn that shows it at `shown` adds — what it names as not reached, and the
     dissent attached to the boundary that it shows. -/

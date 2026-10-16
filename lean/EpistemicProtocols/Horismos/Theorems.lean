@@ -317,20 +317,21 @@ private theorem mem_residualOf {c : Context P} (m : BoundaryMap c) (e : Boundary
   simp only [residualOf, List.mem_map, List.mem_filter]
   exact ⟨e, ⟨hm, by simp [hs]⟩, rfl⟩
 
-/-- Every item on the map whose content does not stand is in the residual of the snapshot, with
-    its question, why it bears, and the arrangement governing it — none where no disposition
-    governs it yet. -/
-theorem open_decisions_in_residual (c : Context P) (e : BoundaryEntry c)
+/-- Every item on the map whose content does not stand is in the residual of the boundary where it
+    stands, with its question, why it bears, and the arrangement governing it — none where no
+    disposition governs it yet. -/
+theorem open_decisions_in_residual (c shown : Context P) (e : BoundaryEntry c)
     (hm : e ∈ (readout c).map) (hs : stands e = false) :
-    openItemOf e ∈ (snapshotOf c).residual :=
+    openItemOf e ∈ (closeAt c shown (readout c)).snapshot.residual :=
   mem_residualOf _ e hm hs
 
 /-- An item awaiting the person is in the residual, marked as governed by no arrangement yet. -/
-theorem awaiting_in_residual (c : Context P) (e : BoundaryEntry c) (hm : e ∈ (readout c).map)
-    (ha : awaitsEntry e = true) :
-    openItemOf e ∈ (snapshotOf c).residual ∧ (openItemOf e).governing = none := by
+theorem awaiting_in_residual (c shown : Context P) (e : BoundaryEntry c)
+    (hm : e ∈ (readout c).map) (ha : awaitsEntry e = true) :
+    openItemOf e ∈ (closeAt c shown (readout c)).snapshot.residual ∧
+      (openItemOf e).governing = none := by
   simp only [awaitsEntry, Bool.and_eq_true, Bool.not_eq_true', Option.isNone_iff_eq_none] at ha
-  exact ⟨open_decisions_in_residual c e hm ha.2, by simp [openItemOf, ha.1]⟩
+  exact ⟨open_decisions_in_residual c shown e hm ha.2, by simp [openItemOf, ha.1]⟩
 
 /-- An item whose disposition an earlier decision fixes does not await the person: it is shown
     with that citation and not asked again. -/
@@ -354,16 +355,14 @@ theorem prior_disposition_records_nothing {c : Context P} (e : BoundaryEntry c)
   cases e with
   | mk d q r ev dep app pr disp pd ct => cases disp <;> rfl
 
-/-- The snapshot carries the map, the record, the residual, what the map did not look at, and the
-    dissent read from the context it is taken in, and a boundary where it stands carries the map
-    read there with the limits and dissent of the turn that shows it. -/
+/-- A boundary where it stands carries the context its citations point into, the map and the
+    residual read there, and the limits and dissent of the turn that shows it. -/
 theorem snapshot_carries (c c' : Context P) :
-    (snapshotOf c).context = c ∧ (snapshotOf c).dissent = dissent c ∧
-      (snapshotOf c).residual = residualOf (readout c).map ∧
-      (snapshotOf c).limits = (readout c).limits ∧
-      ((closeAt c c' (readout c)).snapshot.limits = (readout c').limits ∧
-        (closeAt c c' (readout c)).snapshot.dissent = dissent c' ∧
-        (closeAt c c' (readout c)).snapshot.map = (readout c).map) :=
-  ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
+    (closeAt c c' (readout c)).snapshot.context = c ∧
+      (closeAt c c' (readout c)).snapshot.map = (readout c).map ∧
+      (closeAt c c' (readout c)).snapshot.residual = residualOf (readout c).map ∧
+      (closeAt c c' (readout c)).snapshot.limits = (readout c').limits ∧
+      (closeAt c c' (readout c)).snapshot.dissent = dissent c' :=
+  ⟨rfl, rfl, rfl, rfl, rfl⟩
 
 end Horismos
