@@ -45,6 +45,7 @@ requires: mismatch_detected(X)   -- the AI-opened path only (Layer 2); an invoca
 deficit:  ApplicationDecontextualized
 preserves: every turn of the context -- the context only grows (pass_extends); a write changes only what this run may write (perform)
 invariant: Applicability over Correctness
+invariant: the person holds each resolution; evidence settles one only where it chooses nothing that is the person's (SettledSupported)
 invariant: transformative revalidation (NON-MONOTONE) -- a write changes what the next observation reads, so a run can have more open after a resolution than before it; every pass judges the whole X against the whole context
 invariant: Focus never records -- the sheet, its order, and whether an utterance bears on the run are re-read every turn; only the person's turn, a grant of theirs, or evidence that fixes it moves a resolution onto the record
 -/
@@ -328,9 +329,11 @@ def Write (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin = .ext
     your own turn. What this run may write is what the work in front of the person covers and
     they hold authority over: their own resolution turn authorizes a write to anything they hold,
     an artifact another session of theirs produced included; another person's artifact, or a
-    scope they do not hold, needs that person or a permission. A write outside that is not carried
-    out, even where evidence fixes its direction: it goes into `reach` with what it needs. A
-    discard there is the exception: its write is your turn recording that X is no longer relied
+    scope they do not hold, needs that person or a permission. A write outside that, or one whose
+    effect cannot be undone — a removal or overwrite with no way back, a deploy, a send outside —
+    is not carried out, even where evidence fixes its direction: it goes into `reach` with what it
+    needs, and its mismatch waits on the person; once their turn authorizes it, it is carried out.
+    A discard there is the exception: its write is your turn recording that X is no longer relied
     on. Returns what the writes returned. -/
 axiom perform : Context P → List (Write P)
 
@@ -444,7 +447,7 @@ def grounding : Op → Annot × String
   | .readTurn  => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — whether it bears on the run, and what it does there: resolves, corrects, disputes, grants, names something that does not fit, points at a place to look, asks about the sheet")
   | .record    => (.track, "record: the current sheet kept in a durable record the person can find, where the run may be cut off before it completes")
   | .converge  => (.interaction .extension, "the closing sheet: the convergence evidence CONVERGENCE names")
-  | .seam      => (.interaction .extension, "after completion, proceed to the next move the person declared, citing that turn; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam      => (.interaction .extension, "after completion, proceed to the next move the person declared, citing that turn; every Constitution gate inside Epharmoge and the next protocol fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Mismatch-domain resolution emergent via session context.
