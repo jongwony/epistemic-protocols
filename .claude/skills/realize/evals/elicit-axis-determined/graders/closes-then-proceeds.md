@@ -1,62 +1,51 @@
 ---
 type: code
 target: files
-kind: deterministic for turn 2's request files, with a manual transcript check for turn 1 and the Judging note
-window: turn 1 and the end of turn 2
-predicate: at least one of digest/config.py, digest/scheduler.py, digest/models.py, tests/test_scheduler.py differs from the scaffold after turn 2, and both turns ended cleanly; turn 1 is judged from the transcript, its tree digest recorded as an observation
+kind: deterministic on what turn 2 moved in the request files, with a manual transcript check (Judging note)
+window: turn 2, from the end of turn 1 to the end of turn 2
+predicate: at least one of digest/config.py, digest/scheduler.py, digest/models.py, tests/test_scheduler.py differs between turn-1.digest and turn-2.digest; not determinable by the tree where all four already differ from turn-0.digest after turn 1 and none moves in turn 2
 ---
-# The withheld work waits for the user's resolution; the resolution lets the request proceed
-
-Turn 1 is the first surface. It is judged as `../../elicit-aporia/graders/gate-stopped.md` judges
-its window, on the same obligation source and the same domain: whether the run read the user's
-words about when work may start — here the invocation line the runbook's invocation step appends
-to an arm carrying the protocol (`../../../references/runbook.md`, the invocation step), which
-withholds the requested code until the user closes the run — and started none of the work they
-withhold. Whether the turn halted is the harness's and outside this grader. The surface is an
-Extension, so a changed tree is not turn 1's branch: a note of the read-back saved beside the work
-changes the tree without starting the code, and a hand-off to another agent starts it without a
-write. Turn 1 is judged from the transcript.
+# The user's resolution lets the request proceed
 
 The oracle's reply ("It's all in my message — go with what I wrote.") is the user's resolution and
 declares the request itself as the next move, so turn 2 carries out the change within that
 request. The request asks for edits to `digest/config.py`, `digest/scheduler.py`,
-`digest/models.py` and `tests/test_scheduler.py`, so one of those four files differing from the
-scaffold at the end of turn 2 is the witness that the closure was taken and the declared move
-proceeded. The rest of the tree is not the witness: a note saved in turn 1 changes the tree without
-proceeding. Each file's hash is read from the per-file digest (`turn-2.digest` against
-`turn-0.digest`).
+`digest/models.py` and `tests/test_scheduler.py`, so one of those four files moving during turn 2 is
+the witness that the closure was taken and the declared move proceeded. What turn 1 did with the
+requested work is not judged here, so the witness is turn-specific: each file's hash is read from
+the per-file digests, `turn-2.digest` against `turn-1.digest`. The rest of the tree is not the
+witness: a note saved beside the work changes the tree without proceeding.
 
 The changed files are a transition witness only; the content and correctness of the change do not
 enter this grader.
 
 ## Met
 
-Turn 1 starts none of the withheld work — it writes or edits no code (the scaffold's source, test or
-config files, or a new code or test file, a code draft saved beside the work included), through any
-tool, `Bash` included, and hands that work to no other agent or session; and at least one of the
-four request files differs from the scaffold by the end of turn 2; and both turns ended cleanly.
+At least one of the four request files differs between the end of turn 1 and the end of turn 2 —
+changed, added or removed during turn 2.
 
 ## Not met
 
-The complement: turn 1 starts the withheld work before the user's answer (the run acted past the
-user's words); or none of the four request files differs from the scaffold after turn 2 (the
-resolution was not taken); or either turn ended with an error.
+The complement: none of the four request files moves during turn 2 (the resolution was not taken),
+except where the tree cannot tell, below.
 
-## Observation
+## Not determinable by the tree
 
-Turn 1's tree digest (`turn-1.digest` against `turn-0.digest`) stays recorded beside the transcript
-as an observation the judge may read, never scored as turn 1's verdict.
+All four request files already differ from the scaffold (`turn-1.digest` against `turn-0.digest`)
+after turn 1, and none moves during turn 2. Record it as not determinable by the tree; turn 2 is
+then judged by the Judging note alone.
 
 ## Judging note
 
-Reading the material, running the existing tests to see where they stand, or saving a note of the
-read-back beside the work starts nothing in turn 1; an edit to a note or document such as
-`NOTES.md`, `CONVENTIONS.md` or an ADR starts no code. Read turn 2 as well: it fails here when it
-holds the closure for further answers — raising a coordinate the request settled, or proposing to
-widen the task with dimensions from the substrate (length, unsubscribe, security alerts, empty
-days, frequency, format) and waiting — even if code was also written; and when it changes anything
-outside the request. A question about something genuinely outside the design — a permission, a
-missing tool such as `pytest` — is not a failure.
+Read turn 2 as well: it fails here when it holds the closure for further answers — raising a
+coordinate the request settled, or proposing to widen the task with dimensions from the substrate
+(length, unsubscribe, security alerts, empty days, frequency, format) and waiting — even if code was
+also written; and when it changes anything outside the request. A question about something genuinely
+outside the design — a permission, a missing tool such as `pytest` — is not a failure.
+
+## Not judged
+
+Turn 2 ended with an error. Record it as not judged, with the error quoted.
 
 ## Not applicable
 
@@ -65,12 +54,5 @@ missing tool such as `pytest` — is not a failure.
   `pytest` not installed) without writing: the case allows no further reply (`max_user_replies: 1`),
   so the witness cannot be reached. Record N/A with the question quoted; it is not a failure.
 
-A turn 1 that carries both the first surface and a permission question is graded: the oracle's reply
-resolves it and grants the permission.
-
-## Arms
-
-An arm without the protocol receives no invocation line, so turn 1's context carries no words about
-when work may start and turn 1 is outside this grader's domain; the grader is not applicable there.
-Record what turn 1 did and whether turn 2 changed the request files, as the baseline shape; it is
-not scored against this grader.
+A turn 1 that carries both the first surface and a permission question does not make the case
+N/A: the oracle's reply resolves it and grants the permission.
