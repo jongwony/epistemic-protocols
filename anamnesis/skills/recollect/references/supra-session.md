@@ -11,7 +11,7 @@ Relation         = { from: Member, to: Member | Locator, what: String, support: 
 Locator          = { root: String, identity: Optional(String) }   -- the target of a relation that points at no record reached: a reference naming a record not found. A projection only, never a member: nothing is opened for it
 assemble(found, cue) → List(Recognizable)   -- the judgment: which found records make the one whole the cue means, by the relations the records support, stated in Recognizable.joins
                   -- a method that computes groups (co-occurrence, spectral, diffusion from the cue's records) may propose candidates; it does not decide what the whole is
-                  -- no fixed route: follow whichever relations the cue's axes make worth following, from the records found or across the population the context has bounded; a reach past that boundary is offered, not run
+                  -- no fixed route: follow whichever relations the cue's axes make worth following, from the records found or across the population the context has bounded; a reach past that boundary is as SKILL.md's `search` and `expansion` say
 
 ── INVARIANTS ──
   read-only               : assembly reads the records it joins and writes to none of them, nor to any index
