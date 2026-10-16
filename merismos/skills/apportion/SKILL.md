@@ -43,7 +43,7 @@ Merismos(G) → start(c) → apportion(c, utterances), where c is the fused sess
       not close and what stands in the way → Stop
     [otherwise] the sheet again, with the ledger → Stop
   no utterance: the sheet holds; nothing is taken, and nothing is emitted
-  after the handoff: this protocol holds nothing of the run.
+  after the handoff: this protocol holds nothing of the autonomous run.
 -/
 
 /-! ── MORPHISM ──
@@ -1006,8 +1006,8 @@ def handedOffBy : Outcome P → Option Op
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 The plan leaves as session text and a navigation block over its carrier; what reads it next is the
-person's and the session's to settle. The receiving side runs the block's grounding instruction
-against the work at hand; the emission supplies no answer to a reserved judgment.
+person's and the session's to settle. The block carries the grounding instruction; the emission
+supplies no answer to a reserved judgment.
 -/
 
 end
