@@ -9,7 +9,7 @@ Check a result against every place it lands and every intent it was meant to car
 
 ## Definition
 
-**Epharmoge** (ἐφαρμογή): A dialogical act of checking that a result fits the situation it is applied in — from Aristotle's notion of practical application — resolving the gap between technical correctness and contextual appropriateness. The result is any work product: this session's output, an analysis, a decision, a document, or an artifact another session or person produced. Two things run side by side. The person holds one coordinate per place the result does not fit — fix it this way, leave it for this reason, stop using it, or it is not this result's to fix — and only that coordinate waits on them. Orthogonal to it, the AI relays: it follows the result to everywhere it lands and every intent it was meant to carry, and carries out what is settled within what this run may write. Every place the result does not fit, an omission included, goes on one sheet with its consequence in the person's own situation, and the person answers the sheet in one turn. The run completes when a pass leaves nothing open, with no closing turn asked of them. Completion establishes fit for what was found within what was reached — not the correctness of the result.
+**Epharmoge** (ἐφαρμογή): A dialogical act of checking that a result fits the situation it is applied in — from Aristotle's notion of practical application — resolving the gap between technical correctness and contextual appropriateness. The result is any work product: this session's output, an analysis, a decision, a document, or an artifact another session or person produced. Two things run side by side. The person holds one coordinate per place the result does not fit — fix it this way, leave it for this reason, stop using it, or it is not this result's to fix. Orthogonal to it, the AI relays: it follows the result to everywhere it lands and every intent it was meant to carry, and carries out what is settled within what this run may write. Every place the result does not fit, an omission included, goes on one sheet with its consequence in the person's own situation, and the person answers the sheet in one turn. The run completes when a pass leaves nothing open, with no closing turn asked of them. Completion establishes fit for what was found within what was reached — not the correctness of the result.
 
 ```lean
 /-!
@@ -26,7 +26,7 @@ X, the result under review, is whatever the invocation names — this session's 
 artifact from elsewhere:
   pass(c): observe; perform — the relay; observe again
   [nothing open]   completed — the closing sheet
-  [otherwise]      the sheet, then one gate over every open mismatch → Stop
+  [otherwise]      holding — the sheet, with one question over every open mismatch
   next utterance u: c' := fuse(c, u), read whole →
     [u does not bear on this run]   the session answers it; the run stands as it was
     [otherwise]                     pass(c') → the same reading
@@ -45,7 +45,6 @@ requires: mismatch_detected(X)   -- the AI-opened path only (Layer 2); an invoca
 deficit:  ApplicationDecontextualized
 preserves: every turn of the context -- the context only grows (pass_extends); a write changes only what this run may write (perform)
 invariant: Applicability over Correctness
-invariant: the person holds each resolution; evidence settles one only where it chooses nothing that is the person's (SettledSupported)
 invariant: transformative revalidation (NON-MONOTONE) -- a write changes what the next observation reads, so a run can have more open after a resolution than before it; every pass judges the whole X against the whole context
 invariant: Focus never records -- the sheet, its order, and whether an utterance bears on the run are re-read every turn; only the person's turn, a grant of theirs, or evidence that fixes it moves a resolution onto the record
 -/
@@ -329,11 +328,9 @@ def Write (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin = .ext
     your own turn. What this run may write is what the work in front of the person covers and
     they hold authority over: their own resolution turn authorizes a write to anything they hold,
     an artifact another session of theirs produced included; another person's artifact, or a
-    scope they do not hold, needs that person or a permission. A write outside that, or one whose
-    effect cannot be undone — a removal or overwrite with no way back, a deploy, a send outside —
-    is not carried out, even where evidence fixes its direction: it goes into `reach` with what it
-    needs, and its mismatch waits on the person; once their turn authorizes it, it is carried out.
-    A discard there is the exception: its write is your turn recording that X is no longer relied
+    scope they do not hold, needs that person or a permission. A write outside that is not carried
+    out, even where evidence fixes its direction: it goes into `reach` with what it needs. A
+    discard there is the exception: its write is your turn recording that X is no longer relied
     on. Returns what the writes returned. -/
 axiom perform : Context P → List (Write P)
 
@@ -441,13 +438,13 @@ def grounding : Op → Annot × String
   | .observe   => (.observe, "artifact read, artifact search, record read, and a run that changes no existing state — no send, nothing left behind: every place the result lands and every intent it answers to; each return enters the context as an evidence turn; a place that needs a change to existing state, a permission, or another's authority is named with what it needs and left unreached")
   | .judge     => (.sense, "Internal analysis: the whole result as it now stands against the whole context as it now stands, afresh every pass — never the assistant's own words as what the result must fit; how each mismatch stands; what fits and what was not reached")
   | .evidence  => (.interaction .extension, "where evidence alone settles a mismatch as SettledSupported says, withdraw your own flag or record the relayed resolution as yours, with that evidence; a person's turn that disputes it leaves it open")
-  | .gate      => (.interaction .constitution, "the sheet: every mismatch found with how it stands, concrete actions for each open one with their consequences and your contrary grounds where you have them, never a category title, what fits, what was not reached, and what changed since the last sheet — then one question over every open mismatch")
+  | .gate      => (.interaction .extension, "the sheet: every mismatch found with how it stands, concrete actions for each open one with their consequences and your contrary grounds where you have them, never a category title, what fits, what was not reached, and what changed since the last sheet — then one question over every open mismatch")
   | .adapt     => (.transform, "artifact write, or the revised result stated in your own turn where the result lives in the conversation: an adaptation a settled resolution asks, within what this run may write; what it returns enters the context and the next observation reads it")
   | .discard   => (.transform, "within what this run may write, an artifact write that withdraws the result and puts the replacement in its place, or removes it when nothing takes its place; outside it, your turn recording that the result is no longer relied on")
   | .readTurn  => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — whether it bears on the run, and what it does there: resolves, corrects, disputes, grants, names something that does not fit, points at a place to look, asks about the sheet")
   | .record    => (.track, "record: the current sheet kept in a durable record the person can find, where the run may be cut off before it completes")
   | .converge  => (.interaction .extension, "the closing sheet: the convergence evidence CONVERGENCE names")
-  | .seam      => (.interaction .extension, "after completion, proceed to the next move the person declared, citing that turn; every Constitution gate inside Epharmoge and the next protocol fires unchanged")
+  | .seam      => (.interaction .extension, "after completion, proceed to the next move the person declared, citing that turn; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Mismatch-domain resolution emergent via session context.
@@ -502,7 +499,7 @@ Where a place reads as another owner's, the options name the concrete split, for
 - **One sheet**: As `respond` states — every place on one sheet, one question over the open ones.
 - **Recognition over categories**: As `respond` and the `gate` grounding state — concrete actions with their consequences and contrary grounds, never category titles.
 - **Reach named**: As `observe` and `reach` state.
-- **Relay runs as Extension**: As `perform` and `SettledSupported` state — what is settled is carried out within what this run may write; only what the person holds waits for their turn.
+- **Relay runs as Extension**: As `perform` and `SettledSupported` state — what is settled is carried out within what this run may write.
 - **The person resolves**: As `ResolutionSupported`, `SettledSupported`, and `respond` state — including the quoted disclosure of a turn read as a resolution.
 - **Completion needs no closing turn**: As `NothingOpen`, `Outcome`, and CONVERGENCE state.
 - **How much it matters**: As `respond` states — by demonstrable behavioral consequence, never structural extent alone.
