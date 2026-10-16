@@ -32,7 +32,8 @@ Analogia(R) → start(c) → ground(c, utterances), where c is the fused session
       [the collected context leaves nothing to audit]  `questionDraft`
       [otherwise]  assessment: each conclusion Licensed with its limits, Blocked, or Undetermined
         with what is missing and who can reach it, on the question that stands or on your draft,
-        named which; present it and proceed — no verdict is asked
+        named which — a draft shown as `questionDraft` states; present it and proceed — no verdict
+        is asked
   next requested move: as TOOL GROUNDING `seam` states
   next utterance u: c' := fuse(c, u), read whole against R and c' →
     [u bears on the audit]  pass(c')   (a changed purpose, conclusion, pair, or ground is read there)
@@ -204,9 +205,8 @@ axiom question : (c : Context P) → Occ (questionCoord (P := P)) c
 
 /-- **Your judgment**: the conclusions of the question you carry the audit forward on while the
     person's turns leave it open, read from the context as `QuestionSupported` reads a turn's
-    question — the whole scope asked, per-case and collective conclusions, the pair where open —
-    and shown as your draft with its purpose, the pair where open, and its grounds; empty where
-    you carry none forward. -/
+    question — the whole scope asked, per-case and collective conclusions, the pair where open;
+    empty where you carry none forward. -/
 axiom draftInferences : Context P → List Inference
 
 /-- `K`: the conclusions of the question that stands, or, while it is open, of your draft. -/
@@ -498,8 +498,8 @@ Undetermined naming what is missing and who can reach it. Undetermined does not 
 assessment and is not settled by it; a check this session can reach and has not run is run, not
 reported Undetermined. Convergence evidence: the question with the person's turn it stands on,
 who first put it forward, and whether that turn set it or took a draft, or your draft with its
-grounds where the question is open — the purpose, K, and the source and target audited, with the turn or fact that fixed them or the
-person's answer where the choice was open; the reading the person named, with the turn that named
+grounds where the question is open — the purpose, K, and the source and target audited, with the turn or fact that fixed them, or the
+person's answer or your draft where the choice was open; the reading the person named, with the turn that named
 it, where a conclusion's sense was fixed that way; for each k in K, one line
 (MappingUncertain(k) → verdict(k)) showing the source relation, or chain of relations, that
 carries it, the correspondences it rode on, the likenesses, the differences in both directions,
@@ -560,7 +560,7 @@ def grounding : Op → Annot × String
   | .surface          => (.interaction .extension, "the assessment with its trace, the places reached and not, what is open as the person's own unknown, and what a later turn would change; no verdict answer is required")
   | .converge         => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with the assessment")
   | .readAnswer       => (.sense, "Internal analysis: the latest utterance read whole against R and the fused context as it now stands — whether it bears on the audit")
-  | .seam             => (.interaction .extension, "the next move the person declared, citing that turn; where it rests on a conclusion not Licensed within its limits — Blocked, Undetermined, or Licensed beyond its limits — or on the mapping unaudited, show beside it which part of the assessment it rests on; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam             => (.interaction .extension, "the next move the person declared, citing that turn; where it rests on what the audit has not licensed on a question that stands — a conclusion Blocked, Undetermined, or Licensed beyond its limits, an assessment over your draft, or the mapping unaudited — show beside it what it rests on; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
@@ -599,7 +599,7 @@ Present the whole assessment in everyday language: the question; for each conclu
 
 Beside each claim that matters, state the scope its grounds were checked within, the target-side fact or observable result that would change it, any materially different explanation its evidence fits as well, and who can reach that evidence or why neither party currently can. Carry out the checks this session can reach before presenting, and name the places collection reached and those it could not; where collected material conflicts, name what conflicts with what. What is still open is shown as the person's own unknown, as the question it is. An unmet check is reported as unmet. A claim with nothing behind it is named as having nothing behind it rather than described as tentative.
 
-Then state what a later turn would change, and proceed without asking for a verdict; next work the person requests follows TOOL GROUNDING `seam`. A later turn is read whole: one that bears on the audit — a changed purpose, conclusion, source or target, a fact, a source, a counterexample, a result from running something — is the context the next pass reads, and a question about this audit the current grounds answer entirely is answered without a new pass; evidence already gathered stays, and verdicts are judged again over the question that now stands. Saying the mapping looks right moves nothing, and saying so is not a failing on the reader's part — it is what this surface is built not to need. Adoption is the reader's own turn taking a conclusion into, or setting it aside from, what they carry over; it opens no pass, and an instruction to do the next task adopts nothing. Adopting and setting aside are recorded as the reader's, kept apart from what the evidence shows, and never given as a reason a verdict came out the way it did; a conclusion adopted over a blocked or undetermined verdict stands as accepted and evidentially disputed, with its grounds shown. While the question is open, a turn that turns to other work is simply answered; the question stays open.
+Then state what a later turn would change, and proceed without asking for a verdict; next work the person requests follows TOOL GROUNDING `seam`. A later turn is read whole: one that bears on the audit — a changed purpose, conclusion, source or target, a fact, a source, a counterexample, a result from running something — is the context the next pass reads, and a question about this audit the current grounds answer entirely is answered without a new pass; evidence already gathered stays, and verdicts are judged again over the question now audited. Saying the mapping looks right moves nothing, and saying so is not a failing on the reader's part — it is what this surface is built not to need. Adoption is the reader's own turn taking a conclusion into, or setting it aside from, what they carry over; it opens no pass, and an instruction to do the next task adopts nothing. Adopting and setting aside are recorded as the reader's, kept apart from what the evidence shows, and never given as a reason a verdict came out the way it did; a conclusion adopted over a blocked or undetermined verdict stands as accepted and evidentially disputed, with its grounds shown. While the question is open, a turn that turns to other work is simply answered; the question stays open.
 
 Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, or material belongs to another round or trace.
 
@@ -614,7 +614,7 @@ Read `references/round-composition.md` before composing when terminology must re
 ## Rules
 
 - **Warrant tracks evidence, never assent**: Read each fit claim's warrant off the grounds actually cited for it. Agreement does not promote a claim and disagreement does not defeat one without a ground; what the user reports having observed is evidence like any other observation. Evidence that would fit a materially different explanation as well is read against that explanation too. Record what the reader adopts, report it apart from the evidence, and never offer it as a reason a verdict came out as it did.
-- **The question stands on the person's turn**: Read the purpose, the conclusions at stake in the whole scope asked, and the source and target where that choice is open off the person's own words. Where they leave it open, the AI drafts the question but never makes it stand: its draft does not settle the purpose, narrow the conclusions below what the cited turn asks, or pick between materially different sources or targets for the person, because this audit closes on evidence and no later utterance of the user's would cover a question the AI made stand. A question the user's words settle is read back; an assessment over the AI's draft says it rests on that draft.
+- **The question stands on the person's turn**: Read the purpose, the conclusions at stake in the whole scope asked, and the source and target where that choice is open off the person's own words. Where they leave it open, the AI may draft the question, but its draft settles none of it — not the purpose, not conclusions narrower than the cited turn asks, not a choice between materially different sources or targets — because this audit closes on evidence and no later utterance of the user's would cover a question the AI made stand. A question the user's words settle is read back; an assessment over the AI's draft says it rests on that draft.
 - **Collect to the limit of reach**: Collect over what the mapping rests on until nothing reachable is left; name the places reached and those that could not be; show what remains open as the person's own unknown, never as a stall. Where the purpose is to carry a structure over and the person's turn asks nothing narrower, audit whether the whole structure is preserved, with its relations found by collection.
 - **Judgment is over conclusions, not correspondences**: Judge each conclusion on its own. A peripheral correspondence may stay open without holding the audit open, and no disposition of correspondences completes it. An undetermined conclusion completes the assessment; a reachable check left unrun does not.
 - **A chain is checked as a chain**: A conclusion carried by a chain of source relations is licensed only with a met check on the composite. Evidence that defeats preservation through the composite blocks that route, never the conclusion's truth. A Licensed preservation verdict names in its limits the relations and composites checked.
