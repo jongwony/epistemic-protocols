@@ -429,18 +429,18 @@ what changed, before it generates. The loop is dialogue: no round count or cap c
 
 /-! ── CONVERGENCE ──
 converged: a DirectionalContrast — a direction the person constituted over the map, harvested before
-discard, every probe's disposition declared; holding is a run no turn of the person's has closed. A
-constitution adopts the direction as the map showed it; it establishes nothing about a direction no
-probe materialized, and a contrary ground it was taken over rides it as dissent. The convergence
-evidence: the turn read as the closing, quoted, and the intent taken from it, and where it took a
-reading the round before showed of an unclear turn, that earlier turn quoted too; the purpose as it
-stands, marked as yours where you read it; the constituted direction and the deciding cells, as
-`decidingRows` reads them, each with what it rests on; the open unknowns with what would settle
-each, every probe's disposition with where it lived, and the dissent — a contrary ground first
-visible at the closing turn, a criterion they stated against the pick that turn makes included, is
-shown here and attached, and the closure stands. The framing readout names the work in play — the
-spec being drafted, probes under contrast, a direction being constituted, discard being verified —
-never a completion tally. Grounded, not asserted.
+discard, every probe's disposition declared; holding is an activated run no turn of the person's has
+closed. A constitution adopts the direction as the map showed it; it establishes nothing about a
+direction no probe materialized, and a contrary ground it was taken over rides it as dissent. The
+convergence evidence: the turn read as the closing, quoted, and the intent taken from it, and where
+it took a reading the round before showed of an unclear turn, that earlier turn quoted too; the
+purpose as it stands, marked as yours where you read it; the constituted direction and the deciding
+cells, as `decidingRows` reads them, each with what it rests on; the open unknowns with what would
+settle each, every probe's disposition with where it lived, and the dissent — a contrary ground
+first visible at the closing turn, a criterion they stated against the pick that turn makes
+included, is shown here and attached, and the closure stands. The framing readout names the work in
+play — the spec being drafted, probes under contrast, a direction being constituted, discard being
+verified — never a completion tally. Grounded, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -472,7 +472,6 @@ inductive Op | detect | notActivatedRelay | gather | specRelay | instantiate | i
              | assess | present | readTurn | harvest | cleanup | cleanupVerify | assemble
              | converge | seam
 
-/-- No Constitution entry: whether a turn halts is the harness's baseline. -/
 def grounding : Op → Annot × String
   | .detect            => (.sense, "Internal analysis: whether this is the protocol's case, as `notActivated` reads it")
   | .notActivatedRelay => (.interaction .extension, "before activation only: your `notActivated` reading, in plain words with its basis; not activated")
@@ -488,7 +487,7 @@ def grounding : Op → Annot × String
   | .cleanupVerify     => (.observe, "environment run, artifact read: the verification step closing the same sequence — each path verified absent after its destruction; a disposition observed per probe, and a probe no observation reached declared as not verified; a probe still present is declared with the path to remove by hand, and the direction the person settled stands")
   | .assemble          => (.sense, "Internal analysis: the terminal record built from the harvest and the completed discard trace — after cleanup, never before")
   | .converge          => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with DirectionalContrast")
-  | .seam              => (.interaction .extension, "after a constitution or not activating, proceed to the next move the person declared, citing that turn; otherwise, after a constitution, the record is handed on as session text, the dissent travelling in it; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam              => (.interaction .extension, "after a constitution or not activating, the next move only as the person declared it, citing that turn; otherwise, after a constitution, the record is handed on as session text, the dissent travelling in it; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-- The operations that write a fan's probes, by tier: a Mockup through `.instantiate`, and
     `.instantiateDelegate` where delegated; a Vignette writes no file. -/
