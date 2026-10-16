@@ -36,15 +36,15 @@ Hypotyposis(I) → start(c) → sketch(c, utterances), where c is the fused sess
     person's words set and on which version, what of yours they took, what you propose not yet
     taken, what rests on a check, what stays unestablished, what changed since the standing they
     last answered, where each version is; your readings and contrary grounds, each with what it
-    bears on and rests on → one opening → Stop
+    bears on and rests on → one opening
   next utterance u, read on fuse(c, u):
     [does not bear on this run]   what their words ask done to the versions, observed; the session
-                                  answers it; that answer stays in c; no gate of this run
+                                  answers it; that answer stays in c; no round of this run
     [the person recognizes v]     what their words ask done to the versions, observed → RecognizedForm
-    [otherwise]                   what is gathered now enters c; a production where their turn
-                                  calls for a version none shown embodies; what their words ask
-                                  done to the versions is done and observed → round
-  no utterance: the gate holds; nothing is recognized, written, or removed
+    [otherwise]                   what is gathered now enters c; a production where
+                                  `ProductionCalled` reads one; what their words ask done to the
+                                  versions is done and observed → round
+  no utterance: nothing is recognized, moved, or removed; the run holds
 -/
 
 /-! ── MORPHISM ──
@@ -286,8 +286,8 @@ def recordOf (c : Context P) : Record c :=
     move, or remove a version, a question about a version, a contrary ground answered — judged on
     what the whole utterance does, on the context with it; other work in an utterance that bears
     on the run neither closes it nor answers its judgments. An utterance about other work leaves
-    the run as it stands: the session answers it, that answer stays in the context, and no gate of
-    this run is raised. Words that end the run without recognizing a version do not bear on it,
+    the run as it stands: the session answers it, that answer stays in the context, and no round of
+    this run is drawn. Words that end the run without recognizing a version do not bear on it,
     whatever else the turn says, a request to write, move, or remove a version included: what they
     ask done to the versions is carried out first, as `carriedOut` says, and what else they say
     stands in its own words in the context; the session answers them, saying where each version is
@@ -340,8 +340,10 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
     would show produce nothing; a value they took that a shown version already embodies needs no
     new version. Where a mark reads as about the rendering rather than the form, the next version
     fixes the rendering and leaves the form as it was, and the round says so; where the evidence
-    does not settle which it is about, the round says that. -/
-axiom ProductionRequested : Context P → Prop
+    does not settle which it is about, the round says that. Or, on your stated judgment, making now
+    a version you would propose — the revision an insufficiency you found calls for, an alternative
+    a comparison lacks — serves the next judgment better than showing the proposal alone. -/
+axiom ProductionCalled : Context P → Prop
 
 /-- **Your read**, now, of what the next judgment needs, as far as relevant access reaches: the
     material the form draws on and the sources that bear on it — any a turn cites, and any you
@@ -407,7 +409,7 @@ gathers what the versions will be checked against, then makes them (`narrate` fo
 claims checked as it is written; for an artifact, the operations `producedBy` names), and gathers
 what checking them needs; `respond` is the round, as TOOL GROUNDING's
 `present` entry names it; `session` is the session's own answer to an utterance that does not bear
-on the run, which stays in the context without being a gate of this run.
+on the run, which stays in the context without being a round of this run.
 -/
 
 /-- Your turns. `narrate` writes each narration version; being yours, it grounds nothing. -/
@@ -442,9 +444,8 @@ open Classical in
 /-- A turn that does not bear on the run has what it asks done to the versions carried out, then
     the session answers it, and the run holds; a closing is read from the person's turn before
     anything is gathered, and its record is built after what that turn asked done is observed;
-    otherwise what is gathered now enters the context, a production runs where the turn calls for
-    a version none shown embodies, what the turn asks done to the versions is carried out, and the
-    round follows. -/
+    otherwise what is gathered now enters the context, a production runs where `ProductionCalled`
+    reads one, what the turn asks done to the versions is carried out, and the round follows. -/
 def sketch (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
@@ -456,7 +457,7 @@ def sketch (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
     | some (.recognize v) => .recognized (recognizedOn f v)
     | none =>
       let c₁ := consulted f
-      let c₂ := if ProductionRequested c₁ then production ai c₁ else c₁
+      let c₂ := if ProductionCalled c₁ then production ai c₁ else c₁
       let c₃ := settle c₂
       sketch ai (c₃ ++ [(ai.respond c₃).val]) us
 
@@ -473,17 +474,15 @@ Every round re-judges the whole run against the whole context: nothing counts ro
 down, and no earlier answer is held apart from what later ones say. Neither "every earlier fit
 stands" nor "every revision stales it" is a rule: what a person's words reached is read again on
 the context as it now stands, and what changed since the standing they last answered is shown.
-A production happens where the person's turn calls for a version none shown embodies, and nowhere
-else: an insufficiency you find is shown with its basis and the revision you propose, and you
-produce it once the person takes it up. Each production relays its intent whole, with what changed,
-before it makes anything. The loop is dialogue: each round ends at the gate, and no round count,
-cap, or fatigue closes it.
+A production happens where `ProductionCalled` reads one, at most once per turn of the person's.
+Each production relays its intent whole, with what changed, before it makes anything. The loop is
+dialogue: each round ends on its opening, and no round count, cap, or fatigue closes the run.
 -/
 
 /-! ── CONVERGENCE ──
 converged: a RecognizedForm — a version the person encountered and recognized for the purpose as it
 stands, its record built by `recordOf` after what the recognizing turn asked done was observed;
-holding is a round no turn of the person's that bears on the run has answered. A recognition
+holding is a run no turn of the person's has closed. A recognition
 establishes the person's judgment of fit for that purpose on what the version's medium showed;
 correctness against a standard outside preference rests on the checks the findings name, and
 readiness for use on nothing here; a contrary ground it was taken over rides it in the dissent. The
@@ -534,12 +533,12 @@ def grounding : Op → Annot × String
   | .produce           => (.transform, "artifact write, environment run: what `produce` writes, as its doc states; a narration version writes no file — it is your own turn (`narrate`), recorded on the version")
   | .produceDelegate   => (.dispatch, "delegate (conditional, artifact versions): a version's write handed to execution, its location registered at creation; subordinate to the active runtime policy")
   | .assess            => (.sense, "Internal analysis: the purpose reading, what each version shows and does not, the standing, what stays unestablished, and your readings, over the whole fused context as it now stands")
-  | .present           => (.interaction .constitution, "the round, every round the first included. After a production, each new version first, as encountered in its medium — narration as written, an artifact shown or walked through at its location, saying what was observed there or that it was not observed and what was tried — and what this realization does not show of the qualities the person's judgment concerns; a realization that leaves the judged quality unexposed — a figure shown as its source, a still standing for motion — is said to be so. Then the standing: the purpose as `purpose` says the round shows it; what the person's words set and on which version, and what of yours their turns took; what you propose not yet taken; what rests on a check or a read, with what it was checked against and what that leaves unchecked; what stays unestablished; what changed since the standing they last answered, the parts kept unchanged included; and where each version is — whether in a scratch place, and whether that will outlive the session as far as what the session observes of it shows, or inside a project whose history commits keep, and whether the place holds content no commit keeps — what the person asked done to it that is not observed done, with the reason where it failed, and the home a recognition would take where the context gives one, said the same way. How the standing is drawn is the realization's; no invented completion measure or fixed sequence of phases is shown as where the run stands. Then your readings with their basis — a mark you read as about the rendering rather than the form, or a reading that the run has reached a case `notActivated` names — each closing nothing; and your contrary grounds, as `dissent` holds them. Where versions are offered as alternatives, how they differ and what each implies; where a pick was made side by side and the form will be used alone, consider showing it alone, and a reading that a difference only the side-by-side view made salient carried the pick is a contrary ground. Where a version the run needs calls for a capability this session cannot supply — a medium it cannot show, a reference it cannot reach — name that capability, and set side by side what the medium at hand already lets the person judge and what only the missing one would let them encounter or check; that version waits until they supply it, change the medium, or go on in the medium at hand or without it. Where a consequential home the context leaves unresolved bears on a recognition, the round may ask it. Read the person's turn whole; where its intent was unclear, say in one line how you took it, asking nothing back where that settles nothing the person holds, and answer what they asked — a question about a version as asked. Every round ends on one opening the person can take, in their own words — mark or keep what they see, ask for a change, a combination, or another medium, or take a version as the form")
-  | .readTurn          => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there — a closing, a purpose, a mark or a keep, a value set or taken, a request for a version, a question — read whole against the fused context as it now stands, as `Reaches`, `ClosingSupported`, `PurposeSupported`, `StandingSupported`, and `ProductionRequested` read it")
+  | .present           => (.interaction .extension, "the round, every round the first included. After a production, each new version first, as encountered in its medium — narration as written, an artifact shown or walked through at its location, saying what was observed there or that it was not observed and what was tried — and what this realization does not show of the qualities the person's judgment concerns; a realization that leaves the judged quality unexposed — a figure shown as its source, a still standing for motion — is said to be so. Then the standing: the purpose as `purpose` says the round shows it; what the person's words set and on which version, and what of yours their turns took; what you propose not yet taken; what rests on a check or a read, with what it was checked against and what that leaves unchecked; what stays unestablished; what changed since the standing they last answered, the parts kept unchanged included; and where each version is — whether in a scratch place, and whether that will outlive the session as far as what the session observes of it shows, or inside a project whose history commits keep, and whether the place holds content no commit keeps — what the person asked done to it that is not observed done, with the reason where it failed, and the home a recognition would take where the context gives one, said the same way. How the standing is drawn is the realization's; no invented completion measure or fixed sequence of phases is shown as where the run stands. Then your readings with their basis — a mark you read as about the rendering rather than the form, or a reading that the run has reached a case `notActivated` names — each closing nothing; and your contrary grounds, as `dissent` holds them. Where versions are offered as alternatives, how they differ and what each implies; where a pick was made side by side and the form will be used alone, consider showing it alone, and a reading that a difference only the side-by-side view made salient carried the pick is a contrary ground. Where a version the run needs calls for a capability this session cannot supply — a medium it cannot show, a reference it cannot reach — name that capability, and set side by side what the medium at hand already lets the person judge and what only the missing one would let them encounter or check; that version waits until they supply it, change the medium, or go on in the medium at hand or without it. Where a consequential home the context leaves unresolved bears on a recognition, the round may ask it. Read the person's turn whole; where its intent was unclear, say in one line how you took it, asking nothing back where that settles nothing the person holds, and answer what they asked — a question about a version as asked. Every round ends on one opening the person can take, in their own words — mark or keep what they see, ask for a change, a combination, or another medium, or take a version as the form")
+  | .readTurn          => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there — a closing, a purpose, a mark or a keep, a value set or taken, a request for a version, a question — read whole against the fused context as it now stands, as `Reaches`, `ClosingSupported`, `PurposeSupported`, `StandingSupported`, and `ProductionCalled` read it")
   | .carryOut          => (.transform, "artifact write, environment run: what `carriedOut` does, as its doc states; each write or removal observed")
   | .assemble          => (.sense, "Internal analysis: the terminal record, `recordOf`, built after what the closing turn asked done is observed, never before")
   | .converge          => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with RecognizedForm")
-  | .seam              => (.interaction .extension, "after a recognition or not activating, the next move only from a chain the person declared, a routing policy they adopted, or their grant, citing that source; otherwise, as session text, the `notActivated` reading is handed on after not activating, and after a recognition the record, with the recognized version — an artifact by where it is and what it showed, a narration as written — every other version by where it is, or the round that showed it, rather than its content, the dissent travelling in it; moving the form further into the work than the person named is their next move; every Constitution gate inside this protocol and the next fires unchanged")
+  | .seam              => (.interaction .extension, "after a recognition or not activating, proceed to the next move the person declared, citing that turn; after a recognition the record is handed on as session text, with the recognized version — an artifact by where it is and what it showed, a narration as written — every other version by where it is, or the round that showed it, rather than its content, the dissent travelling in it; every Constitution gate inside this protocol and the next fires unchanged")
 
 /-- The operations that write a version, by realization: an artifact through `.produce`, and
     `.produceDelegate` where its write is handed to execution; narration writes no file. -/
@@ -568,6 +567,6 @@ Where the session can render a figure, a page, or a motion, show the version ren
 
 ## Rules
 
-- **Round composition**: Compose each round so the reader can act without reassembly — use everyday language, keep each judgment beside its evidence and next-move implication, and place analytical context before its gate. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, content belongs to another round or the convergence evidence, or whether text belongs before or inside the gate is in question.
+- **Round composition**: Compose each round so the reader can act without reassembly — use everyday language, keep each judgment beside its evidence and next-move implication, and place analytical context before its opening. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, content belongs to another round or the convergence evidence, or whether text belongs before the round's opening or inside it is in question.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
 - **Contract execution**: As FLOW, the judgments' doc comments, LOOP, TOOL GROUNDING's `intentRelay` and `present` entries, and CONVERGENCE state.
