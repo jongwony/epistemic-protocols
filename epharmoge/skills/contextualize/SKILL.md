@@ -9,7 +9,7 @@ Check a result against every place it lands and every intent it was meant to car
 
 ## Definition
 
-**Epharmoge** (ἐφαρμογή): A dialogical act of checking that a result fits the situation it is applied in — from Aristotle's notion of practical application — resolving the gap between technical correctness and contextual appropriateness. The result is any work product: this session's output, an analysis, a decision, a document, or an artifact another session or person produced. Two things run side by side. The person holds one coordinate per place the result does not fit — fix it this way, leave it for this reason, stop using it, or it is not this result's to fix. Orthogonal to it, the AI relays: it follows the result to everywhere it lands and every intent it was meant to carry, and carries out what is settled within what this run may write. Every place the result does not fit, an omission included, goes on one sheet with its consequence in the person's own situation, and the person answers the sheet in one turn. The run completes when a pass leaves nothing open, with no closing turn asked of them. Completion establishes fit for what was found within what was reached — not the correctness of the result.
+**Epharmoge** (ἐφαρμογή): A dialogical act of checking that a result fits the situation it is applied in — from Aristotle's notion of practical application — resolving the gap between technical correctness and contextual appropriateness. The result is any work product: this session's output, an analysis, a decision, a document, or an artifact another session or person produced. Two things run side by side. The person holds one coordinate per place the result does not fit — fix it this way, leave it for this reason, stop using it, or it is not this result's to fix — and only that coordinate waits on them. Orthogonal to it, the AI relays: it follows the result to everywhere it lands and every intent it was meant to carry, and carries out what is settled within what this run may write. Every place the result does not fit, an omission included, goes on one sheet with its consequence in the person's own situation, and the person answers the sheet in one turn. The run completes when a pass leaves nothing open, with no closing turn asked of them. Completion establishes fit for what was found within what was reached — not the correctness of the result.
 
 ```lean
 /-!
@@ -502,7 +502,7 @@ Where a place reads as another owner's, the options name the concrete split, for
 - **One sheet**: As `respond` states — every place on one sheet, one question over the open ones.
 - **Recognition over categories**: As `respond` and the `gate` grounding state — concrete actions with their consequences and contrary grounds, never category titles.
 - **Reach named**: As `observe` and `reach` state.
-- **Relay runs as Extension**: As `perform` and `SettledSupported` state — what is settled is carried out within what this run may write.
+- **Relay runs as Extension**: As `perform` and `SettledSupported` state — what is settled is carried out within what this run may write; only what the person holds waits for their turn.
 - **The person resolves**: As `ResolutionSupported`, `SettledSupported`, and `respond` state — including the quoted disclosure of a turn read as a resolution.
 - **Completion needs no closing turn**: As `NothingOpen`, `Outcome`, and CONVERGENCE state.
 - **How much it matters**: As `respond` states — by demonstrable behavioral consequence, never structural extent alone.
