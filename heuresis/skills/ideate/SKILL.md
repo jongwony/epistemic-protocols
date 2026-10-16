@@ -23,19 +23,19 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 /-! ── FLOW ──
 Heuresis(U) → start(c) → ideate(c, utterances), where c is the fused session context:
   start: the records `reference` names, read → the classification relay →
-    Blank: a pass over the frames the request names, if any → the map → gate
-    Seeded: a first pass → the map → gate
-    Resumed: a pass over the frames the request opens, if any → the earlier field's map → gate
-    which gate the map carries — the frame map or a round gate — is "The map"'s
+    Blank: a pass over the frames the request names, if any → the map
+    Seeded: a first pass → the map
+    Resumed: a pass over the frames the request opens, if any → the earlier field's map
+    whether the map is the frame map or a round is "The map"'s
   next utterance u: c' := fuse(c, u) →
     u takes the field, with candidates in it → DiverseCandidateField; nothing u names is read
     the person's own invocation of this protocol → this run's reading ends, holding; the run it
       starts reads u
     a turn that does not bear on the run → the session answers it; no map; the run holds
     otherwise the records `reference` names, read →
-      the frames the answer opens — some: a pass over them → the map → gate
-                                    none: the map → gate
-  no utterance: the gate holds; nothing is taken
+      the frames the answer opens — some: a pass over them → the map
+                                    none: the map
+  no utterance: nothing is taken; the run holds
 -/
 
 /-! ── MORPHISM ──
@@ -48,7 +48,7 @@ invariant: the person takes the field         -- only their taking closes; a pic
 invariant: frame map first                    -- at a frame map, until the person has chosen frames, no candidate of yours is shown
 invariant: Divergence over Selection          -- nothing is eliminated, ranked, scored, or chosen; selection is outside this protocol
 invariant: width and depth both widen         -- a new frame or a branch under an open frame or candidate; the map shows each branch's place
-invariant: dissent rides the field            -- unaddressed signals, unexplored frames, and your doubts stand before every gate and in the field
+invariant: dissent rides the field            -- unaddressed signals, unexplored frames, and your doubts stand on every map and in the field
 -/
 
 namespace Heuresis
@@ -174,9 +174,9 @@ structure Signal where
   source  : SignalSource
 
 /-- **Your reading**, from the context as it now stands: the concerns the bound request and named
-    material carry, and any the person voiced later in the run — a constraint added at a gate is a
-    signal from then on. Nothing is fixed at entry, and none is dropped while the person's words
-    still hold it. -/
+    material carry, and any the person voiced later in the run — a constraint added in answer to a
+    map is a signal from then on. Nothing is fixed at entry, and none is dropped while the person's
+    words still hold it. -/
 axiom signals : Context P → List Signal
 
 /-- A partition for parallel generation: a frame, or a branch dug under an open frame or under a
@@ -253,9 +253,9 @@ structure Candidate where
     candidate. Never removed, re-ranked, or relabeled, an excluded frame's included. -/
 axiom candidates : Context P → List Candidate
 
-/-- **Your judgment**, remade at each map before a gate from the candidates and signals as they
-    stand: the candidate responds to the signal. A candidate in an out-of-scope lineage answers no
-    signal for this field. Never stored as a mapping and never a score on the candidate; the field
+/-- **Your judgment**, remade at each map shown from the candidates and signals as they stand: the
+    candidate responds to the signal. A candidate in an out-of-scope lineage answers no signal for
+    this field. Never stored as a mapping and never a score on the candidate; the field
     holds it as `DiverseCandidateField` says. -/
 axiom Responds : Context P → Candidate → Signal → Prop
 
@@ -291,12 +291,17 @@ axiom dissent : Context P → List String
     names — "angles: pricing and pacing" — and none where it names none. At a Resumed entry's
     resuming step, the frames the request names or asks to deepen — an opened frame it names is
     deepened by a branch under it, never reopened; a request that only continues opens none, and a
-    request the earlier field already answered — a gate answer bound as the request by a bare
-    invocation — is not applied again, so the field resumes as last shown. A turn that corrects the
+    request the earlier field already answered — an answer to its map bound as the request by a
+    bare invocation — is not applied again, so the field resumes as last shown. A turn that corrects the
     entry opens what the corrected entry's opening would open and what the turn itself names, less
     any frame already opened — a resume with a named deepening opens that branch. Empty when the
     answer opens nothing — a deferral alone, an idea of the person's own, a question, a correction
-    of anything but the entry, a pick among candidates, or a continue with nothing left to open. -/
+    of anything but the entry, a pick among candidates, or a continue with nothing left to open.
+    Where you carry the widening forward after a round's map on a judgment you state, the further
+    pass opens a subset, yours to choose, of the registered frames still unexplored — never an
+    excluded frame, never one the person parked — digs no branch, since deepening is the person's
+    request, and does not re-apply the latest answer's targets; the map marks those frames as
+    opened on your judgment. -/
 axiom targets : Context P → List Frame
 
 /-- **Your judgment**: the cited turn — the person's latest utterance — takes the field, read from
@@ -394,7 +399,7 @@ classification relay: the entry, its basis, why the field reads thin, and the si
 sources. `generate` is one pass: candidates under each frame the pass opens (`targets`), in
 parallel over the frames, with the seeds promoted on a Seeded entry's first pass, and no
 elimination, ranking, or scoring. On Blank, unless the request names frames, `respond` presents
-the map and its gate before any pass; which gate, "The map" says. `session` is the session's
+the map before any pass; whether it is the frame map or a round, "The map" says. `session` is the session's
 own answer to a turn that does not bear on the run; it stays in the context and opens no pass.
 -/
 
@@ -421,8 +426,10 @@ def advance (generate respond : Context P → Response P) (c : Context P) : Cont
   if (targets c).isEmpty then c ++ [(respond c).val] else pass generate respond c
 
 open Classical in
-/-- `respond` presents the map of the whole field and its gate, re-read from the context and never
-    stored, as the Protocol section's "The map" describes. -/
+/-- `respond` presents the map of the whole field, re-read from the context and never stored, as
+    the Protocol section's "The map" describes. A further pass you carry forward on a judgment you
+    state, as `targets` says, belongs to the response that presents the map; the recursion advances
+    only on the person's turns. -/
 def ideate (generate respond session : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
@@ -444,8 +451,8 @@ def start (relay generate respond session : Context P → Response P) (c : Conte
 /-! ── LOOP ──
 No fixed round count and no quota: nothing is tracked toward a target, and the loop goes on until
 the person takes the field or a fresh invocation ends this run's reading. A basis-cited note on
-whether recent rounds read as closer to earlier ones may sit before the gate; it describes state
-only and never reorders or discourages either answer.
+whether recent rounds read as closer to earlier ones may sit before the round's offer; it
+describes state only and never reorders or discourages either answer.
 -/
 
 /-! ── CONVERGENCE ──
@@ -498,8 +505,8 @@ def grounding : Op → Annot × String
   | .deriveFrames   => (.sense, "Internal analysis: the generation frames — seed-anchored and novel on Seeded, novel and abstract on Blank; a resumed field's frames and branches carry over")
   | .qframes        => (.interaction .constitution, "the frame map, where \"The map\" makes it the gate; read references/blank-entry.md before presenting")
   | .generate       => (.sense, "Internal generation: parallel over the frames the pass opens; a host may realize it through isolated parallel agents, and the meaning does not depend on that; no elimination, ranking, or scoring")
-  | .present        => (.interaction .extension, "the map of the whole field, as \"The map\" describes; precedes the gate")
-  | .qround         => (.interaction .constitution, "the round gate — continue or take the field — as \"The map\" describes")
+  | .present        => (.interaction .extension, "the map of the whole field, as \"The map\" describes; precedes the frame map's selector or the round's offer")
+  | .qround         => (.interaction .extension, "the round's offer — continue, naming what it would open, or take the field as it stands — as \"The map\" describes")
   | .readAnswer     => (.sense, "Internal analysis: the latest utterance read whole with the context — the person's taking if any, whether it is the person's own invocation of this protocol, whether it bears on this run, the frames it opens, any new angle or branch, any deferral, any exclusion or proposal taken, any record it names, any new signal, any idea of their own")
   | .shapeFrames    => (.sense, "Internal analysis: a new angle or a deepening the person named, shaped into frames or branches not already registered before the pass opens them")
   | .park           => (.interaction .extension, "something the person set aside for later acknowledged as parked, quoting their request; declared in the field; its durable record is the host's")
@@ -523,17 +530,17 @@ end Heuresis
 
 ### User-facing realization
 
-Present the classification as a short basis-cited relay: the inferred entry, why the field reads thin, and source-tagged signals. Whenever the gate is the frame map, read `references/blank-entry.md` before presenting it; for `Seeded`, read `references/seeded-entry.md` before the first pass.
+Present the classification as a short basis-cited relay: the inferred entry, why the field reads thin, and source-tagged signals. Whenever the map is the frame map, read `references/blank-entry.md` before presenting it; for `Seeded`, read `references/seeded-entry.md` before the first pass.
 
 ### The map
 
 Every map is in everyday language and is drawn from the context each time. It shows the whole field: the frames and the branches dug under them, the candidates under each with their origins, the unexplored frames, the frames out of scope with the person's turn quoted — a frame brought back in shown as brought back, citing that turn — your proposed exclusions marked as yours, each by name, what is parked with the person's request quoted (exclusions and parks carried in named material shown as `Entry` says), every signal still unaddressed, and your doubts. Mark every change since the map the person answered: this round's candidates, exclusions and proposals taken, signals changed, readings you re-made, and what a turn that did not bear on the run said about the field. Where the intent of the person's turn was unclear, say in one line how you took it. Material the person named that is not yet on the map — awaiting its read, or on a frame map a frame to open — shows as pending. A request to work inside an excluded lineage that does not bring it back is answered by saying that lineage is out of scope. When the map grows large, compress earlier material to branches and counts, the density yours to judge, while those changes and every proposed exclusion show in full; the taking's trace is never compressed. On a Resumed entry, redraw the earlier field's map — the whole field as last shown, with the person's later turns that bear on it, and the material it compressed still reachable.
 
-Where the person asked about the map, answer it first, from the map, before the gate; nothing in the answer ranks or chooses. A request for your pick or a ranking is answered there too: say that choosing follows the taking, and rank nothing.
+Where the person asked about the map, answer it first, from the map, before the frame map's selector or the round's offer; nothing in the answer ranks or chooses. A request for your pick or a ranking is answered there too: say that choosing follows the taking, and rank nothing.
 
-While this field holds no candidate — yours or the person's — the gate is the frame map and its selector, abstract frames in the template `references/blank-entry.md` carries; otherwise it is the round gate, so taking is offered only over a field with a candidate in it. Before every round gate, say first what continuing would cost to review and what taking keeps, naming your proposed exclusions that taking would take. Where the person explicitly asks for the field while no candidate exists, say plainly that there is nothing to take yet. Where named material waits on the frame map for a frame to open, the gate says so plainly.
+While this field holds no candidate — yours or the person's — the map is the frame map, the one gate here: its selector offers abstract frames in the template `references/blank-entry.md` carries, and it waits for the person's choice; otherwise it is a round, so taking is offered only over a field with a candidate in it. Before every round's offer, say first what continuing would cost to review and what taking keeps, naming your proposed exclusions that taking would take. Where the person explicitly asks for the field while no candidate exists, say plainly that there is nothing to take yet. Where named material waits on the frame map for a frame to open, the gate says so plainly.
 
-At every round gate, present continue first and "Take this field as it stands" second, rendered in the person's idiom, with symmetric specificity. Continue names its widening target, the frames `targets` would open — unexplored frames other than those the person parked, a new angle, or a branch under whatever the person asks to deepen; when no such frame is left, it says so and asks the person to name a frame, give a new angle, or say what to deepen, naming no frame, candidate, or branch itself. Any novelty or coverage observation, and every doubt, stays before the gate and does not recommend or reorder either answer.
+Every round ends on its offer: present continue first and "Take this field as it stands" second, rendered in the person's idiom, with symmetric specificity. Continue names its widening target, the frames `targets` would open — unexplored frames other than those the person parked, a new angle, or a branch under whatever the person asks to deepen; when no such frame is left, it says so and asks the person to name a frame, give a new angle, or say what to deepen, naming no frame, candidate, or branch itself. Any novelty or coverage observation, and every doubt, stays before the offer and does not recommend or reorder either answer.
 
 At the taking, show the field's trace: the topic, then the whole map as drawn above with nothing compressed — each frame and branch marked out of scope wherever it is excluded, and otherwise explored or unexplored — and with it what only the trace carries: material named but not yet in the field, listed as named and not in the field; each exclusion taken with the field, shown as your proposal the person took; and every change since the map the person answered, marked.
 
@@ -547,12 +554,12 @@ At the taking, show the field's trace: the topic, then the whole map as drawn ab
 ## Rules
 
 - **User-initiated, zero entry questions**: `/ideate` activates only on direct invocation (Layer 1); `Entry` (Blank, Seeded, or Resumed) is inferred from the request as U-BINDING binds it — never asked. The classification is a relay, not a gate.
-- **Frame-first ownership**: Whenever the gate is the frame map, read `references/blank-entry.md` before presenting abstract frames or any concrete candidate. Preserve every candidate's origin thereafter; an idea the person contributes to this field at any turn is their own candidate, under the frame it fits.
-- **The person takes the field**: Only the person's own latest turn takes the field, as `ClosingSupported` reads it, and only with candidates in the field. A pick among candidates, a judgment on one, or a correction does not take the field; it is read for the frames it opens and the ideas and signals it adds, and the gate stays. A turn that does not bear on the run is met as `Reaches` says.
+- **Frame-first ownership**: Whenever the map is the frame map, read `references/blank-entry.md` before presenting abstract frames or any concrete candidate. Preserve every candidate's origin thereafter; an idea the person contributes to this field at any turn is their own candidate, under the frame it fits.
+- **The person takes the field**: Only the person's own latest turn takes the field, as `ClosingSupported` reads it, and only with candidates in the field. A pick among candidates, a judgment on one, or a correction does not take the field; it is read for the frames it opens and the ideas and signals it adds, and the run goes on. A turn that does not bear on the run is met as `Reaches` says.
 - **Out of scope, never erased**: A frame the person puts out of scope stays in the field with its branches and candidates, citing their turn, and is never widened until their later words bring it back in; applying a boundary they stated to particular frames is your proposal until they take it — both as `excluded` says.
 - **Named material only**: heuresis reads the request, material the person explicitly names at invocation or at any later turn — a prior protocol's output in the session, or a record outside it such as an issue or a document, read by a tool — and what the person says as the run goes on. The request binds as U-BINDING says. Unnamed material — the wider session, codebase, or rules — never enters the field, and hidden decision coordinates are never reverse-traced from externalized substrate; reading what the person means, a bare invocation included, draws on the accumulated context, as U-BINDING says, and the run's own earlier turns about the field, and an earlier field this protocol drew that the invocation resumes, are the field's context.
 - **Chain semantics**: Named material folds in as seeds, each keeping the origin tag it carries or else the origin of the turn it was read from — `external` for a record a tool read; naming it is the person's adoption, recorded apart. When and under which frame each item lands is `candidates`; an invocation is read for what it reaches, as U-BINDING says. The ownership trade-off is declared under Known Limitations.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged.
 - **Width and depth both widen**: A request for more on an open frame or on one candidate opens a branch under it, registered with its parent, and the next pass fills it; nothing is ranked or chosen. Only what the person themselves sets aside for later parks, citing their turn, and is carried in the field.
-- **One map every round**: Before each gate the whole field is redrawn from the context; what it shows, what sits before the gate, and the gate's options and their order are as "The map" says.
+- **One map every round**: Every map the person is shown redraws the whole field from the context; what it shows, what sits before the frame map's selector or the round's offer, and their options and order are as "The map" says.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
