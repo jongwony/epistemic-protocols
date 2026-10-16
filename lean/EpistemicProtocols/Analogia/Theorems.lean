@@ -25,8 +25,7 @@ instance {c : Context P} {x : FitClaim} : Nonempty (Check c x) :=
 theorem no_evidence_no_change (c : Context P) (h : observe c = []) : collect c = c := by
   simp [collect, h]
 
-/-- With nothing to audit — no question stands and no draft is carried forward — the pass
-    presents that and collects nothing. -/
+/-- With nothing to audit, the pass presents that and collects nothing. -/
 theorem nothing_to_audit_collects_nothing (respond : Context P → Response P) (c : Context P)
     (h : ¬ ToAudit c) : pass respond c = .holding c (respond c) := by
   simp [pass, h]
@@ -46,19 +45,16 @@ theorem standing_question_by_person (c : Context P) (h : QuestionStands c) :
   | filled q s ok sup => exact ⟨q, s, ok, s.ok.trans ok, sup, by simp [inferences, hq]⟩
 
 /-- An assessment is made only over the collected context, on a pass that had conclusions to
-    audit before collection, and on the conclusions collection ran for. -/
+    audit before collection. -/
 theorem assessment_after_collection (respond : Context P → Response P) (c b : Context P)
     (ht : ToAudit b) (rec : Assessed b) (r : Response P)
     (h : pass respond c = .assessment b ht rec r) :
-    b = collect c ∧ ToAudit c ∧ inferences b = inferences c := by
+    b = collect c ∧ ToAudit c := by
   unfold pass at h
   by_cases hc : ToAudit c
-  · by_cases hc₂ : ToAudit (collect c) ∧ inferences (collect c) = inferences c
-    · simp only [hc, hc₂, not_true_eq_false, ↓reduceIte, ↓reduceDIte, and_self,
-        Outcome.assessment.injEq] at h
-      obtain ⟨hb, -⟩ := h
-      subst hb
-      exact ⟨rfl, hc, hc₂.2⟩
+  · by_cases hc₂ : ToAudit (collect c)
+    · simp [hc, hc₂] at h
+      exact ⟨h.1.symm, hc⟩
     · simp [hc, hc₂] at h
   · simp [hc] at h
 
@@ -69,9 +65,8 @@ theorem assessment_verdicts_are_judge (respond : Context P → Response P) (c b 
     rec.verdicts = (inferences b).map fun k => (k, judge b k) := by
   unfold pass at h
   by_cases hc : ToAudit c
-  · by_cases hc₂ : ToAudit (collect c) ∧ inferences (collect c) = inferences c
-    · simp only [hc, hc₂, not_true_eq_false, ↓reduceIte, ↓reduceDIte, and_self,
-        Outcome.assessment.injEq] at h
+  · by_cases hc₂ : ToAudit (collect c)
+    · simp [hc, hc₂] at h
       obtain ⟨hb, hrec, -⟩ := h
       subst hb
       cases hrec
@@ -79,12 +74,11 @@ theorem assessment_verdicts_are_judge (respond : Context P → Response P) (c b 
     · simp [hc, hc₂] at h
   · simp [hc] at h
 
-/-- A pass with conclusions to audit, which collection leaves where it found them, yields the
-    assessment. -/
-theorem not_held_completes (respond : Context P → Response P) (c : Context P)
-    (h₁ : ToAudit c) (h₂ : ToAudit (collect c)) (h₃ : inferences (collect c) = inferences c) :
+/-- A pass with conclusions to audit before and after collection yields the assessment. -/
+theorem audit_completes (respond : Context P → Response P) (c : Context P)
+    (h₁ : ToAudit c) (h₂ : ToAudit (collect c)) :
     pass respond c = .assessment (collect c) h₂ (assessed (collect c)) (respond (collect c)) := by
-  simp [pass, h₁, h₂, h₃]
+  simp [pass, h₁, h₂]
 
 /-- Silence settles nothing: with no utterance, the last outcome stands. -/
 theorem silence_keeps_last (respond session : Context P → Response P) (c : Context P)

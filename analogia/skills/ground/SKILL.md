@@ -23,14 +23,12 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 /-! ── FLOW ──
 Analogia(R) → start(c) → ground(c, utterances), where c is the fused session context:
   pass(c):
-    [nothing to audit — no question stands on a person's turn and you carry no draft forward]
-        TOOL GROUNDING `questionDraft`; nothing is collected
+    [nothing to audit]  TOOL GROUNDING `questionDraft`; nothing is collected
     [otherwise]  collect(c): to the limit of your reach over what the mapping rests on — the
         source's relations and their target counterparts, and the checks on the claims bearing
         on K, the conclusions of the question that stands or of your draft; every place looked
         joins the context, a null result included →
-      [the collected context leaves nothing to audit, or moves the conclusions collection ran
-        for]  `questionDraft`, what moved shown
+      [the collected context leaves nothing to audit]  `questionDraft`
       [otherwise]  assessment: each conclusion Licensed with its limits, Blocked, or Undetermined
         with what is missing and who can reach it, on the question that stands or on your draft,
         named which — a draft shown as `questionDraft` states; present it and proceed — no
@@ -402,10 +400,7 @@ def assessed (c : Context P) : Assessed c :=
 /-- Where the audit stands. Each carries the context it was reached on and the relay that
     presents it. -/
 inductive Outcome (P : Type)
-  /-- nothing to audit — no question stands and you carry no draft forward — or collection moved
-      the conclusions it ran for: with no referent, the material to audit asked for, inventing no
-      candidate; otherwise the drafted questions shown, with what collection moved. A run status,
-      not a closure. -/
+  /-- nothing to audit. A run status, not a closure. -/
   | holding    (c : Context P) (relay : Response P)
   /-- Once it has run, the person can say, for each conclusion they expect a framework, analogy,
       earlier design, or abstraction to carry to the target: the source relation, or chain of
@@ -449,14 +444,13 @@ opening a pass.
 
 open Classical in
 /-- One pass. With nothing to audit, that is presented and nothing is collected. Otherwise
-    collection runs; where the collected context leaves nothing to audit, or moves the conclusions
-    collection ran for, that is presented; otherwise the assessment is. -/
+    collection runs; where the collected context leaves nothing to audit, that is presented;
+    otherwise the assessment is. -/
 def pass (respond : Context P → Response P) (c : Context P) : Outcome P :=
   if ¬ ToAudit c then .holding c (respond c)
   else
     let c₂ := collect c
-    if h : ToAudit c₂ ∧ inferences c₂ = inferences c then
-      .assessment c₂ h.1 (assessed c₂) (respond c₂)
+    if h : ToAudit c₂ then .assessment c₂ h (assessed c₂) (respond c₂)
     else .holding c₂ (respond c₂)
 
 open Classical in
@@ -496,7 +490,7 @@ harness's interrupt.
 
 /-! ── CONVERGENCE ──
 assessed: a pass over the question that stands on the person's turn or over your draft, named
-which, in which collection reached what it could and left K where it found it, and every
+which, in which collection reached what it could, and every
 conclusion in K carries a verdict — Licensed with its limits, Blocked, or Undetermined naming
 what is missing and who can reach it. Undetermined does not block the
 assessment and is not settled by it; a check this session can reach and has not run is run, not
@@ -598,7 +592,7 @@ Where a claim turns on what an artifact does rather than on what it says about i
 
 ### User-facing realization
 
-Before assessing, read back the question — what the comparison is for, the conclusions at stake, and the source and target being audited — citing the person's turn it stands on — whether they set it or took your draft — and the turn or fact that fixed the source and target where R or the context did. Where their words leave any of it open, show the question you draft from the context as yours (TOOL GROUNDING `questionDraft`); where you carry the audit forward on it, the assessment says it rests on your draft. An instruction to do the next task takes no draft. A source and target that R or a fact fixes are read, not asked. When the question changes, show what was added, removed or reformulated and why; a removed conclusion is outside the revised question, not resolved.
+Before assessing, read back the question that stands — what the comparison is for, the conclusions at stake, and the source and target being audited — citing the person's turn it stands on — whether they set it or took your draft — and the turn or fact that fixed the source and target where R or the context did. Where their words leave any of it open, show the question you draft from the context as yours (TOOL GROUNDING `questionDraft`); where you carry the audit forward on it, the assessment says it rests on your draft. An instruction to do the next task takes no draft. A source and target that R or a fact fixes are read, not asked. When the question changes, show what was added, removed or reformulated and why; a removed conclusion is outside the revised question, not resolved.
 
 Present the whole assessment in everyday language: the question; for each conclusion, the source relation, or chain of relations, that carries it, every correspondence it rides on with its fit claim, one concrete scenario, and what actually warrants that claim, the likenesses and the differences in both directions, and what is still unknown; and whether each conclusion holds, is blocked, or is undetermined, with how far it reaches. A source feature the target lacks counts against a conclusion only where that conclusion needs it; under the preservation conclusion, a missing counterpart is reported as missing, and whether an absence was meant is the reader's to say. Where a conclusion's verdict turns on which materially different reading of the source holds, show each reading with its verdict and grounds side by side, and name the reading they mean as the reader's to say.
 
