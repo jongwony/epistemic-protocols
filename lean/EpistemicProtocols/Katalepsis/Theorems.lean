@@ -111,7 +111,7 @@ theorem unchecked_consult_only_gathers (c : Context P) (h : ¬ CheckRuns c) :
     consult c = gathered c := by
   simp [consult, h]
 
-theorem check_only_when_judged (c : Context P) (h : Op.check ∈ consultOps c) : CheckRuns c :=
+theorem check_only_when_check_runs (c : Context P) (h : Op.check ∈ consultOps c) : CheckRuns c :=
   Classical.byContradiction fun hn => by simp [consultOps, hn] at h
 
 -- About the annotations TOOL GROUNDING declares: no operation is annotated `.transform`, and the
