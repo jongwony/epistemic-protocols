@@ -64,6 +64,7 @@ Aitesis runs early: it exhausts what the AI can collect for the work ahead. Anal
 
 **Skip**:
 - When the context is fully specified (AI-guided activation only; invoking `/inquire` always collects)
+- When you ask to proceed without context verification, or there is no prospect to verify (AI-guided activation only)
 
 ## Install
 
