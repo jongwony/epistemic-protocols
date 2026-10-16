@@ -334,15 +334,17 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
 /-- **Your judgment**: the latest utterance, read whole on the context with it, calls for a version
     none shown embodies — a mark to revise, a bare rejection with no diagnosis among them; a
     request; a fresh start; a combination to see; a change of medium; the means a version was
-    waiting on, supplied, or the person's word to go on in the medium at hand or without a
-    reference that cannot be reached; or a value they set or replaced that no version shown
-    embodies. A question about a version, answered as asked, and words that move nothing a version
-    would show call for nothing; a value they took that a shown version already embodies calls for
-    no new version. Where a mark reads as about the rendering rather than the form, the next version
-    fixes the rendering and leaves the form as it was, and the round says so; where the evidence
-    does not settle which it is about, the round says that. Or, on your stated judgment, making now
-    a version you would propose — the revision an insufficiency you found calls for, an alternative
-    a comparison lacks — serves the next judgment better than showing the proposal alone. -/
+    waiting on, supplied, or the person's word to go on in the medium at hand or without a reference
+    that cannot be reached; or a value they set or replaced that no version shown embodies; or, on
+    your stated judgment, making now a version you would propose — the revision an insufficiency you
+    found calls for, an alternative a comparison lacks — serves the next judgment better than
+    showing the proposal alone, short of a version that waits on a medium or reference this session
+    cannot supply, which only the person's word releases. A question about a version, answered as
+    asked, and words that move nothing a version would show call for nothing; a value they took that
+    a shown version already embodies calls for no new version. Where a mark reads as about the
+    rendering rather than the form, the next version fixes the rendering and leaves the form as it
+    was, and the round says so; where the evidence does not settle which it is about, the round says
+    that. -/
 axiom ProductionCalled : Context P → Prop
 
 /-- **Your read**, now, of what the next judgment needs, as far as relevant access reaches: the
@@ -470,14 +472,12 @@ def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P
     sketch ai (c₁ ++ [(ai.respond c₁).val]) us
 
 /-! ── LOOP ──
-Every round re-judges the whole run against the whole context: nothing counts rounds or counts
-down, and no earlier answer is held apart from what later ones say. Neither "every earlier fit
-stands" nor "every revision stales it" is a rule: what a person's words reached is read again on
-the context as it now stands, and what changed since the standing they last answered is shown.
-After the first production, a production happens where `ProductionCalled` reads one, at most once
-per turn of the person's. Each production relays its intent whole, with what changed, before it
-makes anything. The loop is dialogue: each round ends on its opening, and no round count, cap,
-or fatigue closes the run.
+Every round re-judges the whole run against the whole context: nothing counts rounds or counts down,
+and no earlier answer is held apart from what later ones say. Neither "every earlier fit stands" nor
+"every revision stales it" is a rule: what a person's words reached is read again on the context as
+it now stands, and what changed since the standing they last answered is shown. Each production
+relays its intent whole, with what changed, before it makes anything. The loop is dialogue: each
+round ends on its opening, and no round count, cap, or fatigue closes the run.
 -/
 
 /-! ── CONVERGENCE ──

@@ -34,7 +34,7 @@ The protocol's legitimacy lives in a chain — intent relay → production → t
 
 | Breach | Guard |
 |--------|-------|
-| A version regenerated from a description instead of revised from the versions your words point to | A revision is always a new version made from the retained versions; a version shown stays as it was shown |
+| A version regenerated from a description instead of revised from versions already shown | A revision is always a new version made from the retained versions; a version shown stays as it was shown |
 | An AI reading of your words, or an AI proposal, treated as your commitment | A value stands only on your turn — one that said it, or one that took it after it was shown as the AI's — and the record says which |
 | A recognition taken to cover what was never shown | A recognition reaches what the version's medium showed and never a revision not yet shown; what went unshown stays unestablished |
 

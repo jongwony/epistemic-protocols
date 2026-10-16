@@ -43,8 +43,8 @@ open Classical in
 theorem one_round_per_turn (ai : AITurns P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u))
     (hk : filledValue (closing (fuse c u)) = none) :
-    let c₂ := if ProductionCalled (consulted (fuse c u)) then production ai (consulted (fuse c u))
-      else consulted (fuse c u)
+    let c₁ := consulted (fuse c u)
+    let c₂ := if ProductionCalled c₁ then production ai c₁ else c₁
     sketch ai c (u :: us) = sketch ai (settle c₂ ++ [(ai.respond (settle c₂)).val]) us := by
   simp [sketch, hr, hk]
 
