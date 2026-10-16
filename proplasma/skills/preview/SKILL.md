@@ -38,7 +38,8 @@ Proplasma(X) → start(c) → preview(c, utterances), where c is the fused sessi
     [does not bear on this run]   the session answers it; that answer stays in c; no round of this run
     [the person constitutes d]    harvest → cleanup → DirectionalContrast
     [otherwise]                   what is gathered now enters c, anything they asked to see
-                                  observed for real among it; a fan where `Fans` reads one → round
+                                  observed for real among it; a fan where they ask to see what no
+                                  probe materialized → round
   no utterance: nothing is constituted, generated, gathered, or discarded; the run holds
 -/
 
@@ -260,15 +261,13 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
   | .open_ _     => none
   | .filled a .. => some a
 
-/-- **Your judgment**: a fan is due on the context as it now stands — the latest utterance asks to
-    see something no probe has materialized: a spec element sent back (an axis, the policy, the
-    tier, which candidates get probes, the probe material), a composition to be seen, a named
-    candidate, or the revision you proposed taken up; or you find the contrast insufficient — an
-    axis the purpose turns on that no probe carries, a candidate whose future would decide it
-    unseen — and carry the revision you propose forward, one the person's words have not set aside,
-    rather than showing it for the person to take up. A wish to see something that exists observed
-    for real is `gathered`'s, not a fan. -/
-axiom Fans : Context P → Prop
+/-- **Your judgment**: the latest utterance asks to see something no probe has materialized — a
+    spec element sent back (an axis, the policy, the tier, which candidates get probes, the probe
+    material), a composition to be seen, a named candidate, or the revision you proposed taken
+    up. A reading of the purpose sent back opens a fan only where they ask to see probes on what
+    the new purpose turns on. A wish to see something that exists observed for real is
+    `gathered`'s, not a fan. -/
+axiom FanRequested : Context P → Prop
 
 /-- **Your read**, now, of what the next judgment needs, as far as relevant access reaches: the
     candidates' material and the sources that bear on the decision — any a turn cites, and any you
@@ -398,8 +397,8 @@ def constituted (c : Context P) (d : Direction) : DirectionalContrast P :=
 open Classical in
 /-- A turn that does not bear on the run is answered by the session and leaves the run as it
     stands; a closing is read from the person's turn before anything is gathered; otherwise what
-    is gathered now enters the context, a fan runs where `Fans` reads one, and the round
-    follows. -/
+    is gathered now enters the context, a fan runs where the turn asks to see what no probe
+    materialized, and the round follows. -/
 def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
@@ -409,7 +408,7 @@ def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
     | some (.constitute d) => .contrasted (constituted f d)
     | none =>
       let c₁ := consulted f
-      let c₂ := if Fans c₁ then fan ai c₁ else c₁
+      let c₂ := if FanRequested c₁ then fan ai c₁ else c₁
       preview ai (c₂ ++ [(ai.respond c₂).val]) us
 
 def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P :=
@@ -422,9 +421,10 @@ def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P
 
 /-! ── LOOP ──
 Every round re-judges the whole run against the whole context: nothing counts down and no answer
-waits for a later round. Beyond the opening fan, a fan happens where `Fans` reads one, and nowhere
-else. Each fan relays the spec whole, with what changed, before it generates. The loop is dialogue:
-no round count or cap closes it.
+waits for a later round. A fan happens where the person's turn asks to see something no probe has
+materialized, and nowhere else: an insufficiency you find is shown with its basis and the revision
+you propose, and you fan over it once the person takes it up. Each fan relays the spec whole, with
+what changed, before it generates. The loop is dialogue: no round count or cap closes it.
 -/
 
 /-! ── CONVERGENCE ──
@@ -472,6 +472,7 @@ inductive Op | detect | notActivatedRelay | gather | specRelay | instantiate | i
              | assess | present | readTurn | harvest | cleanup | cleanupVerify | assemble
              | converge | seam
 
+/-- No Constitution entry: whether a turn halts is the harness's baseline. -/
 def grounding : Op → Annot × String
   | .detect            => (.sense, "Internal analysis: whether this is the protocol's case, as `notActivated` reads it")
   | .notActivatedRelay => (.interaction .extension, "before activation only: your `notActivated` reading, in plain words with its basis; not activated")
@@ -487,7 +488,7 @@ def grounding : Op → Annot × String
   | .cleanupVerify     => (.observe, "environment run, artifact read: the verification step closing the same sequence — each path verified absent after its destruction; a disposition observed per probe, and a probe no observation reached declared as not verified; a probe still present is declared with the path to remove by hand, and the direction the person settled stands")
   | .assemble          => (.sense, "Internal analysis: the terminal record built from the harvest and the completed discard trace — after cleanup, never before")
   | .converge          => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with DirectionalContrast")
-  | .seam              => (.interaction .extension, "after a constitution, proceed to the next move the person declared, citing that turn; otherwise the record is handed on as session text, the dissent travelling in it; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam              => (.interaction .extension, "after a constitution or not activating, proceed to the next move the person declared, citing that turn; otherwise, after a constitution, the record is handed on as session text, the dissent travelling in it; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-- The operations that write a fan's probes, by tier: a Mockup through `.instantiate`, and
     `.instantiateDelegate` where delegated; a Vignette writes no file. -/
