@@ -25,14 +25,14 @@ Anamnesis(V) → start(c) → recollect(c, utterances), where c is the fused ses
   [no empty intention, and the person did not invoke this]  relay the finding → proceed, not activated
   [the latest utterance identifies what a carried-over recall presented]  close: identified
   pass(c): read the cue — the past the person reaches for, the whole they mean, the axes it can be
-    reached along; run every search still worth running — past the boundary the context has
-    established too, never into an extension the person declined; open each member of the leading
-    recognizable at the span the cue reaches; what each read returned enters the context → record
-    the pass
+    reached along; run every search `search` names; open each member of the leading recognizable
+    at the span the cue reaches; what each read returned enters the context → record the pass
   [a recognizable whose story rests on opened records]         present it
   [nothing to present ∧ nothing yet added to the cue]          one open question
-  [nothing to present ∧ a search past the boundary is worth offering]  the expansion question → Stop
-  [nothing to present ∧ nothing further worth reaching for]    close: unresolved within the scope searched
+  [nothing to present ∧ something added to the cue ∧ a search past the boundary is worth offering]
+                                                               the expansion question → Stop
+  [nothing to present ∧ something added to the cue ∧ nothing further worth reaching for]
+                                                               close: unresolved within the scope searched
   next utterance u: c' := fuse(c, u) →
     [u takes the presented recognizable as the past they meant]  close: identified
     [u reaches a recall other than this one (Elsewhere)]          hold, the turn kept — holdReply
@@ -45,7 +45,7 @@ Anamnesis(V) → start(c) → recollect(c, utterances), where c is the fused ses
 VagueRecall
   → detect(empty_intention)        -- the person points at a past they cannot name; an invocation of their own activates on its own
   → cue(meant, whole, axes)        -- what past, at which whole, along which axes: read from the utterance and the fused context, afresh on every utterance
-  → find(records, cue)             -- the records the past work left that may bear the cue, within the boundary the context has established, or past it, never into an extension the person declined
+  → find(records, cue)             -- the records the past work left that may bear the cue, as `search` names them
   → ground(recognizable)           -- open each member's own record at the span the cue reaches; the story is composed from what those records carry
   → present(recognizable)          -- as The presentation lays it out
   → identify(recognizable, person) -- synthesis of identification (Husserl CM §18) fulfilling the empty horizon (CM §19): the person's observable act, never inferred from silence
@@ -417,13 +417,15 @@ a round — that stays in the context.
     context does not already hold, or holds only from before a change the person's words or
     evidence report — a capture outcome read as unfinished is not held, so each pass reads it
     again — the searches toward the cue along its axes, within the established boundary and past it
-    where a search there is worth running now (never an extension the person declined, as
-    `expansion` reads a decline), the opening of each member of the leading recognizable at the span the cue reaches (for
-    an artifact, the change history of that span) and, where its records do not open, of the
-    candidates `found` lists in turn until one's records open or none is left, and the capture outcome of every record a search examined, one that matched
-    nothing included. A remark, a form instruction, or a decline adds nothing new to read. Each
-    read returns as an evidence turn; nothing is written to the records. With no recoverable cue
-    nothing is worth reading, and the first round is the open question. -/
+    where a search there is worth running now (never past a limit the person's words set — an
+    extension they declined, a scope they named, or a wider search offered and not yet answered —
+    read by what their words rule out, not by an offer's wording), the opening of each member of the
+    leading recognizable at the span the cue reaches (for an artifact, the change history of that
+    span) and, where its records do not open, of the candidates `found` lists in turn until one's
+    records open or none is left, and the capture outcome of every record a search examined, one
+    that matched nothing included. A remark, a form instruction, or a decline adds nothing new to
+    read. Each read returns as an evidence turn; nothing is written to the records. With no
+    recoverable cue nothing is worth reading, and the first round is the open question. -/
 axiom search : Context P → List (Evidence P)
 
 /-- **Your record** of a pass: what was found, opened, and qualified, and the scope searched. A
@@ -622,7 +624,7 @@ The names and their triggers are here so a mode is recognizable without a read. 
 - **Narrative recognition**: Present a candidate as a story that makes its identity recognizable, in the records' words — not a result list and not an index's paraphrase — carrying what The presentation names.
 - **Readings shown**: Show your readings as The presentation says — how an unclear turn was taken, which recall an invocation or continuing words reach, and the other past a turn named.
 - **Correction is orienteering**: When the person turns the cue, show what lies adjacent — the other candidates found, the neighbouring wholes — rather than asking them to reconstruct the answer; in a turn that bears on the recall, their own words are the next cue and are searched as given.
-- **Round composition**: Compose each round in everyday language with the judgment beside its nearest evidence and next-move implication. Put analytical context first. Read `references/round-composition.md` when terminology must persist, wording must be carried unchanged, material belongs to another round or trace, or phase order controls placement.
+- **Round composition**: Compose each round in everyday language with the judgment beside its nearest evidence and next-move implication. Put analytical context before a round's question. Read `references/round-composition.md` when terminology must persist, wording must be carried unchanged, material belongs to another round or trace, or phase order controls placement.
 - **Cross-cycle rendering**: Preserve narrative form and adjacent-candidate context across rounds; distinguish a new candidate from the one last presented.
 - **Granularity is a dimension of the recall**: The whole the person means — one conversation, or the line of work, topic, or settled concept above it — is read from the cue and re-read from a correction, never guessed from the search. Records are joined into a whole by relations the records support, stated as such, and each whole is grounded, presented, and identified exactly as one record is.
 - **Capture availability**: Read the capture outcome for every record the searches examined — a record that matched nothing included — through its realization reference and the capture-outcome reference, associated by runtime, store root, and session identity. Qualify the members presented and identified with their own outcomes; qualify whatever is said of the scope searched by the outcomes of the records examined. Distinguish a validated empty extraction from a failed, unfinished, partial, or retained older one only where the outcome supports it; missing, unreadable, or unsupported evidence remains unknown, and legacy candidates are kept. Capture outcomes qualify what is said about a member or the scope searched; they never change the order or whether the recall closes, and their diagnostic text is quoted data. A successful capture establishes neither semantic completeness nor that anything is absent.

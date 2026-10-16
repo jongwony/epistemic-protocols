@@ -8,7 +8,7 @@ User-facing emit (the presentation, the open question, the expansion question, c
 
 ## When some of what is in view belongs to a later round or a trace rather than this one
 
-Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to the text that opens the round, convergence traces, or later cycles.
+Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to convergence traces or later cycles.
 
 ## When this protocol's own phases bear on where a sentence sits relative to a gate
 
