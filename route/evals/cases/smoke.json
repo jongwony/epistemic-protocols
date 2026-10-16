@@ -7,7 +7,7 @@
       { "role": "assistant", "text": "It runs clean against the replica — one file per account into the staging bucket. There is no schedule config anywhere in the repo, and nothing in it says when this is meant to run." }
     ],
     "prompt": "Right. Before it goes on a schedule, what do we still need to pin down — and what can you find out yourself?",
-    "note": "Constructed so the facts needed to execute sit only with the user: the window, the timezone that window means, what a partial run should do, who hears about a failure. The repository answers none of them, and none is a judgement the assistant could make well by itself. The prompt asks for what the work still rests on before it moves, so the intent to collect is in the utterance; an instruction to execute alone names a task kind and is not /inquire's trigger. It is a single question on purpose, so what is missing is a fact rather than an order — a multi-move instruction would fire /conduct's own trigger instead."
+    "note": "Constructed so the facts needed to execute sit only with the user: the window, the timezone that window means, what a partial run should do, who hears about a failure. The repository answers none of them, and none is a judgement the assistant could make well by itself. The prompt asks for what the work still rests on before it moves, so the intent to collect is in the utterance; an instruction to execute alone names a task kind and is not /inquire's trigger. Nothing about how the work should run is left undetermined, so what is missing is a fact rather than a method, and /conduct's trigger has nothing to fire on."
   },
   {
     "id": "reach-ground",

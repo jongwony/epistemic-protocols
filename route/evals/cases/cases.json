@@ -33,7 +33,7 @@
       "inquire"
     ],
     "adjudicated": false,
-    "note": "The person asks what the work rests on before it moves: the intent to have its ground collected is in the utterance, so /inquire's deficit is recognized from what they said rather than inferred from the task's kind. A bare instruction to do the work names a task kind and is not this trigger. /bound stays rejected for the same reason as before — the gap is user-held fact, not an unscoped task awaiting delegation; /conduct likewise, since what is missing is inputs, not the order of moves."
+    "note": "The person asks what the work rests on before it moves: the intent to have its ground collected is in the utterance, so /inquire's deficit is recognized from what they said rather than inferred from the task's kind. A bare instruction to do the work names a task kind and is not this trigger. /bound does not fit: the gap is user-held fact, not an unscoped task awaiting delegation. /conduct does not either: what is missing is inputs, not the order of moves."
   },
   {
     "id": "singleton-ground",
