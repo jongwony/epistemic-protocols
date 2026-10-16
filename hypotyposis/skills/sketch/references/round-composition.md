@@ -12,4 +12,4 @@ Each user-facing round bundles the current judgment, its nearest material (the v
 
 ## When whether text belongs before the round's opening or inside it is in question
 
-Analysis, evidence, the versions, the standing, and any contrary ground the AI holds — a reading that no further encounter is owed included — are text output before the round's opening; the opening carries what the user can take and the implications needed to distinguish what the user can take.
+Analysis, evidence, the versions, the standing, and any contrary ground the AI holds — a reading that no further encounter is owed included — are text output before the round's opening; the opening carries the implications needed to distinguish what the user can take.

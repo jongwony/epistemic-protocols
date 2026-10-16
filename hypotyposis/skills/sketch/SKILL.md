@@ -9,7 +9,7 @@ Discover what a form should be by encountering concrete versions and reacting to
 
 ## Definition
 
-**Hypotyposis** (ὑποτύπωσις): an outline or sketch — a first drawing of a position rather than its finished statement. A dialogical act for the moment when a form has to be made and the intent behind it cannot yet be settled from descriptions: the user can say what is wrong with a thing in front of them long before they can say what the thing should be, because good fit has no positive description of its own while each misfit can be pointed at (Alexander, 1964). So the user need not specify the form first. The AI relays what the next versions will try — what they revise, how many, the medium each is realized in and what that medium can and cannot show, and where each will be — each with its basis, and then makes them. Each round shows the new versions first, in a medium in which the qualities the user's judgment concerns can be encountered, and then the standing: what the user's words set and on which version, what of the AI's they took, what rests on a check, what stays unestablished, and what changed. The user reacts in their own words — a mark, a keep, a request, a value set — and the AI revises the versions those words point to into new versions, never regenerating one from a description of it. The AI's reading of the purpose grows from those reactions rather than being settled up front: what it brings in before any reaction is marked as a default, each later part names the reaction or the gathered material it came from, and each round shows how the reading widened. The run closes when the user takes one version they encountered as the form for their purpose, its home shown in the round or named in that same turn; they can stop at any time, and the run stays as it stood, with what they ask done to the versions as they stop carried out. Once it has run, the user can point at one version as they met it and say "this is the form, for this purpose", seeing where it lives, where the passed-over versions are, what they asked done to any of them that is not yet observed done, and which values rest on their own words or on the AI's proposals they took, and what rests on checked evidence. The recognition establishes their judgment of fit for that purpose on what the version showed — not correctness against a standard outside preference, and not readiness for use.
+**Hypotyposis** (ὑποτύπωσις): an outline or sketch — a first drawing of a position rather than its finished statement. A dialogical act for the moment when a form has to be made and the intent behind it cannot yet be settled from descriptions: the user can say what is wrong with a thing in front of them long before they can say what the thing should be, because good fit has no positive description of its own while each misfit can be pointed at (Alexander, 1964). So the user need not specify the form first. The AI relays what the next versions will try — what they revise, how many, the medium each is realized in and what that medium can and cannot show, and where each will be — each with its basis, and then makes them. Each round shows the new versions first, in a medium in which the qualities the user's judgment concerns can be encountered, and then the standing: what the user's words set and on which version, what of the AI's they took, what rests on a check, what stays unestablished, and what changed. The user reacts in their own words — a mark, a keep, a request, a value set — and the AI revises the versions those words point to — or makes one it would propose — into new versions, never regenerating one from a description of it. The AI's reading of the purpose grows from those reactions rather than being settled up front: what it brings in before any reaction is marked as a default, each later part names the reaction or the gathered material it came from, and each round shows how the reading widened. The run closes when the user takes one version they encountered as the form for their purpose, its home shown in the round or named in that same turn; they can stop at any time, and the run stays as it stood, with what they ask done to the versions as they stop carried out. Once it has run, the user can point at one version as they met it and say "this is the form, for this purpose", seeing where it lives, where the passed-over versions are, what they asked done to any of them that is not yet observed done, and which values rest on their own words or on the AI's proposals they took, and what rests on checked evidence. The recognition establishes their judgment of fit for that purpose on what the version showed — not correctness against a standard outside preference, and not readiness for use.
 
 ```lean
 /-!
@@ -44,7 +44,7 @@ Hypotyposis(I) → start(c) → sketch(c, utterances), where c is the fused sess
     [otherwise]                   what is gathered now enters c; a production where
                                   `ProductionCalled` reads one; what their words ask done to the
                                   versions is done and observed → round
-  no utterance: nothing is recognized, moved, or removed; the run holds
+  no utterance: nothing is recognized, written, or removed; the run holds
 -/
 
 /-! ── MORPHISM ──
@@ -337,8 +337,8 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
     waiting on, supplied, or the person's word to go on in the medium at hand or without a
     reference that cannot be reached; or a value they set or replaced that no version shown
     embodies. A question about a version, answered as asked, and words that move nothing a version
-    would show produce nothing; a value they took that a shown version already embodies needs no
-    new version. Where a mark reads as about the rendering rather than the form, the next version
+    would show call for nothing; a value they took that a shown version already embodies calls for
+    no new version. Where a mark reads as about the rendering rather than the form, the next version
     fixes the rendering and leaves the form as it was, and the round says so; where the evidence
     does not settle which it is about, the round says that. Or, on your stated judgment, making now
     a version you would propose — the revision an insufficiency you found calls for, an alternative
@@ -474,9 +474,10 @@ Every round re-judges the whole run against the whole context: nothing counts ro
 down, and no earlier answer is held apart from what later ones say. Neither "every earlier fit
 stands" nor "every revision stales it" is a rule: what a person's words reached is read again on
 the context as it now stands, and what changed since the standing they last answered is shown.
-A production happens where `ProductionCalled` reads one, at most once per turn of the person's.
-Each production relays its intent whole, with what changed, before it makes anything. The loop is
-dialogue: each round ends on its opening, and no round count, cap, or fatigue closes the run.
+After the first production, a production happens where `ProductionCalled` reads one, at most once
+per turn of the person's. Each production relays its intent whole, with what changed, before it
+makes anything. The loop is dialogue: each round ends on its opening, and no round count, cap,
+or fatigue closes the run.
 -/
 
 /-! ── CONVERGENCE ──
@@ -538,7 +539,7 @@ def grounding : Op → Annot × String
   | .carryOut          => (.transform, "artifact write, environment run: what `carriedOut` does, as its doc states; each write or removal observed")
   | .assemble          => (.sense, "Internal analysis: the terminal record, `recordOf`, built after what the closing turn asked done is observed, never before")
   | .converge          => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with RecognizedForm")
-  | .seam              => (.interaction .extension, "after a recognition or not activating, proceed to the next move the person declared, citing that turn; after a recognition the record is handed on as session text, with the recognized version — an artifact by where it is and what it showed, a narration as written — every other version by where it is, or the round that showed it, rather than its content, the dissent travelling in it; every Constitution gate inside this protocol and the next fires unchanged")
+  | .seam              => (.interaction .extension, "after a recognition or not activating, proceed to the next move the person declared, citing that turn; after a recognition the record is handed on as session text, with the recognized version — an artifact by where it is and what it showed, a narration as written — every other version by where it is, or the round that showed it, rather than its content, the dissent travelling in it; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-- The operations that write a version, by realization: an artifact through `.produce`, and
     `.produceDelegate` where its write is handed to execution; narration writes no file. -/
