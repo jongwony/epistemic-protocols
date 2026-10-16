@@ -3,27 +3,27 @@ type: llm
 target: trace
 kind: manual
 window: every subject turn that ends before the oracle's "resolved" reply is sent
-focus: whether every turn that bears on the run without closing it presents the read-back and the open coordinates with their questions
+focus: whether every turn that bears on the run without closing it ends with a gate the user can answer
 ---
-# Every non-closing turn presents the read-back and the open coordinates
+# Every non-closing turn ends at a gate the user can answer
 
 Contract obligation (source: `euporia/skills/elicit/SKILL.md` — the `surface` grounding, `elicit`).
-A turn that bears on the run and does not close it carries a surface: the read-back and the open
-coordinates with their questions, as the `surface` entry names them — a default appears only as the
-run's proposal on an open coordinate. Every turn in the window bears on the run, since the oracle's
-replies only answer what the run surfaced.
+A turn that bears on the run and does not close it ends with a surface: a constitutive gate the user
+can answer. Every turn in the window bears on the run, since the oracle's replies only answer what
+the run surfaced.
 
 ## Met
 
-Each turn in the window presents the read-back of the intent and, where the round shows open
-coordinates, each with its question, as the `surface` entry names them — wherever in the turn it
-presents them. What the turn ends with is not judged here.
+Each turn in the window ends with something the user can answer about this run — open coordinates,
+a read-back they can take or correct, a question — rather than a plan, a summary, or a statement of
+what the run will do next.
 
 ## Not met
 
-The complement: a turn in the window that presents no read-back, or shows open coordinates without
-their questions.
+A turn in the window that ends without anything to answer, or ends on the run's own announcement
+that it is proceeding.
 
 ## Pairing
 
-Whether the turn after "resolved" closes is `person-closes`'s.
+`gate-stopped` checks the tree witness for the same window; a pass there with a fail here is a stop
+without a gate. Whether the turn after "resolved" closes is `person-closes`'s.

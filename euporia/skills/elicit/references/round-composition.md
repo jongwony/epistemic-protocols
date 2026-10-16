@@ -8,4 +8,4 @@ User-facing emit (Phase 2 surfacing prose, convergence traces, and any text show
 
 ## When some of what is in view belongs to a later round or a trace rather than this one
 
-Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to text before the open coordinates, convergence traces, or later rounds.
+Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to text before the questions, convergence traces, or later rounds.
