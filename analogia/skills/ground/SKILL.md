@@ -29,11 +29,12 @@ Analogia(R) → start(c) → ground(c, utterances), where c is the fused session
         source's relations and their target counterparts, and the checks on the claims bearing
         on K, the conclusions of the question that stands or of your draft; every place looked
         joins the context, a null result included →
-      [the collected context leaves nothing to audit]  `questionDraft`
+      [the collected context leaves nothing to audit, or moves the conclusions collection ran
+        for]  `questionDraft`, what moved shown
       [otherwise]  assessment: each conclusion Licensed with its limits, Blocked, or Undetermined
         with what is missing and who can reach it, on the question that stands or on your draft,
-        named which — a draft shown as `questionDraft` states; present it and proceed — no verdict
-        is asked
+        named which — a draft shown as `questionDraft` states; present it and proceed — no
+        verdict is asked
   next requested move: as TOOL GROUNDING `seam` states
   next utterance u: c' := fuse(c, u), read whole against R and c' →
     [u bears on the audit]  pass(c')   (a changed purpose, conclusion, pair, or ground is read there)
@@ -205,8 +206,8 @@ axiom question : (c : Context P) → Occ (questionCoord (P := P)) c
 
 /-- **Your judgment**: the conclusions of the question you carry the audit forward on while the
     person's turns leave it open, read from the context as `QuestionSupported` reads a turn's
-    question — the whole scope asked, per-case and collective conclusions, the pair where open;
-    empty where you carry none forward. -/
+    question — the whole scope asked, per-case and collective conclusions, one source–target
+    pair; empty where you carry none forward. -/
 axiom draftInferences : Context P → List Inference
 
 /-- `K`: the conclusions of the question that stands, or, while it is open, of your draft. -/
@@ -401,9 +402,10 @@ def assessed (c : Context P) : Assessed c :=
 /-- Where the audit stands. Each carries the context it was reached on and the relay that
     presents it. -/
 inductive Outcome (P : Type)
-  /-- nothing to audit: no question stands and you carry no draft forward — with no referent, the
-      material to audit asked for, inventing no candidate; otherwise the drafted questions shown.
-      A run status, not a closure. -/
+  /-- nothing to audit — no question stands and you carry no draft forward — or collection moved
+      the conclusions it ran for: with no referent, the material to audit asked for, inventing no
+      candidate; otherwise the drafted questions shown, with what collection moved. A run status,
+      not a closure. -/
   | holding    (c : Context P) (relay : Response P)
   /-- Once it has run, the person can say, for each conclusion they expect a framework, analogy,
       earlier design, or abstraction to carry to the target: the source relation, or chain of
@@ -447,13 +449,14 @@ opening a pass.
 
 open Classical in
 /-- One pass. With nothing to audit, that is presented and nothing is collected. Otherwise
-    collection runs; where the collected context leaves nothing to audit, that is presented;
-    otherwise the assessment is. -/
+    collection runs; where the collected context leaves nothing to audit, or moves the conclusions
+    collection ran for, that is presented; otherwise the assessment is. -/
 def pass (respond : Context P → Response P) (c : Context P) : Outcome P :=
   if ¬ ToAudit c then .holding c (respond c)
   else
     let c₂ := collect c
-    if h : ToAudit c₂ then .assessment c₂ h (assessed c₂) (respond c₂)
+    if h : ToAudit c₂ ∧ inferences c₂ = inferences c then
+      .assessment c₂ h.1 (assessed c₂) (respond c₂)
     else .holding c₂ (respond c₂)
 
 open Classical in
@@ -493,14 +496,16 @@ harness's interrupt.
 
 /-! ── CONVERGENCE ──
 assessed: a pass over the question that stands on the person's turn or over your draft, named
-which, in which collection reached what it could, and every conclusion in K carries a verdict — Licensed with its limits, Blocked, or
-Undetermined naming what is missing and who can reach it. Undetermined does not block the
+which, in which collection reached what it could and left K where it found it, and every
+conclusion in K carries a verdict — Licensed with its limits, Blocked, or Undetermined naming
+what is missing and who can reach it. Undetermined does not block the
 assessment and is not settled by it; a check this session can reach and has not run is run, not
 reported Undetermined. Convergence evidence: the question with the person's turn it stands on,
 who first put it forward, and whether that turn set it or took a draft, or your draft with its
-grounds where the question is open — the purpose, K, and the source and target audited, with the turn or fact that fixed them, or the
-person's answer or your draft where the choice was open; the reading the person named, with the turn that named
-it, where a conclusion's sense was fixed that way; for each k in K, one line
+grounds where the question is open — the purpose, K, and the source and target audited, with
+the turn or fact that fixed them, or the person's answer or your draft where the choice was
+open; the reading the person named, with the turn that named it, where a conclusion's
+sense was fixed that way; for each k in K, one line
 (MappingUncertain(k) → verdict(k)) showing the source relation, or chain of relations, that
 carries it, the correspondences it rode on, the likenesses, the differences in both directions,
 and the unknowns; where an abstraction is tested against its own cases, for a Licensed verdict
@@ -560,7 +565,7 @@ def grounding : Op → Annot × String
   | .surface          => (.interaction .extension, "the assessment with its trace, the places reached and not, what is open as the person's own unknown, and what a later turn would change; no verdict answer is required")
   | .converge         => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with the assessment")
   | .readAnswer       => (.sense, "Internal analysis: the latest utterance read whole against R and the fused context as it now stands — whether it bears on the audit")
-  | .seam             => (.interaction .extension, "the next move the person declared, citing that turn; where it rests on what the audit has not licensed on a question that stands — a conclusion Blocked, Undetermined, or Licensed beyond its limits, an assessment over your draft, or the mapping unaudited — show beside it what it rests on; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam             => (.interaction .extension, "the next move the person declared, citing that turn; where it rests on anything short of a conclusion Licensed within its limits on a question that stands — a conclusion Blocked, Undetermined, or Licensed beyond its limits, an assessment over your draft, or the mapping unaudited — show beside it what it rests on; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
@@ -614,7 +619,7 @@ Read `references/round-composition.md` before composing when terminology must re
 ## Rules
 
 - **Warrant tracks evidence, never assent**: Read each fit claim's warrant off the grounds actually cited for it. Agreement does not promote a claim and disagreement does not defeat one without a ground; what the user reports having observed is evidence like any other observation. Evidence that would fit a materially different explanation as well is read against that explanation too. Record what the reader adopts, report it apart from the evidence, and never offer it as a reason a verdict came out as it did.
-- **The question stands on the person's turn**: Read the purpose, the conclusions at stake in the whole scope asked, and the source and target where that choice is open off the person's own words. Where they leave it open, the AI may draft the question, but its draft settles none of it — not the purpose, not conclusions narrower than the cited turn asks, not a choice between materially different sources or targets — because this audit closes on evidence and no later utterance of the user's would cover a question the AI made stand. A question the user's words settle is read back; an assessment over the AI's draft says it rests on that draft.
+- **The question stands on the person's turn**: Read the purpose, the conclusions at stake in the whole scope asked, and the source and target where that choice is open off the person's own words. Where they leave it open, the AI may draft the question, but its draft settles none of it — not the purpose, not conclusions narrower than the cited turn asks, not a choice between materially different sources or targets — because this audit closes on evidence and no later utterance of the user's would cover a question the AI made stand.
 - **Collect to the limit of reach**: Collect over what the mapping rests on until nothing reachable is left; name the places reached and those that could not be; show what remains open as the person's own unknown, never as a stall. Where the purpose is to carry a structure over and the person's turn asks nothing narrower, audit whether the whole structure is preserved, with its relations found by collection.
 - **Judgment is over conclusions, not correspondences**: Judge each conclusion on its own. A peripheral correspondence may stay open without holding the audit open, and no disposition of correspondences completes it. An undetermined conclusion completes the assessment; a reachable check left unrun does not.
 - **A chain is checked as a chain**: A conclusion carried by a chain of source relations is licensed only with a met check on the composite. Evidence that defeats preservation through the composite blocks that route, never the conclusion's truth. A Licensed preservation verdict names in its limits the relations and composites checked.
