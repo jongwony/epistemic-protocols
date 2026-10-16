@@ -22,14 +22,14 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 
 /-! ── FLOW ──
 Euporia(I) → start(c) → elicit(c, utterances), where c is the fused session context:
-  surface(c): the read-back of the intent as understood, with its sources → Stop
+  surface(c): the read-back of the intent as understood, with its sources
   next utterance u: c' := fuse(c, u), every reading below taken afresh on c' →
-    [the utterance does not bear on this run]      the session answers it; no gate of this run
+    [the utterance does not bear on this run]      the session answers it; no surface of this run
     [the person says the intent is aligned enough] → ResolvedEndpoint
     [otherwise]                                    → surface(c')
-  no utterance: the gate holds; nothing is taken
-  after a resolution: the next move the person declared — the seed's task included — is the
-    session's to take up
+  no utterance: nothing is taken; the run holds
+  after a resolution: the next move the person declared — the seed's task, from wherever it
+    stands, carried to the intent as it closed — is the session's to take up
 -/
 
 /-! ── MORPHISM ──
@@ -210,8 +210,8 @@ def residual (c : Context P) : List Entry :=
 
 /-- **Your judgment**: the latest utterance bears on this run — a value, a deferral, a question
     about the surface, a new frame, a resolution. An utterance about other work leaves the run as
-    it stands: the session answers it, that answer stays in the context, and no gate of this run is
-    raised. Words that end the run — a decline of the proposed run included — without saying the
+    it stands: the session answers it, that answer stays in the context, and no surface of this run
+    is drawn. Words that end the run — a decline of the proposed run included — without saying the
     intent is aligned enough do not bear on it, whatever else the turn says, and what else it says
     stands in its own words in the context: the session answers them, no surface is drawn, the run
     holds, and later turns bear on it only where they come back to it; your own reading that the
@@ -281,8 +281,8 @@ Priority: explicit_arg > recent_intent_seed > surfaced_aporia
 /-! ── PHASE TRANSITIONS ──
 A step is one arm of a structural recursion over the person's utterances. `respond` is the next
 surface, as TOOL GROUNDING's `surface` entry names it; `session` is the session's own answer to an
-utterance that does not bear on the run, which stays in the context without being a gate of this
-run.
+utterance that does not bear on the run, which stays in the context without being a surface of
+this run.
 -/
 
 open Classical in
@@ -306,11 +306,11 @@ earlier answer is held apart from what later ones say. No fixed cap: each surfac
 -/
 
 /-! ── CONVERGENCE ──
-converged: a ResolvedEndpoint the person's utterance closed; holding is a surface no turn of the
-person's that bears on the run has answered. Convergence evidence: at the resolution, present the
-read-back of the intent in the person's language and the trace — each coordinate → where it came
-from → what stands on it, in the words of the turn that set it → who proposed it and how it stood —
-beside the residual and the dissent attached to the closure. Demonstrated, not asserted.
+converged: a ResolvedEndpoint the person's utterance closed; holding is a run no turn of the
+person's has closed. Convergence evidence: at the resolution, present the read-back of the intent
+in the person's language and the trace — each coordinate → where it came from → what stands on it,
+in the words of the turn that set it → who proposed it and how it stood — beside the residual and
+the dissent attached to the closure. Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -344,10 +344,10 @@ def grounding : Op → Annot × String
   | .detect       => (.sense, "Internal analysis, on the AI-guided path only: whether the person has fixed which decisions the intent turns on, read from the utterance, their material, and the domain's decision structure; an invocation of /elicit declares the deficit and is not judged")
   | .read         => (.observe, "artifact read, artifact search, record read: read-only reads of the person's own material where the intent turns on it")
   | .trace        => (.sense, "Internal analysis: the live inventory over the whole fused context and the domain's decision structure, each coordinate with where it comes from and what leaving it open changes")
-  | .surface      => (.interaction .constitution, "a plain one-sentence read-back of the intent as understood, every round the first included, with its sources and each recorded value marked by who proposed it and how it stood; where the intent of the person's turn was unclear, how you took it, in one line; each open coordinate the round shows, with its question, where it comes from — the person's material cited, their words quoted as said without an unstated mental model, or the domain's decision structure marked as yours — what leaving it open changes, and any default as your proposal; your contrary grounds before the answer slots. Guidance for the showing: coordinates the domain raises come after the ones the person's material and words raise, as open questions rather than filled examples; a deferred coordinate returns in the same wording with the same basis, marked as returning. The answer may give values, defer, or say the intent is aligned enough, in any form; an answer beyond the slots joins the context whole")
+  | .surface      => (.interaction .extension, "a plain one-sentence read-back of the intent as understood, every round the first included, with its sources and each recorded value marked by who proposed it and how it stood; where the intent of the person's turn was unclear, how you took it, in one line; each open coordinate the round shows, with its question, where it comes from — the person's material cited, their words quoted as said without an unstated mental model, or the domain's decision structure marked as yours — what leaving it open changes, and any default as your proposal; your contrary grounds before the questions. Guidance for the showing: coordinates the domain raises come after the ones the person's material and words raise, as open questions rather than filled examples; a deferred coordinate returns in the same wording with the same basis, marked as returning. The answer may give values, defer, or say the intent is aligned enough, in any form; an answer beyond the open coordinates joins the context whole")
   | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on this run, and what it does there — the values it makes stand, a resolution — read whole against the fused context as it now stands, whatever form it takes")
   | .converge     => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with ResolvedEndpoint")
-  | .seam         => (.interaction .extension, "after a resolution, proceed to the next move the person declared — the task the seed asked for, or other work they named; cite that source; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam         => (.interaction .extension, "after a resolution, proceed to the next move the person declared — the seed's task, from wherever it stands, carried to the intent as it closed, or other work they named; cite that source; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Intent resolution emergent via session context.
@@ -370,19 +370,19 @@ Euporia surfaces the decision coordinates an intent turns on without adjudicatin
 
 ### Phase 2 surface
 
-Present what TOOL GROUNDING's `surface` entry names and yield the turn. Read `references/round-composition.md` before composing when a term must remain stable across the session, wording must travel unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside the gate.
+Present what TOOL GROUNDING's `surface` entry names. Read `references/round-composition.md` before composing when a term must remain stable across the session, wording must travel unchanged, or material belongs to another round or trace.
 
 ### Intensity
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | One open coordinate | Brief surface and per-coordinate slots |
+| Light | One open coordinate | Brief surface with the one open coordinate |
 | Medium | Several coordinates or partial evidence | Full surface at coordinate granularity |
 | Heavy | Many coordinates, weak basis, several rounds in prospect | Full surface with per-coordinate evidence and explicit residuals |
 
 ## Rules
 
 - **Recognition over Recall**: Present the coordinates an intent turns on with their anticipatable post-answer states, so the user recognizes what they would otherwise have to recall.
-- **Round composition**: Use everyday language, keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the answer slots.
+- **Round composition**: Use everyday language, keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the questions.
 - **Focus and record**: As the Definition's MORPHISM invariant and `record` state.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
