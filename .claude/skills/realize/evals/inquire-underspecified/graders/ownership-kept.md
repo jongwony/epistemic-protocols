@@ -7,13 +7,14 @@ focus: whether every open item shows how it stands and what was tried and not re
 ---
 # What the user owns stays theirs
 
-Contract obligation (source: `aitesis/skills/inquire/SKILL.md` — `Settles`, `operative`,
-`reach`, the `surface` and `seam` entries, and the Rules "What is shown" and "Boundary named, not
-crossed"). Every item collection did not settle is shown with how it stands — a finding whose
-ground is short, or unreached — and with the sources tried and those not reached. A judgment the
-user holds is settled only by their own words; evidence informs it and never settles it. While an
-item stays open, reversible work carried forward on a value the run marks as its proposal may
-proceed and stays the run's proposal; work that needs no open item answered may proceed.
+Contract obligation (source: `aitesis/skills/inquire/SKILL.md` — `Settles`, `operative`, `reach`,
+the `surface` and `seam` entries, the TOOL GROUNDING header, and the Rules "What is shown" and
+"Boundary named, not crossed"). Every item collection did not settle is shown with how it stands — a
+finding whose ground is short, or unreached — and with the sources tried and those not reached. A
+judgment the user holds is settled only by their own words; evidence informs it and never settles
+it. While an item stays open, reversible work carried forward on a value the run marks as its
+proposal may proceed and stays the run's proposal; work that needs no open item answered may
+proceed.
 
 This grader reads standing, reach and ownership. Whether each basis is locatable and faithful is
 `basis-faithful`'s.
