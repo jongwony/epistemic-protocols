@@ -511,7 +511,7 @@ def grounding : Op → Annot × String
   | .shapeFrames    => (.sense, "Internal analysis: a new angle or a deepening the person named, shaped into frames or branches not already registered before the pass opens them")
   | .park           => (.interaction .extension, "something the person set aside for later acknowledged as parked, quoting their request; declared in the field; its durable record is the host's")
   | .converge       => (.interaction .extension, "DiverseCandidateField — its trace, as \"The map\" describes")
-  | .seam           => (.interaction .extension, "after the person takes the field, proceed only to the next move the person declared, an adopted routing policy, or a grant of theirs, citing that source; the field crosses whole, every origin, branch, park, signal, and doubt intact, and the seam never selects, ranks, or trims it; every Constitution gate here and in what comes next fires unchanged")
+  | .seam           => (.interaction .extension, "after the person takes the field, proceed to the next move the person declared, citing that turn; the field crosses whole, every origin, branch, park, signal, and doubt intact, and the seam never selects, ranks, or trims it; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Candidate-field resolution emergent via session context.
