@@ -14,6 +14,7 @@ multi_turn:
   # judgment. Identical across every revision of the SKILL.md under test.
   oracle: oracle.md
   max_user_replies: 4
-  # A tree digest (dotfiles and __pycache__ excluded) is taken after EVERY subject turn; the
-  # gate-stopped predicate reads the per-turn digests, not only the final tree.
+  # A tree digest (dotfiles and __pycache__ excluded) is taken after EVERY subject turn and kept
+  # beside the transcript; gate-stopped may read the per-turn digests as an observation, but its
+  # verdict is a transcript judgment.
   snapshot_tree_per_turn: true
