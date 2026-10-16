@@ -61,29 +61,29 @@ theorem unrelated_keeps_the_run (c : Context P) (o : Outcome P) (u : Utterance P
   simp [bound, h]
 
 /-- Carrying the run to a longer context keeps what it is: a boundary that stands stays the same
-    boundary, and a run that holds keeps the boundary that last stood. -/
+    boundary, and a run that holds holds the longer context. -/
 theorem carry_keeps_status (o : Outcome P) (c : Context P) :
-    (o.carry c).stood = o.stood ∧
-      (∀ b, o = .defined b → o.carry c = .defined b) := by
-  cases o <;> simp [Outcome.carry, Outcome.stood]
+    (∀ b, o = .defined b → o.carry c = .defined b) ∧
+      (∀ c', o = .holding c' → o.carry c = .holding c) := by
+  cases o <;> simp [Outcome.carry]
 
 /-- An utterance that bears on the boundary is read where it is said, with what observation
     returned — the run stands as that leaves it — and then answered by your turn, and a run that
-    holds holds with that turn in its context and the boundary that last stood; also after the
-    boundary stood, so a later correction reopens it. -/
+    holds holds with that turn in its context; also after the boundary stood, so a later
+    correction reopens it. -/
 theorem bearing_utterance_rounds (c : Context P) (o : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u)) :
     bound respond session c o (u :: us) =
       bound respond session (observed (fuse c u) ++ [(respond (observed (fuse c u))).val])
         (status (observed (fuse c u))
-          (observed (fuse c u) ++ [(respond (observed (fuse c u))).val]) o.stood) us := by
+          (observed (fuse c u) ++ [(respond (observed (fuse c u))).val])) us := by
   simp [bound, hr]
 
 /-- The boundary stands only where no turn of the person's is owed, and then on one of two grounds:
     the person's acceptance, or, without it, no item awaiting their disposition; it is read at
     `c`, with its limits and dissent read with the turn that shows it. -/
-theorem defined_grounds (c shown : Context P) (stood : Option (DefinedBoundary P))
-    (b : DefinedBoundary P) (h : status c shown stood = .defined b) :
+theorem defined_grounds (c shown : Context P)
+    (b : DefinedBoundary P) (h : status c shown = .defined b) :
     owed c = false ∧
       (isFilled (acceptance c) = true ∨ awaits (readout c) = false) ∧
       b = closeAt c shown (readout c) := by
@@ -97,20 +97,10 @@ theorem defined_grounds (c shown : Context P) (stood : Option (DefinedBoundary P
   · cases h
 
 /-- Where a turn of the person's is still owed, the run holds, with the round that serves it in
-    its context and the boundary that last stood. -/
-theorem owed_holds (c shown : Context P) (stood : Option (DefinedBoundary P))
-    (h : owed c = true) : status c shown stood = .holding shown stood := by
+    its context. -/
+theorem owed_holds (c shown : Context P) (h : owed c = true) :
+    status c shown = .holding shown := by
   simp [status, h]
-
-/-- A run that holds keeps the boundary that last stood: a reopen erases nothing of it. -/
-theorem reopen_keeps_what_stood (c shown : Context P) (stood : Option (DefinedBoundary P))
-    (c' : Context P) (s : Option (DefinedBoundary P)) (h : status c shown stood = .holding c' s) :
-    s = stood := by
-  unfold status at h
-  dsimp only at h
-  split at h
-  · cases h
-  · cases h; rfl
 
 /-- What observation joins to a context is evidence: no turn of yours, and no person's turn. -/
 theorem observed_adds_evidence (c : Context P) :
@@ -125,21 +115,20 @@ theorem observed_adds_evidence (c : Context P) :
 /-- Wherever the boundary stands, it is read before your turn: the context it closes is the one
     read — at the person's utterance, or at the start the invoking context — with only what
     observation returned after it. -/
-theorem defined_before_your_turn (c shown : Context P) (stood : Option (DefinedBoundary P))
-    (b : DefinedBoundary P) (h : status (observed c) shown stood = .defined b) :
+theorem defined_before_your_turn (c shown : Context P)
+    (b : DefinedBoundary P) (h : status (observed c) shown = .defined b) :
     ∃ ev : List (Turn P), b.snapshot.context = c ++ ev ∧
       ∀ e ∈ ev, e.origin = .external ∨ e.origin = .peer := by
-  obtain ⟨_, _, rfl⟩ := defined_grounds (observed c) shown stood b h
+  obtain ⟨_, _, rfl⟩ := defined_grounds (observed c) shown b h
   exact observed_adds_evidence c
 
 /-- Where a person's utterance sets the boundary, the boundary is read at that utterance: the
     context it closes is the person's turn followed only by what observation returned. -/
 theorem defined_at_utterance (c : Context P) (u : Utterance P) (shown : Context P)
-    (stood : Option (DefinedBoundary P)) (b : DefinedBoundary P)
-    (h : status (observed (fuse c u)) shown stood = .defined b) :
+    (b : DefinedBoundary P) (h : status (observed (fuse c u)) shown = .defined b) :
     ∃ ev : List (Turn P), b.snapshot.context = c ++ [u.val] ++ ev ∧
       ∀ e ∈ ev, e.origin = .external ∨ e.origin = .peer :=
-  defined_before_your_turn (fuse c u) shown stood b h
+  defined_before_your_turn (fuse c u) shown b h
 
 /-- A boundary that a bearing utterance sets is read at that utterance: the context it closes is
     the person's turn followed only by what observation returned. -/
@@ -149,35 +138,23 @@ theorem defined_ends_in_utterance (c : Context P) (o : Outcome P) (u : Utterance
     ∃ ev : List (Turn P), b.snapshot.context = c ++ [u.val] ++ ev ∧
       ∀ e ∈ ev, e.origin = .external ∨ e.origin = .peer := by
   rw [bearing_utterance_rounds respond session c o u [] hr, silence] at h
-  exact defined_at_utterance c u _ _ b h
+  exact defined_at_utterance c u _ b h
 
 /-- Only a person's turn accepts the boundary. -/
 theorem accepted_only_by_person (g : Grounding) (h : (acceptanceCoord (P := P)).admits g) :
     g.val = .person := h
 
 /-- An acceptance sets the boundary whatever is still open; the open part is its residual. -/
-theorem acceptance_sets_despite_residual (c shown : Context P) (stood : Option (DefinedBoundary P))
+theorem acceptance_sets_despite_residual (c shown : Context P)
     (ho : owed c = false) (h : isFilled (acceptance c) = true) :
-    status c shown stood = .defined (closeAt c shown (readout c)) := by
+    status c shown = .defined (closeAt c shown (readout c)) := by
   simp [status, h, ho]
 
 /-- Where something awaits the person and they have not accepted, the run holds. -/
-theorem awaiting_holds (c shown : Context P) (stood : Option (DefinedBoundary P))
+theorem awaiting_holds (c shown : Context P)
     (ha : isFilled (acceptance c) = false) (hw : awaits (readout c) = true) :
-    status c shown stood = .holding shown stood := by
+    status c shown = .holding shown := by
   simp [status, ha, hw]
-
-/-- Each utterance continues the run: no utterance ends it, and the utterances after it run on from
-    how this one leaves it — the run carried to the session's answer, where the utterance does not
-    bear on the boundary, or how the run stands read at the utterance, where it does. -/
-theorem each_step_continues (c : Context P) (o : Outcome P) (u : Utterance P)
-    (us : List (Utterance P)) :
-    (∃ cs, bound respond session c o (u :: us) = bound respond session cs (o.carry cs) us) ∨
-    (∃ c'' shown, bound respond session c o (u :: us) =
-      bound respond session shown (status c'' shown o.stood) us) := by
-  by_cases hr : Reaches (fuse c u)
-  · exact .inr ⟨_, _, bearing_utterance_rounds respond session c o u us hr⟩
-  · exact .inl ⟨_, unrelated_keeps_the_run respond session c o u us hr⟩
 
 /-- Every boundary a run sets stands where no turn of the person's was owed, on their acceptance or
     on nothing awaiting them, closed at the context where it was read — provided the outcome the run
@@ -203,7 +180,7 @@ theorem defined_by_acceptance_or_nothing_awaiting (c : Context P) (o : Outcome P
       cases o <;> simp only [Outcome.carry] at hb' <;> first | exact hb' | cases hb'
     · refine ih _ _ h ?_
       intro b' hb'
-      obtain ⟨h1, h2, h3⟩ := defined_grounds _ _ _ b' hb'
+      obtain ⟨h1, h2, h3⟩ := defined_grounds _ _ b' hb'
       exact ⟨_, _, h1, h2, h3⟩
 
 /-- Every disposition on the record cites a person's turn: a relayed earlier decision — one fixing
