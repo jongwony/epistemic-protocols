@@ -16,8 +16,8 @@ the run, since the oracle's replies only answer what the run surfaced.
 
 ## Met
 
-Each turn in the window ends with the read-back of the intent and the open coordinates the round
-shows, each with its question, as the `surface` entry names them.
+Each turn in the window ends with the read-back of the intent and, where the round shows open
+coordinates, each with its question, as the `surface` entry names them.
 
 ## Not met
 
