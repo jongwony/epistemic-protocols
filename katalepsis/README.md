@@ -31,10 +31,10 @@ When a target is complex — a large change, code someone else wrote, a dense pa
 Gather   → Read the target's material, and the sources that bear on it
 Map      → The purpose (the user's words, or AI's reading marked as AI's) and the
            aspects it turns on, each with what it rests on and how it stands
-Explain  → Each aspect in one fitting representation; the user's move
-           answered with its material — a check runs, on their ask or on AI's
-           stated judgment, and its result is shown; no verdict without
-           material: what would settle it is named
+Explain  → Each aspect in one fitting representation; a check, run on the
+           user's ask or on AI's stated judgment, shows its result; the user's
+           move answered with its material — no verdict without material: what
+           would settle it is named
            (gate interaction)
 Close    → The user says what they understand now serves their purpose; the
            map at that moment is the record, with any dissent
