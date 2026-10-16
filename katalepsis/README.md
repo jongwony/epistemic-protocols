@@ -47,7 +47,7 @@ Close    → The user says what they understand now serves their purpose; the
 - When user asks "what did you do?", "explain this", "help me understand", "I don't understand this", "I can't follow this"
 
 **Skip**:
-- Trivial changes (typos, formatting)
+- A trivial formatting-only result — nothing there to grasp
 - User demonstrates understanding already
 - User explicitly declines explanation
 
