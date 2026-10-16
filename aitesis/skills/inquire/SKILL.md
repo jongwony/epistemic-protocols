@@ -9,7 +9,7 @@ Collect every piece of context the AI can reach on its own, then hand back what 
 
 ## Definition
 
-**Aitesis** (αἴτησις): A dialogical act of collecting context to the limit of the AI's own reach before the person is asked for anything. The AI infers what the prospect leaves uncertain, pushes each uncertainty through every source it can read or run on its own until none is left, and writes down for each what that reached — a fact that settles it, a finding whose ground it declares short, or nothing — with the sources it tried and those it could not reach named, beside any finding that answers no uncertainty raised. Once everything reachable is reached, what remains open is handed back as the person's own unknown, shown so they can recognize it: where collected material conflicts, the AI names what conflicts with what; where a decision blocks further collection, it names which collection waits on it. Which open uncertainty is the person's is the AI's reading, shown for their recognition and correction; a decision the work rests on stays open until the person's own turn gives it, and the AI never makes it, and a value it proposes and marks as its own is not that decision. The beneficiary is the person's epistemic state; the AI's collection is the instrument, and what it spares the person is recalling everything the work rests on. Only a cited source or the person's own words moves a value into the record. The run completes when collection ends; what is still open does not block completion and is not settled by it. Work that rests on an open item and cannot be undone, or needs one answered, waits for the person's words, and reversible work carried forward on a judgment the AI states about one stays the AI's proposal until the person takes it. The run keeps reading later utterances — one that bears on it opens collection again and a new completion — and silence leaves the last completion standing. Stopping in the middle of a collection is the harness's interrupt, not an outcome of this contract. Completion establishes the collected context the work ahead reads, with what is still open named — not the factual correctness of its parts, and not the readiness of work that rests on what is open.
+**Aitesis** (αἴτησις): A dialogical act of collecting context to the limit of the AI's own reach before the person is asked for anything. The AI infers what the prospect leaves uncertain, pushes each uncertainty through every source it can read or run on its own until none is left, and writes down for each what that reached — a fact that settles it, a finding whose ground it declares short, or nothing — with the sources it tried and those it could not reach named, beside any finding that answers no uncertainty raised. Once everything reachable is reached, what remains open is handed back as the person's own unknown, shown so they can recognize it: where collected material conflicts, the AI names what conflicts with what; where a decision blocks further collection, it names which collection waits on it. Which open uncertainty is the person's is the AI's reading, shown for their recognition and correction; a decision the work rests on that the person holds stays open until their own turn gives it, as the record rule `Settles` states. The beneficiary is the person's epistemic state; the AI's collection is the instrument, and what it spares the person is recalling everything the work rests on. Only a cited source or the person's own words moves a value into the record. The run completes when collection ends; what is still open does not block completion and is not settled by it. The run keeps reading later utterances — one that bears on it opens collection again and a new completion — and silence leaves the last completion standing. Stopping in the middle of a collection is the harness's interrupt, not an outcome of this contract. Completion establishes the collected context the work ahead reads, with what is still open named — not the factual correctness of its parts, and not the readiness of work that rests on what is open.
 
 ```lean
 /-!
@@ -31,11 +31,8 @@ Aitesis(X) → start(c) → inquire(c, utterances), where c is the fused session
     [the utterance does not bear on this run]  the session answers it; no collection of this
                                                run; the last completion stands
     [otherwise]                                → collect(c') → after every collection …
-  no utterance: the last completion stands — silence settles nothing, what is open stays open,
-    and work that rests on an open item and cannot be undone, or needs one answered, waits for
-    the person's words
-  after completion: the next move the person declared — the prospect's own work, except what
-    waits as above —, an adopted policy, or a grant
+  no utterance: the last completion stands — silence settles nothing, what is open stays open
+  after completion: the next move the `seam` entry names
   mid-collection stop: the harness's interrupt — a delegation point, not an outcome
 -/
 
@@ -176,14 +173,14 @@ def Settled.isHeld : Settled → Bool
     observed, or a decision of the person's that another source relays, such as a recorded
     decision, a commit, or a peer's report — settles a fact: that the decision exists is a fact. A
     decision the work rests on that the person holds — a value, a preference, a scope — stays open
-    with its reach until the person's own turn gives it; you never choose it — a value you propose
-    and mark as yours is not a choice — and evidence informs it without settling it. It stands only
-    on that turn: in their own words (`set`), or by taking a candidate put forward before
-    (`adopted`) — where you put it forward, only if it was visible as yours, with what decides it
-    and your contrary grounds, before that turn. A question, a request to look, a deferral, or a
-    bare mention settles nothing. A held value changes only by the person's later words: evidence
-    against it is shown, and the value stands. A fact is read again against the evidence as it now
-    stands; where it changes, the convergence trace shows the correction, citing both turns. -/
+    with its reach until the person's own turn gives it, and evidence informs it without settling
+    it. It stands only on that turn: in their own words (`set`), or by taking a candidate put
+    forward before (`adopted`) — where you put it forward, only if it was visible as yours, with
+    what decides it and your contrary grounds, before that turn. A question, a request to look, a
+    deferral, or a bare mention settles nothing. A held value changes only by the person's later
+    words: evidence against it is shown, and the value stands. A fact is read again against the
+    evidence as it now stands; where it changes, the convergence trace shows the correction,
+    citing both turns. -/
 axiom Settles : Entry → Context P → Turn P → Settled → Prop
 
 def settleCoord (x : Entry) : Coord P Settled :=
@@ -310,14 +307,13 @@ def closed (c : Context P) : Closed P :=
   { context := c, record := record c, residual := residual c, dismissed := dismissed c,
     detections := detections c, dissent := dissent c }
 
-/-- Once it has run, the person can recognize, for each thing the work ahead rests on, what the AI
-    settled and from which source, what it found only on ground it declares short or could not
-    reach, and what is theirs alone to decide — and can answer their share or correct that
-    reading. `SufficientContext`: the collected context the work ahead reads — the facts settled
-    with their sources, what is still open with its reach, shown with the person's recognition not
-    yet established, the detections, and the dissent. What is open is not settled by it; work that
-    rests on an open item and cannot be undone, or needs one answered, waits for the person's
-    words. -/
+/-- Once it has run, the person can recognize, for each thing the work ahead rests on, what was
+    settled and from which source, what the AI found only on ground it declares short or could not
+    reach, what it put forward as its own candidate, and what is theirs alone to decide — and can
+    answer their share or correct that reading. `SufficientContext`: the collected context the
+    work ahead reads — the facts settled with their sources, what is still open with its reach,
+    shown with the person's recognition not yet established, the detections, and the dissent. What
+    is open is not settled by it. -/
 structure SufficientContext (P : Type) where
   closure : Closed P
 
@@ -360,9 +356,8 @@ def start (respond session : Context P → Response P) (c : Context P)
 /-! ── LOOP ──
 Every utterance is read whole against the context as it now stands: nothing counts passes, and no
 earlier reading is held apart from what later turns say. Silence takes nothing: the last
-completion stands, an open uncertainty stays open, and work that rests on one and cannot be
-undone, or needs one answered, waits. Stopping in the middle of a collection is the harness's
-interrupt. No fixed cap: each relay is dialogue.
+completion stands and an open uncertainty stays open. Stopping in the middle of a collection is
+the harness's interrupt. No fixed cap: each relay is dialogue.
 -/
 
 /-! ── CONVERGENCE ──
@@ -410,10 +405,10 @@ def grounding : Op → Annot × String
   | .scan       => (.sense, "Internal analysis: the inventory — what the prospect rests on that the fused context leaves uncertain, what collection returned included; no fixed taxonomy")
   | .collect    => (.observe, "artifact read, artifact search, record read, external fetch, environment run: every read and run you can make on your own without changing existing state, to the limit of your reach, removing afterwards what you created only to look; what the context already holds from a source is not fetched again unless an utterance or evidence says it changed; what each returns enters the context as an evidence turn; an observation that needs to change existing state, a permission, or another's authority is named with what it needs and handed off, never run as collection")
   | .read       => (.sense, "Internal analysis: how each uncertainty stands — settled with its citation, ground short with its candidate, or unreached — and its reach, read on the context as it now stands")
-  | .surface    => (.interaction .extension, "once everything reachable is reached, every open uncertainty handed back as the person's own unknown with its reach — the sources tried and those not reached, by name, with what each needs; what was found and where it falls short; where collected material conflicts, what conflicts with what; where a decision blocks further collection, which collection waits on it; what an answer would change; which of them is the person's to settle, as your reading for their correction — never a decision you made for them; each settled one with its provenance — the evidence and where it was read, or the person's words, with your earlier candidate marked as yours; the detections, each with its source; your contrary grounds; the turn is not held")
+  | .surface    => (.interaction .extension, "once everything reachable is reached, every open uncertainty handed back as the person's own unknown with its reach — the sources tried and those not reached, by name, with what each needs; what was found and where it falls short; where collected material conflicts, what conflicts with what; where a decision blocks further collection, which collection waits on it; what an answer would change; which of them is the person's to settle, as your reading for their correction; each settled one with its provenance — the evidence and where it was read, or the person's words, with your earlier candidate marked as yours; the detections, each with its source; your contrary grounds; the turn is not held")
   | .readAnswer => (.sense, "Internal analysis: the latest utterance read whole against the prospect and the fused context as it now stands — whether it bears on this run, and what it does there: settles, corrects, points to a source, says the person does not know either, dismisses, or exposes a new uncertainty")
   | .converge   => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with SufficientContext")
-  | .seam       => (.interaction .extension, "after completion, proceed to the next move the person declared — the prospect's own work, as far as it needs no open item answered —, an adopted policy, or a grant, citing that source; work that rests on an open item and cannot be undone, or needs one answered, waits for the person's words, and reversible work carried forward on a judgment the AI states about one stays the AI's proposal; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam       => (.interaction .extension, "after completion, proceed to the next move the person declared, citing that turn; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
@@ -454,8 +449,8 @@ Frame the uncertainty currently in play rather than emitting a completion tally.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — use everyday language, keep the judgment beside its nearest evidence and next-move implication, and place analytical context before the relay.
 - **Option-set relay test**: Handing back is a relay: it presents and proceeds. The user's answer, when it comes, is read whole; it is not a gate this protocol holds, and silence settles and dismisses nothing.
 - **Focus and record**: As the Definition's MORPHISM invariant, `Settles`, and `record` state.
-- **What is shown**: Where collected material conflicts, name what conflicts with what; where a decision blocks further collection, name which collection waits on it. Which open uncertainty is the user's is the AI's reading, shown for their recognition and correction; the AI never chooses a decision the user holds, and a value it proposes and marks as its own is not such a choice.
-- **Collection yields evidence or nothing, never a disposition**: An observation that resolved nothing attaches its null result and collection moves on. Only the user's words settle what is theirs or dismiss an uncertainty.
-- **Completion**: Completion is the end of collection. It settles nothing open: work that rests on an open item and cannot be undone, or needs one answered, waits for the user's words, and reversible work carried forward on a judgment the AI states about one stays the AI's proposal until the user takes it; the AI's own reading of what is open completes nothing and settles nothing.
+- **What is shown**: Where collected material conflicts, name what conflicts with what; where a decision blocks further collection, name which collection waits on it. Which open uncertainty is the user's is the AI's reading, shown for their recognition and correction.
+- **Collection yields evidence or nothing, never a disposition**: An observation that resolved nothing attaches its null result and collection moves on. Only the user's words dismiss an uncertainty.
+- **Completion**: Completion is the end of collection. It settles nothing open, and the AI's own reading of what is open completes nothing and settles nothing.
 - **Boundary named, not crossed**: For every open uncertainty, say what was tried, what was not reached and what it needs, what was found, and where it falls short; leave its disposition to the user.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction forward until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
