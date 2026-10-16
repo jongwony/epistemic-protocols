@@ -36,8 +36,8 @@ Periagoge(A) → start(c) → induce(c, utterances), where c is the fused sessio
                                                                → the sheet again; otherwise
                                                                → crystallized
     [otherwise]                                                what is collected now enters c → the sheet again
-  no utterance: nothing is taken; the run holds
-  after a crystallization or not activating: the next move the `seam` entry names
+  no utterance: nothing comes to stand; the run holds
+  after a crystallization, or not activating on an invocation: the next move the `seam` entry names
 -/
 
 /-! ── MORPHISM ──
@@ -499,7 +499,7 @@ def start (respond session converge : Context P → Response P) (c : Context P)
 /-! ── CONVERGENCE ──
 crystallized — the one closing of `Outcome`, the person's; the trace it carries is its structure's
 fields. notActivated and holding are not closings: the first is your reading before any sheet, the
-second a run no recognition of the person's has crystallized. The convergence
+second a run that has not crystallized. The convergence
 evidence: the turn read as the closing, in its own words, with the goal and the candidate it
 recognized.
 -/
@@ -531,6 +531,7 @@ def Interaction.realization : Interaction → Continuation
 
 inductive Op | detect | collect | judge | sheet | readTurn | declare | converge | seam
 
+/-- No Constitution entry: whether a turn halts is the harness's baseline. -/
 def grounding : Op → Annot × String
   | .detect   => (.sense, "Internal analysis: whether this is the protocol's case, as `notActivated` reads it, over the utterance and the context")
   | .collect  => (.observe, "artifact read, artifact search; external fetch (conditional: the domain lies outside the person's artifacts), its URL cited where used: what `collect` reads, as its doc states")
@@ -539,7 +540,7 @@ def grounding : Op → Annot × String
   | .readTurn => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there — a move, a value taken, a reading set aside or brought back, words about an open item, a closing — read whole against the fused context as it now stands, as `Reaches`, `ClosingSupported`, `SetAsideSupported`, `StandingSupported`, and `OpenSupported` read it")
   | .declare  => (.interaction .extension, "before activation, on an invocation only — AI-guided activation stays silent —, your `notActivated` reading in plain words with its basis, and what was searched")
   | .converge => (.interaction .extension, "at a crystallization, the convergence evidence CONVERGENCE names: the closing turn quoted beside the trace and the dissent")
-  | .seam     => (.interaction .extension, "after a crystallization or not activating, proceed to the next move the person declared, citing that turn; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam     => (.interaction .extension, "after a crystallization, or not activating on an invocation, proceed to the next move the person declared, citing that turn; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
