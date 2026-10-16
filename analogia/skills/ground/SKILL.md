@@ -158,14 +158,17 @@ inductive Proposer | draft | person
     draft put forward before, as it was or corrected. -/
 inductive Standing | set | adopted
 
-/-- The question an audit answers: what the comparison is for, the conclusions at stake (`K`), and
-    the source and target — carried only where `R` and the context leave a materially different
-    choice of either open, `none` where they fix it — with who first put it forward and how it
-    came to stand. A question concerns one source–target pair. -/
-structure Question where
+/-- What a question asks: what the comparison is for, the conclusions at stake (`K`), and the
+    source and target — carried only where `R` and the context leave a materially different choice
+    of either open, `none` where they fix it. A question concerns one source–target pair. -/
+structure Draft where
   purpose     : String
   conclusions : List Inference
   pair        : Option (String × String)
+
+/-- The question an audit answers: what it asks, with who first put it forward and how it came to
+    stand. -/
+structure Question extends Draft where
   proposer    : Proposer
   standing    : Standing
 
@@ -202,17 +205,19 @@ def questionCoord : Coord P Question :=
     stands. -/
 axiom question : (c : Context P) → Occ (questionCoord (P := P)) c
 
-/-- **Your judgment**: the conclusions of the question you carry the audit forward on while the
-    person's turns leave it open, read from the context as `QuestionSupported` reads a turn's
-    question — the whole scope asked, per-case and collective conclusions, one source–target
-    pair; empty where you carry none forward. -/
-axiom draftInferences : Context P → List Inference
+/-- **Your judgment**: the question you carry the audit forward on while the person's turns leave
+    it open — its purpose, conclusions, and pair read from the context as `QuestionSupported` reads
+    a turn's question, the whole scope asked, per-case and collective conclusions; `none` where you
+    carry none forward. -/
+axiom draft : Context P → Option Draft
 
 /-- `K`: the conclusions of the question that stands, or, while it is open, of your draft. -/
 def inferences (c : Context P) : List Inference :=
   match question c with
   | .filled q .. => q.conclusions
-  | .open_ _     => draftInferences c
+  | .open_ _     => match draft c with
+    | some d => d.conclusions
+    | none   => []
 
 /-- The question stands: it is filled on a person's turn. -/
 def QuestionStands (c : Context P) : Prop :=

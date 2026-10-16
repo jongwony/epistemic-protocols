@@ -85,7 +85,7 @@ theorem silence_keeps_last (respond session : Context P → Response P) (c : Con
     (o : Outcome P) : ground respond session c o [] = o := rfl
 
 /-- A turn that does not bear on the audit opens no pass: the session answers it, both stay in
-    the context, and the last outcome stands — an open question stays open. -/
+    the context, and the last outcome stands. -/
 theorem unrelated_opens_no_pass (respond session : Context P → Response P) (c : Context P)
     (o : Outcome P) (u : Utterance P) (hb : ¬ BearsOnRun (fuse c u)) :
     step respond session c o u = (fuse c u ++ [(session (fuse c u)).val], o) := by
