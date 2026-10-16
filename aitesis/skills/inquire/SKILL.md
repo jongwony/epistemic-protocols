@@ -366,10 +366,10 @@ and is not settled by it. A finding alone establishes nothing
 about what is open. Convergence evidence, at each completion: for every uncertainty raised, one
 pair (ContextInsufficient(u) → how it stands) — a settled one with its citation and, for a held
 value, who proposed it and how it stood; a corrected fact citing both the earlier and the later
-turn; an open one with its reach and any value you put forward for it, marked as yours —
-naming what conflicts with what and which collection waits on which decision — marked as shown
-to the person with their recognition not yet established unless a later turn of theirs showed
-it; a dismissed one with the person's words and how it stood then — beside the detections and
+turn; an open one with its reach — naming what conflicts with what and which collection waits
+on which decision — marked as shown to the person with their recognition not yet established
+unless a later turn of theirs showed it, beside any value you put forward for it, marked as yours;
+a dismissed one with the person's words and how it stood then — beside the detections and
 the dissent attached to the closure. Demonstrated, not asserted.
 -/
 
