@@ -29,9 +29,12 @@ theorem relay_before_instantiation (ai : AITurns P) (c : Context P) :
   simp only [List.append_assoc]
   exact ⟨_, rfl⟩
 
-theorem round_fans_only_where_judged (ai : AITurns P) (c : Context P) (h : ¬ Fans c) :
-    round ai c = c ++ [(ai.respond c).val] := by
-  simp [round, h]
+theorem fans_only_where_judged (ai : AITurns P) (c : Context P) (u : Utterance P)
+    (us : List (Utterance P)) (hr : Reaches (fuse c u))
+    (hk : filledValue (closing (fuse c u)) = none) (h : ¬ Fans (consulted (fuse c u))) :
+    preview ai c (u :: us) =
+      preview ai (consulted (fuse c u) ++ [(ai.respond (consulted (fuse c u))).val]) us := by
+  simp [preview, hr, hk, h]
 
 theorem unrelated_adds_no_gate (ai : AITurns P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :

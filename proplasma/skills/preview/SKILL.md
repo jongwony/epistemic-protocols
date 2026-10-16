@@ -29,18 +29,16 @@ Proplasma(X) → start(c) → preview(c, utterances), where c is the fused sessi
     it; the axes the purpose turns on; the placeholder policy; which candidates get probes and why
     any waits; the tier — each with its basis, and on every later fan what changed since the last;
     it yields no turn → the probes, each entering c as written
-  round: a fan where `Fans` reads one — they ask to see what no probe materialized, or you carry
-    forward a revision for a contrast you find insufficient; after a fan, each new probe first, from
-    its realization; then the map — whole on the first round, what changed on a later one, whole
-    when asked: per axis, what each direction's future looks like there and what that rests on; the
-    premises every probe shares; the open unknowns with what would settle each; your readings and
-    contrary grounds, each with what it bears on and rests on → one opening, or a contradiction's
-    working with nothing after it
+  round: after a fan, each new probe first, from its realization; then the map — whole on the first
+    round, what changed on a later one, whole when asked: per axis, what each direction's future
+    looks like there and what that rests on; the premises every probe shares; the open unknowns
+    with what would settle each; your readings and contrary grounds, each with what it bears on
+    and rests on → one opening, or a contradiction's working with nothing after it
   next utterance u, read on fuse(c, u):
     [does not bear on this run]   the session answers it; that answer stays in c; no round of this run
     [the person constitutes d]    harvest → cleanup → DirectionalContrast
     [otherwise]                   what is gathered now enters c, anything they asked to see
-                                  observed for real among it → round
+                                  observed for real among it; a fan where `Fans` reads one → round
   no utterance: nothing is constituted, generated, gathered, or discarded; the run holds
 -/
 
@@ -267,8 +265,9 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
     tier, which candidates get probes, the probe material), a composition to be seen, a named
     candidate, or the revision you proposed taken up; or you find the contrast insufficient — an
     axis the purpose turns on that no probe carries, a candidate whose future would decide it
-    unseen — and carry the revision you propose forward rather than showing it for the person to
-    take up. A wish to see something that exists observed for real is `gathered`'s, not a fan. -/
+    unseen — and carry the revision you propose forward, one the person's words have not set aside,
+    rather than showing it for the person to take up. A wish to see something that exists observed
+    for real is `gathered`'s, not a fan. -/
 axiom Fans : Context P → Prop
 
 /-- **Your read**, now, of what the next judgment needs, as far as relevant access reaches: the
@@ -363,9 +362,9 @@ abbrev Mode (P : Type) := Context P
 A step is one arm of a structural recursion over the person's utterances. Your turns are
 `AITurns`: a fan relays the spec — whole, with what changed — before anything is generated, then
 the probes are written (`narrate` for a Vignette; for a Mockup, the operations `instantiatedBy`
-names); `round` is a fan where `Fans` reads one, then `respond`, the round as TOOL GROUNDING's
-`present` entry names it; `session` is the session's own answer to an utterance that does not bear
-on the run, which stays in the context without drawing a round of this run.
+names); `respond` is the round, as TOOL GROUNDING's `present` entry names it; `session` is the
+session's own answer to an utterance that does not bear on the run, which stays in the context
+without drawing a round of this run.
 -/
 
 /-- Your turns. `narrate` writes each Vignette probe's narration; being yours, it grounds
@@ -392,12 +391,6 @@ axiom cleanup : Context P → List (Evidence P)
 
 def discard (c : Context P) : Context P := c ++ (cleanup c).map (·.val)
 
-open Classical in
-/-- A round: a fan where `Fans` reads one, then the round shown on what stands. -/
-def round (ai : AITurns P) (c : Context P) : Context P :=
-  let c₁ := if Fans c then fan ai c else c
-  c₁ ++ [(ai.respond c₁).val]
-
 def constituted (c : Context P) (d : Direction) : DirectionalContrast P :=
   let c₁ := discard c
   ⟨c₁, purpose c₁, harvestOf c d, discardTrace c₁, dissent c⟩
@@ -405,7 +398,8 @@ def constituted (c : Context P) (d : Direction) : DirectionalContrast P :=
 open Classical in
 /-- A turn that does not bear on the run is answered by the session and leaves the run as it
     stands; a closing is read from the person's turn before anything is gathered; otherwise what
-    is gathered now enters the context and the round follows, a fan in it where `Fans` reads one. -/
+    is gathered now enters the context, a fan runs where `Fans` reads one, and the round
+    follows. -/
 def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
@@ -413,35 +407,40 @@ def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
     if ¬ Reaches f then preview ai (f ++ [(ai.session f).val]) us
     else match filledValue (closing f) with
     | some (.constitute d) => .contrasted (constituted f d)
-    | none => preview ai (round ai (consulted f)) us
+    | none =>
+      let c₁ := consulted f
+      let c₂ := if Fans c₁ then fan ai c₁ else c₁
+      preview ai (c₂ ++ [(ai.respond c₂).val]) us
 
 def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P :=
   let c₀ := consulted c
   match notActivated c₀ with
   | some why => .notActivated c₀ why
-  | none => preview ai (round ai (fan ai c₀)) us
+  | none =>
+    let c₁ := fan ai c₀
+    preview ai (c₁ ++ [(ai.respond c₁).val]) us
 
 /-! ── LOOP ──
 Every round re-judges the whole run against the whole context: nothing counts down and no answer
-waits for a later round. A fan happens where `Fans` reads one, and nowhere else. Each fan relays
-the spec whole, with what changed, before it generates. The loop is dialogue: no round count or
-cap closes it.
+waits for a later round. Beyond the opening fan, a fan happens where `Fans` reads one, and nowhere
+else. Each fan relays the spec whole, with what changed, before it generates. The loop is dialogue:
+no round count or cap closes it.
 -/
 
 /-! ── CONVERGENCE ──
 converged: a DirectionalContrast — a direction the person constituted over the map, harvested before
-discard, every probe's disposition declared; holding is a run no turn of the person's has closed.
-A constitution adopts the direction as the map showed it; it establishes nothing about a direction
-no probe materialized, and a contrary ground it was taken over rides it as dissent. The convergence evidence: the turn read as
-the closing, quoted, and the intent taken from it, and where it took a reading the round before
-showed of an unclear turn, that earlier turn quoted too; the purpose as it stands, marked as yours
-where you read it; the constituted direction and the deciding cells, as `decidingRows` reads them,
-each with what it rests on; the open unknowns with what would settle each, every probe's disposition
-with where it lived, and the dissent — a contrary ground first visible at the closing turn, a
-criterion they stated against the pick that turn makes included, is shown here and attached, and the
-closure stands. The framing readout names the work in play — the spec being drafted, probes under
-contrast, a direction being constituted, discard being verified — never a completion tally.
-Grounded, not asserted.
+discard, every probe's disposition declared; holding is a run no turn of the person's has closed. A
+constitution adopts the direction as the map showed it; it establishes nothing about a direction no
+probe materialized, and a contrary ground it was taken over rides it as dissent. The convergence
+evidence: the turn read as the closing, quoted, and the intent taken from it, and where it took a
+reading the round before showed of an unclear turn, that earlier turn quoted too; the purpose as it
+stands, marked as yours where you read it; the constituted direction and the deciding cells, as
+`decidingRows` reads them, each with what it rests on; the open unknowns with what would settle
+each, every probe's disposition with where it lived, and the dissent — a contrary ground first
+visible at the closing turn, a criterion they stated against the pick that turn makes included, is
+shown here and attached, and the closure stands. The framing readout names the work in play — the
+spec being drafted, probes under contrast, a direction being constituted, discard being verified —
+never a completion tally. Grounded, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
