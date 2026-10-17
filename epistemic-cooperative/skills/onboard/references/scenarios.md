@@ -19,7 +19,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Quiz Q (design)**: You're about to delegate a multi-step task, but you do not yet know all the decisions it involves. How would you decide where AI may act and which choices you want to inspect first?
 - Hint: Ask for the relevant whole provisional structure before choosing the boundary's parts or depth. Open an axis when its concrete implications matter, then accept or correct the arrangement without having to visit every axis. An open goal or deferred choice can remain in the result's residual, with what depends on it shown on the map.
 
-**Philosophy**: ὁρισμός (definition, boundary) — from horizein, "to bound." Core principle: **Definition over Assumption**. Workflow position: it defines the boundary and its residual and stops at the hand-off; it does not run or enforce the work that follows. Game feel: a recognizable whole → open the axis that matters → inspect and correct its implications → entrust at sufficient depth → carry the boundary and the remaining questions.
+**Philosophy**: ὁρισμός (definition, boundary) — from horizein, "to bound." Core principle: **Definition over Assumption**. Workflow position: it defines the boundary and its residual and hands off to the next move you declared; it does not run or enforce that work itself. Game feel: a recognizable whole → open the axis that matters → inspect and correct its implications → entrust at sufficient depth → carry the boundary and the remaining questions.
 
 ## Anamnesis `/recollect`
 
