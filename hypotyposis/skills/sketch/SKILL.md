@@ -168,8 +168,8 @@ def purposeCoord : Coord P String :=
     front-loaded: each part names what it rests on — the person's words it came from (their request,
     or their reaction to a specific version), the gathered material, or a default of yours (the
     convention of the kind of form, an example you picked, an idea a version of yours brought in),
-    marked as a default. A default gives way to what the reactions bring. Each round shows what the reading gained,
-    lost, or changed since the last round, and from which reaction or material. -/
+    marked as a default. A default gives way to what the reactions bring. Each round shows what the
+    reading gained, lost, or changed since the last round. -/
 axiom purpose : (c : Context P) → Occ (purposeCoord (P := P)) c
 
 /-- A place a version can live: a path, a reference, an address. -/
@@ -492,9 +492,8 @@ def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P
 Every round re-judges the whole run against the whole context: nothing counts rounds, and no
 earlier answer is held apart from what later ones say. Neither "every earlier fit stands" nor
 "every revision stales it" is a rule: what a person's words reached is read again on the context as
-it now stands, and what changed since the standing they last answered is shown. Each production
-relays its intent whole, with what changed, before it makes anything. The loop is dialogue: each
-round ends on its opening, and no round count, cap, or fatigue closes the run.
+it now stands, and what changed since the standing they last answered is shown. The loop is
+dialogue: each round ends on its opening, and no round count, cap, or fatigue closes the run.
 -/
 
 /-! ── CONVERGENCE ──
