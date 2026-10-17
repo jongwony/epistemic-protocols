@@ -20,7 +20,7 @@ assemble(found, cue) → List(Recognizable)   -- the judgment: which found recor
   disclosed-coverage      : what was followed, what was not reached, and which roots were searched are reported in the round or the close, beside the story where there is one
 
 ── KNOWN FAILURE MODES (wholes above one record) ──
-SparseRelations      : records found, and too few supported relations join them into the whole meant — nothing to present, and what was followed is reported
+SparseRelations      : records found, and too few supported relations join them into the whole meant — nothing to present
 BrokenReference      : relations resolve mostly to records not reached — report them as notes; the assembled whole may be too thin to recognize
 WholeMisread         : the whole misread — seen when a correction describes a different whole; the next pass re-reads the cue and assembles again
 -- One record would have answered: no case here. A recognizable of one member is the whole, and a whole misread above one record is WholeMisread

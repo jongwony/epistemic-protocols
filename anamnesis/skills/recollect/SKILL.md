@@ -255,8 +255,7 @@ axiom scopeQualifications : (c : Context P) → List (Qualification c)
 
 /-- **Your reading** of what the searches of this recall covered — which records and roots, to what
     extent, the records earlier recalls opened that this recall's story cites included — and which
-    records did not open, from their evidence turns, with any limit the person's words set, read
-    from their turn. -/
+    records did not open, from their evidence turns, with any limit the person's words set. -/
 axiom searched : Context P → String
 
 /-- **Your reading**: the person has added to the cue since this recall began — an answer, a
@@ -296,7 +295,7 @@ axiom answer : (c : Context P) → Occ (answerCoord (P := P)) c
     matter from this recall's — bears on this recall where it also carries one of these: the pass
     takes what it carries for this recall, and the other past is left for the person to take up, as
     The presentation says; otherwise it does not bear. Words that end this recall without
-    identifying anything do not bear on it, whatever else the turn says — a decline or a correction
+    identifying anything do not bear on it, whatever else the turn says — a limit or a correction
     said with them included — and what else it says stands in its own words in the context: they are
     answered as the step `recollect` takes the turn — by the session, or within the reply
     `holdReply` names where the turn reaches another recall (`Elsewhere`) — with the scope report
@@ -396,13 +395,12 @@ a round — that stays in the context.
     context does not already hold, or holds only from before a change the person's words or evidence
     report — a capture outcome read as unfinished is not held, so each pass reads it again — the
     searches toward the cue along its axes, each worth its cost and within what the person's words
-    rule out, read on the accumulated context as it now stands, following within the pass what each
-    read exposes, as Where to look says, until nothing worth its cost is left, the opening of each
+    leave open, read on the accumulated context as it now stands, following within the pass what each
+    read exposes, as Where to look says, until nothing worth its cost is left; the opening of each
     member of the leading recognizable at the span the cue reaches (for an artifact, the change
     history of that span) and, where its records do not open, of the candidates `found` lists in
-    turn until one's records open or none is left, and the capture outcome of every record a search
-    examined, one that matched nothing included. What bounds the search is progress and cost; no
-    count does. A remark or a form instruction adds nothing new to read. Each read returns as an
+    turn until one's records open or none is left; and the capture outcome of every record a search
+    examined, one that matched nothing included. No count bounds the search. A remark or a form instruction adds nothing new to read. Each read returns as an
     evidence turn; nothing is written to the records. With no recoverable cue nothing is worth reading, and the
     first round is the open question. -/
 axiom search : Context P → List (Evidence P)

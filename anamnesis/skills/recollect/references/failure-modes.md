@@ -52,7 +52,7 @@ Which follows — the open question or the unresolved close — is as SKILL.md's
 
 ```
 an index that is empty or whose capture failed
-  -- the records themselves remain searchable along the cue's axes; the capture outcome says whether the index was validated empty, failed, unfinished, or never written, and that is what the round reports about it
+  -- the records themselves remain searchable along the cue's axes; the capture outcome says whether the index was validated empty, failed, unfinished, or never written, and that is what the round or the close reports about it
   -- an empty index says nothing about whether the past took place
 the substitute channel
   -- a separate capture, not derived from the index: a fork's id stays findable there when the index is empty; its loss is not recoverable from the conversation records
