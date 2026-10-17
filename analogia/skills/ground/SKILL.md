@@ -564,7 +564,7 @@ def grounding : Op → Annot × String
   | .surface          => (.interaction .extension, "the assessment with its trace, the places reached and not, what is open as the person's own unknown, and what a later turn would change; no verdict answer is required")
   | .converge         => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with the assessment")
   | .readAnswer       => (.sense, "Internal analysis: the latest utterance read whole against R and the fused context as it now stands — whether it bears on the audit")
-  | .seam             => (.interaction .extension, "the next move the person declared, citing that turn; where it rests on anything short of a conclusion Licensed within its limits on a question that stands — a conclusion Blocked, Undetermined, or Licensed beyond its limits, an assessment over your draft, or the mapping unaudited — show beside it what it rests on; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam             => (.interaction .extension, "the next move the person declared, citing that turn")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
