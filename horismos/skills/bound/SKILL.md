@@ -561,7 +561,9 @@ this run governs: it is the person's current words. UserSupplies leaves the pers
 value. AIPropose permits proposal work while the person keeps the selection. AIAutonomous permits
 choice only inside the governing arrangement's reach, and that choice is recorded as yours.
 Reassignment does not enlarge authority. This protocol defines the boundary: the reversible work a
-round carries forward is work on the boundary, and it does not execute or enforce downstream work.
+round carries forward gathers what the boundary needs — collecting material and evidence, running
+what that takes where no existing state changes, such as a scratch space — and leaves the work the
+boundary is for to what follows it: this protocol does not execute or enforce downstream work.
 -/
 
 end
