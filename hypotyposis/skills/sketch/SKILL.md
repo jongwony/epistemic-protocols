@@ -436,11 +436,11 @@ structure AITurns (P : Type) where
     each in a medium in which the qualities the person's judgment concerns can be encountered;
     revise the retained versions the context calls for — a mark stays attached to what it marked,
     and the version revised need not be the version marked; a revision may draw on several
-    versions, on a changed source, or start fresh. Where the versions will be offered as
-    alternatives, their differences are encounterable and what each implies recognizable, and a
-    version that would not differ perceptibly on what is judged is not offered as another choice —
-    alternatives that share a frame and differ on a few qualities, few enough to hold at once,
-    carry their differences best. -/
+    versions, on a changed source, or start fresh where the person asks. Where the versions will be
+    offered as alternatives, their differences are encounterable and what each implies
+    recognizable, and a version that would not differ perceptibly on what is judged is not offered
+    as another choice — alternatives that share a frame and differ on a few qualities, few enough
+    to hold at once, carry their differences best. -/
 axiom produce : Context P → List (Evidence P)
 
 def production (ai : AITurns P) (c : Context P) : Context P :=
