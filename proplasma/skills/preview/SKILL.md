@@ -29,8 +29,7 @@ Proplasma(X) → start(c) → preview(c, utterances), where c is the fused sessi
     it; the axes the purpose turns on; the placeholder policy; which candidates get probes and why
     any waits; the tier — each with its basis, and on every later fan what changed since the last;
     it yields no turn → the probes, each entering c as written
-  round: a fan where `Fans` reads one — they ask to see what no probe materialized, or you carry
-    forward a revision for a contrast you find insufficient; after a fan, each new probe first, from
+  round: after a fan — and any you carry, as `FanCarried` reads them — each new probe first, from
     its realization; then the map — whole on the first round, what changed on a later one, whole
     when asked: per axis, what each direction's future looks like there and what that rests on; the
     premises every probe shares; the open unknowns with what would settle each; your readings and
@@ -40,7 +39,8 @@ Proplasma(X) → start(c) → preview(c, utterances), where c is the fused sessi
     [does not bear on this run]   the session answers it; that answer stays in c; no round of this run
     [the person constitutes d]    harvest → cleanup → DirectionalContrast
     [otherwise]                   what is gathered now enters c, anything they asked to see
-                                  observed for real among it → round
+                                  observed for real among it; a fan where they ask to see what no
+                                  probe materialized → round
   no utterance: nothing is constituted, generated, gathered, or discarded; the run holds
 -/
 
@@ -260,15 +260,24 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
   | .open_ _     => none
   | .filled a .. => some a
 
-/-- **Your judgment**: a fan is due on the context as it now stands — the latest utterance asks to
-    see something no probe has materialized: a spec element sent back (an axis, the policy, the
-    tier, which candidates get probes, the probe material), a composition to be seen, a named
-    candidate, or the revision you proposed taken up; or you find the contrast insufficient — an
-    axis the purpose turns on that no probe carries, a candidate whose future would decide it
-    unseen — and carry the revision you propose forward, one the person's words have not set aside,
-    rather than showing it for the person to take up. A wish to see something that exists observed
-    for real is `gathered`'s, not a fan. -/
-axiom Fans : Context P → Prop
+/-- **Your judgment**: the latest utterance asks to see something no probe has materialized — a
+    spec element sent back (an axis, the policy, the tier, which candidates get probes, the probe
+    material), a composition to be seen, a named candidate, or the revision you proposed taken
+    up. A reading of the purpose sent back opens a fan only where they ask to see probes on what
+    the new purpose turns on. A wish to see something that exists observed for real is
+    `gathered`'s, not a fan. -/
+axiom FanRequested : Context P → Prop
+
+/-- **Your judgment**: you find the contrast insufficient on the context as it now stands — an axis
+    the purpose turns on that no probe carries, a candidate whose future would decide it unseen —
+    and carry the revision you propose forward as a fan of your own, one the person's words have
+    not set aside. -/
+axiom FanCarried : Context P → Prop
+
+/-- **Your judgment**: how many fans of your own this turn carries before the round is shown — as
+    far as the work reaches toward a contrast the person can close on; each still needs
+    `FanCarried` on the context it meets. -/
+axiom reach : Context P → Nat
 
 /-- **Your read**, now, of what the next judgment needs, as far as relevant access reaches: the
     candidates' material and the sources that bear on the decision — any a turn cites, and any you
@@ -362,8 +371,8 @@ abbrev Mode (P : Type) := Context P
 A step is one arm of a structural recursion over the person's utterances. Your turns are
 `AITurns`: a fan relays the spec — whole, with what changed — before anything is generated, then
 the probes are written (`narrate` for a Vignette; for a Mockup, the operations `instantiatedBy`
-names); `round` is a fan where `Fans` reads one, then `respond`, the round as TOOL GROUNDING's
-`present` entry names it; `session` is the session's own answer to an utterance that does not bear
+names); `aiTurn` is your carried fans, then `respond`, the round as TOOL GROUNDING's `present`
+entry names it; `session` is the session's own answer to an utterance that does not bear
 on the run, which stays in the context without drawing a round of this run.
 -/
 
@@ -392,9 +401,14 @@ axiom cleanup : Context P → List (Evidence P)
 def discard (c : Context P) : Context P := c ++ (cleanup c).map (·.val)
 
 open Classical in
-/-- A round: a fan where `Fans` reads one, then the round shown on what stands. -/
-def round (ai : AITurns P) (c : Context P) : Context P :=
-  let c₁ := if Fans c then fan ai c else c
+/-- Your fans, one after another while `FanCarried` reads one, as far as `reach` allows. -/
+def carry (ai : AITurns P) : Nat → Context P → Context P
+  | 0,     c => c
+  | n + 1, c => if FanCarried c then carry ai n (fan ai c) else c
+
+/-- Your turn: the fans you carry, then the round shown on what stands. -/
+def aiTurn (ai : AITurns P) (c : Context P) : Context P :=
+  let c₁ := carry ai (reach c) c
   c₁ ++ [(ai.respond c₁).val]
 
 def constituted (c : Context P) (d : Direction) : DirectionalContrast P :=
@@ -404,7 +418,8 @@ def constituted (c : Context P) (d : Direction) : DirectionalContrast P :=
 open Classical in
 /-- A turn that does not bear on the run is answered by the session and leaves the run as it
     stands; a closing is read from the person's turn before anything is gathered; otherwise what
-    is gathered now enters the context and the round follows, a fan in it where `Fans` reads one. -/
+    is gathered now enters the context, a fan runs where the turn asks to see what no probe
+    materialized, and the round follows. -/
 def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
@@ -412,19 +427,23 @@ def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
     if ¬ Reaches f then preview ai (f ++ [(ai.session f).val]) us
     else match filledValue (closing f) with
     | some (.constitute d) => .contrasted (constituted f d)
-    | none => preview ai (round ai (consulted f)) us
+    | none =>
+      let c₁ := consulted f
+      let c₂ := if FanRequested c₁ then fan ai c₁ else c₁
+      preview ai (aiTurn ai c₂) us
 
 def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P :=
   let c₀ := consulted c
   match notActivated c₀ with
   | some why => .notActivated c₀ why
-  | none => preview ai (round ai (fan ai c₀)) us
+  | none => preview ai (aiTurn ai (fan ai c₀)) us
 
 /-! ── LOOP ──
 Every round re-judges the whole run against the whole context: nothing counts down and no answer
-waits for a later round. Beyond the opening fan, a fan happens where `Fans` reads one. Each fan
-relays the spec whole, with what changed, before it generates. The loop is dialogue: no round count
-or cap closes it.
+waits for a later round. Beyond the opening fan, a fan happens where the person's turn asks to see
+something no probe has materialized, or where `FanCarried` reads one. Each fan relays the spec
+whole, with what changed, before it generates. The loop is dialogue: no round count or cap closes
+it.
 -/
 
 /-! ── CONVERGENCE ──
