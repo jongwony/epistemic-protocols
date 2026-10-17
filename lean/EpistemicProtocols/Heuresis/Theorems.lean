@@ -24,8 +24,8 @@ theorem silence (generate respond session : Context P → Response P) (c : Conte
     ideate generate respond session c [] = .holding c := by
   simp [ideate]
 
-/-- A blank or resumed start whose request opens no frame presents the map before any pass:
-    `start` presents it on the context with the relay, and generates nothing first. -/
+/-- A blank or resumed start whose request opens no frame runs no `generate` step of its own:
+    `start` goes straight to `respond` on the context with the relay, presenting the map. -/
 theorem opening_map_first (relay generate respond session : Context P → Response P)
     (c : Context P) (us : List (Utterance P))
     (h : entry (receive c ++ [(relay (receive c)).val]) = .blank ∨
@@ -57,9 +57,9 @@ theorem unreached_step (generate respond session : Context P → Response P) (c 
       ideate generate respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
   simp only [ideate, hk, hi, hr, ↓reduceDIte, ↓reduceIte, not_false_eq_true]
 
-/-- A turn that takes nothing, is no fresh invocation, bears on the run, and opens no frame runs no
-    pass: the map is presented again on the context with that turn and the records `reference`
-    reads. -/
+/-- A turn that takes nothing, is no fresh invocation, bears on the run, and opens no frame runs
+    no `generate` step of its own: the next step is `respond` on the context with that turn and
+    the records `reference` reads, presenting the map again. -/
 theorem no_empty_pass (generate respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P))
     (hk : ¬ Taken c u)

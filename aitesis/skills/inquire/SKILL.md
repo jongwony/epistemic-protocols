@@ -400,7 +400,6 @@ def Interaction.realization : Interaction → Continuation
 
 inductive Op | scan | collect | read | surface | readAnswer | converge | seam
 
-/-- No Constitution entry: whether a turn halts is the harness's baseline. -/
 def grounding : Op → Annot × String
   | .scan       => (.sense, "Internal analysis: the inventory — what the prospect rests on that the fused context leaves uncertain, what collection returned included; no fixed taxonomy")
   | .collect    => (.observe, "artifact read, artifact search, record read, external fetch, environment run: every read and run you can make on your own without changing existing state, to the limit of your reach, removing afterwards what you created only to look; what the context already holds from a source is not fetched again unless an utterance or evidence says it changed; what each returns enters the context as an evidence turn; an observation that needs to change existing state, a permission, or another's authority is named with what it needs and handed off, never run as collection")
@@ -408,7 +407,7 @@ def grounding : Op → Annot × String
   | .surface    => (.interaction .extension, "once everything reachable is reached, every open uncertainty handed back as the person's own unknown with its reach — the sources tried and those not reached, by name, with what each needs; what was found and where it falls short; where collected material conflicts, what conflicts with what; where a decision blocks further collection, which collection waits on it; what an answer would change; which of them is the person's to settle, as your reading for their correction; each settled one with its provenance — the evidence and where it was read, or the person's words, with your earlier candidate marked as yours; the detections, each with its source; your contrary grounds; the turn is not held")
   | .readAnswer => (.sense, "Internal analysis: the latest utterance read whole against the prospect and the fused context as it now stands — whether it bears on this run, and what it does there: settles, corrects, points to a source, says the person does not know either, dismisses, or exposes a new uncertainty")
   | .converge   => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with SufficientContext")
-  | .seam       => (.interaction .extension, "after completion, proceed to the next move the person declared, citing that turn; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam       => (.interaction .extension, "after completion, proceed to the next move the person declared, citing that turn")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
