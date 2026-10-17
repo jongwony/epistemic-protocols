@@ -777,7 +777,7 @@ axiom snapshotAnchor : Context P → Option String
 
 /-- `GroundingInstruction`: the receiving procedure the block carries. -/
 def receivingProcedure : String :=
-  "Dereference the carrier and its source session, using /inquire where available or an equivalent grounding pass; the authority the source session's governing utterances granted does not widen through reassignment."
+  "Dereference the carrier and its source session, using /inquire where available or an equivalent grounding pass; the authority the plan carries does not widen through reassignment."
 
 /-- `record_handoff`: the block over the carrier — entry points only, never a re-authored plan. -/
 def navigation (c : Context P) : NavigationBlock :=
