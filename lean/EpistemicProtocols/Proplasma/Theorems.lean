@@ -29,13 +29,10 @@ theorem relay_before_instantiation (ai : AITurns P) (c : Context P) :
   simp only [List.append_assoc]
   exact ⟨_, rfl⟩
 
-theorem carry_stops_without_judgment (ai : AITurns P) (n : Nat) (c : Context P)
-    (h : ¬ FanCarried c) : carry ai n c = c := by
-  cases n <;> simp [carry, h]
-
-theorem aiTurn_without_carry (ai : AITurns P) (c : Context P) (h : ¬ FanCarried c) :
+/-- Without `FanCarried`, your turn is the round alone. -/
+private theorem aiTurn_without_carry (ai : AITurns P) (c : Context P) (h : ¬ FanCarried c) :
     aiTurn ai c = c ++ [(ai.respond c).val] := by
-  simp [aiTurn, carry_stops_without_judgment ai _ c h]
+  simp [aiTurn, h]
 
 theorem unrelated_adds_no_gate (ai : AITurns P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
