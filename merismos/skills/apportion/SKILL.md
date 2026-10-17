@@ -43,8 +43,7 @@ Merismos(G) → start(c) → apportion(c, utterances), where c is the fused sess
       not close and what stands in the way → Stop
     [otherwise] the sheet again, with the ledger → Stop
   no utterance: the sheet holds; nothing is taken, and nothing is emitted
-  after the handoff: the run executes the plan as the Rule "Handoff carries its obligations"
-    names; this protocol holds nothing of it.
+  after the handoff: this protocol holds nothing of the autonomous run.
 -/
 
 /-! ── MORPHISM ──
@@ -70,7 +69,7 @@ invariant: Coverage over Convenience   -- every goal obligation belongs to some 
 invariant: Fit over Ambition           -- every unit fits one execution horizon, or the person took it over its verdict (unfit_needs_person)
 invariant: Declared Seam over Asserted Joint  -- every cut declares its seam: the evidence it cites, or heuristic
 invariant: the person takes and closes; your judgments stand as proposals and contrary grounds
-invariant: Handoff carries its obligations  -- what rests on the person comes back once at the end, never decided for them
+invariant: Handoff carries its obligations  -- every taken plan carries `handoffObligations`
 -/
 
 namespace Merismos
@@ -588,8 +587,7 @@ axiom recommend : (c : Context P) → (f : Focus) → Option {i : Nat // Separat
     now stands; empty when you hold none. Each is shown beside what it bears on, before the
     person's turn it bears on, and refuses no taking. A taking over one keeps it attached to the
     plan — taken, and evidentially disputed — naming at emission the unit by the ref it is emitted
-    under; it is raised again only on new evidence, and the run reads it under
-    `handoffObligations`. -/
+    under; it is raised again only on new evidence. -/
 axiom dissent : Context P → List String
 
 /-- **Your judgment**: the cited turn takes the plan as the latest sheet showed it, read against
@@ -766,7 +764,7 @@ axiom carrierRecord : Context P → String
 axiom CarrierComplete : Context P → Prop
 
 /-- **Your record**: the session the plan was taken in — the source session, whose governing
-    utterances the receiving run reads and within which the carrier record is found. Where the
+    utterances a receiving side can read and within which the carrier record is found. Where the
     environment carries more than one session id, which one reaches that session is yours to
     read. -/
 axiom sessionId : Context P → String
@@ -779,7 +777,7 @@ axiom snapshotAnchor : Context P → Option String
 
 /-- `GroundingInstruction`: the receiving procedure the block carries. -/
 def receivingProcedure : String :=
-  "Using /inquire where available or an equivalent grounding pass, dereference the carrier and its source session, follow the goal's cited evidence, and recover the current scope and the authority granted from the governing utterances — a taking read with the sheet it took among them — and authorized revisions; preserve those limits through reassignment. Interpret each reservation under the recovered ground, following any further source its subject requires, and surface the plan's reservations with their settling grounds and the doubts it carries. A coordinator's summary does not substitute for source wording that settles authority; a judgment whose source is unreachable or no longer supports it stays open while independent reading continues. Grounding reads the plan and starts nothing; whoever runs it carries the obligations the plan holds."
+  "Using /inquire where available or an equivalent grounding pass, dereference the carrier and its source session, follow the goal's cited evidence, and recover the current scope and authorized revisions from the governing utterances — a taking read with the sheet it took among them; preserve those limits and the authority the plan carries through reassignment. Interpret each reservation under the recovered ground, following any further source its subject requires, and surface the plan's reservations with their settling grounds and the doubts it carries. A coordinator's summary does not substitute for source wording that settles authority; a judgment whose source is unreachable or no longer supports it stays open while independent reading continues. Grounding reads the plan and starts nothing; whoever runs it carries the obligations the plan holds."
 
 /-- `record_handoff`: the block over the carrier — entry points only, never a re-authored plan. -/
 def navigation (c : Context P) : NavigationBlock :=
@@ -808,7 +806,7 @@ inductive RelayKind
 
 /-- The emitted result: the context after the writes, what was emitted, the plan read back from
     it, and the navigation block over its carrier. It is handed off by `.handoff` in the same
-    turn, and the run executes it as the Rule "Handoff carries its obligations" names. -/
+    turn. -/
 structure Apportioned (P : Type) where
   context    : Context P
   emission   : Emission
@@ -1008,8 +1006,8 @@ def handedOffBy : Outcome P → Option Op
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
 The plan leaves as session text and a navigation block over its carrier; what reads it next is the
-person's and the session's to settle. The receiving side runs the block's grounding instruction
-against the work at hand; the emission supplies no answer to a reserved judgment.
+person's and the session's to settle. The block carries the grounding instruction; the emission
+supplies no answer to a reserved judgment.
 -/
 
 end
@@ -1051,7 +1049,7 @@ The person may answer in their own words, and one answer may edit several units.
 
 A completion condition is an executable stop-time predicate; an invariant condition is a boundary the interval preserves while completing. A check the run itself could change so that it passes is said so. Where an obligation could become a predicate once sharpened, the draft proposes the sharpened check as that obligation's whole check, marked as the draft's; a taking adopts it, and where the person declines it the gap stands. A check that covers only part of an obligation leaves the rest beside it as a gap or a held-open item, so the two read apart. A unit whose done rests only on accepted gaps is shown as one the run cannot tell is done. An item only live judgment can settle is held open with the ground that will settle it. An obligation requiring interception before action is out of scope and names what must intercept it.
 
-On a taking, emit one entry per unit with its whole certificate — every check, every accepted gap, every held-open item — and keep a reserved acceptance criterion visibly apart from a waived one. Park the packaged plan in one durable carrier and emit a navigation block that points to it; the run dereferences that carrier, runs `/inquire` where available or an equivalent grounding pass, and reads the governing utterances to recover the authority the plan carries and each reservation's retained or entrusted judgment. Where the carrier write comes back incomplete, nothing closes: the sheet is drawn again and says what the `.recordHandoff` grounding names. Once the block records the carrier, hand the plan off in the same turn as the `.handoff` grounding names, saying how it went.
+On a taking, emit one entry per unit with its whole certificate — every check, every accepted gap, every held-open item — and keep a reserved acceptance criterion visibly apart from a waived one. Park the packaged plan in one durable carrier and emit a navigation block that points to it, carrying the receiving procedure `receivingProcedure` states. Where the carrier write comes back incomplete, nothing closes: the sheet is drawn again and says what the `.recordHandoff` grounding names. Once the block records the carrier, hand the plan off in the same turn as the `.handoff` grounding names, saying how it went.
 
 Read `references/round-composition.md` before composing when terminology must remain stable, wording must travel unchanged, material belongs to another round or trace, or phase order determines placement.
 
@@ -1065,14 +1063,13 @@ Goal singleness, the host-contract subtraction, the out-of-scope classification,
 
 ## Rules
 
-- **Handoff carries its obligations**: Every taken plan carries `handoffObligations`, and every run of it, wherever and whenever started, does what that text states. The plan travels by its navigation block, never copied.
-- **Re-entry**: After the handoff this run has ended. An answer to what came back is the person's to give to the run that returned it; changing the plan is a new `/apportion` the person invokes, whose sheet is drawn from the accumulated context and names the plan it replaces; stopping what still runs is the run's.
+- **Handoff carries its obligations**: Every taken plan carries `handoffObligations`. The plan travels by its navigation block, never copied.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
 - **One sheet for the whole plan**: Show the whole plan on every turn that bears on the run — the goal, units, conditions, whole-goal conditions, the acceptance question, the authority, out-of-scope and subtracted obligations — every line drawn on every sheet, with the ledger of every change since the sheet the person answered. The plan and every question about it share that one sheet.
 - **Recommendation only where the ground separates**: Mark an action as recommended only where the ground clearly separates it from the others; comparable actions stand side by side with their consequences.
 - **The person takes and closes**: Only the person's taking closes the run, whatever its form; silence, a stop, or a turn to other work leaves the sheet holding. A taking adopts what the sheet showed and accepts the gaps shown; a value the draft proposed and the person took is recorded as the draft's and adopted, apart from values the person set. An answer to the focus closes nothing.
-- **Authority before departure**: Show on the sheet the authority the run will reach while the person is away — by kind, target, and limit — so the person settles it before they leave; read what they grant as a broad direction, and an act that falls outside it or whose place inside it is unclear is shown as a doubt on the sheet before the taking and, after the handoff, comes back as the Rule "Handoff carries its obligations" names.
-- **Contrary grounds ride the plan**: Show each doubt beside what it bears on, with what it rests on, before the person's turn it bears on. A doubt never refuses a taking; a plan taken over it carries it, the run reads it under `handoffObligations`, and it is raised again only on new evidence.
+- **Authority before departure**: Show on the sheet the authority the run will reach while the person is away — by kind, target, and limit — so the person settles it before they leave; read what they grant as a broad direction, and an act that falls outside it or whose place inside it is unclear is shown as a doubt on the sheet before the taking and, after the handoff, comes back as `handoffObligations` states.
+- **Contrary grounds ride the plan**: Show each doubt beside what it bears on, with what it rests on, before the person's turn it bears on. A doubt never refuses a taking; a plan taken over it carries it, and it is raised again only on new evidence.
 - **Whole certificate**: A unit's certificate carries every check, every accepted gap, and every held-open item of its done together; a passing check never stands for a done that a held-open judgment still awaits.
 - **Whole-goal acceptance**: The acceptance question is settled once, by the person: a criterion (theirs or the draft's, taken), a reservation, or a waiver. One value stands; a later settling replaces an earlier one, and emission never carries two.
 - **Host contract subtraction**: Exclude goal-independent host procedure from `O_G`; it is inherited process, not an out-of-scope obligation. A requirement the goal states as its own outcome remains in scope. Show what was subtracted on every sheet and in the trace, so a misjudged subtraction stays correctable.
