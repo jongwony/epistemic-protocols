@@ -503,13 +503,13 @@ def grounding : Op → Annot × String
   | .deriveFrames   => (.sense, "Internal analysis: the generation frames — seed-anchored and novel on Seeded, novel and abstract on Blank; a resumed field's frames and branches carry over")
   | .qframes        => (.interaction .constitution, "the frame map, where \"The map\" makes it the gate; read references/blank-entry.md before presenting")
   | .generate       => (.sense, "Internal generation: parallel over the frames the pass opens; a host may realize it through isolated parallel agents, and the meaning does not depend on that; no elimination, ranking, or scoring")
-  | .present        => (.interaction .extension, "the map of the whole field, as \"The map\" describes; precedes the frame map's selector or the round's offer")
+  | .present        => (.interaction .extension, "the map of the whole field, as \"The map\" describes")
   | .qround         => (.interaction .extension, "the round's offer — continue, naming what it would open, or take the field as it stands — as \"The map\" describes")
   | .readAnswer     => (.sense, "Internal analysis: the latest utterance read whole with the context — the person's taking if any, whether it is the person's own invocation of this protocol, whether it bears on this run, the frames it opens, any new angle or branch, any deferral, any exclusion or proposal taken, any record it names, any new signal, any idea of their own")
   | .shapeFrames    => (.sense, "Internal analysis: a new angle or a deepening the person named, shaped into frames or branches not already registered before the pass opens them")
   | .park           => (.interaction .extension, "something the person set aside for later acknowledged as parked, quoting their request; declared in the field; its durable record is the host's")
   | .converge       => (.interaction .extension, "DiverseCandidateField — its trace, as \"The map\" describes")
-  | .seam           => (.interaction .extension, "after the person takes the field, proceed to the next move the person declared, citing that turn; the field crosses whole, every origin, branch, park, signal, and doubt intact, and the seam never selects, ranks, or trims it; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam           => (.interaction .extension, "after the person takes the field, proceed to the next move the person declared, citing that turn")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Candidate-field resolution emergent via session context.
