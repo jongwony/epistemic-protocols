@@ -777,7 +777,7 @@ axiom snapshotAnchor : Context P → Option String
 
 /-- `GroundingInstruction`: the receiving procedure the block carries. -/
 def receivingProcedure : String :=
-  "Using /inquire where available or an equivalent grounding pass, dereference the carrier and its source session, follow the goal's cited evidence, and recover the current scope and the authority granted from the governing utterances — a taking read with the sheet it took among them — and authorized revisions; preserve those limits through reassignment. Interpret each reservation under the recovered ground, following any further source its subject requires, and surface the plan's reservations with their settling grounds and the doubts it carries. A coordinator's summary does not substitute for source wording that settles authority; a judgment whose source is unreachable or no longer supports it stays open while independent reading continues. Grounding reads the plan and starts nothing; whoever runs it carries the obligations the plan holds."
+  "Dereference the carrier and its source session, using /inquire where available or an equivalent grounding pass; the authority the governing utterances granted does not widen through reassignment."
 
 /-- `record_handoff`: the block over the carrier — entry points only, never a re-authored plan. -/
 def navigation (c : Context P) : NavigationBlock :=
@@ -1033,7 +1033,7 @@ Read prior material first — a boundary already drawn, an earlier plan — then
 
 ### Activation exceptions
 
-Relay and deactivate when the goal's scope yields no obligation. Your reading that the work has no autonomous interval, or that its plan is already condition-bearing, is a contrary ground on the first sheet, and a request bundling several stated outcomes held together only by the host's standing procedural contract is the question there of which goal this apportionment takes; neither ends the run. A present navigation block whose locator does not reach its carrier, or that leaves a premise required for current compilation unsupported, is an unreadable handoff and never falls through to fresh compilation. Unsupported downstream judgments remain open under the incoming grounding instruction while independent compilation can continue.
+Relay and deactivate when the goal's scope yields no obligation. Your reading that the work has no autonomous interval, or that its plan is already condition-bearing, is a contrary ground on the first sheet, and a request bundling several stated outcomes held together only by the host's standing procedural contract is the question there of which goal this apportionment takes; neither ends the run. A present navigation block whose locator does not reach its carrier, or that leaves a premise required for current compilation unsupported, is an unreadable handoff and never falls through to fresh compilation. Unsupported downstream judgments remain open while independent compilation can continue.
 
 ## Protocol
 
@@ -1064,7 +1064,6 @@ Goal singleness, the host-contract subtraction, the out-of-scope classification,
 ## Rules
 
 - **Handoff carries its obligations**: Every taken plan carries `handoffObligations`. The plan travels by its navigation block, never copied.
-- **Re-entry**: After the handoff this run has ended: a later utterance does not reopen its sheet, and a new `/apportion` the person invokes draws its sheet from the accumulated context.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
 - **One sheet for the whole plan**: Show the whole plan on every turn that bears on the run — the goal, units, conditions, whole-goal conditions, the acceptance question, the authority, out-of-scope and subtracted obligations — every line drawn on every sheet, with the ledger of every change since the sheet the person answered. The plan and every question about it share that one sheet.
 - **Recommendation only where the ground separates**: Mark an action as recommended only where the ground clearly separates it from the others; comparable actions stand side by side with their consequences.
