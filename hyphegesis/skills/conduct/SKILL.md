@@ -9,7 +9,7 @@ Conduct how a session's epistemic work will be carried out — the lines of work
 
 ## Definition
 
-**Hyphegesis** (ὑφήγησις: a leading-the-way, guiding from just ahead): A dialogical act of conducting a session's epistemic work when the goal is clear but how to run it is not. The protocol's lexical verb is `/conduct`. Once it has run, the person can say: this work proceeds this way — these lines run in this order or side by side, they combine like this, they stop here, and their results go there; I recognize what I entrusted and what I kept, and I took this method as mine; what rests on me was shown to me on the map I took. The whole map and its execution start as your judgment — which lines of work, how they relate, who runs each and where, and how precisely the map is worth drawing for the time it takes to reach the goal. The person keeps only what is theirs: when to stop, how lines combine, where results go, the constraints in force, and the authority they entrust with its limits, given as a broad direction. Every person turn is read again against the context as it now stands. The method is taken on the person's word, or relayed at the start where the person's own words already settle it; the turn that closes presents the map as a relay — after a taking, once more, with what that turn changed on its ledger — and hands it off in the same turn without waiting, carrying what that map showed: the person's coordinates, the deferred decisions, its lifetime, and the capabilities it needs; and the run ends there.
+**Hyphegesis** (ὑφήγησις: a leading-the-way, guiding from just ahead): A dialogical act of conducting a session's epistemic work when the goal is clear but how to run it is not. The protocol's lexical verb is `/conduct`. Once it has run, the person can say: this work proceeds this way — these lines run in this order or side by side, they combine like this, they stop here, and their results go there; I recognize what I entrusted and what I kept, and I took this method as mine. The whole map and its execution start as your judgment — which lines of work, how they relate, who runs each and where, and how precisely the map is worth drawing for the time it takes to reach the goal. The person keeps only what is theirs: when to stop, how lines combine, where results go, the constraints in force, and the authority they entrust with its limits, given as a broad direction. Every person turn is read again against the context as it now stands. The method is taken on the person's word, or relayed at the start where the person's own words already settle it; the turn that closes presents the map as a relay — after a taking, once more, with what that turn changed on its ledger — and hands it off in the same turn without waiting, carrying what that map showed: the person's coordinates, the deferred decisions, its lifetime, and the capabilities it needs; and the run ends there.
 
 ```lean
 /-!
@@ -250,9 +250,8 @@ structure Determination where
     where you put it forward, only if it was shown on a map before this turn — or gave a grant
     whose words reach your choice (`granted`). A grant never reaches the authority coordinate
     itself: the authority and its limits stand only as the person set or adopted them. Whether an
-    act falls inside a grant is read the same way, and the Rule "Person's coordinates" says where
-    the person sees one that does not. A question, a deferral, or a bare mention makes nothing
-    stand. -/
+    act falls inside a grant is read the same way, and the map shows one that does not (`.map`).
+    A question, a deferral, or a bare mention makes nothing stand. -/
 axiom StandingSupported : Coordinate → Context P → Turn P → Determination → Prop
 
 /-- Only a person's turn makes a value stand on a coordinate the person holds, and no grant makes
@@ -374,8 +373,7 @@ axiom source : Context P → Option NavigationBlock
 
 /-- Once it has run, the person can say: this work proceeds this way — these lines run in this
     order or side by side, they combine like this, they stop here, and their results go there; I
-    recognize what I entrusted and what I kept, and I took this method as mine; what rests on me
-    was shown to me on the map I took.
+    recognize what I entrusted and what I kept, and I took this method as mine.
     `ConductedMethod`: the method handed off and what it carries — each field as the relayed map
     showed it, `source` aside, which its producer supplies. `plan` is the method
     as the map the closing turn answered showed it, with what changed since that map, as the relayed
@@ -561,7 +559,6 @@ The map's first line says what the work is for and what it hands off. Prior-sess
 
 - **Conduction warrant**: Hyphegesis never conducts itself.
 - **Round composition**: Use everyday language, place each judgment beside its evidence and next-move implication, and keep analytical context before the gate. Read `references/round-composition.md` when terminology or wording must persist, content belongs to another turn, or placement relative to the gate is in question.
-- **Person's coordinates**: Read the authority the person entrusts as a broad direction; where an act falls outside it or its place inside it is unclear, the person sees it as a contrary ground before the handoff, on the map.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly; preserve content, wording, order, cadence, and turn boundaries fixed elsewhere, stating what changed and any overlapping constraint that remains.
 
 ## Adversarial Guards
