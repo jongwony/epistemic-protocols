@@ -351,11 +351,11 @@ axiom owed : Context P → Bool
 
 /-- **Your record**: the contrary grounds you presented in a round before the person's turn — a
     disposition you doubt, a premise that may not hold — attached to the boundary where the person
-    set it over them; beside them, your doubts over which choice to make inside an entrustment —
-    not whether a choice stays inside it — which are not contrary grounds: they are yours to weigh
-    and are shown with the boundary; empty when there were none. A ground you would raise first
-    where the boundary would stand makes the person's turn owed instead. The person's dispositions
-    stand over them: you never rewrite or veto one. -/
+    set it over them; empty when there were none. A doubt over which choice to make inside an
+    entrustment — not whether a choice stays inside it — is not one: it is yours to weigh where you
+    make that choice. A contrary ground you would raise first where the boundary would stand makes
+    the person's turn owed instead. The person's dispositions stand over them: you never rewrite or
+    veto one. -/
 axiom dissent : Context P → List String
 
 /-- One disposition on the record: the decision, the disposition, and the person's turn it stands
@@ -549,7 +549,7 @@ def grounding : Op → Annot × String
   | .readout      => (.sense, "Internal analysis: derive the whole map and the opened detail from the context as observation left it, at every round; read each disposition and content by the turn that set it, and an earlier decision fixing who settles one as a cited fact")
   | .round        => (.interaction .extension, "the whole map — the person's own lines as theirs, your additions marked as proposals, each decision with its evidence, what depends on it and what getting it wrong costs, and any entrustment's reach, every later act that cannot be undone in view — what the map did not look at — every source observation did not reach, by name — the choices still open beside the round's question, your contrary grounds, where you hold any, before the answer, and the way to accept the boundary as it stands kept recognizable; labels defined where they are used")
   | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on the boundary, and what it does there — dispositions, corrections, an opening, an acceptance — read whole against the fused context, whatever form it takes; a reading not yet settled — by this reply or a later one — makes the person's turn owed: the run holds and a round serves it, committing nothing; a request to see something is served by the turn that shows it")
-  | .converge     => (.interaction .extension, "DefinedBoundary as it stands — its map, its record with who put each disposition forward and how it stood, cited facts, the residual — declared empty where nothing is open — with why each open item bears and who settles it, and its limits — every source observation did not reach, by name — every later act that cannot be undone that an entrustment on it reaches, in view, and the dissent attached to it — a contrary ground that makes the person's turn owed, as `owed` reads it, is never first shown here; with the way to reopen it; where it answers a request to see something, the requested content beside the boundary as it stands, pointing to what was already shown where nothing changed; where nothing awaited the person, say so")
+  | .converge     => (.interaction .extension, "DefinedBoundary as it stands — its map, its record with who put each disposition forward and how it stood, cited facts, the residual — declared empty where nothing is open — with why each open item bears and who settles it, and its limits — every source observation did not reach, by name — every later act that cannot be undone that an entrustment on it reaches, in view, and the dissent attached to it — a contrary ground the person has not closed over is never first shown here, it makes their turn owed; with the way to reopen it; where it answers a request to see something, the requested content beside the boundary as it stands, pointing to what was already shown where nothing changed; where nothing awaited the person, say so")
   | .seam         => (.interaction .extension, "where the boundary newly stands or what stands has changed, proceed to the next move the person declared, citing that turn")
 
 /-! ── COMPOSITION ──
@@ -587,7 +587,7 @@ end Horismos
 - When the user corrects an assumption, the scope, or the question the boundary answers, the next round reads the corrected context: revise affected content and obligations, show their changed implications, and preserve independent commitments. Keep excluded or conditional parts legible in the map where they matter to later reliance; the residual lists what is still open.
 - When the user accepts the boundary as it stands and no turn of theirs is still owed, stop at that depth; where one is owed, the round serves it first. The acceptance takes the proposals it covers only where each was shown as yours with its deciding evidence and your contrary grounds, where you hold any; what it does not cover stays open in the residual. Present the constituted whole and its remaining questions without asking for a second approval of the same arrangement.
 - When no item on the map awaits the user's disposition and no turn of the user's is owed, the turn that shows the standing boundary (`converge`) presents it and says that it stands; the user's next words reopen it where they bear on it.
-- When a response is not yet readable as continuing the boundary, accepting it, or ending the run, the user's turn is owed even where nothing awaits: the next round shows the candidate readings with their consequences, and nothing is committed from the unsettled reading.
+- When a response's reading is not yet settled — materially different futures remain viable — the user's turn is owed even where nothing awaits: the next round shows the candidate readings with their consequences, and nothing is committed from the unsettled reading.
 - When the user turns to other work, answer it; the run stays as it stood — a run that holds keeps holding and a boundary that stands keeps standing — and nothing is closed on the user's behalf.
 - When composing a round whose terminology, quotation, neighboring material, or phase order needs attention, read `references/round-composition.md` before presenting it.
 
