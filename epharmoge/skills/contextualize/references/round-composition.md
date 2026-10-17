@@ -12,4 +12,4 @@ Each user-facing round bundles the current judgment, its nearest evidence, and t
 
 ## When this protocol's own moves bear on where a sentence sits relative to a gate
 
-Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Context embedded in a question field is a protocol violation.
+Output all analysis, evidence, and rationale as text before the sheet's question. The question contains only the essential question; options contain only option-specific differential implications. Context embedded in a question field is a protocol violation.
