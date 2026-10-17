@@ -337,7 +337,7 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
     none shown embodies — a mark to revise, a bare rejection with no diagnosis among them; a
     request; a fresh start; a combination to see; a change of medium; the means a version was
     waiting on, supplied, or the person's word to go on in the medium at hand or without a reference
-    that cannot be reached; or a value they set or replaced that no version shown embodies. A
+    that cannot be reached; or a value they set, took, or replaced that no version shown embodies. A
     question about a version, answered as asked, and words that move nothing a version would show
     call for nothing; a value they took that a shown version already embodies calls for no new
     version. Where a mark reads as about the rendering rather than the form, the next version fixes
