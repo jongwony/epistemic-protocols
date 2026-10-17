@@ -39,7 +39,7 @@ Invoke `/conduct` at the start of (or partway into) a multi-move work prospect:
 /conduct migrate this service from framework v2 to v3
 ```
 
-Unless the invocation's own words already settle the method, Hyphegesis lays out one map of the whole method before asking anything: what the work is for, the lines of work drawn as a graph (an indented outline where no graph renders), who runs each line and where — the AI's inference, marked as such — how the lines combine, when they stop, and where their results go, what the method needs from whoever runs it and whether each was observed, the decisions deferred until their evidence exists, and the AI's contrary grounds, including where it reads that the work needs no conducting. The user corrects any part of it or takes it; after every answer that bears on the run and does not take the method, the map is drawn again with a ledger of what changed — the user's edits first, then each value re-drafted because of them, then anything else that changed — so a correction upstream re-fills what depends on it while every value the user set stays theirs. Where the user will not be present while the method runs, the map shows, before they leave, the authority the method will need and separates what must be decided before they leave from what can come back at the end. Before taking the method the user can stop at any time, and stopping leaves the run as it stood.
+Unless the invocation's own words already settle the method, Hyphegesis lays out one map of the whole method before asking anything: what the work is for, the lines of work drawn as a graph (an indented outline where no graph renders), who runs each line and where — the AI's inference, marked as such — how the lines combine, when they stop, and where their results go, what the method needs from whoever runs it and whether each was observed, the decisions deferred until their evidence exists, and the AI's contrary grounds, including where it reads that the work needs no conducting. The user corrects any part of it or takes it; after every answer that bears on the run and does not take the method, the map is drawn again with a ledger of what changed — the user's edits first, then each value re-drafted because of them, then anything else that changed — so a correction upstream re-fills what depends on it while every value the user set stays theirs. Where the user will not be present while the method runs, the map shows, before they leave, the authority the method will need and separates what must be decided before they leave from what can be decided later. Before taking the method the user can stop at any time, and stopping leaves the run as it stood.
 
 ## What a method settles
 
@@ -52,7 +52,7 @@ These are the questions the map answers from the work in front of it — guidanc
 | Independence | Whether lines see each other's results before those results combine |
 | Combination | How separately produced results are combined (the user's to decide) |
 | Stopping | When each line, and the whole method, stops (the user's to decide) |
-| Destination | Where each result goes — a next unit of work, for one (the user's to decide) |
+| Destination | Where each result goes beyond the method — a next unit of work, for one (the user's to decide) |
 | Constraints | What is in force on the work — a direction for who runs it, whether the user will be present, a horizon among them (the user's to decide) |
 | Authority | What the user entrusts and its limits, given as a broad direction (the user's to decide) |
 
