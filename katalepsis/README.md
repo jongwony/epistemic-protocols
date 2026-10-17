@@ -35,7 +35,6 @@ Explain  → Each aspect in one fitting representation; a check, run on the
            user's ask or on AI's stated judgment, shows its result; the user's
            move answered with its material — no verdict without material: what
            would settle it is named
-           (gate interaction)
 Close    → The user says what they understand now serves their purpose; the
            map at that moment is the record, with any dissent
 ```
