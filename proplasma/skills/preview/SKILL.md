@@ -29,13 +29,12 @@ Proplasma(X) → start(c) → preview(c, utterances), where c is the fused sessi
     it; the axes the purpose turns on; the placeholder policy; which candidates get probes and why
     any waits; the tier — each with its basis, and on every later fan what changed since the last;
     it yields no turn → the probes, each entering c as written, then what they make worth gathering
-  round: after a fan — and any you carry, each followed by what it makes worth gathering, as
-    `FanCarried` reads them within `carryBound` — each new probe first, from its realization; then
-    the map — whole on the first round, what changed on a later one, whole when asked: per axis,
-    what each direction's future looks like there and what that rests on; the premises every probe
-    shares; the open unknowns with what would settle each; your readings and contrary grounds, each
-    with what it bears on and rests on → one opening, or a contradiction's working with nothing
-    after it
+  round: after a fan — and any you carry, as `FanCarried` reads them within `carryBound` — each
+    new probe first, from its realization; then the map — whole on the first round, what changed
+    on a later one, whole when asked: per axis, what each direction's future looks like there and
+    what that rests on; the premises every probe shares; the open unknowns with what would settle
+    each; your readings and contrary grounds, each with what it bears on and rests on → one
+    opening, or a contradiction's working with nothing after it
   next utterance u, read on fuse(c, u):
     [does not bear on this run]   the session answers it; that answer stays in c; no round of this run
     [the person constitutes d]    harvest → cleanup → DirectionalContrast
@@ -214,7 +213,7 @@ axiom unknowns : Context P → List String
 /-- **Your record**: your contrary grounds, each with what it bears on and what it rests on — a
     direction whose future no probe materialized, or a probe you read as not carrying its
     direction, among them — shown and attached as `present` and CONVERGENCE say, and raised again
-    only on new evidence; a closing stands beside any raised after it; empty when there were none. -/
+    only on new evidence; empty when there were none. -/
 axiom dissent : Context P → List String
 
 /-- **Your judgment**: the latest utterance bears on this run — a closing, a purpose, a reading or
@@ -263,21 +262,21 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
 
 /-- **Your judgment**: the latest utterance asks to see something no probe has materialized — a
     spec element sent back (an axis, the policy, the tier, which candidates get probes, the probe
-    material), a composition to be seen, a named candidate, or a revision you proposed and left
-    as a proposal, taken up. A reading of the purpose sent back is a request to fan only where they ask
-    to see probes on what the new purpose turns on. A wish to see something that exists observed
+    material), a composition to be seen, a named candidate, or the revision you proposed taken up.
+    A reading of the purpose sent back is a request to fan only where they ask to see probes on
+    what the new purpose turns on. A wish to see something that exists observed
     for real is `gathered`'s, not a fan. -/
 axiom FanRequested : Context P → Prop
 
 /-- **Your judgment**: you find the contrast insufficient on the context as it now stands — an axis
     the purpose turns on that no probe carries, a candidate whose future would decide it unseen —
     and carry the revision you propose forward as a fan of your own, one the person's words still
-    leave open. -/
+    leave open, while what this turn has shown so far still lets the person take the round in at
+    once. -/
 axiom FanCarried : Context P → Prop
 
-/-- **Your judgment**: at most how many fans of your own this turn carries before the round is
-    shown — what the person can take in at once, the showing that costs them least to recognize;
-    whether each one is due is `FanCarried`'s. -/
+/-- **Your bound**: an upper limit on the fans of your own this turn carries, so the turn ends; set
+    it no lower than the carrying `FanCarried` would call for. -/
 axiom carryBound : Context P → Nat
 
 /-- **Your read**, now, of what the next judgment needs, as far as relevant access reaches: the
@@ -362,8 +361,8 @@ inductive Outcome (P : Type)
   | holding      (c : Context P)
 
 /-! ── MODE STATE ──
-Λ is the fused context and nothing else; every reading above is taken from it. No round, stage, or
-count is stored: each round is judged afresh from the whole context.
+Λ is the fused context and nothing else; every reading above is taken from it. No pending
+checkpoint, stage, or count is stored: each round is judged afresh from the whole context.
 -/
 
 abbrev Mode (P : Type) := Context P
@@ -422,8 +421,7 @@ open Classical in
 /-- A turn that does not bear on the run is answered by the session and leaves the run as it
     stands; a closing is read from the person's turn before anything is gathered; otherwise what
     is gathered now enters the context, a fan runs where the turn asks to see what no probe
-    materialized, followed by what it makes worth gathering, and your turn follows — any fans you
-    carry, then the round. -/
+    materialized, and your turn follows — any fans you carry, then the round. -/
 def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
@@ -502,7 +500,7 @@ def grounding : Op → Annot × String
   | .specRelay         => (.interaction .extension, "the spec whole before any probe is generated — your reading of the purpose, marked as yours unless they said it; the axes the purpose turns on; the placeholder policy: each probe overtly synthetic, its structure faithful to its direction and its data values fake, evidence for no claim, and where a placeholder may blur a difference; which candidates get probes — enough that at least two futures stand in view once the probes already made are counted, a candidate the person named, or a composition, being probed alone against them, and few enough to take in at once, about four new probes a fan — and, where candidates wait, which and why; and the tier — each with the basis that chose it. On every later fan the whole spec again with what changed since the last relay; marking a change by its cause is welcome, not required. It yields no turn")
   | .instantiate       => (.transform, "artifact write, environment run: temp-isolated placeholder probes over the candidates the relay named for probes, each realization registered at creation; existing project files never modified; the Vignette tier writes no file — its narration is your own turn (`narrate`), recorded on the probe")
   | .instantiateDelegate => (.dispatch, "delegate (conditional, Mockup tier): a probe's write handed to execution, temp-isolated, its path registered at creation")
-  | .assess            => (.sense, "Internal analysis: the purpose reading, the axes, each cell and what it rests on, the shared premises, the open unknowns, and your readings, over the whole fused context as it now stands")
+  | .assess            => (.sense, "Internal analysis: the purpose reading, the axes, each cell and what it rests on, the shared premises, the open unknowns, and your readings, whether to carry a fan of your own (`FanCarried`) and the turn's bound on that (`carryBound`), over the whole fused context as it now stands")
   | .present           => (.interaction .extension, "the round, every round the first included. After a fan, each new probe first, from its realization — a Mockup walked through at its path. Then the map: the purpose as the person said it, or else your reading of it, marked as yours; per axis the purpose turns on, what each direction's future looks like there and what that rests on, as `contrastMap` reads it; the premises every probe shares, as shared; the open unknowns, each with what would settle it; your readings with their basis — an insufficient contrast with the revision you propose or carried forward, or a reading that the run has reached a case `notActivated` names — the futures already recognizable or the commitment no longer standing among them — each closing nothing; and your contrary grounds, each with what it bears on and what it rests on, a direction whose future no probe materialized among them. Every later round shows what changed on the map, and the whole map when the person asks for it, and answers what they asked — a question about a probe within placeholder discipline, saying what the probe was built to show and never a claim about the world; an analogy you offer says which axis it weights. A correction of the purpose moves the map. Read the person's turn whole; where its intent was unclear, say in one line how you took it, with no question asked back. The round that shows evidence sets it in its cell against the claim your description made and against whatever the person has said that bears on it, saying where each agrees and where it parts. Where they voice a reading or an expectation of a future, or check their understanding against what was shown, lay it beside what the probes show, saying where the two agree and where they part; before reading it as at odds with a probe, read whether it speaks to another purpose, a preference, or an assumption a placeholder cannot reach, and say which, moving the map — a placeholder never settles how a future will be lived. Where their words and evidence — the candidates' material, a source, a result gathered — part on the same axis and premises, or two of their own utterances do — a criterion they stated and a pick they made — show it with its working in one round: their words quoted, the narrowest such material that bears on it, why the two part, and what they got right; a probe, or anything gathered from one, is never that material, and where their words part from one, the laying-beside above governs; a contradiction they keep after its working stays in view as a held contrary ground until it is settled — on a surface that stays in view where the session has one, otherwise briefly beside each round. Where what could not be reached, or a conflict among what was gathered, bears on a direction, say it there. A round that shows a contradiction's working ends on that working, with nothing after it; every other round ends on one opening the person can take — settle a direction, a composition, or one no probe showed; send back any part of the spec; name a candidate to see; ask about a probe, or to see something real observed")
   | .readTurn          => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there — a closing, a purpose, a reading or expectation, a request to see something depicted or observed, a question — read whole against the fused context as it now stands, as `Reaches` and the judgments above read it")
   | .harvest           => (.sense, "Internal analysis: the constituted direction, whether a probe materialized it, the deciding cells as `decidingRows` reads them, and the open unknowns, read from the context before discard")
