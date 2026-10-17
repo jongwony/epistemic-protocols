@@ -9,7 +9,7 @@ Discover what a form should be by encountering concrete versions and reacting to
 
 ## Definition
 
-**Hypotyposis** (ὑποτύπωσις): an outline or sketch — a first drawing of a position rather than its finished statement. A dialogical act for the moment when a form has to be made and the intent behind it cannot yet be settled from descriptions: the user can say what is wrong with a thing in front of them long before they can say what the thing should be, because good fit has no positive description of its own while each misfit can be pointed at (Alexander, 1964). So the user need not specify the form first. The AI relays what the next versions will try — what they revise, how many, the medium each is realized in and what that medium can and cannot show, and where each will be — each with its basis, and then makes them. Each round shows the new versions first, in a medium in which the qualities the user's judgment concerns can be encountered, and then the standing: what the user's words set and on which version, what of the AI's they took, what rests on a check, what stays unestablished, and what changed. The user reacts in their own words — a mark, a keep, a request, a value set — and the AI revises the versions those words point to into new versions, never regenerating one from a description of it, and may also make versions it would propose. The AI's reading of the purpose grows from those reactions rather than being settled up front: what it brings in before any reaction is marked as a default, each later part names the reaction or the gathered material it came from, and each round shows how the reading widened. The run closes when the user takes one version they encountered as the form for their purpose, its home shown in the round or named in that same turn; they can stop at any time, and the run stays as it stood, with what they ask done to the versions as they stop carried out. Once it has run, the user can point at one version as they met it and say "this is the form, for this purpose", seeing where it lives, where the passed-over versions are, what they asked done to any of them that is not yet observed done, and which values rest on their own words or on the AI's proposals they took, and what rests on checked evidence. The recognition establishes their judgment of fit for that purpose on what the version showed — not correctness against a standard outside preference, and not readiness for use.
+**Hypotyposis** (ὑποτύπωσις): an outline or sketch — a first drawing of a position rather than its finished statement. A dialogical act for the moment when a form has to be made and the intent behind it cannot yet be settled from descriptions: the user can say what is wrong with a thing in front of them long before they can say what the thing should be, because good fit has no positive description of its own while each misfit can be pointed at (Alexander, 1964). So the user need not specify the form first. The AI relays what the next versions will try — what they revise, how many, the medium each is realized in and what that medium can and cannot show, and where each will be — each with its basis, and then makes them. Each round shows the new versions first, in a medium in which the qualities the user's judgment concerns can be encountered, and then the standing: what the user's words set and on which version, what of the AI's they took, what rests on a check, what stays unestablished, and what changed. The user reacts in their own words — a mark, a keep, a request, a value set — and the AI revises the versions those words point to into new versions, never regenerating one from a description of it, and may also make versions it would propose. The AI's reading of the purpose grows from those reactions rather than being settled up front: what it brings in itself is marked as a default, each later part names the reaction or the gathered material it came from, and each round shows how the reading widened. The run closes when the user takes one version they encountered as the form for their purpose, its home shown in the round or named in that same turn; they can stop at any time, and the run stays as it stood, with what they ask done to the versions as they stop carried out. Once it has run, the user can point at one version as they met it and say "this is the form, for this purpose", seeing where it lives, where the passed-over versions are, what they asked done to any of them that is not yet observed done, and which values rest on their own words or on the AI's proposals they took, and what rests on checked evidence. The recognition establishes their judgment of fit for that purpose on what the version showed — not correctness against a standard outside preference, and not readiness for use.
 
 ```lean
 /-!
@@ -165,7 +165,7 @@ def purposeCoord : Coord P String :=
 /-- **Your reading**: the purpose as it stands; `open_` until a person's turn says it. It holds back
     neither a round nor a closing while it is open: the round shows what the person said of it and
     your reading of the rest, marked as yours. That reading grows from the run rather than being
-    front-loaded: each part names what it rests on — a default you brought in before any reaction
+    front-loaded: each part names what it rests on — a default you brought in yourself
     (the convention of the kind of form, the request's own words, an example you picked), marked as
     a default; or the person's reaction to a specific version, or the gathered material, it came
     from. A default gives way to what the reactions bring. Each round shows what the reading gained,
@@ -390,9 +390,9 @@ def settle (c : Context P) : Context P := c ++ (carriedOut c).map (·.val)
     `RecognizedForm`: the version the person recognized, and the record built after what the
     recognizing turn asked done was observed. It records their recognition of fit for the purpose
     as it stands, on what the version showed — a witness of what they recognized, not a
-    specification of what to build. Handed on, it carries the recognized version — an artifact by
-    where it is and what it showed, a narration as written — and every other version by where it is
-    or the round that showed it rather than its content. -/
+    specification of what to build. Handed on as session text, it names the recognized version — an
+    artifact by where it is and what it showed, a narration as written — and every other version by
+    where it is or the round that showed it rather than its content. -/
 structure RecognizedForm (P : Type) where
   context : Context P
   version : Nat
@@ -430,8 +430,8 @@ structure AITurns (P : Type) where
   session : Context P → Response P
 
 /-- **Your production** of the artifact versions under the relayed intent: each artifact as observed
-    at creation, written beside any other version rather than over it, its location
-    registered then.
+    at creation, written where the person's words named a place for it, beside any other version
+    rather than over it, its location registered then.
     The observation evidences that the artifact exists there, and nothing about whether it fits.
     Guidance for every version a production makes, narration included, not steps it fixes: realize
     each in a medium in which the qualities the person's judgment concerns can be encountered;

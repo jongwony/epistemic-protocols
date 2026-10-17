@@ -39,7 +39,7 @@ theorem unrelated_adds_no_gate (ai : AITurns P) (c : Context P) (u : Utterance P
 
 open Classical in
 /-- A turn that bears on the run and closes nothing is exactly one round, over the production the
-    turn calls for and the productions you carry on your own proposals. -/
+    turn calls for, where it calls for one, and the productions you carry on your own proposals. -/
 theorem one_round_per_turn (ai : AITurns P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u))
     (hk : filledValue (closing (fuse c u)) = none) :

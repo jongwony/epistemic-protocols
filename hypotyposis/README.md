@@ -6,7 +6,7 @@ React to concrete versions until you can point at one you met and say: this is t
 
 ## What is Hypotyposis?
 
-A modern reinterpretation of Greek ὑποτύπωσις (outline, sketch) — a protocol for the moment **when a form has to be made and you cannot yet say what it should be, but you would recognize it on sight**. It makes concrete versions — after relaying what they will try, with its basis — in a medium where the qualities you are judging can be met, takes your reactions to them in your own words (what does not fit, what to keep, what to change), makes the versions those words call for — revising the ones they point to, starting fresh, or combining them — and may also make one the AI would propose, until you recognize one version you met as the form for your purpose; you can stop at any time, and stopping leaves the run as it stood, with what you ask done to the versions as you stop carried out.
+A modern reinterpretation of Greek ὑποτύπωσις (outline, sketch) — a protocol for the moment **when a form has to be made and you cannot yet say what it should be, but you would recognize it on sight**. It makes concrete versions — after relaying what they will try, with its basis — in a medium where the qualities you are judging can be met, takes your reactions to them in your own words (what does not fit, what to keep, what to change), makes the versions those words call for — revising the ones they point to, starting fresh, or combining them — and may also make versions the AI would propose, until you recognize one version you met as the form for your purpose; you can stop at any time, and stopping leaves the run as it stood, with what you ask done to the versions as you stop carried out.
 
 ### The Core Problem
 
