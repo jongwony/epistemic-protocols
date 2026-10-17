@@ -286,11 +286,11 @@ axiom dissent : Context P → List String
     frames selected and any the person named, shaped into frames; at a round, the named unexplored
     frames, a new angle shaped into frames, or a branch under an open frame or candidate the person
     asked to deepen. An excluded frame is never among them. A continue that names nothing takes
-    every unexplored frame except one the person parked — where none is left, new frames you shape;
-    the person naming it opens it. On a Seeded
-    entry's first pass, the frames the request itself names and at least one derived frame, how many
-    being yours; the rest stay unexplored. At a Blank entry's start, the frames the request itself
-    names — "angles: pricing and pacing" — and none where it names none. At a Resumed entry's
+    every unexplored frame except one the person parked — the person naming it opens it — and,
+    where none is left, new frames you shape. On a Seeded entry's first pass, the frames the
+    request itself names and at least one derived frame, how many being yours; the rest stay
+    unexplored. At a Blank entry's start, the frames the request itself names — "angles: pricing
+    and pacing" — and none where it names none. At a Resumed entry's
     resuming step, the frames the request names or asks to deepen — an opened frame it names is
     deepened by a branch under it, never reopened; a request that only continues opens none, and a
     request the earlier field already answered — an answer to its map bound as the request by a
@@ -424,10 +424,10 @@ def advance (generate respond : Context P → Response P) (c : Context P) : Cont
 
 open Classical in
 /-- `respond` presents the map of the whole field, re-read from the context and never stored, as
-    the Protocol section's "The map" describes. A further widening you carry forward on a judgment
-    you state — unexplored frames, new frames, or branches, never into a lineage the person
-    excluded or parked or a frame you proposed to exclude — belongs to the response that presents
-    the map; the recursion advances only on the person's turns. -/
+    the Protocol section's "The map" describes. After a round's map, a further pass you carry
+    forward on a judgment you state — opening what a continue that names nothing would, or a branch
+    under an open frame or candidate outside what the person parked — belongs to the response that
+    presents the map; the recursion advances only on the person's turns. -/
 def ideate (generate respond session : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
@@ -501,12 +501,12 @@ def grounding : Op → Annot × String
   | .extractSignals => (.sense, "Internal analysis: signals — concerns, weaknesses, requirements — read from the bound request, named material, and what the person says later, each tagged by its source; never scored or ranked")
   | .classifyRelay  => (.interaction .extension, "the inferred entry and its basis, quoting the utterance fragment where there is one — on a bare invocation, whether it reads as a new topic or a resume — stated as your reading, which the person can correct; why the field reads thin, and the signals with their sources; relay, not a gate")
   | .deriveFrames   => (.sense, "Internal analysis: the generation frames — seed-anchored and novel on Seeded, novel and abstract on Blank; a resumed field's frames and branches carry over")
-  | .qframes        => (.interaction .constitution, "the frame map, where \"The map\" makes it the gate; read references/blank-entry.md before presenting")
+  | .qframes        => (.interaction .constitution, "the frame map, as \"The map\" describes; read references/blank-entry.md before presenting")
   | .generate       => (.sense, "Internal generation: parallel over the frames the pass opens; a host may realize it through isolated parallel agents, and the meaning does not depend on that; no elimination, ranking, or scoring")
   | .present        => (.interaction .extension, "the map of the whole field, as \"The map\" describes")
   | .qround         => (.interaction .extension, "the round's offer — continue, naming what it would open, or take the field as it stands — as \"The map\" describes")
   | .readAnswer     => (.sense, "Internal analysis: the latest utterance read whole with the context — the person's taking if any, whether it is the person's own invocation of this protocol, whether it bears on this run, the frames it opens, any new angle or branch, any deferral, any exclusion or proposal taken, any record it names, any new signal, any idea of their own")
-  | .shapeFrames    => (.sense, "Internal analysis: a new angle or a deepening the person named, shaped into frames or branches not already registered before the pass opens them")
+  | .shapeFrames    => (.sense, "Internal analysis: a new angle or a deepening, shaped into frames or branches not already registered before the pass opens them")
   | .park           => (.interaction .extension, "something the person set aside for later acknowledged as parked, quoting their request; declared in the field; its durable record is the host's")
   | .converge       => (.interaction .extension, "DiverseCandidateField — its trace, as \"The map\" describes")
   | .seam           => (.interaction .extension, "after the person takes the field, proceed to the next move the person declared, citing that turn")
