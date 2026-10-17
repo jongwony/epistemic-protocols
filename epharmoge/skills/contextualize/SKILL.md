@@ -26,7 +26,7 @@ X, the result under review, is whatever the invocation names — this session's 
 artifact from elsewhere:
   pass(c): observe; perform — the relay; observe again
   [nothing open]   completed — the closing sheet
-  [otherwise]      the sheet, then one gate over every open mismatch → Stop
+  [otherwise]      holding — the sheet, with one question over every open mismatch
   next utterance u: c' := fuse(c, u), read whole →
     [u does not bear on this run]   the session answers it; the run stands as it was
     [otherwise]                     pass(c') → the same reading
@@ -322,11 +322,10 @@ def Write (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin = .ext
 /-- **Your action**, the relay: carry out every adaptation and every discard a resolution settles —
     the person's, one under their grant, one evidence relays — that the context does not yet show
     carried out, the person's whole answer read and its combined consequence weighed first, and
-    what your own writes newly settle, until nothing newly settled is left; where a write brings
-    back a place an earlier write in this run repaired, stop there and leave both for the person.
-    A write follows where X lives: an artifact is written where it lies; a result that lives in
-    the conversation — an answer, an analysis — is adapted by your stating the revised result in
-    your own turn. What this run may write is what the work in front of the person covers and
+    what your own writes newly settle, until nothing newly settled is left. A write follows where
+    X lives: an artifact is written where it lies; a result that lives in the conversation — an
+    answer, an analysis — is adapted by your stating the revised result in your own turn. What
+    this run may write is what the work in front of the person covers and
     they hold authority over: their own resolution turn authorizes a write to anything they hold,
     an artifact another session of theirs produced included; another person's artifact, or a
     scope they do not hold, needs that person or a permission. A write outside that, or one whose
@@ -441,13 +440,13 @@ def grounding : Op → Annot × String
   | .observe   => (.observe, "artifact read, artifact search, record read, and a run that changes no existing state — no send, nothing left behind: every place the result lands and every intent it answers to; each return enters the context as an evidence turn; a place that needs a change to existing state, a permission, or another's authority is named with what it needs and left unreached")
   | .judge     => (.sense, "Internal analysis: the whole result as it now stands against the whole context as it now stands, afresh every pass — never the assistant's own words as what the result must fit; how each mismatch stands; what fits and what was not reached")
   | .evidence  => (.interaction .extension, "where evidence alone settles a mismatch as SettledSupported says, withdraw your own flag or record the relayed resolution as yours, with that evidence; a person's turn that disputes it leaves it open")
-  | .gate      => (.interaction .constitution, "the sheet: every mismatch found with how it stands, concrete actions for each open one with their consequences and your contrary grounds where you have them, never a category title, what fits, what was not reached, and what changed since the last sheet — then one question over every open mismatch")
+  | .gate      => (.interaction .extension, "the sheet: every mismatch found with how it stands, concrete actions for each open one with their consequences and your contrary grounds where you have them, never a category title, what fits, what was not reached, and what changed since the last sheet — then one question over every open mismatch")
   | .adapt     => (.transform, "artifact write, or the revised result stated in your own turn where the result lives in the conversation: an adaptation a settled resolution asks, within what this run may write; what it returns enters the context and the next observation reads it")
   | .discard   => (.transform, "within what this run may write, an artifact write that withdraws the result and puts the replacement in its place, or removes it when nothing takes its place; outside it, your turn recording that the result is no longer relied on")
   | .readTurn  => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — whether it bears on the run, and what it does there: resolves, corrects, disputes, grants, names something that does not fit, points at a place to look, asks about the sheet")
   | .record    => (.track, "record: the current sheet kept in a durable record the person can find, where the run may be cut off before it completes")
   | .converge  => (.interaction .extension, "the closing sheet: the convergence evidence CONVERGENCE names")
-  | .seam      => (.interaction .extension, "after completion, proceed to the next move the person declared, citing that turn; every Constitution gate inside Epharmoge and the next protocol fires unchanged")
+  | .seam      => (.interaction .extension, "after completion, proceed to the next move the person declared, citing that turn")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Mismatch-domain resolution emergent via session context.
@@ -506,5 +505,5 @@ Where a place reads as another owner's, the options name the concrete split, for
 - **The person resolves**: As `ResolutionSupported`, `SettledSupported`, and `respond` state — including the quoted disclosure of a turn read as a resolution.
 - **Completion needs no closing turn**: As `NothingOpen`, `Outcome`, and CONVERGENCE state.
 - **How much it matters**: As `respond` states — by demonstrable behavioral consequence, never structural extent alone.
-- **After the close**: The AI never rewrites or vetoes a resolution the person settled. New evidence against it is shown, and is owed before any dependent step that cannot be undone. A next step the person declared runs only after completion.
+- **After the close**: The AI never rewrites or vetoes a resolution the person settled.
 - **Form feedback**: Silence about form is not evidence about form. Too dense fails quietly — the reader skims, answers past it, stops — while too plain fails out loud, so the complaints that arrive come from one side only. Density therefore does not carry over from the previous round: each round takes it from what this request asked for, while a statement about form does carry over until it is countermanded. Read an instruction about form for the parts of a round it reaches, not for what kind of reaction it is — a complaint, a request, a symptom report and a bare preference are one input here, and sorting them by kind yields nothing the reach reading does not already give while costing a clause per kind. Change the form rather than asking which form they want; naming one is the recall this discipline exists to remove. What such an instruction reaches is whatever the active protocol leaves open in how a round is composed — its density, its ordering, its length. What it does not reach is whatever is already fixed for this round elsewhere: content the protocol requires, wording carried verbatim, an order it presents in, a cadence it caps, a turn boundary it sets. Those stay in place, and the layer that fixed them is what states why. Say in one line what changed; where the instruction overlapped something that stays, say in one line that it stays and why — that second line is owed by the overlap, not by how the instruction was worded.

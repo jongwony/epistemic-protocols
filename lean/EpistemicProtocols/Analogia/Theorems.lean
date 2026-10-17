@@ -25,36 +25,34 @@ instance {c : Context P} {x : FitClaim} : Nonempty (Check c x) :=
 theorem no_evidence_no_change (c : Context P) (h : observe c = []) : collect c = c := by
   simp [collect, h]
 
-/-- While the question does not stand, the pass presents it and collects nothing more. -/
-theorem held_gate_collects_nothing (respond : Context P → Response P) (c : Context P)
-    (h : ¬ QuestionStands c) : pass respond c = .holding c (respond c) := by
+/-- With nothing to audit, the pass presents that and collects nothing. -/
+theorem nothing_to_audit_collects_nothing (respond : Context P → Response P) (c : Context P)
+    (h : ¬ ToAudit c) : pass respond c = .holding c (respond c) := by
   simp [pass, h]
 
 /-- The question is filled only from a person's turn. -/
 theorem question_by_person {c : Context P} {s : Cite c}
     (ok : (questionCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
-/-- The question an assessment answers stands on a person's turn: under `QuestionStands`, which
-    every assessment carries, the question is filled from a cited turn the person sent, that turn
-    supports it, and the conclusions the run assesses are that question's. -/
+/-- A question that stands stands on a person's turn: it is filled from a cited turn the person
+    sent, that turn supports it, and the conclusions the run audits are that question's. -/
 theorem standing_question_by_person (c : Context P) (h : QuestionStands c) :
     ∃ (q : Question) (s : Cite c), s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person ∧
       QuestionSupported c (c[s.idx]'s.lt) q ∧ inferences c = q.conclusions := by
-  unfold QuestionStands inferences at h
+  unfold QuestionStands at h
   cases hq : question c with
   | open_ _ => simp [hq] at h
   | filled q s ok sup => exact ⟨q, s, ok, s.ok.trans ok, sup, by simp [inferences, hq]⟩
 
-/-- An assessment is made only over the collected context: the pass's question stood before
-    collection, and the question that stands over the collected context is the one `hs`
-    witnesses. -/
+/-- An assessment is made only over the collected context, on a pass that had conclusions to
+    audit before collection. -/
 theorem assessment_after_collection (respond : Context P → Response P) (c b : Context P)
-    (hs : QuestionStands b) (rec : Assessed b) (r : Response P)
-    (h : pass respond c = .assessment b hs rec r) :
-    b = collect c ∧ QuestionStands c := by
+    (ht : ToAudit b) (rec : Assessed b) (r : Response P)
+    (h : pass respond c = .assessment b ht rec r) :
+    b = collect c ∧ ToAudit c := by
   unfold pass at h
-  by_cases hc : QuestionStands c
-  · by_cases hc₂ : QuestionStands (collect c)
+  by_cases hc : ToAudit c
+  · by_cases hc₂ : ToAudit (collect c)
     · simp [hc, hc₂] at h
       exact ⟨h.1.symm, hc⟩
     · simp [hc, hc₂] at h
@@ -62,12 +60,12 @@ theorem assessment_after_collection (respond : Context P → Response P) (c b : 
 
 /-- An assessment's verdicts are `judge` over each conclusion of `K` in the collected context. -/
 theorem assessment_verdicts_are_judge (respond : Context P → Response P) (c b : Context P)
-    (hs : QuestionStands b) (rec : Assessed b) (r : Response P)
-    (h : pass respond c = .assessment b hs rec r) :
+    (ht : ToAudit b) (rec : Assessed b) (r : Response P)
+    (h : pass respond c = .assessment b ht rec r) :
     rec.verdicts = (inferences b).map fun k => (k, judge b k) := by
   unfold pass at h
-  by_cases hc : QuestionStands c
-  · by_cases hc₂ : QuestionStands (collect c)
+  by_cases hc : ToAudit c
+  · by_cases hc₂ : ToAudit (collect c)
     · simp [hc, hc₂] at h
       obtain ⟨hb, hrec, -⟩ := h
       subst hb
@@ -76,9 +74,9 @@ theorem assessment_verdicts_are_judge (respond : Context P → Response P) (c b 
     · simp [hc, hc₂] at h
   · simp [hc] at h
 
-/-- A pass whose question stands before and after collection yields the assessment. -/
-theorem not_held_completes (respond : Context P → Response P) (c : Context P)
-    (h₁ : QuestionStands c) (h₂ : QuestionStands (collect c)) :
+/-- A pass with conclusions to audit before and after collection yields the assessment. -/
+theorem audit_completes (respond : Context P → Response P) (c : Context P)
+    (h₁ : ToAudit c) (h₂ : ToAudit (collect c)) :
     pass respond c = .assessment (collect c) h₂ (assessed (collect c)) (respond (collect c)) := by
   simp [pass, h₁, h₂]
 
@@ -87,7 +85,7 @@ theorem silence_keeps_last (respond session : Context P → Response P) (c : Con
     (o : Outcome P) : ground respond session c o [] = o := rfl
 
 /-- A turn that does not bear on the audit opens no pass: the session answers it, both stay in
-    the context, and the last outcome stands — a waiting question stays open. -/
+    the context, and the last outcome stands. -/
 theorem unrelated_opens_no_pass (respond session : Context P → Response P) (c : Context P)
     (o : Outcome P) (u : Utterance P) (hb : ¬ BearsOnRun (fuse c u)) :
     step respond session c o u = (fuse c u ++ [(session (fuse c u)).val], o) := by
