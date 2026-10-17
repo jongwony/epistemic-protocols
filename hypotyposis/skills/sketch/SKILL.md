@@ -335,16 +335,15 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
     none shown embodies — a mark to revise, a bare rejection with no diagnosis among them; a
     request; a fresh start; a combination to see; a change of medium; the means a version was
     waiting on, supplied, or the person's word to go on in the medium at hand or without a reference
-    that cannot be reached; or a value they set or replaced that no version shown embodies; or, on
-    your stated judgment, making now a version you would propose — the revision an insufficiency you
-    found calls for, an alternative a comparison lacks — serves the next judgment better than
-    showing the proposal alone, short of a version that waits on a medium or reference this session
-    cannot supply, which only the person's word releases. A question about a version, answered as
-    asked, and words that move nothing a version would show call for nothing; a value they took that
-    a shown version already embodies calls for no new version. Where a mark reads as about the
-    rendering rather than the form, the next version fixes the rendering and leaves the form as it
-    was, and the round says so; where the evidence does not settle which it is about, the round says
-    that. -/
+    that cannot be reached; or a value they set or replaced that no version shown embodies. A
+    question about a version, answered as asked, and words that move nothing a version would show
+    call for nothing; a value they took that a shown version already embodies calls for no new
+    version. Where a mark reads as about the rendering rather than the form, the next version fixes
+    the rendering and leaves the form as it was, and the round says so; where the evidence does not
+    settle which it is about, the round says that. Apart from what the turn calls for, a production
+    is also called where, on your stated judgment, making now a version you would propose — the
+    revision an insufficiency you found calls for, an alternative a comparison lacks — serves the
+    next judgment better than showing the proposal alone. -/
 axiom ProductionCalled : Context P → Prop
 
 /-- **Your read**, now, of what the next judgment needs, as far as relevant access reaches: the
@@ -539,7 +538,7 @@ def grounding : Op → Annot × String
   | .carryOut          => (.transform, "artifact write, environment run: what `carriedOut` does, as its doc states; each write or removal observed")
   | .assemble          => (.sense, "Internal analysis: the terminal record, `recordOf`, built after what the closing turn asked done is observed, never before")
   | .converge          => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with RecognizedForm")
-  | .seam              => (.interaction .extension, "after a recognition or not activating, proceed to the next move the person declared, citing that turn; after a recognition the record is handed on as session text, with the recognized version — an artifact by where it is and what it showed, a narration as written — every other version by where it is, or the round that showed it, rather than its content, the dissent travelling in it; this protocol declares no wired outbound edge, and every Constitution gate fires unchanged")
+  | .seam              => (.interaction .extension, "after a recognition or not activating, proceed to the next move the person declared, citing that turn; after a recognition the record is handed on as session text, with the recognized version — an artifact by where it is and what it showed, a narration as written — every other version by where it is, or the round that showed it, rather than its content, the dissent travelling in it")
 
 /-- The operations that write a version, by realization: an artifact through `.produce`, and
     `.produceDelegate` where its write is handed to execution; narration writes no file. -/
