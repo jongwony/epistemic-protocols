@@ -9,4 +9,4 @@ fixation risk the frame map exists to avoid does not apply the same way here.
 
 How many derived frames the first pass opens is your judgment — enough to show the field
 widening, few enough that the round can be taken in. Every frame left closed shows on the
-map as unexplored; what a later continue opens, and a further pass you carry forward, is `targets` in SKILL.md. How the seeds enter the map, with their origins, is `candidates` in SKILL.md.
+map as unexplored; what a later continue opens is `targets` in SKILL.md. How the seeds enter the map, with their origins, is `candidates` in SKILL.md.
