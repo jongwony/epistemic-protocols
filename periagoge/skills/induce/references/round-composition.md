@@ -12,4 +12,4 @@ Each user-facing round bundles the current judgment, its nearest evidence, and t
 
 ## When the order of the sheet bears on where a sentence sits relative to the move
 
-Output all analysis, evidence, and rationale — the sheet, what changed, and your doubts — as text before the move. The move contains only the essential question and what each way of answering does to the goal and the candidate. Keeping context above the move lets each answer's differential implication stand alone, so the question arrives with the analysis already absorbed.
+Output all analysis, evidence, and rationale — the sheet, what changed, and your doubts — as text before the move. The move contains only the essential question and what each way of answering does to the goal and the candidate. Keeping context above the move lets each answer's differential implication stand alone, so the question arrives with the analysis already absorbed. Work carried past the move follows it in the same response, with its account; where it re-draws a value the sheet showed, it says so beside the value it replaces.
