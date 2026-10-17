@@ -45,7 +45,7 @@ A
   → CrystallizedAbstraction
 requires: in_process(A)                     -- read before activation (`notActivated`)
 deficit:  AbstractionInProcess              -- activation precondition
-preserves: instance_set(A)                  -- the cases are read as they first entered the context, never rewritten; a case you found is yours
+preserves: instance_set(A)                  -- the cases are read, never rewritten; a case you found is yours
 invariant: Goal Crossed with Readings through Examples, with Alternatives Maintained, over Single-Candidate Steering
 invariant: setting a reading aside, taking a value you showed, an open item's words, and every closing are the person's; your readings make none of them
 -/
@@ -455,6 +455,19 @@ axiom collect : Context P → List (Evidence P)
 
 def pass (c : Context P) : Context P := c ++ (collect c).map (·.val)
 
+/-- **Your work**, carried forward past a sheet in the same response on a judgment you state, within
+    this protocol's domain — using the abstraction-to-be in the person's work among it: what it
+    returned, each an evidence turn; empty where you carry nothing forward. -/
+axiom carry : Context P → List (Evidence P)
+
+/-- A sheet, then the work carried past it; where that work returned anything, the sheet is drawn
+    again on what it returned, so the response ends on the sheet the person's next turn follows. -/
+def present (respond : Context P → Response P) (c : Context P) : Context P :=
+  let c₂ := c ++ [(respond c).val]
+  match carry c₂ with
+  | [] => c₂
+  | t  => let c₃ := c₂ ++ t.map (·.val); c₃ ++ [(respond c₃).val]
+
 /-- **Your judgment**: the context holds a case no sheet has shown and no turn of the person's
     brought that would decide against the candidate the recognizing turn recognized; where it
     does, the turn recognizes nothing. -/
@@ -472,9 +485,8 @@ def crystallize (converge : Context P → Response P) (c : Context P) :
 
 open Classical in
 /-- `respond` presents the sheet the Protocol section describes under "The sheet": the candidate
-    as `candidate` gives it, the cross view (`crossView`), and the cases of `casesSection`, drawn on
-    what any work you carry forward in that response returned. A
-    recognition is the person's closing, filled, citing the latest utterance; it crystallizes
+    as `candidate` gives it, the cross view (`crossView`), and the cases of `casesSection`; `present`
+    places the work carried past it. A recognition is the person's closing, filled, citing the latest utterance; it crystallizes
     unless the context, with what collection returns for it, is `Overturned`. -/
 def induce (respond session converge : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
@@ -488,14 +500,14 @@ def induce (respond session converge : Context P → Response P) :
         | .open_ _          => false
       let c₁ := pass c'
       if latest ∧ ¬ Overturned c₁ then .crystallized (crystallize converge c₁)
-      else induce respond session converge (c₁ ++ [(respond c₁).val]) us
+      else induce respond session converge (present respond c₁) us
 
 def start (respond session converge : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
   let c₁ := pass c
   match notActivated c₁ with
   | some why => .notActivated c₁ why
-  | none     => induce respond session converge (c₁ ++ [(respond c₁).val]) us
+  | none     => induce respond session converge (present respond c₁) us
 
 /-! ── CONVERGENCE ──
 crystallized — the one closing of `Outcome`, the person's; the trace it carries is its structure's
@@ -529,13 +541,14 @@ def Interaction.realization : Interaction → Continuation
   | .constitution => .stop
   | .extension    => .proceed
 
-inductive Op | detect | collect | judge | sheet | readTurn | declare | converge | seam
+inductive Op | detect | collect | judge | sheet | carry | readTurn | declare | converge | seam
 
 def grounding : Op → Annot × String
   | .detect   => (.sense, "Internal analysis: whether this is the protocol's case, as `notActivated` reads it, over the utterance and the context")
   | .collect  => (.observe, "artifact read, artifact search; external fetch (conditional: the domain lies outside the person's artifacts), its URL cited where used: what `collect` reads, as its doc states")
   | .judge    => (.sense, "Internal analysis: the whole run afresh against the whole context, and whether a recognition is `Overturned`, once collection has returned")
   | .sheet    => (.interaction .extension, "the sheet the Protocol section describes under \"The sheet\", every turn that bears on the run and does not close it, the first included")
+  | .carry    => (.transform, "work carried forward past a sheet in the same response, on a judgment you state, within this protocol's domain: what `carry` names")
   | .readTurn => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there — a move, a value taken, a reading set aside or brought back, words about an open item, a closing — read whole against the fused context as it now stands, as `Reaches`, `ClosingSupported`, `SetAsideSupported`, `StandingSupported`, and `OpenSupported` read it")
   | .declare  => (.interaction .extension, "before activation, on an invocation only — AI-guided activation stays silent —, your `notActivated` reading in plain words with its basis, and what was searched")
   | .converge => (.interaction .extension, "at a crystallization, the convergence evidence CONVERGENCE names: the closing turn quoted beside the trace and the dissent")
@@ -560,7 +573,7 @@ Bind the seed from an explicit argument first, then the most recent cluster of c
 
 ### The sheet
 
-Every sheet is in everyday language. Mark each value on the sheet as set by the user's words, taken by them from what you showed, or still a proposal, marked with who put it forward. Each sheet opens with any case you found since the last sheet, marked as found by you, so the user meets it before their next turn; a found case stays yours until the user's words take it up. Work you carry forward in a response comes before its sheet, with its account, and the sheet ends the response.
+Every sheet is in everyday language. Mark each value on the sheet as set by the user's words, taken by them from what you showed, or still a proposal, marked with who put it forward. Each sheet opens with any case you found since the last sheet, marked as found by you, so the user meets it before their next turn; a found case stays yours until the user's words take it up. Work you carry forward past a sheet follows it in the same response, with its account; where it returned anything, the sheet is drawn again on it, so the response ends on the sheet the user's next turn follows.
 
 Then the goal: what the abstraction is for. Where the user has said it, quote their words; otherwise give your reading. Under it, the working candidate — a name and a rule — from the first sheet, with the ground it stands on and, where that ground is short, what is short beside it as a point still open — a row of its own that leaves no case out is such a shortfall, shown with what case would have to be left out for the name to say something —, always on a reading still in play: where the user sets that reading aside, or every reading is set aside, put forward one on a live reading or on a new reading of your own, its weak ground shown. Both move: the run's work is moving the goal and the candidate until the abstraction matches what the user means.
 

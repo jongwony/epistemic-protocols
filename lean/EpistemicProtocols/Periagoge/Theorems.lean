@@ -91,8 +91,7 @@ theorem unrecognized_draws_again (respond session converge : Context P → Respo
             src.idx + 1 = (fuse c u).length) ∨
          Overturned (pass (fuse c u))) :
     induce respond session converge c (u :: us) =
-      induce respond session converge
-        (pass (fuse c u) ++ [(respond (pass (fuse c u))).val]) us := by
+      induce respond session converge (present respond (pass (fuse c u))) us := by
   rcases h with hn | ho
   · cases hc : closing (fuse c u) with
     | open_ _ => simp [induce, hre, hc]

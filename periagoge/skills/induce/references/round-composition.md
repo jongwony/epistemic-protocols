@@ -8,7 +8,7 @@ User-facing emit (the sheet, what changed since the last answered sheet, the mov
 
 ## When some of what is in view belongs to a later round or a trace rather than this one
 
-Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to text before the move, convergence traces, or later cycles.
+Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to convergence traces or later cycles.
 
 ## When the order of the sheet bears on where a sentence sits relative to the move
 
