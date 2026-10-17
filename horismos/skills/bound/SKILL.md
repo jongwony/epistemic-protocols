@@ -343,20 +343,19 @@ axiom Reaches : Context P → Prop
     not cases it must check: a reply of theirs whose reading their later words have not yet
     settled (materially different futures remain viable — the round shows the candidate readings,
     and nothing is committed from it until their words settle it); you hold contrary grounds the
-    person has not closed over, other than a doubt about which choice to make inside an
-    entrustment — not whether a choice stays inside it — which is yours to weigh and is shown
-    with the boundary; an acceptance does not reach what is now at issue. A request to see or open
-    something is not one: the turn that shows it serves it, seeing it adopts nothing, and a
-    boundary that stands keeps standing. Where a turn is owed, the run holds and the round serves
-    it. -/
+    person has not closed over — `dissent` says what is not one; an acceptance does not reach what
+    is now at issue. A request to see or open something is not one: the turn that shows it serves
+    it, seeing it adopts nothing, and a boundary that stands keeps standing. Where a turn is owed,
+    the run holds and the round serves it. -/
 axiom owed : Context P → Bool
 
 /-- **Your record**: the contrary grounds you presented in a round before the person's turn — a
     disposition you doubt, a premise that may not hold — attached to the boundary where the person
-    set it over them, and your doubts over which choice to make inside an entrustment, shown with
-    the boundary; empty when there were none. A ground you would raise first where the boundary would
-    stand makes the person's turn owed instead, as `owed` reads it. The person's dispositions stand
-    over them: you never rewrite or veto one. -/
+    set it over them; beside them, your doubts over which choice to make inside an entrustment —
+    not whether a choice stays inside it — which are not contrary grounds: they are yours to weigh
+    and are shown with the boundary; empty when there were none. A ground you would raise first
+    where the boundary would stand makes the person's turn owed instead. The person's dispositions
+    stand over them: you never rewrite or veto one. -/
 axiom dissent : Context P → List String
 
 /-- One disposition on the record: the decision, the disposition, and the person's turn it stands
