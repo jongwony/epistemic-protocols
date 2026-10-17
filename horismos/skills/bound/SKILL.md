@@ -333,9 +333,8 @@ axiom acceptance : (c : Context P) → Occ (acceptanceCoord (P := P)) c
     what the map turns on — even where it also asks for other work. An utterance that bears on
     none of it leaves the run as it stands: the session answers it, that answer stays in the
     context, a holding run keeps holding, and a boundary that stands keeps standing. Words saying
-    the person is done are read like any other turn: saying so accepts and disposes of nothing, and
-    the turn that answers them says how it took them and where the run stands; your own reading
-    that the person is done ends nothing. -/
+    the person is done are read like any other turn, and the turn that answers them says how it
+    took them and where the run stands; your own reading that the person is done ends nothing. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your reading**: a turn of the person's is still owed before the boundary stands — read on the
