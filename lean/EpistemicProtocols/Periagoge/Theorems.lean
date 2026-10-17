@@ -38,6 +38,17 @@ theorem other_work_draws_nothing (respond session converge : Context P → Respo
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(collect c).map (·.val), rfl⟩
 
+/-- What `present` adds after the context it draws on — the response, its sheet and the work carried
+    forward in it — holds no turn the person sent: carried work supplies no turn of theirs to a
+    recognition, a setting-aside, a line's standing, or words about an open item. -/
+theorem present_adds_no_person_turn (respond : Context P → Response P) (c : Context P) :
+    ∃ t, present respond c = c ++ t ∧ ∀ e ∈ t, e.origin ≠ .person := by
+  refine ⟨(response respond c).map (·.val), rfl, ?_⟩
+  intro e he
+  simp only [List.mem_map] at he
+  obtain ⟨y, -, rfl⟩ := he
+  rcases y.property with h | h | h <;> rw [h] <;> decide
+
 /-- A crystallized abstraction comes only from a filled closing — a person's turn, by
     `closed_by_person` — that cites the utterance just fused onto a context `c₀`, where that
     context, with what collection returned for it, is not `Overturned`; the record is `crystallize`
@@ -84,15 +95,14 @@ theorem recognition_crystallizes (respond session converge : Context P → Respo
 
 /-- A turn that bears on the run and recognizes nothing — no filled closing cites the utterance
     just fused, or the context with it and what collection returned for it is `Overturned` —
-    crystallizes nothing at that step: the sheet is drawn again on that context. -/
+    crystallizes nothing at that step: the response to it is placed on that context (`present`). -/
 theorem unrecognized_draws_again (respond session converge : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (h : (¬ ∃ (src : Cite (fuse c u)), ∃ ok sup, closing (fuse c u) = .filled () src ok sup ∧
             src.idx + 1 = (fuse c u).length) ∨
          Overturned (pass (fuse c u))) :
     induce respond session converge c (u :: us) =
-      induce respond session converge
-        (pass (fuse c u) ++ [(respond (pass (fuse c u))).val]) us := by
+      induce respond session converge (present respond (pass (fuse c u))) us := by
   rcases h with hn | ho
   · cases hc : closing (fuse c u) with
     | open_ _ => simp [induce, hre, hc]
