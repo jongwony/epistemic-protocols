@@ -403,8 +403,8 @@ a round — that stays in the context.
     span the cue reaches (for an artifact, the change history of that span) and, where its records
     do not open, of the candidates `found` lists in turn until one's records open or none is left,
     and the capture outcome of every record a search examined, one that matched nothing included.
-    What bounds the search is progress, the person's limits, and cost; no count does. A remark, a
-    form instruction, or a limit adds nothing new to read. Each read returns as an evidence turn;
+    What bounds the search is progress, the person's limits, and cost; no count does. A remark or a form
+    instruction adds nothing new to read. Each read returns as an evidence turn;
     nothing is written to the records. With no recoverable cue nothing is worth reading, and the
     first round is the open question. -/
 axiom search : Context P → List (Evidence P)
