@@ -24,7 +24,7 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 Hypotyposis(I) → start(c) → sketch(c, utterances), where c is the fused session context:
   start: what bears on the form is gathered; then your reading, on it, that this is not this
     protocol's case (`notActivated`), in plain words with its basis → not activated; otherwise
-    → production → round
+    → production, then further productions as far as you carry them → round
   production(c): the intent relayed whole — your reading of the purpose, marked as yours unless
     they said it, each part with what it rests on, a default marked as one; what the next versions
     try and which versions they revise; how many; the medium each is realized in, what it can show
@@ -41,9 +41,9 @@ Hypotyposis(I) → start(c) → sketch(c, utterances), where c is the fused sess
     [does not bear on this run]   what their words ask done to the versions, observed; the session
                                   answers it; that answer stays in c; no round of this run
     [the person recognizes v]     what their words ask done to the versions, observed → RecognizedForm
-    [otherwise]                   what is gathered now enters c; a production where
-                                  `ProductionCalled` reads one; what their words ask done to the
-                                  versions is done and observed → round
+    [otherwise]                   what is gathered now enters c; productions as far as you carry
+                                  them, each where `ProductionCalled` reads one; what their words
+                                  ask done to the versions is done and observed → round
   no utterance: nothing is recognized, written, or removed; the run holds
 -/
 
@@ -341,10 +341,14 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
     version. Where a mark reads as about the rendering rather than the form, the next version fixes
     the rendering and leaves the form as it was, and the round says so; where the evidence does not
     settle which it is about, the round says that. Apart from what the turn calls for, a production
-    is also called where, on your stated judgment, making now a version you would propose — the
-    revision an insufficiency you found calls for, an alternative a comparison lacks — serves the
-    next judgment better than showing the proposal alone. -/
+    is also called where, on your stated judgment, making now a version you would propose serves
+    the next judgment better than showing the proposal alone. -/
 axiom ProductionCalled : Context P → Prop
+
+/-- **Your judgment**: how far you carry the work from this context before the round — how many
+    productions you make from it at most, each one only where `ProductionCalled` reads one on the
+    context as it then stands; it is your reading of how far the work reaches, not a fixed count. -/
+axiom reach : Context P → Nat
 
 /-- **Your read**, now, of what the next judgment needs, as far as relevant access reaches: the
     material the form draws on and the sources that bear on it — any a turn cites, and any you
@@ -442,11 +446,18 @@ def production (ai : AITurns P) (c : Context P) : Context P :=
   consulted (c₃ ++ (produce c₃).map (·.val))
 
 open Classical in
+/-- Productions carried one after another, each where `ProductionCalled` reads one on the
+    context the previous one left; at most `n` of them. -/
+def carry (ai : AITurns P) : Nat → Context P → Context P
+  | 0,     c => c
+  | n + 1, c => if ProductionCalled c then carry ai n (production ai c) else c
+
+open Classical in
 /-- A turn that does not bear on the run has what it asks done to the versions carried out, then
     the session answers it, and the run holds; a closing is read from the person's turn before
     anything is gathered, and its record is built after what that turn asked done is observed;
-    otherwise what is gathered now enters the context, a production runs where `ProductionCalled`
-    reads one, what the turn asks done to the versions is carried out, and the round follows. -/
+    otherwise what is gathered now enters the context, productions run as `carry` makes them, what
+    the turn asks done to the versions is carried out, and the round follows. -/
 def sketch (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
@@ -458,7 +469,7 @@ def sketch (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
     | some (.recognize v) => .recognized (recognizedOn f v)
     | none =>
       let c₁ := consulted f
-      let c₂ := if ProductionCalled c₁ then production ai c₁ else c₁
+      let c₂ := carry ai (reach c₁) c₁
       let c₃ := settle c₂
       sketch ai (c₃ ++ [(ai.respond c₃).val]) us
 
@@ -467,7 +478,8 @@ def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P
   match notActivated c₀ with
   | some why => .notActivated c₀ why
   | none =>
-    let c₁ := production ai c₀
+    let p := production ai c₀
+    let c₁ := carry ai (reach p) p
     sketch ai (c₁ ++ [(ai.respond c₁).val]) us
 
 /-! ── LOOP ──
@@ -482,7 +494,7 @@ round ends on its opening, and no round count, cap, or fatigue closes the run.
 /-! ── CONVERGENCE ──
 converged: a RecognizedForm — a version the person encountered and recognized for the purpose as it
 stands, its record built by `recordOf` after what the recognizing turn asked done was observed;
-holding is a run no turn of the person's has closed. A recognition
+holding is an activated run no turn of the person's has closed. A recognition
 establishes the person's judgment of fit for that purpose on what the version's medium showed;
 correctness against a standard outside preference rests on the checks the findings name, and
 readiness for use on nothing here; a contrary ground it was taken over rides it in the dissent. The
@@ -538,7 +550,7 @@ def grounding : Op → Annot × String
   | .carryOut          => (.transform, "artifact write, environment run: what `carriedOut` does, as its doc states; each write or removal observed")
   | .assemble          => (.sense, "Internal analysis: the terminal record, `recordOf`, built after what the closing turn asked done is observed, never before")
   | .converge          => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with RecognizedForm")
-  | .seam              => (.interaction .extension, "after a recognition or not activating, proceed to the next move the person declared, citing that turn; after a recognition the record is handed on as session text, with the recognized version — an artifact by where it is and what it showed, a narration as written — every other version by where it is, or the round that showed it, rather than its content, the dissent travelling in it")
+  | .seam              => (.interaction .extension, "after a recognition or not activating, proceed to the next move the person declared, citing that turn")
 
 /-- The operations that write a version, by realization: an artifact through `.produce`, and
     `.produceDelegate` where its write is handed to execution; narration writes no file. -/

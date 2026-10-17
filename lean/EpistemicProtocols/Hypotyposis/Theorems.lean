@@ -37,16 +37,20 @@ theorem unrelated_adds_no_gate (ai : AITurns P) (c : Context P) (u : Utterance P
       sketch ai (settle (fuse c u) ++ [(ai.session (settle (fuse c u))).val]) us := by
   simp [sketch, h]
 
-open Classical in
-/-- A turn that bears on the run and closes nothing is exactly one round, over at most one
-    production: the one `ProductionCalled` reads on the consulted context, else none. -/
+/-- A turn that bears on the run and closes nothing is exactly one round, over the productions
+    `carry` makes. -/
 theorem one_round_per_turn (ai : AITurns P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u))
     (hk : filledValue (closing (fuse c u)) = none) :
     let c₁ := consulted (fuse c u)
-    let c₂ := if ProductionCalled c₁ then production ai c₁ else c₁
+    let c₂ := carry ai (reach c₁) c₁
     sketch ai c (u :: us) = sketch ai (settle c₂ ++ [(ai.respond (settle c₂)).val]) us := by
   simp [sketch, hr, hk]
+
+/-- Where `ProductionCalled` reads none, nothing is produced. -/
+theorem carry_uncalled (ai : AITurns P) (n : Nat) (c : Context P) (h : ¬ ProductionCalled c) :
+    carry ai n c = c := by
+  cases n <;> simp [carry, h]
 
 theorem each_step_continues_or_closes (ai : AITurns P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) (o : Outcome P) (h : sketch ai c (u :: us) = o) :
