@@ -407,7 +407,7 @@ def carry (ai : AITurns P) : Nat → Context P → Context P
   | 0,     c => c
   | n + 1, c => let c' := consulted c; if FanCarried c' then carry ai n (fan ai c') else c'
 
-/-- Your turn after the opening or a requested fan: the fans you carry, then the round shown on what
+/-- Your turn, whether or not a fan came before it: the fans you carry, then the round shown on what
     stands. -/
 def aiTurn (ai : AITurns P) (c : Context P) : Context P :=
   let c₁ := carry ai (reach c) c
