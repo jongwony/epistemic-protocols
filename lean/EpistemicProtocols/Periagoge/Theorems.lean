@@ -38,6 +38,30 @@ theorem other_work_draws_nothing (respond session converge : Context P → Respo
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(collect c).map (·.val), rfl⟩
 
+/-- What `present` adds after the context it draws on — the sheet, the turns of the work carried
+    past it, and any sheet drawn again — holds no turn the person sent: carried work supplies no
+    turn of theirs to a recognition, a setting-aside, or a line's standing. -/
+theorem present_adds_no_person_turn (respond : Context P → Response P) (c : Context P) :
+    ∃ t, present respond c = c ++ t ∧ ∀ e ∈ t, e.origin ≠ .person := by
+  unfold present
+  cases h : carry (c ++ [(respond c).val]) with
+  | nil =>
+    refine ⟨[(respond c).val], by simp [h], ?_⟩
+    intro e he
+    simp at he
+    subst he
+    rw [(respond c).property]
+    decide
+  | cons x xs =>
+    refine ⟨[(respond c).val] ++ (x :: xs).map (·.val) ++
+      [(respond (c ++ [(respond c).val] ++ (x :: xs).map (·.val))).val], by simp [h], ?_⟩
+    intro e he
+    simp only [List.mem_append, List.mem_singleton, List.mem_map] at he
+    rcases he with (rfl | ⟨y, -, rfl⟩) | rfl
+    · rw [(respond c).property]; decide
+    · rcases y.property with h | h | h <;> rw [h] <;> decide
+    · rw [(respond _).property]; decide
+
 /-- A crystallized abstraction comes only from a filled closing — a person's turn, by
     `closed_by_person` — that cites the utterance just fused onto a context `c₀`, where that
     context, with what collection returned for it, is not `Overturned`; the record is `crystallize`
@@ -84,7 +108,8 @@ theorem recognition_crystallizes (respond session converge : Context P → Respo
 
 /-- A turn that bears on the run and recognizes nothing — no filled closing cites the utterance
     just fused, or the context with it and what collection returned for it is `Overturned` —
-    crystallizes nothing at that step: the sheet is drawn again on that context. -/
+    crystallizes nothing at that step: the sheet is presented again on that context, with the work
+    carried past it (`present`). -/
 theorem unrecognized_draws_again (respond session converge : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (h : (¬ ∃ (src : Cite (fuse c u)), ∃ ok sup, closing (fuse c u) = .filled () src ok sup ∧
