@@ -37,16 +37,23 @@ theorem unrelated_adds_no_gate (ai : AITurns P) (c : Context P) (u : Utterance P
       sketch ai (settle (fuse c u) ++ [(ai.session (settle (fuse c u))).val]) us := by
   simp [sketch, h]
 
-/-- A turn that bears on the run, closes nothing, and calls for no version makes no version: the
-    round follows what was gathered and carried out. -/
-theorem unrequested_produces_nothing (ai : AITurns P) (c : Context P) (u : Utterance P)
+open Classical in
+/-- A turn that bears on the run and closes nothing is exactly one round, over the production the
+    turn calls for, where it calls for one, and the productions you carry on your own proposals. -/
+theorem one_round_per_turn (ai : AITurns P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u))
-    (hk : filledValue (closing (fuse c u)) = none)
-    (hp : ¬ ProductionRequested (consulted (fuse c u))) :
-    sketch ai c (u :: us) =
-      sketch ai (settle (consulted (fuse c u)) ++
-        [(ai.respond (settle (consulted (fuse c u)))).val]) us := by
-  simp [sketch, hr, hk, hp]
+    (hk : filledValue (closing (fuse c u)) = none) :
+    let c₁ := consulted (fuse c u)
+    let c₂ := if ProductionRequested c₁ then production ai c₁ else c₁
+    let c₃ := settle c₂
+    let c₄ := carry ai (reach c₃) c₃
+    sketch ai c (u :: us) = sketch ai (c₄ ++ [(ai.respond c₄).val]) us := by
+  simp [sketch, hr, hk]
+
+/-- Where `Proposes` reads none, `carry` makes nothing. -/
+theorem carry_uncalled (ai : AITurns P) (n : Nat) (c : Context P) (h : ¬ Proposes c) :
+    carry ai n c = c := by
+  cases n <;> simp [carry, h]
 
 theorem each_step_continues_or_closes (ai : AITurns P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) (o : Outcome P) (h : sketch ai c (u :: us) = o) :
