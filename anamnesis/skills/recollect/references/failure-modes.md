@@ -48,7 +48,7 @@ AttributionLoss    : a past statement read as the person's decision because a to
 
 A pass that leaves nothing to present runs in the turn the searches ran in; nothing needs carrying to a later turn.
 
-Which round follows — the open question, the wider search, or the unresolved close — is as SKILL.md's `respond`, `settle`, and `expansion` say.
+Which round follows — the open question or the unresolved close — is as SKILL.md's `round` and `settle` say.
 
 ```
 an index that is empty or whose capture failed
