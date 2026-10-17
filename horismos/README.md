@@ -17,8 +17,6 @@ flowchart LR
     C -->|Accepts it as it stands, no turn owed| F[Boundary stands, what still waits in residual]
     C -->|Unclear, or an AI objection not yet closed over| H[Round that serves it]
     H --> B
-    C -->|Says they are done| K[The AI says how it took the words and where the run stands]
-    K -->|Later words| C
     F -->|Later words| C
     G -->|Later words| C
 ```

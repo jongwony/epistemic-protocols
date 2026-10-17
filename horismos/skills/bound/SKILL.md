@@ -294,8 +294,9 @@ axiom readout : (c : Context P) → BoundaryEssence c
     what returns conflicts, name what conflicts with what. A source not reached is named, by name,
     in your turn that shows the map, and so enters what the map did not look at; what still
     remains open is the person's own unknown, carried in the residual. Observation changes no
-    existing state; what needs a change of state, a permission, or another's authority is named and
-    handed over, not observed. -/
+    existing state: it may run what gathering takes where nothing existing changes, such as a
+    scratch space; what needs a change of existing state, a permission, or another's authority is
+    named and handed over, not observed. -/
 axiom observe : Context P → List (Evidence P)
 
 /-- The context with what observation returned joined to it; the map is read there. -/
@@ -544,7 +545,7 @@ def Interaction.realization : Interaction → Continuation
 inductive Op | observe | readout | round | readAnswer | converge | seam
 
 def grounding : Op → Annot × String
-  | .observe      => (.observe, "record read, artifact read, artifact search: at the start and at every reply that bears on the boundary, read what the map needs from the reachable sources — a fact a consequence rests on, a record an opened axis needs, a file the person asked you to read — without changing existing state, collecting as far as reach allows and reading whole what you say you read; what each returns enters the context as an evidence turn; name what conflicts with what, and name what was not reached in your turn that shows the map, so it enters the map's limits; an observation that needs a change of state, a permission, or another's authority is named with what it needs and handed over, never run as observation")
+  | .observe      => (.observe, "record read, artifact read, artifact search, scratch run: at the start and at every reply that bears on the boundary, read what the map needs from the reachable sources — a fact a consequence rests on, a record an opened axis needs, a file the person asked you to read — without changing existing state, collecting as far as reach allows and reading whole what you say you read; what each returns enters the context as an evidence turn; name what conflicts with what, and name what was not reached in your turn that shows the map, so it enters the map's limits; an observation that needs a change of existing state, a permission, or another's authority is named with what it needs and handed over, never run as observation")
   | .readout      => (.sense, "Internal analysis: derive the whole map and the opened detail from the context as observation left it, at every round; read each disposition and content by the turn that set it, and an earlier decision fixing who settles one as a cited fact")
   | .round        => (.interaction .extension, "the whole map — the person's own lines as theirs, your additions marked as proposals, each decision with its evidence, what depends on it and what getting it wrong costs, and any entrustment's reach, every later act that cannot be undone in view — what the map did not look at — every source observation did not reach, by name — the choices still open beside the round's question, your contrary grounds, where you hold any, before the answer, and the way to accept the boundary as it stands kept recognizable; labels defined where they are used")
   | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on the boundary, and what it does there — dispositions, corrections, an opening, an acceptance — read whole against the fused context, whatever form it takes; a reading not yet settled — by this reply or a later one — makes the person's turn owed: the run holds and a round serves it, committing nothing; a request to see something is served by the turn that shows it")
@@ -561,9 +562,8 @@ this run governs: it is the person's current words. UserSupplies leaves the pers
 value. AIPropose permits proposal work while the person keeps the selection. AIAutonomous permits
 choice only inside the governing arrangement's reach, and that choice is recorded as yours.
 Reassignment does not enlarge authority. This protocol defines the boundary: the reversible work a
-round carries forward gathers what the boundary needs — collecting material and evidence, running
-what that takes where no existing state changes, such as a scratch space — and leaves the work the
-boundary is for to what follows it: this protocol does not execute or enforce downstream work.
+round carries forward is the observation the boundary needs (`observe`), and the work the boundary
+is for is left to what follows it; this protocol does not execute or enforce downstream work.
 -/
 
 end
@@ -596,7 +596,7 @@ end Horismos
 
 - **Recognition over Recall**: Present structured options with anticipatable post-selection states.
 - **Round composition**: Keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the question.
-- **Observation before showing**: At the start and at every reply that bears on the boundary, observe what the map needs from the reachable sources before showing it, without changing existing state; name and hand over what needs a change of state, a permission, or another's authority. Collect as far as reach allows, read whole what you say you read, name what conflicts with what, name what was not reached in the turn that shows the map, and leave what remains as the person's own unknown in the residual.
+- **Observation before showing**: At the start and at every reply that bears on the boundary, observe what the map needs from the reachable sources before showing it, without changing existing state; name and hand over what needs a change of existing state, a permission, or another's authority. Collect as far as reach allows, read whole what you say you read, name what conflicts with what, name what was not reached in the turn that shows the map, and leave what remains as the person's own unknown in the residual.
 - **Whole before selection**: Construct and present the relevant provisional whole before asking what to settle, inspect, or entrust; the user's existing goal and map can remain incomplete.
 - **Progressive examination**: Let the user's response open, deepen, replace, or close axes of that whole. Serve requested examination in the next turn — a boundary that stands keeps standing — and a request to see content adopts none of it.
 - **Dynamic rendering**: Keep boundary questions and examination dimensions runtime-grounded, with recognizable seeds and a path to extend or replace the framing.
