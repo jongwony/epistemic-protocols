@@ -777,7 +777,7 @@ axiom snapshotAnchor : Context P → Option String
 
 /-- `GroundingInstruction`: the receiving procedure the block carries. -/
 def receivingProcedure : String :=
-  "Dereference the carrier and its source session, using /inquire where available or an equivalent grounding pass; the authority the plan carries does not widen through reassignment."
+  "Using /inquire where available or an equivalent grounding pass, dereference the carrier and its source session, follow the goal's cited evidence, and recover the current scope and authorized revisions from the governing utterances — a taking read with the sheet it took among them; the authority the plan carries does not widen through reassignment. Interpret each reservation under the recovered ground, following any further source its subject requires, and surface the plan's reservations with their settling grounds and the doubts it carries. A coordinator's summary does not substitute for source wording that settles authority; a judgment whose source is unreachable or no longer supports it stays open while independent reading continues. Grounding reads the plan and starts nothing; whoever runs it carries the obligations the plan holds."
 
 /-- `record_handoff`: the block over the carrier — entry points only, never a re-authored plan. -/
 def navigation (c : Context P) : NavigationBlock :=
@@ -1033,7 +1033,7 @@ Read prior material first — a boundary already drawn, an earlier plan — then
 
 ### Activation exceptions
 
-Relay and deactivate when the goal's scope yields no obligation. Your reading that the work has no autonomous interval, or that its plan is already condition-bearing, is a contrary ground on the first sheet, and a request bundling several stated outcomes held together only by the host's standing procedural contract is the question there of which goal this apportionment takes; neither ends the run. A present navigation block whose locator does not reach its carrier, or that leaves a premise required for current compilation unsupported, is an unreadable handoff and never falls through to fresh compilation. Unsupported downstream judgments remain open while independent compilation can continue.
+Relay and deactivate when the goal's scope yields no obligation. Your reading that the work has no autonomous interval, or that its plan is already condition-bearing, is a contrary ground on the first sheet, and a request bundling several stated outcomes held together only by the host's standing procedural contract is the question there of which goal this apportionment takes; neither ends the run. A present navigation block whose locator does not reach its carrier, or that leaves a premise required for current compilation unsupported, is an unreadable handoff and never falls through to fresh compilation. Unsupported downstream judgments remain open under the incoming grounding instruction while independent compilation can continue.
 
 ## Protocol
 

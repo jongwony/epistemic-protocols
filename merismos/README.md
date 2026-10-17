@@ -43,7 +43,7 @@ Every taken plan carries the obligations it hands to every run of it, wherever a
 
 ## Composition
 
-The taken plan leaves as session text and a navigation block over its carrier, so any later line of work — a method designed with `/conduct`, issues in a tracker, another session — reads it by pointer. Concrete executor selection stays outside: units carry capability requirements, never a binding.
+The taken plan leaves as session text and a navigation block over its carrier, so any later line of work — a method designed with `/conduct`, issues in a tracker, another session — reads it by pointer. Reading the block grounds the plan and starts nothing. Concrete executor selection stays outside: units carry capability requirements, never a binding.
 
 ## Known Limitations
 
