@@ -28,13 +28,14 @@ Proplasma(X) → start(c) → preview(c, utterances), where c is the fused sessi
   fan(c): the spec relayed whole — your reading of the purpose, marked as yours unless they said
     it; the axes the purpose turns on; the placeholder policy; which candidates get probes and why
     any waits; the tier — each with its basis, and on every later fan what changed since the last;
-    it yields no turn → the probes, each entering c as written
-  round: after a fan — and any you carry, each on what is gathered first, as `FanCarried` reads them
-    within `reach` — each new probe first, from its realization; then the map — whole on the first
-    round, what changed on a later one, whole when asked: per axis, what each direction's future
-    looks like there and what that rests on; the premises every probe shares; the open unknowns with
-    what would settle each; your readings and contrary grounds, each with what it bears on and rests
-    on → one opening, or a contradiction's working with nothing after it
+    it yields no turn → the probes, each entering c as written, then what they make worth gathering
+  round: after a fan — and any you carry, each followed by what it makes worth gathering, as
+    `FanCarried` reads them within `carryBound` — each new probe first, from its realization; then
+    the map — whole on the first round, what changed on a later one, whole when asked: per axis,
+    what each direction's future looks like there and what that rests on; the premises every probe
+    shares; the open unknowns with what would settle each; your readings and contrary grounds, each
+    with what it bears on and rests on → one opening, or a contradiction's working with nothing
+    after it
   next utterance u, read on fuse(c, u):
     [does not bear on this run]   the session answers it; that answer stays in c; no round of this run
     [the person constitutes d]    harvest → cleanup → DirectionalContrast
@@ -213,7 +214,7 @@ axiom unknowns : Context P → List String
 /-- **Your record**: your contrary grounds, each with what it bears on and what it rests on — a
     direction whose future no probe materialized, or a probe you read as not carrying its
     direction, among them — shown and attached as `present` and CONVERGENCE say, and raised again
-    only on new evidence, beside a closing that stands; empty when there were none. -/
+    only on new evidence; a closing stands beside any raised after it; empty when there were none. -/
 axiom dissent : Context P → List String
 
 /-- **Your judgment**: the latest utterance bears on this run — a closing, a purpose, a reading or
@@ -262,22 +263,22 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
 
 /-- **Your judgment**: the latest utterance asks to see something no probe has materialized — a
     spec element sent back (an axis, the policy, the tier, which candidates get probes, the probe
-    material), a composition to be seen, a named candidate, or a revision you proposed and did
-    not carry, taken up. A reading of the purpose sent back is a request to fan only where they ask
+    material), a composition to be seen, a named candidate, or a revision you proposed and left
+    as a proposal, taken up. A reading of the purpose sent back is a request to fan only where they ask
     to see probes on what the new purpose turns on. A wish to see something that exists observed
     for real is `gathered`'s, not a fan. -/
 axiom FanRequested : Context P → Prop
 
 /-- **Your judgment**: you find the contrast insufficient on the context as it now stands — an axis
     the purpose turns on that no probe carries, a candidate whose future would decide it unseen —
-    and carry the revision you propose forward as a fan of your own, one the person's words have
-    not set aside. -/
+    and carry the revision you propose forward as a fan of your own, one the person's words still
+    leave open. -/
 axiom FanCarried : Context P → Prop
 
 /-- **Your judgment**: at most how many fans of your own this turn carries before the round is
-    shown — the bound on `carry`; whether each one is due is `FanCarried`'s, read on the context
-    it meets. -/
-axiom reach : Context P → Nat
+    shown — what the person can take in at once, the showing that costs them least to recognize;
+    whether each one is due is `FanCarried`'s. -/
+axiom carryBound : Context P → Nat
 
 /-- **Your read**, now, of what the next judgment needs, as far as relevant access reaches: the
     candidates' material and the sources that bear on the decision — any a turn cites, and any you
@@ -401,16 +402,16 @@ axiom cleanup : Context P → List (Evidence P)
 def discard (c : Context P) : Context P := c ++ (cleanup c).map (·.val)
 
 open Classical in
-/-- Your fans, one after another while `FanCarried` reads one, each judged on what is gathered
-    first, as far as `reach` allows. -/
+/-- Your fans, one after another while `FanCarried` reads one, each followed by what it makes
+    worth gathering, as far as `carryBound` allows. -/
 def carry (ai : AITurns P) : Nat → Context P → Context P
   | 0,     c => c
-  | n + 1, c => let c' := consulted c; if FanCarried c' then carry ai n (fan ai c') else c'
+  | n + 1, c => if FanCarried c then carry ai n (consulted (fan ai c)) else c
 
 /-- Your turn, whether or not a fan came before it: the fans you carry, then the round shown on what
     stands. -/
 def aiTurn (ai : AITurns P) (c : Context P) : Context P :=
-  let c₁ := carry ai (reach c) c
+  let c₁ := carry ai (carryBound c) c
   c₁ ++ [(ai.respond c₁).val]
 
 def constituted (c : Context P) (d : Direction) : DirectionalContrast P :=
@@ -421,7 +422,8 @@ open Classical in
 /-- A turn that does not bear on the run is answered by the session and leaves the run as it
     stands; a closing is read from the person's turn before anything is gathered; otherwise what
     is gathered now enters the context, a fan runs where the turn asks to see what no probe
-    materialized, and your turn follows — any fans you carry, then the round. -/
+    materialized, followed by what it makes worth gathering, and your turn follows — any fans you
+    carry, then the round. -/
 def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
@@ -431,14 +433,14 @@ def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
     | some (.constitute d) => .contrasted (constituted f d)
     | none =>
       let c₁ := consulted f
-      let c₂ := if FanRequested c₁ then fan ai c₁ else c₁
+      let c₂ := if FanRequested c₁ then consulted (fan ai c₁) else c₁
       preview ai (aiTurn ai c₂) us
 
 def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P :=
   let c₀ := consulted c
   match notActivated c₀ with
   | some why => .notActivated c₀ why
-  | none => preview ai (aiTurn ai (fan ai c₀)) us
+  | none => preview ai (aiTurn ai (consulted (fan ai c₀))) us
 
 /-! ── LOOP ──
 Every round re-judges the whole run against the whole context: no round counts down and no answer

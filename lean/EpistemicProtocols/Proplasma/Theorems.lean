@@ -30,14 +30,12 @@ theorem relay_before_instantiation (ai : AITurns P) (c : Context P) :
   exact ⟨_, rfl⟩
 
 theorem carry_stops_without_judgment (ai : AITurns P) (n : Nat) (c : Context P)
-    (h : ¬ FanCarried (consulted c)) : carry ai (n + 1) c = consulted c := by
-  simp [carry, h]
+    (h : ¬ FanCarried c) : carry ai n c = c := by
+  cases n <;> simp [carry, h]
 
-theorem aiTurn_without_carry (ai : AITurns P) (c : Context P) (hn : reach c ≠ 0)
-    (h : ¬ FanCarried (consulted c)) :
-    aiTurn ai c = consulted c ++ [(ai.respond (consulted c)).val] := by
-  obtain ⟨n, hr⟩ := Nat.exists_eq_succ_of_ne_zero hn
-  simp [aiTurn, hr, carry_stops_without_judgment ai n c h]
+theorem aiTurn_without_carry (ai : AITurns P) (c : Context P) (h : ¬ FanCarried c) :
+    aiTurn ai c = c ++ [(ai.respond c).val] := by
+  simp [aiTurn, carry_stops_without_judgment ai _ c h]
 
 theorem unrelated_adds_no_gate (ai : AITurns P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
@@ -46,10 +44,10 @@ theorem unrelated_adds_no_gate (ai : AITurns P) (c : Context P) (u : Utterance P
 
 theorem no_fan_without_judgment (ai : AITurns P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u)) (hk : filledValue (closing (fuse c u)) = none)
-    (hq : ¬ FanRequested (consulted (fuse c u))) (h0 : reach (consulted (fuse c u)) = 0) :
+    (hq : ¬ FanRequested (consulted (fuse c u))) (hc : ¬ FanCarried (consulted (fuse c u))) :
     preview ai c (u :: us) =
       preview ai (consulted (fuse c u) ++ [(ai.respond (consulted (fuse c u))).val]) us := by
-  simp [preview, hr, hk, hq, aiTurn, h0, carry]
+  simp [preview, hr, hk, hq, aiTurn_without_carry ai _ hc]
 
 /-- One step either continues on some context or ends at a closing the person's turn filled. -/
 private theorem step (ai : AITurns P) (c : Context P) (u : Utterance P) (us : List (Utterance P))
