@@ -250,8 +250,8 @@ structure Determination where
     where you put it forward, only if it was shown on a map before this turn — or gave a grant
     whose words reach your choice (`granted`). A grant never reaches the authority coordinate
     itself: the authority and its limits stand only as the person set or adopted them. Whether an
-    act falls inside a grant is read the same way, and the map shows one that does not (`.map`).
-    A question, a deferral, or a bare mention makes nothing stand. -/
+    act falls inside a grant is read the same way. A question, a deferral, or a bare mention
+    makes nothing stand. -/
 axiom StandingSupported : Coordinate → Context P → Turn P → Determination → Prop
 
 /-- Only a person's turn makes a value stand on a coordinate the person holds, and no grant makes
@@ -375,13 +375,13 @@ axiom source : Context P → Option NavigationBlock
     order or side by side, they combine like this, they stop here, and their results go there; I
     recognize what I entrusted and what I kept, and I took this method as mine.
     `ConductedMethod`: the method handed off and what it carries — each field as the relayed map
-    showed it, `source` aside, which its producer supplies. `plan` is the method
-    as the map the closing turn answered showed it, with what changed since that map, as the relayed
-    map showed it — on a relay, the person's words for what they settled and your draft for the
-    rest — and where its text and a recorded value differ, the recorded value governs. Independent
-    lines are handed off so they do not see each other's results before those results combine. Every navigation block
-    this method leaves for a reader outside this session — `source`, and the one over the record a
-    later-session result is written to — is supplied by its producer from that record's own
+    showed it, `source` aside, which its producer supplies. `plan` is the method as the map the
+    closing turn answered showed it, with what changed since that map, as the relayed map showed
+    it — on a relay, the person's words for what they settled and your draft for the rest — and
+    where its text and a recorded value differ, the recorded value governs. Independent lines
+    are handed off so they do not see each other's results before those results combine. Every
+    navigation block this method leaves for a reader outside this session — `source`, and the
+    one over the record a later-session result is written to — is supplied by its producer from that record's own
     identity, source session, and purpose; its grounding instruction directs the recipient to run
     `/inquire` or equivalent grounding over the record and its cited sources, recover the retained
     and entrusted judgments from the governing utterances, and keep an unsupported decision open
