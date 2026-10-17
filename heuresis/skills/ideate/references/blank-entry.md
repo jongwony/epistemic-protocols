@@ -1,6 +1,6 @@
 # The frame map — frame-first gate before any concrete candidate
 
-Read whenever the gate is the frame map, as SKILL.md's "The map" says, before it is
+Read whenever the map is the frame map, as SKILL.md's "The map" says, before it is
 presented. This is the frame-first law: the frame map's template and the requirement it
 satisfies. What each answer opens is `targets` in SKILL.md.
 
@@ -25,6 +25,6 @@ Or:
 ```
 
 An idea the user gives here is their own direction, not an example of yours: it lands as their
-candidate under the frame it fits, and the field then holds a candidate, so the next gate is
-the round gate. How the frame map and its gate are otherwise shown is SKILL.md's "The map"; a
+candidate under the frame it fits, and the field then holds a candidate, so the next map is a
+round. How the frame map is otherwise shown is SKILL.md's "The map"; a
 turn that does not bear on the run is met as `Reaches` says.
