@@ -45,8 +45,9 @@ theorem one_round_per_turn (ai : AITurns P) (c : Context P) (u : Utterance P)
     (hk : filledValue (closing (fuse c u)) = none) :
     let c₁ := consulted (fuse c u)
     let c₂ := if ProductionRequested c₁ then production ai c₁ else c₁
-    let c₃ := carry ai (reach c₂) c₂
-    sketch ai c (u :: us) = sketch ai (settle c₃ ++ [(ai.respond (settle c₃)).val]) us := by
+    let c₃ := settle c₂
+    let c₄ := carry ai (reach c₃) c₃
+    sketch ai c (u :: us) = sketch ai (c₄ ++ [(ai.respond c₄).val]) us := by
   simp [sketch, hr, hk]
 
 /-- Where `Proposes` reads none, `carry` makes nothing. -/
