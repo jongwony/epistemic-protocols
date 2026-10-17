@@ -50,8 +50,8 @@ DirectionProspect
   → gather          -- what bears on the decision, read or run now — what they asked to see observed included (focus)
   → relay_spec      -- the spec whole with its basis, BEFORE any generation; on a later fan, with what changed
   → instantiate     -- placeholder probes over the candidates the relay named for probes,
-                    -- temp-isolated, each realization registered; then what the probes make
-                    -- worth gathering
+                    -- temp-isolated, each realization registered
+  → gather          -- what the probes make worth gathering, read or run now
   → present         -- the map: probes first, then per axis what each future shows and what it rests on (focus)
   → fuse(u)         -- the person's turn joins the context whole
   → constitute      -- the person's closing over the map (`ClosingSupported`)
@@ -406,9 +406,9 @@ def constituted (c : Context P) (d : Direction) : DirectionalContrast P :=
 open Classical in
 /-- A turn that does not bear on the run is answered by the session and leaves the run as it
     stands; a closing is read from the person's turn before anything is gathered; otherwise what
-    is gathered now enters the context, one fan runs — the one they ask for, else one of your own
-    where `FanCarried` reads one — followed by what it makes worth gathering, and the round
-    follows. -/
+    is gathered now enters the context, at most one fan runs — the one they ask for, else one of
+    your own where `FanCarried` reads one — followed by what it makes worth gathering, and the
+    round follows. -/
 def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
@@ -432,10 +432,8 @@ def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P
 
 /-! ── LOOP ──
 Every round re-judges the whole run against the whole context: no round counts down and no answer
-waits for a later round. Beyond the first fan, one fan runs a turn at most: the one the person's
-turn asks for, or else one of your own where `FanCarried` reads one.
-Each fan relays the spec whole, with what changed, before it generates. The loop is dialogue: no
-round count or cap closes it.
+waits for a later round. Each fan relays the spec whole, with what changed, before it generates.
+The loop is dialogue: no round count or cap closes it.
 -/
 
 /-! ── CONVERGENCE ──
