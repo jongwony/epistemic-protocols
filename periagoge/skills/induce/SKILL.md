@@ -45,7 +45,7 @@ A
   → CrystallizedAbstraction
 requires: in_process(A)                     -- read before activation (`notActivated`)
 deficit:  AbstractionInProcess              -- activation precondition
-preserves: instance_set(A)                  -- the cases are read, never rewritten; a case you found is yours
+preserves: instance_set(A)                  -- the cases are read, never rewritten: they stay as read, whatever work carried past a sheet changes in their artifacts; a case you found is yours
 invariant: Goal Crossed with Readings through Examples, with Alternatives Maintained, over Single-Candidate Steering
 invariant: setting a reading aside, taking a value you showed, an open item's words, and every closing are the person's; your readings make none of them
 -/
@@ -154,7 +154,7 @@ axiom brought : Context P → List Instance
     stands. Where the person's words state it, it is their words, quoted; otherwise it is your
     reading. It moves: a turn that narrows or widens it moves it, on the scope its words reach. At
     a recognition it is the goal as the recognizing turn took it — the sheet's, with the person's
-    changes since; a re-draw of yours that no sheet showed is not that value. -/
+    changes since. -/
 axiom goal : Context P → String
 
 /-- One reading of what the cases share. -/
@@ -180,8 +180,7 @@ structure Candidate where
     set aside, you put forward a candidate on a live reading or on a new reading of your own. Where
     you set the candidate across readings, their merge is a reading of its own, with its row; a
     merge the person makes is already a reading. At a recognition it is the candidate as the
-    recognizing turn took it — the sheet's, with the person's changes since; a re-draw of yours that
-    no sheet showed is not that value. -/
+    recognizing turn took it — the sheet's, with the person's changes since. -/
 axiom candidate : Context P → Candidate
 
 /-- **Your judgment**, made afresh on every pass: every reading of what the cases share drawn in this
@@ -310,8 +309,8 @@ inductive Proposer | ai | person | source
 /-- **Your reading**: the position of the turn that first put forward line `e`. A value whose
     content a turn of the person's or of another source put forward, and which you then drew up,
     was put forward by that turn; a case the person singled out from what they pointed you to was
-    put forward by the turn of theirs that singled it out; what the work you carried past a sheet
-    returned was put forward by you. `none` where no turn has put it forward. -/
+    put forward by the turn of theirs that singled it out. `none` where no turn has put it
+    forward. -/
 axiom introducedAt : Context P → Entry → Option Nat
 
 def proposer (c : Context P) (e : Entry) : Proposer :=
@@ -456,18 +455,17 @@ axiom collect : Context P → List (Evidence P)
 
 def pass (c : Context P) : Context P := c ++ (collect c).map (·.val)
 
-/-- A turn the work carried past a sheet adds: your own, or what a tool or the environment
-    returned. Never the person's. -/
+/-- A turn the work carried past a sheet adds: your own, what a tool or the environment returned,
+    or a peer's report. Never the person's. -/
 def Carried (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin = .external ∨ e.origin = .peer}
 
 /-- **Your work**, carried forward past a sheet in the same response on a judgment you state, within
     this protocol's domain — using the abstraction-to-be in the person's work among it: the turns it
-    adds, your own and what its tools returned; empty where you carry nothing forward. Whatever it
-    changes in the artifacts the cases come from, the cases are not read again from what it changed. -/
+    adds, your own and what its tools returned; empty where you carry nothing forward. -/
 axiom carry : Context P → List (Carried P)
 
-/-- A sheet, then the work carried past it; where that work returned anything, the sheet is drawn
-    again on what it returned, so the response ends on the sheet the person's next turn follows. -/
+/-- A sheet, then the work carried past it; where that work added anything, the sheet is drawn
+    again on it, so the response ends on the sheet the person's next turn follows. -/
 def present (respond : Context P → Response P) (c : Context P) : Context P :=
   let c₂ := c ++ [(respond c).val]
   match carry c₂ with
@@ -491,8 +489,8 @@ def crystallize (converge : Context P → Response P) (c : Context P) :
 
 open Classical in
 /-- `respond` presents the sheet the Protocol section describes under "The sheet": the candidate
-    as `candidate` gives it, the cross view (`crossView`), and the cases of `casesSection`; `present`
-    places the work carried past it. A recognition is the person's closing, filled, citing the latest utterance; it crystallizes
+    as `candidate` gives it, the cross view (`crossView`), and the cases of `casesSection`. A
+    recognition is the person's closing, filled, citing the latest utterance; it crystallizes
     unless the context, with what collection returns for it, is `Overturned`. -/
 def induce (respond session converge : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
@@ -554,7 +552,7 @@ def grounding : Op → Annot × String
   | .collect  => (.observe, "artifact read, artifact search; external fetch (conditional: the domain lies outside the person's artifacts), its URL cited where used: what `collect` reads, as its doc states")
   | .judge    => (.sense, "Internal analysis: the whole run afresh against the whole context, and whether a recognition is `Overturned`, once collection has returned")
   | .sheet    => (.interaction .extension, "the sheet the Protocol section describes under \"The sheet\", every turn that bears on the run and does not close it, the first included, and again where `present` draws it again")
-  | .carry    => (.transform, "artifact read, artifact write, a run: the work `carry` names; what it adds enters the context")
+  | .carry    => (.transform, "artifact read, artifact write, environment run: the work `carry` names; what it adds enters the context")
   | .readTurn => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there — a move, a value taken, a reading set aside or brought back, words about an open item, a closing — read whole against the fused context as it now stands, as `Reaches`, `ClosingSupported`, `SetAsideSupported`, `StandingSupported`, and `OpenSupported` read it")
   | .declare  => (.interaction .extension, "before activation, on an invocation only — AI-guided activation stays silent —, your `notActivated` reading in plain words with its basis, and what was searched")
   | .converge => (.interaction .extension, "at a crystallization, the convergence evidence CONVERGENCE names: the closing turn quoted beside the trace and the dissent")
