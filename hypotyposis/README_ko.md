@@ -44,8 +44,8 @@
 
 - Alexander, C. (1964). *Notes on the Synthesis of Form*. Harvard UP — *verified*. 좋은 적합에는 긍정적 서술이 없고, 부적합은 즉각적이며 열거 가능하다. 형태를 먼저 서술하는 대신 버전에 자기 말로 반응한다는 결정.
 - Dorst, K. & Cross, N. (2001). Creativity in the design process: co-evolution of problem–solution. *Design Studies* 22(5) — *mostly*. 문제와 해는 함께 형성된다. 사용자의 말이 정한 것을 매 라운드 전체 컨텍스트 위에서 다시 읽고, 누가 제안했는지는 따로 둔다는 결정.
-- Tohidi, M., Buxton, W., Baecker, R. & Sellen, A. (2006). Getting the right design and the design right. *CHI 2006* — *verified*. 안을 하나만 보여주면 평가가 부풀고 비판이 억제된다. 보일 버전 수가 기본값 1이 아니라 라운드마다 중계되고 다음 라운드에서 되돌려 보낼 수 있다는 결정.
-- Dow, S. et al. (2010). Parallel prototyping leads to better design results, more divergence, and increased self-efficacy. *ACM TOCHI* 17(4) — *verified*. 피드백 전에 만든 대안이 결과와 만드는 이의 몫을 모두 높인다. 대안이 라운드 일정에 고정되지 않고 라운드마다 중계되어 다음 라운드에서 되돌려 보낼 수 있다는 결정.
+- Tohidi, M., Buxton, W., Baecker, R. & Sellen, A. (2006). Getting the right design and the design right. *CHI 2006* — *verified*. 안을 하나만 보여주면 평가가 부풀고 비판이 억제된다. 보일 버전 수가 기본값 1이 아니라 생산마다 중계되고 다음 라운드에서 되돌려 보낼 수 있다는 결정.
+- Dow, S. et al. (2010). Parallel prototyping leads to better design results, more divergence, and increased self-efficacy. *ACM TOCHI* 17(4) — *verified*. 피드백 전에 만든 대안이 결과와 만드는 이의 몫을 모두 높인다. 대안이 라운드 일정에 고정되지 않고 생산마다 중계되어 다음 라운드에서 되돌려 보낼 수 있다는 결정.
 - Wadinambiarachchi, S. et al. (2024). The effects of generative AI on design fixation and divergent thinking. *CHI 2024* — *verified*. 이른 구체물은 이후의 상상을 좁힌다. 무엇이든 만들기 전에 생산 의도를 근거와 함께 중계해 버전을 좁힌 것이 보이게 하고, 의도가 묻지 않은 반응도 받아들인다는 결정.
 
 ## 설치
