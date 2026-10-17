@@ -457,12 +457,6 @@ def carry (ai : AITurns P) : Nat → Context P → Context P
   | n + 1, c => if Proposes c then carry ai n (production ai c) else c
 
 open Classical in
-/-- A turn that does not bear on the run has what it asks done to the versions carried out, then
-    the session answers it, and the run holds; a closing is read from the person's turn before
-    anything is gathered, and its record is built after what that turn asked done is observed;
-    otherwise what is gathered now enters the context, a production runs where the turn calls for a
-    version none shown embodies, what the turn asks done to the versions is carried out, then the
-    productions you carry on your own proposals, and the round follows. -/
 def sketch (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
