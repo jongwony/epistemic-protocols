@@ -9,7 +9,7 @@ Conduct how a session's epistemic work will be carried out — the lines of work
 
 ## Definition
 
-**Hyphegesis** (ὑφήγησις: a leading-the-way, guiding from just ahead): A dialogical act of conducting a session's epistemic work when the goal is clear but how to run it is not. The protocol's lexical verb is `/conduct`. Once it has run, the person can say: this work proceeds this way — these lines run in this order or side by side, they combine like this, they stop here, and their results go there; I recognize what I entrusted and what I kept, and I took this method as mine; what rests on me goes no further without me and comes back to me at the end, while the rest runs on. The whole map and its execution start as your judgment — which lines of work, how they relate, who runs each and where, and how precisely the map is worth drawing for the time it takes to reach the goal. The person keeps only what is theirs: when to stop, how lines combine, where results go, the constraints in force, and the authority they entrust with its limits, given as a broad direction. Every person turn is read again against the context as it now stands. The method is taken on the person's word, or relayed at the start where the person's own words already settle it; the turn that closes presents the map as a relay — after a taking, once more, with what that turn changed on its ledger — and hands it off in the same turn without waiting, carrying what that map showed: the person's coordinates, the deferred decisions, its lifetime, and the capabilities it needs; and the run ends there.
+**Hyphegesis** (ὑφήγησις: a leading-the-way, guiding from just ahead): A dialogical act of conducting a session's epistemic work when the goal is clear but how to run it is not. The protocol's lexical verb is `/conduct`. Once it has run, the person can say: this work proceeds this way — these lines run in this order or side by side, they combine like this, they stop here, and their results go there; I recognize what I entrusted and what I kept, and I took this method as mine; what rests on me is handed off marked as mine. The whole map and its execution start as your judgment — which lines of work, how they relate, who runs each and where, and how precisely the map is worth drawing for the time it takes to reach the goal. The person keeps only what is theirs: when to stop, how lines combine, where results go, the constraints in force, and the authority they entrust with its limits, given as a broad direction. Every person turn is read again against the context as it now stands. The method is taken on the person's word, or relayed at the start where the person's own words already settle it; the turn that closes presents the map as a relay — after a taking, once more, with what that turn changed on its ledger — and hands it off in the same turn without waiting, carrying what that map showed: the person's coordinates, the deferred decisions, its lifetime, and the capabilities it needs; and the run ends there.
 
 ```lean
 /-!
@@ -31,8 +31,8 @@ Hyphegesis(WP) → start(c) → conduct(c, utterances), where c is the fused ses
     [the person takes the method]                      → the map, relayed → handoff, in the same turn → ConductedMethod
     [otherwise]                                        → the map again, drawn from c', with a ledger
   no utterance: the gate holds; nothing is taken
-  after handoff: the run has ended; the substrate executes the method as the Rule "Handoff carries
-    its obligations" names, and re-entry is as the Rule "Re-entry" says.
+  after handoff: the run has ended; executing the method, and stopping what still runs, are the
+    substrate's.
 -/
 
 /-! ── MORPHISM ──
@@ -376,13 +376,13 @@ axiom source : Context P → Option NavigationBlock
 /-- Once it has run, the person can say: this work proceeds this way — these lines run in this
     order or side by side, they combine like this, they stop here, and their results go there; I
     recognize what I entrusted and what I kept, and I took this method as mine; what rests on me
-    goes no further without me and comes back to me at the end, while the rest runs on.
+    is handed off marked as mine.
     `ConductedMethod`: the method handed off and what it carries — each field as the relayed map
     showed it, `source` aside, which its producer supplies; the substrate reads what is uncertain against this record. `plan` is the method
     as the map the closing turn answered showed it, with what changed since that map, as the relayed
     map showed it — on a relay, the person's words for what they settled and your draft for the
     rest — and where its text and a recorded value differ, the recorded value governs. The substrate
-    executes it as the Rule "Handoff carries its obligations" names. Independent lines are handed
+    executes it. Independent lines are handed
     off so they do not see each other's results before those results combine. Every navigation block
     this method leaves for a reader outside this session — `source`, and the one over the record a
     later-session result is written to — is supplied by its producer from that record's own
@@ -483,7 +483,6 @@ def start (respond session : Context P → Response P) (c : Context P)
 /-! ── LOOP ──
 Every map re-reads the whole context; nothing counts rounds, and no earlier answer is held apart
 from what later ones say. Each map is what `.map` names. No round cap: each map is dialogue.
-After a handoff, re-entry is as the Rule "Re-entry" says.
 -/
 
 /-! ── CONVERGENCE ──
@@ -564,9 +563,7 @@ The map's first line says what the work is for and what it hands off. Prior-sess
 
 - **Conduction warrant**: Hyphegesis never conducts itself.
 - **Round composition**: Use everyday language, place each judgment beside its evidence and next-move implication, and keep analytical context before the gate. Read `references/round-composition.md` when terminology or wording must persist, content belongs to another turn, or placement relative to the gate is in question.
-- **Person's coordinates**: Read the authority the person entrusts as a broad direction; where an act falls outside it or its place inside it is unclear, the person sees it as a contrary ground before the handoff, on the map; after the handoff, it comes back as the Rule "Handoff carries its obligations" names.
-- **Handoff carries its obligations**: The substrate runs what does not rest on the person without waiting for them and, when the method has run, returns to them once with every line's results; what rests on the person — a step that cannot be undone, where a contrary ground the relayed map carried, or one execution brings evidence for, bears on it, among them — comes back in that return with what did not proceed because of it, and nothing is decided for them.
-- **Re-entry**: After a handoff, a later utterance that changes the method's direction opens a new run over the accumulated context, where what stood is read again, and that run's plan names the method it replaces; stopping what still runs is the substrate's. A question about status reopens nothing; an answer to what came back goes to it.
+- **Person's coordinates**: Read the authority the person entrusts as a broad direction; where an act falls outside it or its place inside it is unclear, the person sees it as a contrary ground before the handoff, on the map.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly; preserve content, wording, order, cadence, and turn boundaries fixed elsewhere, stating what changed and any overlapping constraint that remains.
 
 ## Adversarial Guards
