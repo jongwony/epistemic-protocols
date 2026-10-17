@@ -439,7 +439,7 @@ def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P
   | none => preview ai (aiTurn ai (fan ai c₀)) us
 
 /-! ── LOOP ──
-Every round re-judges the whole run against the whole context: nothing counts down and no answer
+Every round re-judges the whole run against the whole context: no round counts down and no answer
 waits for a later round. Beyond the opening fan, a fan happens where the person's turn asks to see
 something no probe has materialized, or where `FanCarried` reads one. Each fan relays the spec
 whole, with what changed, before it generates. The loop is dialogue: no round count or cap closes
