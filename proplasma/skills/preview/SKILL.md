@@ -29,12 +29,12 @@ Proplasma(X) → start(c) → preview(c, utterances), where c is the fused sessi
     it; the axes the purpose turns on; the placeholder policy; which candidates get probes and why
     any waits; the tier — each with its basis, and on every later fan what changed since the last;
     it yields no turn → the probes, each entering c as written
-  round: after a fan — and any you carry, as `FanCarried` reads them within `reach` — each new
-    probe first, from its realization; then the map — whole on the first round, what changed on a
-    later one, whole when asked: per axis, what each direction's future looks like there and what
-    that rests on; the premises every probe shares; the open unknowns with what would settle each;
-    your readings and contrary grounds, each with what it bears on and rests on → one opening, or a
-    contradiction's working with nothing after it
+  round: after a fan — and any you carry, each on what is gathered first, as `FanCarried` reads them
+    within `reach` — each new probe first, from its realization; then the map — whole on the first
+    round, what changed on a later one, whole when asked: per axis, what each direction's future
+    looks like there and what that rests on; the premises every probe shares; the open unknowns with
+    what would settle each; your readings and contrary grounds, each with what it bears on and rests
+    on → one opening, or a contradiction's working with nothing after it
   next utterance u, read on fuse(c, u):
     [does not bear on this run]   the session answers it; that answer stays in c; no round of this run
     [the person constitutes d]    harvest → cleanup → DirectionalContrast
@@ -213,7 +213,7 @@ axiom unknowns : Context P → List String
 /-- **Your record**: your contrary grounds, each with what it bears on and what it rests on — a
     direction whose future no probe materialized, or a probe you read as not carrying its
     direction, among them — shown and attached as `present` and CONVERGENCE say, and raised again
-    only on new evidence; empty when there were none. -/
+    only on new evidence, beside a closing that stands; empty when there were none. -/
 axiom dissent : Context P → List String
 
 /-- **Your judgment**: the latest utterance bears on this run — a closing, a purpose, a reading or
@@ -262,10 +262,10 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
 
 /-- **Your judgment**: the latest utterance asks to see something no probe has materialized — a
     spec element sent back (an axis, the policy, the tier, which candidates get probes, the probe
-    material), a composition to be seen, a named candidate, or the revision you proposed taken
-    up. A reading of the purpose sent back is a request to fan only where they ask to see probes
-    on what the new purpose turns on. A wish to see something that exists observed for real is
-    `gathered`'s, not a fan. -/
+    material), a composition to be seen, a named candidate, or a revision you proposed and did
+    not carry, taken up. A reading of the purpose sent back is a request to fan only where they ask
+    to see probes on what the new purpose turns on. A wish to see something that exists observed
+    for real is `gathered`'s, not a fan. -/
 axiom FanRequested : Context P → Prop
 
 /-- **Your judgment**: you find the contrast insufficient on the context as it now stands — an axis
@@ -361,7 +361,7 @@ inductive Outcome (P : Type)
   | holding      (c : Context P)
 
 /-! ── MODE STATE ──
-Λ is the fused context and nothing else; every reading above is taken from it. No gate, stage, or
+Λ is the fused context and nothing else; every reading above is taken from it. No round, stage, or
 count is stored: each round is judged afresh from the whole context.
 -/
 
@@ -401,13 +401,14 @@ axiom cleanup : Context P → List (Evidence P)
 def discard (c : Context P) : Context P := c ++ (cleanup c).map (·.val)
 
 open Classical in
-/-- Your fans, one after another while `FanCarried` reads one, each on what is gathered first, as
-    far as `reach` allows. -/
+/-- Your fans, one after another while `FanCarried` reads one, each judged on what is gathered
+    first, as far as `reach` allows. -/
 def carry (ai : AITurns P) : Nat → Context P → Context P
   | 0,     c => c
-  | n + 1, c => if FanCarried c then carry ai n (fan ai (consulted c)) else c
+  | n + 1, c => let c' := consulted c; if FanCarried c' then carry ai n (fan ai c') else c'
 
-/-- Your turn after any requested fan: the fans you carry, then the round shown on what stands. -/
+/-- Your turn after the opening or a requested fan: the fans you carry, then the round shown on what
+    stands. -/
 def aiTurn (ai : AITurns P) (c : Context P) : Context P :=
   let c₁ := carry ai (reach c) c
   c₁ ++ [(ai.respond c₁).val]
@@ -442,9 +443,8 @@ def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P
 /-! ── LOOP ──
 Every round re-judges the whole run against the whole context: no round counts down and no answer
 waits for a later round. Beyond the opening fan, a fan happens where the person's turn asks to see
-something no probe has materialized, or where `FanCarried` reads one, as far as `reach` bounds this
-turn. Each fan relays the spec whole, with what changed, before it generates. The loop is
-dialogue: no round count or cap closes it.
+something no probe has materialized, or as `aiTurn` carries one of yours. Each fan relays the spec
+whole, with what changed, before it generates. The loop is dialogue: no round count or cap closes it.
 -/
 
 /-! ── CONVERGENCE ──
@@ -531,7 +531,7 @@ end Proplasma
 
 ## Mode Activation
 
-`/preview` is user-invocable, and an invocation is read through `notActivated` before anything is built. On the Hybrid path, the AI may propose it at a live direction choice only with cited evidence that the candidates' futures cannot be recognized from their descriptions — a choice delegated to a principle, the option set reworked instead of chosen, or "I'd have to see it"; prior-session indices may seed that reading, never the person's judgment.
+`/preview` is user-invocable, and an invocation is read through `notActivated` before anything is built. On the Hybrid path, the AI may propose it at a live direction choice only with cited evidence that the candidates' futures cannot be recognized from their descriptions — a choice delegated to a principle, the option set reworked instead of chosen, or "I'd have to see it"; prior-session indices may seed that reading, never the person's judgment. Proposed this way, the run starts once the person takes the proposal up.
 
 ## Protocol
 
