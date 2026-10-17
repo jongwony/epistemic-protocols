@@ -189,8 +189,7 @@ structure Frame where
 
 /-- **Your record**, read from the context: the frames and branches registered — derived from the
     entry, frames the request itself names or the person names at the frame map or at a round,
-    shaped into frames, branches under what the person asked to deepen, and frames and branches
-    you shape when you widen the field on your own judgment. On Seeded, at least one,
+    shaped into frames, and branches under what the person asked to deepen. On Seeded, at least one,
     seed-anchored and novel, every seed landing under one; on Blank, novel and abstract. Any idea or
     item of material that fits no registered frame registers a frame shaped from its angle. Whether
     the person's words name a registered frame is read here. -/
@@ -286,11 +285,10 @@ axiom dissent : Context P → List String
     frames selected and any the person named, shaped into frames; at a round, the named unexplored
     frames, a new angle shaped into frames, or a branch under an open frame or candidate the person
     asked to deepen. An excluded frame is never among them. A continue that names nothing takes
-    every unexplored frame except one the person parked — the person naming it opens it — and,
-    where none is left, new frames you shape. On a Seeded entry's first pass, the frames the
-    request itself names and at least one derived frame, how many being yours; the rest stay
-    unexplored. At a Blank entry's start, the frames the request itself names — "angles: pricing
-    and pacing" — and none where it names none. At a Resumed entry's
+    every unexplored frame except one the person parked; the person naming it opens it. On a Seeded
+    entry's first pass, the frames the request itself names and at least one derived frame, how many
+    being yours; the rest stay unexplored. At a Blank entry's start, the frames the request itself
+    names — "angles: pricing and pacing" — and none where it names none. At a Resumed entry's
     resuming step, the frames the request names or asks to deepen — an opened frame it names is
     deepened by a branch under it, never reopened; a request that only continues opens none, and a
     request the earlier field already answered — an answer to its map bound as the request by a
@@ -298,7 +296,7 @@ axiom dissent : Context P → List String
     entry opens what the corrected entry's opening would open and what the turn itself names, less
     any frame already opened — a resume with a named deepening opens that branch. Empty when the
     answer opens nothing — a deferral alone, an idea of the person's own, a question, a correction
-    of anything but the entry, or a pick among candidates. -/
+    of anything but the entry, a pick among candidates, or a continue with nothing left to open. -/
 axiom targets : Context P → List Frame
 
 /-- **Your judgment**: the cited turn — the person's latest utterance — takes the field, read from
@@ -424,10 +422,7 @@ def advance (generate respond : Context P → Response P) (c : Context P) : Cont
 
 open Classical in
 /-- `respond` presents the map of the whole field, re-read from the context and never stored, as
-    the Protocol section's "The map" describes. After a round's map, a further pass you carry
-    forward on a judgment you state — opening what a continue that names nothing would, or a branch
-    under an open frame or candidate outside what the person parked — belongs to the response that
-    presents the map; the recursion advances only on the person's turns. -/
+    the Protocol section's "The map" describes. -/
 def ideate (generate respond session : Context P → Response P) :
     Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
@@ -538,7 +533,7 @@ Where the person asked about the map, answer it first, from the map, before the 
 
 While this field holds no candidate — yours or the person's — the map is the frame map: its selector offers abstract frames in the template `references/blank-entry.md` carries; otherwise it is a round, so taking is offered only over a field with a candidate in it. Before every round's offer, say first what continuing would cost to review and what taking keeps, naming your proposed exclusions that taking would take. Where the person explicitly asks for the field while no candidate exists, say plainly that there is nothing to take yet. Where named material waits on the frame map for a frame to open, the gate says so plainly.
 
-Every round ends on its offer: present continue first and "Take this field as it stands" second, rendered in the person's idiom, with symmetric specificity. Continue names its widening target, the frames `targets` would open — unexplored frames other than those the person parked, new frames or a new angle, or a branch under whatever the person asks to deepen. Any novelty or coverage observation, and every doubt, stays before the offer and does not recommend or reorder either answer.
+Every round ends on its offer: present continue first and "Take this field as it stands" second, rendered in the person's idiom, with symmetric specificity. Continue names its widening target, the frames `targets` would open — unexplored frames other than those the person parked, a new angle, or a branch under whatever the person asks to deepen. Any novelty or coverage observation, and every doubt, stays before the offer and does not recommend or reorder either answer.
 
 At the taking, show the field's trace: the topic, then the whole map as drawn above with nothing compressed — each frame and branch marked out of scope wherever it is excluded, and otherwise explored or unexplored — and with it what only the trace carries: material named but not yet in the field, listed as named and not in the field; each exclusion taken with the field, shown as your proposal the person took; and every change since the map the person answered, marked.
 
