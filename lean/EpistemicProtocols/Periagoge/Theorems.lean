@@ -95,8 +95,7 @@ theorem recognition_crystallizes (respond session converge : Context P → Respo
 
 /-- A turn that bears on the run and recognizes nothing — no filled closing cites the utterance
     just fused, or the context with it and what collection returned for it is `Overturned` —
-    crystallizes nothing at that step: the response to it, with its sheet, is placed on that context
-    (`present`). -/
+    crystallizes nothing at that step: the response to it is placed on that context (`present`). -/
 theorem unrecognized_draws_again (respond session converge : Context P → Response P)
     (c : Context P) (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (h : (¬ ∃ (src : Cite (fuse c u)), ∃ ok sup, closing (fuse c u) = .filled () src ok sup ∧
