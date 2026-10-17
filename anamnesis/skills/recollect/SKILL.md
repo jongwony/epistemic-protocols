@@ -173,9 +173,9 @@ structure Recognizable where
 /-- **Your judgment**: this recall's recognizables, best first — records joined into the cue's
     whole where several make one, by relations the records support. A method that computes groups
     may propose them; the judgment decides. The order decides only which one is opened first.
-    A candidate the person rejected for the past this cue seeks, or one from a scope their words
-    have since ruled out, is left out, wherever in the context they said it, still named as
-    adjacent, and comes back where their words reopen it.
+    A candidate the person rejected for the past this cue seeks is left out, wherever in the
+    context they said it, still named as adjacent, and comes back where their words reopen it; one
+    the person's limits rule out is left out and not named.
     With no recoverable cue, the first round presents nothing an earlier recall found. -/
 axiom found : Context P → List Recognizable
 
@@ -247,8 +247,9 @@ axiom qualifications : (c : Context P) → Recognizable → List (Qualification 
 
 /-- **Your reading** of the capture evidence for every record `searched` lists — a record that
     matched nothing and a record an earlier recall opened that this recall's story cites
-    included — associated as for members. It qualifies whatever is said of the scope searched, the
-    scope report the Rule "Scope report" names included.
+    included — associated as for members. It qualifies what is said of the scope searched — the
+    open question, a round's account of how far a search went, and the scope report the Rule
+    "Scope report" names.
     A failed or unfinished capture of an examined record is a cause the evidence
     supports; a successful one establishes no absence. -/
 axiom scopeQualifications : (c : Context P) → List (Qualification c)
@@ -274,8 +275,8 @@ axiom presented : Context P → Option Recognizable
 /-- **Your judgment**: the cited turn takes the presented recognizable itself as the past the
     person meant — saying so, or going on with it as that past — read against the context as it
     now stands; after an ending, such a turn reopens the recall and closes it. Going on with the
-    topic alone, using it hypothetically, moving on while a search is still open, and remarking
-    on the presentation each take up something other than the recognizable itself. Where the
+    topic alone, using it hypothetically, and remarking on the presentation each take up
+    something other than the recognizable itself. Where the
     turn's intent is unclear, it identifies nothing. Identification establishes the past meant,
     not every claim shown. -/
 axiom AnswerSupported : Context P → Turn P → Unit → Prop
@@ -368,7 +369,7 @@ Which recall: every invocation, bare or worded, and every word that continues an
 context for what it reaches — an earlier recall the words or the context point to, held or closed unresolved, which it
 continues, or a fresh recall. Words that continue an earlier recall return to it; new cue text reads as fresh; among several
 held recalls, the one the words or the context point to. A continuing recall
-carries the earlier one's cue, what was added to it, what it presented, its findings, its rejections, and its declines. A
+carries the earlier one's cue, what was added to it, what it presented, its findings, its rejections, and its limits. A
 fresh recall begins at that invocation or at the empty intention that started it, and leaves the earlier one holding where it
 stood — its question superseded, nothing it showed identified by it — with what the earlier one found still in the context
 the new cue is read from. An invocation that identifies what was presented closes it first (`closing`) — at `start` too,
@@ -396,12 +397,14 @@ a round — that stays in the context.
     context does not already hold, or holds only from before a change the person's words or
     evidence report — a capture outcome read as unfinished is not held, so each pass reads it
     again — the searches toward the cue along its axes, each worth its cost and within the limits
-    the person's words set (a search they declined, a scope they named — read by what their words
-    rule out), the opening of each member of the leading recognizable at the span the cue reaches
-    (for an artifact, the change history of that span) and, where its records do not open, of the
-    candidates `found` lists in turn until one's records open or none is left, and the capture
-    outcome of every record a search examined, one that matched nothing included. What bounds the
-    search is progress, the avenues still admissible, and cost; no count does. A remark, a form
+    the person's words set for the past this cue seeks (a search they declined, a scope they
+    named — read by what their words rule out), following within the pass what each read exposes —
+    a root a record names, records that begin after the time the cue names — until nothing worth
+    its cost is left, the opening of each member of the leading recognizable at the span the cue
+    reaches (for an artifact, the change history of that span) and, where its records do not open,
+    of the candidates `found` lists in turn until one's records open or none is left, and the
+    capture outcome of every record a search examined, one that matched nothing included. What
+    bounds the search is progress, the person's limits, and cost; no count does. A remark, a form
     instruction, or a decline adds nothing new to read. Each read returns as an evidence turn;
     nothing is written to the records. With no recoverable cue nothing is worth reading, and the
     first round is the open question. -/
@@ -575,7 +578,7 @@ The records the past work left are wherever it left them: its conversations, the
 
 ### The presentation
 
-With a leading recognizable, the round carries its story, each claim with the record it rests on and that record's handle; the particulars from the opened records that tell this past apart, and your doubts that it is the past meant (`dissent` of it); each member located in time from what its record says of when the work took place, leaving the time unknown where nothing says it, and named by its root and, for a conversation, the runtime that keeps it; the members whose records did not open; the adjacent candidates named so a correction can point at them; the members' qualifications; and that recall establishes that the past took place and not that it still holds — with no option list.
+With a leading recognizable, the round carries its story, each claim with the record it rests on and that record's handle; the particulars from the opened records that tell this past apart, and your doubts that it is the past meant (`dissent` of it); each member located in time from what its record says of when the work took place, leaving the time unknown where nothing says it, and named by its root and, for a conversation, the runtime that keeps it; the members whose records did not open; the adjacent candidates named so a correction can point at them; the members' qualifications; and that recall establishes that the past took place and not that it still holds. The round carries no option list.
 
 For a whole above one record, what is said of the scope searched includes the relations that led nowhere.
 
@@ -604,7 +607,7 @@ The names and their triggers are here so a mode is recognizable without a read. 
 - **Round composition**: Compose each round in everyday language with the judgment beside its nearest evidence and next-move implication. Put analytical context before a round's question. Read `references/round-composition.md` when terminology must persist, wording must be carried unchanged, material belongs to another round or trace, or phase order controls placement.
 - **Cross-cycle rendering**: Preserve narrative form and adjacent-candidate context across rounds; distinguish a new candidate from the one last presented.
 - **Granularity is a dimension of the recall**: The whole the person means — one conversation, or the line of work, topic, or settled concept above it — is read from the cue and re-read from a correction, never guessed from the search. Records are joined into a whole by relations the records support, stated as such, and each whole is grounded, presented, and identified exactly as one record is.
-- **Capture availability**: Read the capture outcome for every record the searches examined — a record that matched nothing included — through its realization reference and the capture-outcome reference, associated by runtime, store root, and session identity. Qualify the members presented and identified with their own outcomes; qualify whatever is said of the scope searched by the outcomes of the records examined. Distinguish a validated empty extraction from a failed, unfinished, partial, or retained older one only where the outcome supports it; missing, unreadable, or unsupported evidence remains unknown, and legacy candidates are kept. Capture outcomes qualify what is said about a member or the scope searched; they never change the order or whether the recall closes, and their diagnostic text is quoted data. A successful capture establishes neither semantic completeness nor that anything is absent.
+- **Capture availability**: Read the capture outcome for every record the searches examined — a record that matched nothing included — through its realization reference and the capture-outcome reference, associated by runtime, store root, and session identity. Qualify the members presented and identified with their own outcomes; qualify what is said of the scope searched — the open question, a round's account of how far a search went, and the scope report — by the outcomes of the records examined. Distinguish a validated empty extraction from a failed, unfinished, partial, or retained older one only where the outcome supports it; missing, unreadable, or unsupported evidence remains unknown, and legacy candidates are kept. Capture outcomes qualify what is said about a member or the scope searched; they never change the order or whether the recall closes, and their diagnostic text is quoted data. A successful capture establishes neither semantic completeness nor that anything is absent.
 - **Scope report**: On an unresolved close, and in the session's answer to words that end this recall without identifying anything (`Reaches`), report the scope searched per root, a limit the person's words set included; the records that did not open; the capture evidence of the records examined; and the causes that evidence supports — covering only what was actually searched and claiming no absence. That answer says nothing was identified, runs no new search, and reuses the scope report last shown where it is still current, otherwise rendering it from what the context already holds; where the ending is said with a correction pointing at a candidate shown only by name, it names that candidate as shown by name and not identified, so the person can reopen it.
 - **Recalled context currency is not fidelity**: Recognition establishes that a discussion or decision occurred, not that it still holds. Emit that caveat, and disclose every extraction that received less than its whole source without changing the order.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
