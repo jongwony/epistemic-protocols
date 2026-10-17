@@ -339,10 +339,9 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
     waiting on, supplied, or the person's word to go on in the medium at hand or without a reference
     that cannot be reached; or a value they set, took, or replaced that no version shown embodies. A
     question about a version, answered as asked, and words that move nothing a version would show
-    call for nothing; a value they took that a shown version already embodies calls for no new
-    version. Where a mark reads as about the rendering rather than the form, the next version fixes
-    the rendering and leaves the form as it was, and the round says so; where the evidence does not
-    settle which it is about, the round says that. -/
+    call for nothing. Where a mark reads as about the rendering rather than the form, the next
+    version fixes the rendering and leaves the form as it was, and the round says so; where the
+    evidence does not settle which it is about, the round says that. -/
 axiom ProductionRequested : Context P → Prop
 
 /-- **Your judgment**: on the context as it stands, making now a version you would propose serves
