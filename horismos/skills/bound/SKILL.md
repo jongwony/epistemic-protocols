@@ -335,16 +335,16 @@ axiom acceptance : (c : Context P) → Occ (acceptanceCoord (P := P)) c
     none of it leaves the run as it stands: the session answers it, that answer stays in the
     context, a holding run keeps holding, and a boundary that stands keeps standing. Words that end
     the run are read like any other turn, and the turn that answers them says how it took them;
-    whether a boundary that stands still reaches later work is read from the context where the
-    ending stands; your own reading that the person is done ends nothing. -/
+    your own reading that the person is done ends nothing. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your reading**: a turn of the person's is still owed before the boundary stands — read on the
     context as observation left it, including what this round will show. Guidance for the reading,
     not cases it must check: a reply of theirs whose reading their later words have not yet
     settled (materially different futures remain viable — the round shows the candidate readings,
-    and nothing is committed from it until their words settle it); you hold contrary grounds the
-    person has not closed over; an acceptance does not reach what is now at issue. A request to
+    and nothing is committed from it until their words settle it); you hold contrary grounds against
+    a disposition or held value of theirs that they have not closed over — a doubt about your own
+    choice inside an entrustment is yours to weigh and is shown with the boundary; an acceptance does not reach what is now at issue. A request to
     see or open something is not one: the turn that shows it serves it, seeing it adopts nothing,
     and a boundary that stands keeps standing. Where a turn is owed, the run holds and the round
     serves it. -/
@@ -352,10 +352,9 @@ axiom owed : Context P → Bool
 
 /-- **Your record**: the contrary grounds you presented in a round before the person's turn — a
     disposition you doubt, a premise that may not hold — attached to the boundary where the person
-    set it over them; empty when there were none. A ground you would raise first where the
-    boundary would stand makes the person's turn owed instead. The person's dispositions stand
-    over them: you never rewrite or veto one, and new evidence against one is shown before any
-    step that depends on it and cannot be undone. -/
+    set it over them; empty when there were none. A ground against a disposition of the person's
+    that you would raise first where the boundary would stand makes their turn owed instead. The
+    person's dispositions stand over them: you never rewrite or veto one. -/
 axiom dissent : Context P → List String
 
 /-- One disposition on the record: the decision, the disposition, and the person's turn it stands
@@ -549,29 +548,19 @@ def grounding : Op → Annot × String
   | .readout      => (.sense, "Internal analysis: derive the whole map and the opened detail from the context as observation left it, at every round; read each disposition and content by the turn that set it, and an earlier decision fixing who settles one as a cited fact")
   | .round        => (.interaction .extension, "the whole map — the person's own lines as theirs, your additions marked as proposals, each decision with its evidence, what depends on it and what getting it wrong costs, and any entrustment's reach, every later act that cannot be undone in view — what the map did not look at — every source observation did not reach, by name — the choices still open beside the round's question, your contrary grounds, where you hold any, before the answer, and the way to accept the boundary as it stands kept recognizable; labels defined where they are used")
   | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on the boundary, and what it does there — dispositions, corrections, an opening, an acceptance — read whole against the fused context, whatever form it takes; a reading not yet settled — by this reply or a later one — makes the person's turn owed: the run holds and a round serves it, committing nothing; a request to see something is served by the turn that shows it")
-  | .converge     => (.interaction .extension, "DefinedBoundary as it stands — its map, its record with who put each disposition forward and how it stood, cited facts, the residual — declared empty where nothing is open — with why each open item bears and who settles it, and its limits — every source observation did not reach, by name — every later act that cannot be undone that an entrustment on it reaches, in view, and the dissent attached to it — a contrary ground the person has not closed over is never first shown here, it makes their turn owed; with the way to reopen it; where it answers a request to see something, the requested content beside the boundary as it stands, pointing to what was already shown where nothing changed; where nothing awaited the person, say so")
-  | .seam         => (.interaction .extension, "where the boundary newly stands or what stands has changed, proceed to the next move the person declared, citing that turn — where the turn that sets it also ends the run, only a next move declared with it; a boundary standing again unchanged does not run that move again; this protocol declares no wired outbound edge, and every checkpoint whose own contract requires the person's response still fires")
+  | .converge     => (.interaction .extension, "DefinedBoundary as it stands — its map, its record with who put each disposition forward and how it stood, cited facts, the residual — declared empty where nothing is open — with why each open item bears and who settles it, and its limits — every source observation did not reach, by name — every later act that cannot be undone that an entrustment on it reaches, in view, and the dissent attached to it — a contrary ground against a disposition of the person's that they have not closed over is never first shown here, it makes their turn owed; with the way to reopen it; where it answers a request to see something, the requested content beside the boundary as it stands, pointing to what was already shown where nothing changed; where nothing awaited the person, say so")
+  | .seam         => (.interaction .extension, "where the boundary newly stands or what stands has changed, proceed to the next move the person declared, citing that turn")
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution remains context-bound.
-A receiving protocol or delegate reads DefinedBoundary with its context: the whole map, its record,
-and its citations, never an uncited task list. It resolves the relevant entry's question,
-applicability, dependencies, limits, and cited sources before relying on a disposition or content. A
-grant is the arrangement governing a decision (`governing`): the disposition recorded in this run,
+A grant is the arrangement governing a decision (`governing`): the disposition recorded in this run,
 reaching only what was shown of it, or, where none is, a disposition fixed by a cited earlier
-decision of the person who holds it, read through that source and reaching only what the source
-states — a cited fact, not a disposition of this run. Where both bear on one decision and differ,
-the disposition recorded in this run governs: it is the person's current words. An open item's
-governing arrangement carries the origin it stands on, so an earlier decision's grant is read
-through its source, not as this run's. A proposal and open content are read as such.
-UserSupplies leaves the person to supply the value. AIPropose permits proposal work while the
-person keeps the selection. AIAutonomous permits choice only inside the
-governing arrangement's reach, and that choice is recorded as yours. A missing entry, an unreadable
-citation, or a changed prerequisite leaves that judgment unresolved; where examination needs
-evidence or a capability this run lacks, name what is needed and keep the judgment pending; continue
-independent authorized work and reopen the affected boundary before dependent settlement. A grant to
-perform work preserves every checkpoint whose own contract requires the person's response, and
-reassignment does not enlarge authority. This protocol defines the boundary; it does not execute or
+decision of the person who holds it, reaching only what that source states — a cited fact, not a
+disposition of this run. Where both bear on one decision and differ, the disposition recorded in
+this run governs: it is the person's current words. UserSupplies leaves the person to supply the
+value. AIPropose permits proposal work while the person keeps the selection. AIAutonomous permits
+choice only inside the governing arrangement's reach, and that choice is recorded as yours.
+Reassignment does not enlarge authority. This protocol defines the boundary; it does not execute or
 enforce downstream work.
 -/
 
@@ -599,7 +588,6 @@ end Horismos
 - When no item on the map awaits the user's disposition and no turn of the user's is owed, the turn that shows the standing boundary (`converge`) presents it and says that it stands; the user's next words reopen it where they bear on it.
 - When a response is not yet readable as continuing the boundary, accepting it, or ending the run, the user's turn is owed even where nothing awaits: the next round shows the candidate readings with their consequences, and nothing is committed from the unsettled reading.
 - When the user turns to other work, answer it; the run stays as it stood — a run that holds keeps holding and a boundary that stands keeps standing — and nothing is closed on the user's behalf.
-- Before handing off or using a resulting boundary, read the COMPOSITION contract with its cited sources. Preserve the holder of every retained judgment, the reach of each grant, and any condition that must be revisited.
 - When composing a round whose terminology, quotation, neighboring material, or phase order needs attention, read `references/round-composition.md` before presenting it.
 
 ## Rules
@@ -614,8 +602,8 @@ end Horismos
 - **Entrustment reach**: An entrustment reaches what was shown of it. A later act that cannot be undone is entrusted only where its consequence was shown by kind, target, and limit; an earlier authorization of the same kind, target, and limit is not asked for again.
 - **Dependency revision**: Reconcile changed ground and transitive dependents before the next round or the reading where the boundary stands, retaining supported decisions and recording unresolved consequences.
 - **Prior-map provenance**: Read an earlier boundary through the turns it cites. Its citation still points at the same source; whether that source still supports the settlement is judged against the context that now stands, and an unreachable or unsupported setting is advisory. An earlier decision relayed from a record is a cited fact, not a disposition of this run — whether it fixes a decision's content or who settles it.
-- **After closure**: Never rewrite or veto a user's disposition. Attach your contrary grounds to the boundary where the user set it over them, raise a disposition again only on new evidence, and show that evidence before any dependent step that cannot be undone.
-- **Settlement across delegation**: Carry and read the source-defined question, judgment holder, limits, dependencies, and residual at downstream use; work reassignment and a summary supply no additional grant.
+- **After closure**: Never rewrite or veto a user's disposition. Attach your contrary grounds to the boundary where the user set it over them, and raise a disposition again only on new evidence.
+- **Settlement across delegation**: Reassigning the work and summarizing the boundary supply no additional grant.
 - **Closing**: Keep the way to accept the boundary as it stands recognizable in every round, with every irreversible AI-delegation proposal in view. The boundary stands where no turn of the user's is owed (your `owed` reading) and they accept it or no item awaits their disposition; silence and other work leave the run as it stood, words that end the run are read as `Reaches` states, and scan exhaustion or a visit count supplies no acceptance.
 - **Ambiguous response routing**: Read mixed responses whole; when materially different futures remain viable, continue and present those readings and their consequences. Commit nothing from an unresolved reading. Never ask the user to classify their own words into the disposition forms.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
