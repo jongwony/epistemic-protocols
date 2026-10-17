@@ -174,8 +174,7 @@ structure Recognizable where
     whole where several make one, by relations the records support. A method that computes groups
     may propose them; the judgment decides. The order decides only which one is opened first.
     A candidate the person rejected for the past this cue seeks is left out, wherever in the
-    context they said it, still named as adjacent, and comes back where their words reopen it; one
-    the person's limits rule out is left out, still named as adjacent.
+    context they said it, still named as adjacent, and comes back where their words reopen it.
     With no recoverable cue, the first round presents nothing an earlier recall found. -/
 axiom found : Context P → List Recognizable
 
@@ -369,7 +368,7 @@ Which recall: every invocation, bare or worded, and every word that continues an
 context for what it reaches — an earlier recall the words or the context point to, held or closed unresolved, which it
 continues, or a fresh recall. Words that continue an earlier recall return to it; new cue text reads as fresh; among several
 held recalls, the one the words or the context point to. A continuing recall
-carries the earlier one's cue, what was added to it, what it presented, its findings, its rejections, and its limits. A
+carries the earlier one's cue, what was added to it, what it presented, its findings, and its rejections. A
 fresh recall begins at that invocation or at the empty intention that started it, and leaves the earlier one holding where it
 stood — its question superseded, nothing it showed identified by it — with what the earlier one found still in the context
 the new cue is read from. An invocation that identifies what was presented closes it first (`closing`) — at `start` too,
@@ -396,16 +395,15 @@ a round — that stays in the context.
 /-- **Your collection** for one pass: what the cue as it now stands gives reason to read and the
     context does not already hold, or holds only from before a change the person's words or evidence
     report — a capture outcome read as unfinished is not held, so each pass reads it again — the
-    searches toward the cue along its axes, each worth its cost and within the limits the person's
-    words set for this recall (a search they declined, a scope they named — read by what their words
-    rule out), following within the pass what each read exposes, as Where to look says, until
-    nothing worth its cost is left, the opening of each member of the leading recognizable at the
-    span the cue reaches (for an artifact, the change history of that span) and, where its records
-    do not open, of the candidates `found` lists in turn until one's records open or none is left,
-    and the capture outcome of every record a search examined, one that matched nothing included.
-    What bounds the search is progress, the person's limits, and cost; no count does. A remark or a form
-    instruction adds nothing new to read. Each read returns as an evidence turn;
-    nothing is written to the records. With no recoverable cue nothing is worth reading, and the
+    searches toward the cue along its axes, each worth its cost and within what the person's words
+    rule out, read on the accumulated context as it now stands, following within the pass what each
+    read exposes, as Where to look says, until nothing worth its cost is left, the opening of each
+    member of the leading recognizable at the span the cue reaches (for an artifact, the change
+    history of that span) and, where its records do not open, of the candidates `found` lists in
+    turn until one's records open or none is left, and the capture outcome of every record a search
+    examined, one that matched nothing included. What bounds the search is progress and cost; no
+    count does. A remark or a form instruction adds nothing new to read. Each read returns as an
+    evidence turn; nothing is written to the records. With no recoverable cue nothing is worth reading, and the
     first round is the open question. -/
 axiom search : Context P → List (Evidence P)
 
@@ -573,11 +571,11 @@ Before searching a runtime's conversation records, read its realization referenc
 
 ### Where to look
 
-The records the past work left are wherever it left them: its conversations, the artifacts it changed and their change history, the decisions it recorded. Read from the cue the axes it can be reached along — a time, a person, an artifact, an identifier, a coined term — and follow them. Start from the current configuration's records; when the recall points at another root — a record names it, the records here begin after the time the cue names, or the person says so — search there too, and say which roots were searched. A root nothing points at is searched where it is worth its cost.
+The records the past work left are wherever it left them: its conversations, the artifacts it changed and their change history, the decisions it recorded. Read from the cue the axes it can be reached along — a time, a person, an artifact, an identifier, a coined term — and follow them. Start from the current configuration's records; when the recall points at another root — a record names it, the records here begin after the time the cue names, or the person says so — search there too, and say which roots were searched.
 
 ### The presentation
 
-With a leading recognizable, the round carries its story, each claim with the record it rests on and that record's handle; the particulars from the opened records that tell this past apart, and your doubts that it is the past meant (`dissent` of it); each member located in time from what its record says of when the work took place, leaving the time unknown where nothing says it, and named by its root and, for a conversation, the runtime that keeps it; the members whose records did not open; the adjacent candidates named so a correction can point at them; the members' qualifications; and that recall establishes that the past took place and not that it still holds. The round ends on the story, open to the person's own words.
+With a leading recognizable, the round carries its story, each claim with the record it rests on and that record's handle; the particulars from the opened records that tell this past apart, and your doubts that it is the past meant (`dissent` of it); each member located in time from what its record says of when the work took place, leaving the time unknown where nothing says it, and named by its root and, for a conversation, the runtime that keeps it; the members whose records did not open; the adjacent candidates named so a correction can point at them; the members' qualifications; and that recall establishes that the past took place and not that it still holds.
 
 For a whole above one record, what is said of the scope searched includes the relations that led nowhere.
 
