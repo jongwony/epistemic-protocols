@@ -29,18 +29,19 @@ Proplasma(X) → start(c) → preview(c, utterances), where c is the fused sessi
     it; the axes the purpose turns on; the placeholder policy; which candidates get probes and why
     any waits; the tier — each with its basis, and on every later fan what changed since the last;
     it yields no turn → the probes, each entering c as written, then what they make worth gathering
-  round: after a fan — and one of your own where `FanCarried` reads one — each new probe first,
-    from its realization; then the map — whole on the first round, what changed
-    on a later one, whole when asked: per axis, what each direction's future looks like there and
-    what that rests on; the premises every probe shares; the open unknowns with what would settle
-    each; your readings and contrary grounds, each with what it bears on and rests on → one
-    opening, or a contradiction's working with nothing after it
+  round: after the turn's one fan, where one ran, each new probe first, from its realization;
+    then the map — whole on the first round, what changed on a later one, whole when asked: per
+    axis, what each direction's future looks like there and what that rests on; the premises every
+    probe shares; the open unknowns with what would settle each; your readings and contrary
+    grounds, each with what it bears on and rests on → one opening, or a contradiction's working
+    with nothing after it
   next utterance u, read on fuse(c, u):
-    [does not bear on this run]   the session answers it; that answer stays in c; no round of this run
+    [does not bear on this run]   the session answers it; that answer stays in c; no round of
+                                  this run
     [the person constitutes d]    harvest → cleanup → DirectionalContrast
     [otherwise]                   what is gathered now enters c, anything they asked to see
-                                  observed for real among it; a fan where they ask to see what no
-                                  probe materialized → round
+                                  observed for real among it; one fan at most — the one they ask
+                                  for, else one of your own where `FanCarried` reads one → round
   no utterance: nothing is constituted, generated, gathered, or discarded; the run holds
 -/
 
@@ -48,7 +49,9 @@ Proplasma(X) → start(c) → preview(c, utterances), where c is the fused sessi
 DirectionProspect
   → gather          -- what bears on the decision, read or run now — what they asked to see observed included (focus)
   → relay_spec      -- the spec whole with its basis, BEFORE any generation; on a later fan, with what changed
-  → instantiate     -- placeholder probes over the candidates the relay named for probes, temp-isolated, each realization registered
+  → instantiate     -- placeholder probes over the candidates the relay named for probes,
+                    -- temp-isolated, each realization registered; then what the probes make
+                    -- worth gathering
   → present         -- the map: probes first, then per axis what each future shows and what it rests on (focus)
   → fuse(u)         -- the person's turn joins the context whole
   → constitute      -- the person's closing over the map (`ClosingSupported`)
@@ -262,7 +265,8 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
 
 /-- **Your judgment**: the latest utterance asks to see something no probe has materialized — a
     spec element sent back (an axis, the policy, the tier, which candidates get probes, the probe
-    material), a composition to be seen, a named candidate, or a revision you proposed and showed unbuilt, taken up.
+    material), a composition to be seen, a named candidate, or a revision you proposed that no probe
+    has built yet, taken up.
     A reading of the purpose sent back is a request to fan only where they ask to see probes on
     what the new purpose turns on. A wish to see something that exists observed
     for real is `gathered`'s, not a fan. -/
@@ -270,7 +274,8 @@ axiom FanRequested : Context P → Prop
 
 /-- **Your judgment**: you find the contrast insufficient to make the futures recognizable for the
     purpose, and carry the revision you propose forward as a fan of your own, one the person's
-    words still leave open. -/
+    words still leave open. Where they ask for a fan in the same turn, the revision you propose
+    rides that fan's spec. -/
 axiom FanCarried : Context P → Prop
 
 /-- **Your read**, now, of what the next judgment needs, as far as relevant access reaches: the
@@ -365,9 +370,9 @@ abbrev Mode (P : Type) := Context P
 A step is one arm of a structural recursion over the person's utterances. Your turns are
 `AITurns`: a fan relays the spec — whole, with what changed — before anything is generated, then
 the probes are written (`narrate` for a Vignette; for a Mockup, the operations `instantiatedBy`
-names); `aiTurn`, defined over them, is a fan of your own where `FanCarried` reads one, then
-`respond`, the round as TOOL GROUNDING's `present` entry names it; `session` is the session's own answer to an utterance that does not bear
-on the run, which stays in the context without drawing a round of this run.
+names); `respond` is the round as TOOL GROUNDING's `present` entry names it, after at most one fan
+a turn and what it makes worth gathering; `session` is the session's own answer to an utterance
+that does not bear on the run, which stays in the context without drawing a round of this run.
 -/
 
 /-- Your turns. `narrate` writes each Vignette probe's narration; being yours, it grounds
@@ -394,13 +399,6 @@ axiom cleanup : Context P → List (Evidence P)
 
 def discard (c : Context P) : Context P := c ++ (cleanup c).map (·.val)
 
-open Classical in
-/-- Your turn: a fan of your own where `FanCarried` reads one, followed by what it makes worth
-    gathering, then the round shown on what stands. -/
-def aiTurn (ai : AITurns P) (c : Context P) : Context P :=
-  let c₁ := if FanCarried c then consulted (fan ai c) else c
-  c₁ ++ [(ai.respond c₁).val]
-
 def constituted (c : Context P) (d : Direction) : DirectionalContrast P :=
   let c₁ := discard c
   ⟨c₁, purpose c₁, harvestOf c d, discardTrace c₁, dissent c⟩
@@ -408,9 +406,9 @@ def constituted (c : Context P) (d : Direction) : DirectionalContrast P :=
 open Classical in
 /-- A turn that does not bear on the run is answered by the session and leaves the run as it
     stands; a closing is read from the person's turn before anything is gathered; otherwise what
-    is gathered now enters the context, a fan runs where the turn asks to see what no probe
-    materialized, and your turn follows — a fan of your own where `FanCarried` reads one, then the
-    round. -/
+    is gathered now enters the context, one fan runs — the one they ask for, else one of your own
+    where `FanCarried` reads one — followed by what it makes worth gathering, and the round
+    follows. -/
 def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
   | c, []      => .holding c
   | c, u :: us =>
@@ -420,19 +418,22 @@ def preview (ai : AITurns P) : Context P → List (Utterance P) → Outcome P
     | some (.constitute d) => .contrasted (constituted f d)
     | none =>
       let c₁ := consulted f
-      let c₂ := if FanRequested c₁ then consulted (fan ai c₁) else c₁
-      preview ai (aiTurn ai c₂) us
+      let c₂ := if FanRequested c₁ then consulted (fan ai c₁)
+                else if FanCarried c₁ then consulted (fan ai c₁) else c₁
+      preview ai (c₂ ++ [(ai.respond c₂).val]) us
 
 def start (ai : AITurns P) (c : Context P) (us : List (Utterance P)) : Outcome P :=
   let c₀ := consulted c
   match notActivated c₀ with
   | some why => .notActivated c₀ why
-  | none => preview ai (aiTurn ai (consulted (fan ai c₀))) us
+  | none =>
+    let c₁ := consulted (fan ai c₀)
+    preview ai (c₁ ++ [(ai.respond c₁).val]) us
 
 /-! ── LOOP ──
 Every round re-judges the whole run against the whole context: no round counts down and no answer
-waits for a later round. Beyond the first fan, a fan happens where the person's turn asks to see
-something no probe has materialized, or where `FanCarried` reads one — one fan of your own a turn.
+waits for a later round. Beyond the first fan, one fan runs a turn at most: the one the person's
+turn asks for, or else one of your own where `FanCarried` reads one.
 Each fan relays the spec whole, with what changed, before it generates. The loop is dialogue: no
 round count or cap closes it.
 -/
