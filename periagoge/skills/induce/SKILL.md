@@ -29,7 +29,7 @@ Periagoge(A) → start(c) → induce(c, utterances), where c is the fused sessio
     [does not bear on this run]                                the session answers it; that answer
                                                                stays in c; the run stays as it stands
     [the person recognizes the goal and the candidate]         what is collected now enters c; where
-                                                               c holds a case no sheet has shown
+                                                               c holds a case no turn of yours has shown
                                                                and no turn of the person's brought
                                                                that would decide against that
                                                                candidate (`Overturned`)
@@ -137,10 +137,10 @@ structure Instance where
     its basis, and closes nothing. -/
 axiom notActivated : Context P → Option String
 
-/-- **Your record**: the cases you found and bring to the sheet — the rest of what collection
-    turned up stays in the context it was read into — that the person's words have neither taken
-    up nor turned down. A case that would decide against the candidate is among the cases you
-    bring. -/
+/-- **Your record**: the cases you found, by collection or by work you carried forward in a
+    response, and bring to the sheet — the rest of what collection turned up stays in the context it
+    was read into — that the person's words have neither taken up nor turned down. A case that would
+    decide against the candidate is among the cases you bring. -/
 axiom found : Context P → List Instance
 
 /-- **Your reading**: the cases the person brought — named in their turns, or singled out by them
@@ -460,19 +460,23 @@ def pass (c : Context P) : Context P := c ++ (collect c).map (·.val)
     what a tool or the environment returned, or a peer's report. Never the person's. -/
 def ResponseTurn (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin = .external ∨ e.origin = .peer}
 
-/-- **Your response** to a turn that bears on the run and does not close it, the first included: the
-    sheet, as `respond` draws it on what the response has reached, and the work within this
+/-- **Your response** to a turn that bears on the run and does not close it, the first included:
+    the sheet, as `respond` draws it on what the response has reached, and the work within this
     protocol's domain you carry forward in it on a judgment you state — using the abstraction-to-be
     in the person's work among it — with what that work returned. What comes first, how far the
     work goes, and how much is shown are yours to judge, on what least loads the person's
-    recognition. The person's next turn answers the candidate the response last showed. -/
+    recognition. What the work turns up bears on the candidate as collection does: the candidate
+    the response puts forward stands on every case you reached, and a case against it is shown in a
+    turn of your own — what you looked into, the case, and how it sorts against the candidate —
+    never left out to keep the candidate clean. The person's next turn answers the candidate the
+    response last showed. -/
 axiom response : (Context P → Response P) → Context P → List (ResponseTurn P)
 
 /-- The response, placed in the context. -/
 def present (respond : Context P → Response P) (c : Context P) : Context P :=
   c ++ (response respond c).map (·.val)
 
-/-- **Your judgment**: the context holds a case no response of yours has shown and no turn of the
+/-- **Your judgment**: the context holds a case no turn of yours has shown and no turn of the
     person's brought that would decide against the candidate the recognizing turn recognized; where
     it does, the turn recognizes nothing. -/
 axiom Overturned : Context P → Prop
