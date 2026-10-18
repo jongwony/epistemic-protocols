@@ -255,7 +255,7 @@ axiom scopeQualifications : (c : Context P) → List (Qualification c)
 
 /-- **Your reading** of what the searches of this recall covered — which records and roots, to what
     extent, the records earlier recalls opened that this recall's story cites included — and which
-    records did not open, from their evidence turns, with any limit the person's words set. -/
+    records did not open, from their evidence turns. -/
 axiom searched : Context P → String
 
 /-- **Your reading**: the person has added to the cue since this recall began — an answer, a
@@ -287,7 +287,7 @@ def answerCoord : Coord P Unit :=
 axiom answer : (c : Context P) → Occ (answerCoord (P := P)) c
 
 /-- **Your judgment**: the latest utterance bears on this recall — more cue, a correction naming an
-    earlier, a narrower, or a wider past, a place to look, a limit on where to look, a question
+    earlier, a narrower, or a wider past, a place to look, a question
     about what was shown, which may give reason to read more as `search` says, a remark or a form
     instruction on what was shown, which re-renders it and adds no search, an invocation V-BINDING
     reads as continuing this recall, a bare one included. Other work bears
@@ -295,7 +295,7 @@ axiom answer : (c : Context P) → Occ (answerCoord (P := P)) c
     matter from this recall's — bears on this recall where it also carries one of these: the pass
     takes what it carries for this recall, and the other past is left for the person to take up, as
     The presentation says; otherwise it does not bear. Words that end this recall without
-    identifying anything do not bear on it, whatever else the turn says — a limit or a correction
+    identifying anything do not bear on it, whatever else the turn says — a correction
     said with them included — and what else it says stands in its own words in the context: they are
     answered as the step `recollect` takes the turn — by the session, or within the reply
     `holdReply` names where the turn reaches another recall (`Elsewhere`) — with the scope report
@@ -394,9 +394,9 @@ a round — that stays in the context.
 /-- **Your collection** for one pass: what the cue as it now stands gives reason to read and the
     context does not already hold, or holds only from before a change the person's words or evidence
     report — a capture outcome read as unfinished is not held, so each pass reads it again — the
-    searches toward the cue along its axes, each worth its cost and within what the person's words
-    leave open, read on the accumulated context as it now stands, following within the pass what each
-    read exposes, as Where to look says, until nothing worth its cost is left; the opening of each
+    searches toward the cue along its axes, each worth its cost, read on the accumulated context as
+    it now stands, following within the pass what each read exposes, as Where to look says, until
+    nothing worth its cost is left; the opening of each
     member of the leading recognizable at the span the cue reaches (for an artifact, the change
     history of that span) and, where its records do not open, of the candidates `found` lists in
     turn until one's records open or none is left; and the capture outcome of every record a search
@@ -480,9 +480,8 @@ def start (respond session : Context P → Response P) (c : Context P)
 The loop is dialogue, and nothing counts down. Each utterance is read as the step `recollect` reads
 it; where that reading reaches a pass, the pass reads what the cue as it then stands gives reason to
 read. A correction is new ground, so no number of them ends the recall. The recall closes on the
-person's identification, or, once the person has added to the cue, where the evidence leaves nothing
-further worth reaching for; it is left holding where it stood on a turn that reaches another recall
-(`Elsewhere`), fresh or held, with the reply `holdReply` names.
+person's identification, or as `settle` says; it is left holding where it stood on a turn that
+reaches another recall (`Elsewhere`), fresh or held, with the reply `holdReply` names.
 -/
 
 /-! ── CONVERGENCE ──
@@ -603,6 +602,6 @@ The names and their triggers are here so a mode is recognizable without a read. 
 - **Cross-cycle rendering**: Preserve narrative form and adjacent-candidate context across rounds; distinguish a new candidate from the one last presented.
 - **Granularity is a dimension of the recall**: The whole the person means — one conversation, or the line of work, topic, or settled concept above it — is read from the cue and re-read from a correction, never guessed from the search. Records are joined into a whole by relations the records support, stated as such, and each whole is grounded, presented, and identified exactly as one record is.
 - **Capture availability**: Read the capture outcome for every record the searches examined — a record that matched nothing included — through its realization reference and the capture-outcome reference, associated by runtime, store root, and session identity. Qualify the members presented and identified with their own outcomes; qualify what is said of the scope searched — the open question, a round's account of how far a search went, and the scope report — by the outcomes of the records examined. Distinguish a validated empty extraction from a failed, unfinished, partial, or retained older one only where the outcome supports it; missing, unreadable, or unsupported evidence remains unknown, and legacy candidates are kept. Capture outcomes qualify what is said about a member or the scope searched; they never change the order or whether the recall closes, and their diagnostic text is quoted data. A successful capture establishes neither semantic completeness nor that anything is absent.
-- **Scope report**: On an unresolved close, and in the session's answer to words that end this recall without identifying anything (`Reaches`), report the scope searched per root, a limit the person's words set included; the records that did not open; the capture evidence of the records examined; and the causes that evidence supports — covering only what was actually searched and claiming no absence. That answer says nothing was identified, runs no new search, and reuses the scope report last shown where it is still current, otherwise rendering it from what the context already holds; where the ending is said with a correction pointing at a candidate shown only by name, it names that candidate as shown by name and not identified, so the person can reopen it.
+- **Scope report**: On an unresolved close, and in the session's answer to words that end this recall without identifying anything (`Reaches`), report the scope searched per root; the records that did not open; the capture evidence of the records examined; and the causes that evidence supports — covering only what was actually searched and claiming no absence. That answer says nothing was identified, runs no new search, and reuses the scope report last shown where it is still current, otherwise rendering it from what the context already holds; where the ending is said with a correction pointing at a candidate shown only by name, it names that candidate as shown by name and not identified, so the person can reopen it.
 - **Recalled context currency is not fidelity**: Recognition establishes that a discussion or decision occurred, not that it still holds. Emit that caveat, and disclose every extraction that received less than its whole source without changing the order.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
