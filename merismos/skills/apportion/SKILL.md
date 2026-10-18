@@ -376,7 +376,7 @@ inductive Requirement
   | planTerminal (units : Nat)
 
 /-- `PlanStateRequirement`: never without the evidence it rests on. Whether that evidence still
-    tracks what it asserts is the receiving side's judgment, not certified here. -/
+    tracks what it asserts is not certified here. -/
 structure PlanStateRequirement where
   predicate : Requirement
   basis     : {l : List Cited // l ≠ []}
