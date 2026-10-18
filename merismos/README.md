@@ -52,7 +52,7 @@ The taken plan leaves as session text and a navigation block over its carrier, s
 - **Seam evidence is often absent**: abstract goals frequently supply no evidenced joint, and heuristic cuts can leave duplicated setup or cross-unit state leakage.
 - **Horizon fit is an estimate**: judged before the run from the goal's description; the override path exists because the user often knows better.
 - **Predicate coverage**: subjective quality bars do not derive. Where sharpening could still produce a predicate, the draft proposes it as that obligation's check, and the gap stands only where the user declines it; where a judgment and not a check settles the item, it is reserved instead. A check the run could itself change so that it passes is flagged on the sheet.
-- **The handoff is honored by the run**: once the plan is handed off, this protocol has ended; whether the run keeps the handoff obligations is the run's, and pre-action interception belongs to the harness substrate.
+- **Keeping the handoff is the run's**: once the plan is handed off, this protocol has ended; whether the run keeps the handoff obligations is the run's, and pre-action interception belongs to the harness substrate.
 
 ## Install
 
