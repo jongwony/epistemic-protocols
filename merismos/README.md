@@ -39,11 +39,11 @@ One unit is one execution interval is one entry, carrying that unit's whole cert
 
 ## The Handoff
 
-Every taken plan carries the obligations its run follows, wherever and whenever it is started — the contract's `handoffObligations`: what does not rest on the user runs without waiting for them; when the plan has run, the run returns once with every unit's result, and what rests on the user — an irreversible step that a carried doubt, or evidence found while running, bears on among them — comes back in that return with what did not proceed because of it; nothing is decided for the user. A user who wants to arrange the units first — say, with `/conduct` — says so when taking the plan, and the navigation block becomes the handoff they start later.
+Every taken plan carries the obligations it hands to every run of it, wherever and whenever it is started — the contract's `handoffObligations`: what does not rest on the user runs without waiting for them; when the plan has run, the run returns once with every unit's result, and what rests on the user — an irreversible step that a carried doubt, or evidence found while running, bears on among them — comes back in that return with what did not proceed because of it; nothing is decided for the user. A user who wants to arrange the units first — say, with `/conduct` — says so when taking the plan, and the navigation block becomes the handoff they start later.
 
 ## Composition
 
-The taken plan leaves as session text and a navigation block over its carrier, so any later line of work — a method designed with `/conduct`, issues in a tracker, another session — reads it by pointer. Reading the block grounds the plan and starts nothing. Concrete executor selection stays outside: units carry capability requirements, never a binding. `/contextualize` and `/grasp` verify after the interval.
+The taken plan leaves as session text and a navigation block over its carrier, so any later line of work — a method designed with `/conduct`, issues in a tracker, another session — reads it by pointer. Concrete executor selection stays outside: units carry capability requirements, never a binding.
 
 ## Known Limitations
 
