@@ -9,7 +9,7 @@ Achieve certain comprehension of a target in play — code, a document, a result
 
 ## Definition
 
-**Katalepsis** (κατάληψις): A dialogical act of achieving firm comprehension—from Stoic philosophy meaning "a grasping firmly"—resolving an ungrasped target into verified user understanding through a map of understanding built with the person and checked against the target's material and the results they ask to see.
+**Katalepsis** (κατάληψις): A dialogical act of achieving firm comprehension—from Stoic philosophy meaning "a grasping firmly"—resolving an ungrasped target into verified user understanding through a map of understanding built with the person and checked against the target's material and the results looked at together.
 
 ```lean
 /-!
@@ -22,26 +22,26 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 
 /-! ── FLOW ──
 Katalepsis(R) → start(c) → grasp(c, utterances), where c is the fused session context:
-  present(c): the map and the next round, read afresh from the context → Stop
+  present(c): the map and the next round, read afresh from the context
   next utterance u, read on fuse(c, u) →
     [the utterance does not bear on this run]   the session answers it; that answer stays in the
-                                                context; nothing is consulted; no gate of this run
+                                                context; nothing is consulted; no round of this run
     [the person closes (ClosureSupported)]       → VerifiedUnderstanding
     [otherwise] c' := fuse(c, u) with what `consult` reads now appended, a check's result
       included → present(c')
-  no utterance: the gate holds; nothing is taken
+  no utterance: nothing is taken; the run holds
 -/
 
 /-! ── MORPHISM ──
 Target
   → gather               -- the target's material and the sources that bear on it, read now (focus)
+  → check                -- a check handed to execution as `.check` says, before each round; its result returns through `consult`
   → map                  -- the purpose the person said (`ScopeSupported`), else your reading of it marked as yours; the aspects it turns on, each with what it rests on (focus)
   → present              -- the map's changes and the next round, with its material (focus)
   → fuse(u)              -- the person's turn joins the context whole
-  → check                -- a check handed to execution as `.check` says; its result returns through `consult`
   → close                -- the person's closure over the map (`ClosureSupported`)
   → VerifiedUnderstanding
-requires: target_exists(R)              -- the comprehension target is present in context and can be quoted verbatim; its provenance is unconstrained. An admission condition on the target, not a promise that every answer finds enough ground for adjudication
+requires: target_exists(R)              -- the comprehension target is present in context and can be quoted verbatim; its provenance is unconstrained. An admission condition on the target, not a promise that every reading finds material that bears on it
 deficit:  TargetUngrasped               -- activation precondition (Layer 1)
 preserves: R                            -- this run reads the target and never rewrites it; a check changes no existing state; a change to the target is the session's other work
 invariant: Grounded, not asserted       -- every aspect on the map says what it rests on; your explanation is never shown as the person's understanding
@@ -163,63 +163,54 @@ structure Side (c : Context P) where
     whether it carries the target or reasoning about it is read here from its content. -/
 axiom IsTarget : (c : Context P) → Side c → Prop
 
-/-- **Your judgment**: the observed turn read its source in this run, when it was made, and the
-    span is the narrowest material supporting the judgment, quoted in place. A locator the person
-    must go open is not the material. -/
+/-- **Your judgment**: the cited turn carries what a source read or a check run returned in this
+    run, and the span is the narrowest returned material supporting the judgment, quoted in place.
+    A locator the person must go open is not the material. -/
 axiom SourceRead : (c : Context P) → Cite c → String → Prop
 
-/-- What a person's reading is measured against: the target's own material, in the turn quoted
-    even after the target changes, or material from outside the conversation read in this run — a
-    source outside the context, or the output a check returned. Your own reasoning is never a
-    measure, nor another agent's — a peer turn measures only as what a source it read or a check
-    it ran returned. -/
-inductive Measure (c : Context P)
+/-- What a fact rests on: the target's own material, in the turn quoted even after the target
+    changes, or what a source or a check returned in this run. Your own reasoning is never
+    material, nor another agent's — a peer turn counts only as what a source it read or a check it
+    ran returned. -/
+inductive Material (c : Context P)
   | target (s : Side c) (object : IsTarget c s)
-  | source (observed : Cite c)
-      (readNow : observed.src.val = .external ∨ observed.src.val = .peer) (span : String)
-      (linked : SourceRead c observed span)
+  | source (observed : Cite c) (span : String) (linked : SourceRead c observed span)
 
-/-- **Your judgment**, the record rule: the cited person turn handles the aspect — produces,
-    applies, predicts, or explains its relations at the level the aspect asks, in a reading of
-    their own — where the material it is measured against bears it out, read against the context
-    as it now stands. A reading the material parts from handles nothing and stays the person's
-    reading. Assent, a self-rating, a bare pick among options you offered, or an echo of your own
-    wording handles nothing; an explanatory paraphrase handles what it reaches. -/
-axiom ShownSupported : (c : Context P) → Cite c → Entry → Measure c → Prop
+/-- **Your judgment**: the material bears on aspect `a` — what the target does there, read on the
+    context as it now stands; it may be that it settles nothing. A fact is about the target, never
+    about the person. -/
+axiom FactSupported : (c : Context P) → Material c → Entry → Prop
 
-/-- How a person's turn handled aspect `a`: the turn, and the material it was measured against,
-    with that turn's support. -/
-structure Shown (c : Context P) (a : Entry) where
+/-- A fact on aspect `a`: the material, with its support. -/
+structure Fact (c : Context P) (a : Entry) where
+  material  : Material c
+  supported : FactSupported c material a
+
+/-- **Your judgment**, the record rule: the cited person turn says what they understand of aspect
+    `a` — a reading of their own, producing, applying, predicting, or explaining its relations at
+    the level the aspect asks, or an acknowledgment of your explanation, which is acceptance of it
+    and never a reading of their own — read against the context as it now stands. A self-rating, a
+    bare pick among options you offered, or an echo of your own wording is neither; an explanatory
+    paraphrase reaches what it reaches. -/
+axiom ReadingSupported : (c : Context P) → Cite c → Entry → Prop
+
+/-- What the person has said of aspect `a`: the turn, with its support. -/
+structure Reading (c : Context P) (a : Entry) where
   src       : Cite c
   byPerson  : src.src.val = .person
-  measure   : Measure c
-  supported : ShownSupported c src a measure
+  supported : ReadingSupported c src a
 
-/-- **Your judgment**: the cited turn is what `checked` returned for a check on aspect `a` handed
-    off where `AsksCheck` holds — a run, an experiment, a source read to settle it; a read `gathered`
-    returned is not one. What it shows for the aspect is read on the context as it now stands, and
-    may be that it settles nothing. -/
-axiom CheckSupported : (c : Context P) → Cite c → Entry → Prop
-
-/-- A check run on aspect `a`: the turn its result arrived in, from outside the conversation, with
-    that turn's support. A check someone has named and no one has asked to run is not one; it is
-    read on the map with who named it. -/
-structure Check (c : Context P) (a : Entry) where
-  result    : Cite c
-  observed  : result.src.val = .external ∨ result.src.val = .peer
-  supported : CheckSupported c result a
-
-/-- An aspect's row on the map: the person's own handling of it, if any, and the checks run on it.
-    How the row stands is your judgment from these and the context — resting on your explanation
-    alone, checked together, handled by the person, waiting on a check named and not run, or
-    misaligned where the person's reading and the material part — and no standing is stored. -/
+/-- An aspect's row on the map, on two axes kept apart: what the target does there — its facts,
+    each with the material it rests on, and what is still open on it, as CONVERGENCE lists — and
+    what the person has said of it. The reading stays theirs until their own turn changes it.
+    Both are your judgment from the context, and nothing on the row is stored. -/
 structure Cell (c : Context P) (a : Entry) where
-  handled : Option (Shown c a)
-  checks  : List (Check c a)
+  facts   : List (Fact c a)
+  reading : Option (Reading c a)
 
 /-- **Your reading**: aspect `a`'s row, read afresh on `c`; whether a turn bears on a reworded
-    aspect is your judgment. Where several person turns handle it, which one stands is read on the
-    current context, and a later turn that contradicts it may leave it unhandled. -/
+    aspect is your judgment. Where several person turns give a reading, which one stands is read
+    on the current context; a later turn of the person's may replace it or take it back. -/
 axiom cell : (c : Context P) → (a : Entry) → Cell c a
 
 /-- The map: every aspect of the live inventory, with its row. -/
@@ -227,8 +218,7 @@ def map (c : Context P) : List ((a : Entry) × Cell c a) :=
   (aspects c).map fun a => ⟨a, cell c a⟩
 
 /-- **Your record**: your contrary grounds bearing on the person's judgment, each with what it
-    bears on and what it rests on, shown as `present` and CONVERGENCE say; new evidence after the
-    closure is shown in the session beside it, and the closure stands. Empty when there are
+    bears on and what it rests on, shown as `present` and CONVERGENCE say. Empty when there are
     none. -/
 axiom dissent : Context P → List String
 
@@ -236,8 +226,8 @@ axiom dissent : Context P → List String
     an acknowledgment, a wish to see or try something, a request for more depth, a correction of
     your reading, a question about the map, a closure — judged on what the whole utterance does,
     read on the context with it before anything is consulted. An utterance about other work leaves
-    the run as it stands: the session answers it, that answer stays in the context, and no gate of
-    this run is raised. Words that end the run without saying that what they understand serves
+    the run as it stands: the session answers it, that answer stays in the context, and no round of
+    this run is drawn. Words that end the run without saying that what they understand serves
     their purpose do not bear on it, whatever else the turn says, and what else it says stands in
     its own words in the context: the session answers them, no round is drawn, the run holds, and
     later turns bear on it only where they come back to it; your own reading that the person is done
@@ -249,8 +239,8 @@ axiom Reaches : Context P → Prop
 /-- **Your judgment**: the cited turn — the latest utterance; a turn before the latest round closes
     nothing — says that what they now understand of the target serves their purpose, read on the
     context as it now stands. An acknowledgment of an explanation is not that. Where the turn's
-    intent is unclear, it closes nothing. The map's standings, or your own reading, close nothing,
-    and no standing holds the closure back. Setting one aspect aside does not close the run; a
+    intent is unclear, it closes nothing. Nothing on the map, nor your own reading, closes it, and
+    nothing on the map holds the closure back. Setting one aspect aside does not close the run; a
     set-aside aspect stays on the map as it stood. -/
 axiom ClosureSupported : Context P → Turn P → Unit → Prop
 
@@ -272,8 +262,8 @@ def closed (c : Context P) : Closed P :=
   { context := c, scope := scope c, map := map c, dissent := dissent c }
 
 /-- Once it has run, the person can say: what I now understand of this target serves my purpose —
-    I saw it on a map built with me and checked against the target's material and the results I
-    asked to see, and for what still waits on a check, I know what would settle it.
+    I saw it on a map built with me and checked against the target's material and the results we
+    looked at together, and for what still waits on a check, I know what would settle it.
     `VerifiedUnderstanding`: the person's closure over the map CONVERGENCE lists — what each
     aspect rests on, as they saw it when they closed. It records that closure, not a certificate
     of what was demonstrated, nor omniscient comprehension. -/
@@ -284,23 +274,29 @@ inductive Outcome (P : Type)
   | verified  (r : VerifiedUnderstanding P)
   | holding   (c : Context P)
 
-/-- **Your judgment**: the latest utterance, bearing on this run, asks for a check — a wish to see
-    or try something — or takes the one you offered, read on the context as it now stands. -/
-axiom AsksCheck : Context P → Prop
+/-- **Your judgment**: a check within your reach runs now — the latest utterance, bearing on this
+    run, asks for one (a wish to see or try something); or you run one
+    yourself, as TOOL GROUNDING's `present` entry says. Read on the context as it now stands, what
+    `gathered` returned included. -/
+axiom CheckRuns : Context P → Prop
 
 /-- **Your read**, now, of what the next judgment needs: the target's material and the sources that
     bear on it — any a turn cites, and any you find — as far as relevant access reaches. What you
     say you read, you read to the end. Empty where nothing outside the context bears. -/
 axiom gathered : Context P → List (Evidence P)
 
-/-- **Your read**, now: what the check handed off at `.check` returned. -/
+/-- **Your read**, now: what the check handed off at `.check` returned — a run, an experiment, a
+    source read to settle it. -/
 axiom checked : Context P → List (Evidence P)
 
+/-- The context with what `gathered` read now appended. -/
+def withGathered (c : Context P) : Context P := c ++ (gathered c).map (·.val)
+
 open Classical in
-/-- What is read now: what is gathered, and what the check returned where `AsksCheck` holds, as
-    `consultOps` hands it off. -/
+/-- What is read now: what is gathered, and then what the check returned where `CheckRuns` holds
+    on the context with it, as `consultOps` hands it off. -/
 def consult (c : Context P) : List (Evidence P) :=
-  gathered c ++ (if AsksCheck c then checked c else [])
+  gathered c ++ (if CheckRuns (withGathered c) then checked (withGathered c) else [])
 
 /-- The context with what `consult` read now appended. -/
 def consulted (c : Context P) : Context P := c ++ (consult c).map (·.val)
@@ -317,7 +313,7 @@ invocation that say what to understand of it fill the scope (`ScopeSupported`).
 /-! ── PHASE TRANSITIONS ──
 A step is one arm of a structural recursion over the person's utterances. `respond` is the next
 round, as TOOL GROUNDING's `present` entry names it; `session` is the session's own answer to an
-utterance that does not bear on the run, which stays in the context without being a gate of this
+utterance that does not bear on the run, which stays in the context without being a round of this
 run.
 -/
 
@@ -344,15 +340,16 @@ earlier answer is held apart from what later ones say. No fixed cap: each round 
 -/
 
 /-! ── CONVERGENCE ──
-converged: a VerifiedUnderstanding the person's utterance closed; holding is a round no turn of the
-person's that bears on the run has answered. The convergence evidence — the map at closure: each
-aspect with its standing, what it rests
-on (the person's own reading with the material it was measured against, in their words; each check
-run, with what it showed and, where it ran on a stand-in, what it left untested; each check named
-and not run, with who named it and what it would settle; the person's account with neither measure
-nor check, attributed to them, with no verdict and what would settle it; acceptance of your
-explanation where that is what it rests on), whether the scope as it stands still turns on it, and
-whether what it rests on was measured against a version of the target that has since changed; the
+converged: a VerifiedUnderstanding the person's utterance closed; holding is a run no turn of the
+person's has closed. The convergence evidence — the map at closure: each aspect on its two axes,
+its facts (each with the material it rests on; each check run, with what it showed and, where it
+ran on a stand-in, what it left untested), what is still open on it (each check named and not run,
+with what it would settle and what running it needs; where no material bears on it, that, with what
+would settle it), and what
+the person has said of it (their own reading in their words, the facts beside it agreeing or
+parting; acceptance of your explanation where that is what they gave; or nothing yet), whether the
+scope as it stands still turns on it, and whether its facts were read, or the person's reading
+given, on a version of the target that has since changed; the
 purpose and scope as they stand, open included, and marked as yours where you read or set it; what
 could not be reached that bears on an aspect; the dissent — a contrary ground not shown before the
 closing turn is shown here, and the closure stands. Grounded, not asserted.
@@ -386,17 +383,18 @@ def Interaction.realization : Interaction → Continuation
 inductive Op | gather | assess | present | check | readAnswer | converge
 
 def grounding : Op → Annot × String
-  | .gather     => (.observe, "artifact read, artifact search: read-only reads, now, of the target's material and the sources that bear on it — any a turn cites, and any you find — as far as relevant access reaches; name what was reached and what was not, and any conflict among what was gathered")
+  | .gather     => (.observe, "artifact read, artifact search: read-only reads as `gathered` states; name what was reached and what was not, and any conflict among what was gathered")
   | .assess     => (.sense, "Internal analysis: the purpose reading, the live inventory of aspects and each one's row on the map, over the whole fused context as it now stands")
-  | .present    => (.interaction .constitution, "the round, every round the first included. The first round is the map: the purpose as the person said it, or else your reading of it, marked as yours — where nothing grounds a useful reading, the target's main aspects, with the purpose line saying so; the aspects the purpose turns on, in the order it turns on them with that basis on the purpose line, an edge the person has not voiced among them where the material grounds one, each with its essence, the material it rests on and its standing; and your contrary grounds with their basis. A correction of the purpose moves the map. Every later round shows what changed on the map, and the whole map when the person asks for it; where the session has a surface that stays in view, the map can stay there as well. A contrary ground you hold stays in view until it is settled — on the surface that stays in view where the session has one, otherwise briefly beside each round. Explain each aspect in the one representation — a picture, an example, a metaphor — that best carries its essence for this person; leave out what their words show they know, and go deeper when they ask. Read the person's turn whole; where its intent was unclear, say in one line how you took it. The round that shows a check's result sets it beside the aspect, against the claim your explanation made and against whatever the person has said that bears on it, saying where each agrees and where it parts; agreement and parting alike — their words revealing a contradiction or simply being wrong included — are what the map is filled from. Before reading their words as a misreading, read whether they aim at another purpose: say that reading as a candidate with its basis and move the map, adding no question; if the person sets it aside, their words are read again as a reading of the target. A reading or application of their own is measured against the material: an adjudication follows only where you have material to attach; where there is none, give no verdict: say you have nothing to check the account against and name what would settle it. Where what they said and a `Measure` part on the same scope and premises, or two of their own utterances do, show it with its working in one round: their words quoted; the narrowest `Measure` where one bears on it, never your own explanation — scoped to what that material settles; why the two part; what they got right; and another reading beside it where the material allows. A contradiction whose working was shown and that the person keeps is not worked again: it stays in view as a held contrary ground, is worked again only on new material, and the round ends on its opening. A contradiction inside the target is a finding about it, judged for a side only with settling material outside it; your own earlier explanation against a `Measure` is yours to correct, quoting it, as relay. An objection you raise yourself is relay: shown with its basis, and the run continues. Where what you could not reach, or a conflict among what you gathered, bears on an aspect or on a judgment the person is making, say it there. Where a judgment the person is about to make turns on an aspect resting on your explanation, offer to run the cheapest check that would show it and to show its result — an offer, never a question for them to answer; offer it again only on new evidence or a changed purpose. An aspect the person set aside is not explained or offered again unless they return to it. Other work in the utterance neither closes this run nor answers its judgments. A round that shows a contradiction's working ends on that working, with nothing after it; every other round ends on one opening the person can take — respond to the map, ask to see or try something, go on, or say that what they understand now serves their purpose.")
-  | .check      => (.dispatch, "delegate: where `AsksCheck` holds, the check handed to execution with the aspect and what it is to show; it changes no existing state — what it has to write goes to a scratch space outside the target's tree — and a result from a stand-in comes with what it stood for and what it left untested; what it returns enters the context through `consult` as evidence read now, before the round that shows it")
+  | .present    => (.interaction .extension, "the round, every round the first included. The first round is the map: the purpose as the person said it, or else your reading of it, marked as yours — where nothing grounds a useful reading, the target's main aspects, with the purpose line saying so; the aspects the purpose turns on, in the order it turns on them with that basis on the purpose line, an edge the person has not voiced among them where the material grounds one, each with its essence, its facts with the material they rest on, and the person's reading where they have given one; and your contrary grounds with their basis. A correction of the purpose moves the map. Every later round shows what changed on the map, and the whole map when the person asks for it; where the session has a surface that stays in view, the map can stay there as well. A contrary ground you hold stays in view until it is settled — on the surface that stays in view where the session has one, otherwise briefly beside each round. Explain each aspect in the one representation — a picture, an example, a metaphor — that best carries its essence for this person; leave out what their words show they know, and go deeper when they ask. Read the person's turn whole; where its intent was unclear, say in one line how you took it. The round that shows a check's result sets it beside the aspect and against the claim your explanation made, saying where it agrees and where it parts; the result is what the map's facts are filled from, and the comparison with your explanation is said in the round, never recorded as a fact. Before setting their words against a fact, read whether they aim at another purpose: say that reading as a candidate with its basis and move the map, adding no question; if the person sets it aside, their words are read again as a reading of the target. Where a reading or application of their own says what the target does, set the facts that bear on it beside it, saying where each agrees and where it parts; where no material bears on it, say so and name what would settle it. Where what they said and a fact part on the same scope and premises, or two of their own utterances do, show it with its working in one round: their words quoted; the narrowest material where it bears on it, never your own explanation — scoped to what that material settles; why the two part; where their words and the material agree; and another reading beside it where the material allows. A contradiction whose working was shown and that the person keeps is not worked again: it stays in view as a held contrary ground, is worked again only on new material, and the round ends on its opening. A contradiction inside the target is a finding about it, judged for a side only with settling material outside it; your own earlier explanation against a fact is yours to correct, quoting it, as relay. An objection you raise yourself is relay: shown with its basis, and the run continues. Where what you could not reach, or a conflict among what you gathered, bears on an aspect or on a judgment the person is making, say it there. Where a check within your reach would show what the target does on an aspect the purpose turns on — where a reading of the person's own says what it does included — run the cheapest that would show it before the round — as far as your reach goes, what the purpose turns on most first; a check out of your reach is an offer, with what running it needs, made again only on new evidence or a changed purpose — never a question for them to answer. An aspect the person set aside is not explained again, nor a check raised on it, unless they return to it. Other work in the utterance neither closes this run nor answers its judgments. A round that shows a contradiction's working ends on that working, with nothing after it; every other round ends on one opening the person can take — respond to the map, ask to see or try something, go on, or say that what they understand now serves their purpose.")
+  | .check      => (.dispatch, "delegate: where `CheckRuns` holds, the check handed to execution with the aspect and what it is to show; it changes no existing state — what it has to write goes to a scratch space outside the target's tree, and what it created only to look is removed afterwards — and a result from a stand-in comes with what it stood for and what it left untested; what it returns enters the context through `consult` as evidence read now, before the round that shows it")
   | .readAnswer => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there, as `Reaches` and the judgments above read it — read whole against the fused context as it now stands")
   | .converge   => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with VerifiedUnderstanding")
 
 open Classical in
 /-- The operations whose returns `consult` appends to the context: what `.gather` reads, and, where
-    `AsksCheck` holds, what the check handed off at `.check` returns. -/
-def consultOps (c : Context P) : List Op := if AsksCheck c then [.gather, .check] else [.gather]
+    `CheckRuns` holds once it is read, what the check handed off at `.check` returns. -/
+def consultOps (c : Context P) : List Op :=
+  if CheckRuns (withGathered c) then [.gather, .check] else [.gather]
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution emergent via session context.
@@ -415,16 +413,15 @@ end Katalepsis
 
 ### Map rendering
 
-Label each row by what the person will understand or decide through it, and keep the target's anchors — code, plan, document, analysis, model, or a mix — beside the label, its standing said in words.
+Label each row by what the person will understand or decide through it, and keep the target's anchors — code, plan, document, analysis, model, or a mix — beside the label, its facts and the person's reading said in words.
 
 ### Verification rendering and safeguards
 
-Compose each round under TOOL GROUNDING's `present` entry. When grounding an explanation or correction, cite concrete locations in the target — file and line where it is code, the equivalent anchor where it is not. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, content belongs to another round or the convergence evidence, or whether text belongs before or inside the gate is in question.
+Compose each round under TOOL GROUNDING's `present` entry. When grounding an explanation or correction, cite concrete locations in the target — file and line where it is code, the equivalent anchor where it is not. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, content belongs to another round or the convergence evidence, or whether text belongs before or inside the round's opening is in question.
 
 ## Rules
 
 - **User-initiated only**: Activate only on the user's wish to understand a target present in context and quotable, whatever produced it; an explicit decline before activation withholds it.
-- **User authority**: An acknowledgment of your explanation stands as the person's judgment: it is not probed again, a factual disagreement or new evidence is shown beside it, and it is recorded as acceptance of your explanation, as CONVERGENCE lists.
-- **Round composition**: Compose each round so the reader can act without reassembly — use everyday language, keep each judgment beside its evidence and next-move implication (your own adjudication included, its evidence being the excerpt attached with it), and place analytical context before its gate.
+- **User authority**: An acknowledgment of your explanation stands as the person's judgment: it is not probed again, and a factual disagreement or new evidence is shown beside it.
+- **Round composition**: Compose each round so the reader can act without reassembly — use everyday language, keep each judgment beside its evidence and next-move implication (a fact set beside their reading included, its evidence being the excerpt attached with it), and place analytical context before the round's opening.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
-- **Contract execution**: As FLOW, the judgments' doc comments, TOOL GROUNDING's `present` entry, and CONVERGENCE state.
