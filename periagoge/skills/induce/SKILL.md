@@ -460,8 +460,9 @@ def ResponseTurn (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin
 /-- **Your response** to a turn that bears on the run and does not close it, the first included: the
     sheet, as `respond` draws it on what the response has reached, and the work within this
     protocol's domain you carry forward in it on a judgment you state — using the abstraction-to-be
-    in the person's work among it — with what that work returned. What comes first, how far the work
-    goes, and how much is shown are yours to judge, on what least loads the person's recognition.
+    in the person's work among it — with what that work returned. Reversible work inside this
+    protocol's domain goes as far as you can reach within one turn, most important first; what comes
+    first and how much is shown are yours to infer, on what least loads the person's recognition.
     What is shown is what your sheet or your account in it presents to the person; what a tool or
     the environment returned, and what you sent to one, is shown only as far as your sheet or
     account presents it. What the work turns up bears on the candidate as collection does: the
@@ -473,11 +474,12 @@ def ResponseTurn (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin
     person, what each way of answering does, and whether recognition is invited are judged on the
     response as a whole, on the values it last shows: recognition is invited only where the
     candidate fits the goal on every case shown, and where a case could still separate it, that case
-    is asked about first. The candidate answered is the one the response last puts forward; an
-    alternative you passed over stays an alternative. A turn of the person's that answers the run
-    answers the run's last response before it — which response, and how far, read from the whole
-    turn and the context — and takes each value as that response last showed it, with the person's
-    changes since, that turn's own included. -/
+    is asked about first. The goal and candidate answered are the working values the response showed
+    as `goal` and `candidate` give them on what it reached; a proposed replacement or an alternative
+    shown beside them keeps that role until the person's words reach it, the recognizing turn's own
+    included. A turn of the person's that answers the run answers the run's last response before it
+    — which response, and how far, read from the whole turn and the context — and takes each value
+    as that response last showed it, with the person's changes since, that turn's own included. -/
 axiom response : (Context P → Response P) → Context P → List (ResponseTurn P)
 
 /-- The response, placed in the context. -/
