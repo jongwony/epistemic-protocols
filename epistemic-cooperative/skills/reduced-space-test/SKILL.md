@@ -26,7 +26,7 @@ InferenceUncertainClaim
   -> Residual               (uncovered complement -> follow-up protocol)
 ```
 
-An empirical terminal pairs a **scoped result** (`ScopedResolution` or `CoverageShortfall`) with a **carried residual**: the supported outcome or explicit shortfall, paired with the coverage complement. The scoped result retains its scope record, including still-pending boundary obligations with their sources and next treatment; these obligations remain distinct from coverage. A `/bound` run that ends without an applicable `DefinedBoundary` follows Phase 2 and supplies no successful validation result.
+An empirical terminal pairs a **scoped result** (`ScopedResolution` or `CoverageShortfall`) with a **carried residual**: the supported outcome or explicit shortfall, paired with the coverage complement. The scoped result retains its scope record, including still-pending boundary obligations with their sources and next treatment; these obligations remain distinct from coverage. Without an applicable `DefinedBoundary`, a `/bound` run follows Phase 2 from the accumulated context and supplies no successful validation result.
 
 ## Types
 
@@ -49,7 +49,7 @@ Reduced-Space Test orchestrates existing protocols; most per-step work is delega
 ```
 (conditional front) /elicit | /induce                              Phase 0
    -> decompose equivalence claim into facets [owned: ScopedClaimFrame]  Phase 1
-   -> /bound      [applicable DefinedBoundary, or another actual exit]  Phase 2
+   -> /bound      [applicable DefinedBoundary, or the accumulated context]  Phase 2
    -> recognize the cut the user did not draw                         Phase 2, before projection
    -> project scope, coverage complement, and pending obligations     Phase 2, only with the applicable result
    -> /inquire    [ContextInsufficient -> SufficientContext, Observe]  Phase 3
@@ -121,7 +121,7 @@ At empirical convergence, present the pairing: the scoped resolution with its sc
 3. **Scoped claim only** (evidence discipline): Resolution sentences assert an updated failure probability within the defined conditions — lower on confirmation, higher on disconfirmation, open on inconclusive. Absolute claims in either direction exceed what a stand-in space supports and are reframed to the scoped form. A disconfirming or inconclusive result is a first-class resolution, never suppressed to force a confirmation.
 4. **Residual carries forward** (completeness): Derive the uncovered complement from the settled test scope and facet frame, and route it to a follow-up protocol. Preserve pending boundary obligations in the scoped result's record through final presentation and downstream use, distinct from the coverage complement; dependent observation waits until its scope and prerequisites are settled.
 5. **Scope covers claim** (coverage): The bounded test space must cover the claim it licenses. Evidence from a slice narrower than its claim is under-covering: it yields no scoped resolution for the full claim and exits as a `CoverageShortfall` — re-scope to the covered slice (resolution over the slice + remainder as residual) or re-bound — never an implicit retry.
-6. **Compose, do not reinvent** (cost discipline): Reduced-Space Test orchestrates `/bound` and `/inquire` (with a conditional `/elicit` or `/induce` front). Project only an actually emitted, applicable `DefinedBoundary`; otherwise preserve what the actual exit left and follow that exit and the user's instruction. It introduces no new interaction deficit and does not constitute a new protocol.
+6. **Compose, do not reinvent** (cost discipline): Reduced-Space Test orchestrates `/bound` and `/inquire` (with a conditional `/elicit` or `/induce` front). Project only an actually emitted, applicable `DefinedBoundary`; otherwise preserve the accumulated context and follow the user's instruction read from it. It introduces no new interaction deficit and does not constitute a new protocol.
 
 ## Boundary Note
 
