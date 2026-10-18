@@ -1,6 +1,6 @@
 # `katalepsis/` — `/grasp`
 
-**Responsibility under the Northstar** (root `AGENTS.md`). The protocol here makes sure something in play — code, a document, a result — is actually understood before work builds on it. The AI first shows a map of understanding over the person's purpose and completes it with them, each aspect saying what it rests on — the person's reading borne out by the target's material, a result looked at together, or the AI's explanation alone — rather than assumed from agreement, until they say what they understand now serves their purpose.
+**Responsibility under the Northstar** (root `AGENTS.md`). The protocol here makes sure something in play — code, a document, a result — is actually understood before work builds on it. The AI first shows a map of understanding over the person's purpose and completes it with them, each aspect keeping what the target does there, with its material and results, apart from what the person understands of it — their own reading or the AI's explanation they accepted — rather than assumed from agreement, until they say what they understand now serves their purpose.
 
 **Boundary.** `skills/grasp/SKILL.md` is the contract for `/grasp`; it names any supporting file in its `references/` to read where that file applies. `README.md`, `README_ko.md`, and `docs/` explain the protocol to people, and `.claude-plugin/` and `.codex-plugin/` carry what a host needs to list and install it; what the protocol does once invoked is set in the `SKILL.md`.
 

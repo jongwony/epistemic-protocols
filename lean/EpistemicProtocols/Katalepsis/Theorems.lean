@@ -19,7 +19,7 @@ variable {P : Type}
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 
-instance {c : Context P} {a : Entry} : Nonempty (Cell c a) := ⟨⟨none, []⟩⟩
+instance {c : Context P} {a : Entry} : Nonempty (Cell c a) := ⟨⟨[], none⟩⟩
 
 theorem silence (respond session : Context P → Response P) (c : Context P) :
     grasp respond session c [] = .holding c := by
@@ -90,16 +90,14 @@ theorem map_rows_every_aspect (c : Context P) :
     (map c).map (·.1) = aspects c := by
   simp [map, Function.comp_def]
 
-theorem handled_by_person (c : Context P) :
-    ∀ x ∈ map c, ∀ h ∈ x.2.handled,
-      h.src.src.val = .person ∧ ShownSupported c h.src x.1 h.measure :=
-  fun _ _ h _ => ⟨h.byPerson, h.supported⟩
+theorem reading_by_person (c : Context P) :
+    ∀ x ∈ map c, ∀ r ∈ x.2.reading,
+      r.src.src.val = .person ∧ ReadingSupported c r.src x.1 :=
+  fun _ _ r _ => ⟨r.byPerson, r.supported⟩
 
-theorem checks_observed (c : Context P) :
-    ∀ x ∈ map c, ∀ k ∈ x.2.checks,
-      (k.result.src.val = .external ∨ k.result.src.val = .peer) ∧
-        CheckSupported c k.result x.1 :=
-  fun _ _ k _ => ⟨k.observed, k.supported⟩
+theorem facts_supported (c : Context P) :
+    ∀ x ∈ map c, ∀ f ∈ x.2.facts, FactSupported c f.material x.1 :=
+  fun _ _ f _ => f.supported
 
 theorem scope_only_by_person {c : Context P} {s : Cite c}
     (ok : (scopeCoord (P := P)).admits s.src) : s.src.val = .person := ok
