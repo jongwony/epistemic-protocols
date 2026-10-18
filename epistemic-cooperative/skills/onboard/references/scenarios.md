@@ -8,7 +8,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Situation**: You ask Claude to edit a long email draft. You're fine with typo fixes and smoother phrasing, but paragraph reorganization and tone changes feel like decisions you want to own. Right now there's no explicit boundary — Claude might change anything.
 
-**Intervention**: `/bound` first shows the relevant whole provisional decision map, including what you already settled, AI proposals, and unresolved parts. You can open an axis such as tone to inspect concrete proposed changes before deciding how much to entrust. A request to see those changes does not adopt them. Correcting a premise updates the affected decisions while preserving independent ones; a sufficient boundary can leave questions explicitly open. The result is read with the sources that set its limits, so assigning a subagent preserves retained decisions and the actual discretion granted.
+**Intervention**: `/bound` first shows the relevant whole provisional decision map, including what you already settled, AI proposals, and unresolved parts. You can open an axis such as tone to inspect concrete proposed changes before deciding how much to entrust. A request to see those changes does not adopt them. Correcting a premise updates the affected decisions while preserving independent ones; a boundary can stand with questions explicitly open. Handing the work to a subagent does not enlarge what you entrusted: the decisions you kept stay yours.
 
 **Trial prompt**: "Let's practice: say 'Edit this email for me' and I'll show a provisional map that you can open, correct, or entrust at the depth you need"
 
@@ -19,7 +19,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Quiz Q (design)**: You're about to delegate a multi-step task, but you do not yet know all the decisions it involves. How would you decide where AI may act and which choices you want to inspect first?
 - Hint: Ask for the relevant whole provisional structure before choosing the boundary's parts or depth. Open an axis when its concrete implications matter, then accept or correct the arrangement without having to visit every axis. An open goal or deferred choice can remain in the result's residual, with what depends on it shown on the map.
 
-**Philosophy**: ὁρισμός (definition, boundary) — from horizein, "to bound." Core principle: **Definition over Assumption**. Workflow position: the resulting boundary and its residual guide downstream judgment through their setting sources. Game feel: a recognizable whole → open the axis that matters → inspect and correct its implications → entrust at sufficient depth → carry the boundary and the remaining questions.
+**Philosophy**: ὁρισμός (definition, boundary) — from horizein, "to bound." Core principle: **Definition over Assumption**. Workflow position: it defines the boundary and its residual and hands off to the next move you declared; it does not run or enforce that work itself. Game feel: a recognizable whole → open the axis that matters → inspect and correct its implications → entrust at sufficient depth → carry the boundary and the remaining questions.
 
 ## Anamnesis `/recollect`
 
