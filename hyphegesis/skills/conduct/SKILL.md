@@ -9,7 +9,7 @@ Conduct how a session's epistemic work will be carried out — the lines of work
 
 ## Definition
 
-**Hyphegesis** (ὑφήγησις: a leading-the-way, guiding from just ahead): A dialogical act of conducting a session's epistemic work when the goal is clear but how to run it is not. The protocol's lexical verb is `/conduct`. Once it has run, the person can say: this work proceeds this way — these lines run in this order or side by side, they combine like this, they stop here, and their results go there; I recognize what I entrusted and what I kept, and I took this method as mine; what rests on me goes no further without me and comes back to me at the end, while the rest runs on. The whole map and its execution start as your judgment — which lines of work, how they relate, who runs each and where, and how precisely the map is worth drawing for the time it takes to reach the goal. The person keeps only what is theirs: when to stop, how lines combine, where results go, the constraints in force, and the authority they entrust with its limits, given as a broad direction. Every person turn is read again against the context as it now stands. The method is taken on the person's word, or relayed at the start where the person's own words already settle it; the turn that closes presents the map as a relay — after a taking, once more, with what that turn changed on its ledger — and hands it off in the same turn without waiting, carrying what that map showed: the person's coordinates, the deferred decisions, its lifetime, and the capabilities it needs; and the run ends there.
+**Hyphegesis** (ὑφήγησις: a leading-the-way, guiding from just ahead): A dialogical act of conducting a session's epistemic work when the goal is clear but how to run it is not. The protocol's lexical verb is `/conduct`. Once it has run, the person can say: this work proceeds this way — these lines run in this order or side by side, they combine like this, they stop here, and their results go there; I recognize what I entrusted and what I kept, and I took this method as mine. The whole map and its execution start as your judgment — which lines of work, how they relate, who runs each and where, and how precisely the map is worth drawing for the time it takes to reach the goal. The person keeps only what is theirs: when to stop, how lines combine, where results go, the constraints in force, and the authority they entrust with its limits, given as a broad direction. Every person turn is read again against the context as it now stands. The method is taken on the person's word, or relayed at the start where the person's own words already settle it; the turn that closes presents the map as a relay — after a taking, once more, with what that turn changed on its ledger — and hands it off in the same turn without waiting, carrying what that map showed: the person's coordinates, the deferred decisions, its lifetime, and the capabilities it needs; and the run ends there.
 
 ```lean
 /-!
@@ -31,8 +31,7 @@ Hyphegesis(WP) → start(c) → conduct(c, utterances), where c is the fused ses
     [the person takes the method]                      → the map, relayed → handoff, in the same turn → ConductedMethod
     [otherwise]                                        → the map again, drawn from c', with a ledger
   no utterance: the gate holds; nothing is taken
-  after handoff: the run has ended; the substrate executes the method as the Rule "Handoff carries
-    its obligations" names, and re-entry is as the Rule "Re-entry" says.
+  after handoff: the run has ended; the substrate executes the method.
 -/
 
 /-! ── MORPHISM ──
@@ -251,9 +250,8 @@ structure Determination where
     where you put it forward, only if it was shown on a map before this turn — or gave a grant
     whose words reach your choice (`granted`). A grant never reaches the authority coordinate
     itself: the authority and its limits stand only as the person set or adopted them. Whether an
-    act falls inside a grant is read the same way, and the Rule "Person's coordinates" says where
-    the person sees one that does not. A question, a deferral, or a bare mention makes nothing
-    stand. -/
+    act falls inside a grant is read the same way. A question, a deferral, or a bare mention
+    makes nothing stand. -/
 axiom StandingSupported : Coordinate → Context P → Turn P → Determination → Prop
 
 /-- Only a person's turn makes a value stand on a coordinate the person holds, and no grant makes
@@ -319,10 +317,8 @@ axiom deferred : Context P → List Deferred
     otherwise; past it, what rested on them returns open, as `operative` reads it. -/
 axiom lifetime : Context P → String
 
-/-- **Your record**: the contrary grounds you hold at the closure — a value you would set otherwise,
-    the draft's weakest assumption, a line you doubt, that the work may need no conducting, a
-    capability you expect the substrate cannot provide, a pointer that did not resolve — shown on
-    the map and attached to the closure; empty when there are none. -/
+/-- **Your record**: the contrary grounds you hold at the closure, each naming what it bears on and
+    what it rests on — shown on the map and attached to the closure; empty when there are none. -/
 axiom dissent : Context P → List String
 
 /-- **Your judgment**: the cited turn takes the method as the map showed it, read against the
@@ -377,17 +373,15 @@ axiom source : Context P → Option NavigationBlock
 
 /-- Once it has run, the person can say: this work proceeds this way — these lines run in this
     order or side by side, they combine like this, they stop here, and their results go there; I
-    recognize what I entrusted and what I kept, and I took this method as mine; what rests on me
-    goes no further without me and comes back to me at the end, while the rest runs on.
+    recognize what I entrusted and what I kept, and I took this method as mine.
     `ConductedMethod`: the method handed off and what it carries — each field as the relayed map
-    showed it, `source` aside, which its producer supplies; the substrate reads what is uncertain against this record. `plan` is the method
-    as the map the closing turn answered showed it, with what changed since that map, as the relayed
-    map showed it — on a relay, the person's words for what they settled and your draft for the
-    rest — and where its text and a recorded value differ, the recorded value governs. The substrate
-    executes it as the Rule "Handoff carries its obligations" names. Independent lines are handed
-    off so they do not see each other's results before those results combine. Every navigation block
-    this method leaves for a reader outside this session — `source`, and the one over the record a
-    later-session result is written to — is supplied by its producer from that record's own
+    showed it, `source` aside, which its producer supplies. `plan` is the method as the map the
+    closing turn answered showed it, with what changed since that map, as the relayed map showed
+    it — on a relay, the person's words for what they settled and your draft for the rest — and
+    where its text and a recorded value differ, the recorded value governs. Independent lines
+    are handed off so they do not see each other's results before those results combine. Every
+    navigation block this method leaves for a reader outside this session — `source`, and the
+    one over the record a later-session result is written to — is supplied by its producer from that record's own
     identity, source session, and purpose; its grounding instruction directs the recipient to run
     `/inquire` or equivalent grounding over the record and its cited sources, recover the retained
     and entrusted judgments from the governing utterances, and keep an unsupported decision open
@@ -485,7 +479,6 @@ def start (respond session : Context P → Response P) (c : Context P)
 /-! ── LOOP ──
 Every map re-reads the whole context; nothing counts rounds, and no earlier answer is held apart
 from what later ones say. Each map is what `.map` names. No round cap: each map is dialogue.
-After a handoff, re-entry is as the Rule "Re-entry" says.
 -/
 
 /-! ── CONVERGENCE ──
@@ -531,7 +524,7 @@ def grounding : Op → Annot × String
   | .readAnswer    => (.sense, "Internal analysis: whether the latest utterance bears on this run, and what it does there — the coordinates it makes stand, a grant or a direction given outside the map, a taking — read whole against the fused context as it now stands, whatever form it takes")
   | .draft         => (.sense, "Internal analysis: the whole method drafted from the context, as precisely as reaching the goal is worth — the lines of work and how they order, see each other, combine, stop, and where their results go — around every value the person set, with the deferred decisions, what the method needs, and its lifetime")
   | .place         => (.sense, "Internal analysis: who runs each line, where, and whether the person will be present, inferred from the tools the running harness describes and the accumulated context, bounded by any direction the person gave")
-  | .map           => (.interaction .extension, "the whole map on one sheet, which is the full state taking it as is would take: the lines of work as a graph the host can render, each line a node with its id and short everyday name in place, order and joins as its edges — an indented outline naming what each line follows only where no graph renders — each line's id and its order in the graph's source held from turn to turn, the drawn layout being the renderer's, so the change ledger is what lets the person check a change; what the method leaves uncovered; the substrate placement marked as your inference, following any direction or presence the person fixed; what the method needs, each observed or unconfirmed, and each act it needs that falls outside the grant or whose place inside it is unclear; the lifetime of its grants and readings, the draft's, following any horizon the person gave; the deferred decisions, each marked as returning to the person or as covered by the recorded grant it names; where the person will not be present, the authority the method would need, presented before they leave, with what must be decided before they leave set apart from what can come back at the end; your contrary grounds; after an answer, how you took it where its intent was unclear, in one line, and the change ledger — the person's edits first, then each value re-filled because of them, then what changed for any other reason — a new observation, your own re-draft — a removed line or replaced value kept with what it was, a value the person took before, or a granted value, that a change now alters flagged, and a person's value whose reach a change left unclear named with what it may reach and left open")
+  | .map           => (.interaction .extension, "the whole map on one sheet, which is the full state taking it as is would take: the lines of work as a graph the host can render, each line a node with its id and short everyday name in place, order and joins as its edges — an indented outline naming what each line follows only where no graph renders — each line's id and its order in the graph's source held from turn to turn, the drawn layout being the renderer's, so the change ledger is what lets the person check a change; what the method leaves uncovered; the substrate placement marked as your inference, following any direction or presence the person fixed; what the method needs, each observed or unconfirmed, and each act it needs that falls outside the grant or whose place inside it is unclear; the lifetime of its grants and readings, the draft's, following any horizon the person gave; the deferred decisions, each marked as returning to the person or as covered by the recorded grant it names; where the person will not be present, the authority the method would need, presented before they leave, with what must be decided before they leave set apart from what can wait for them; your contrary grounds; after an answer, how you took it where its intent was unclear, in one line, and the change ledger — the person's edits first, then each value re-filled because of them, then what changed for any other reason — a new observation, your own re-draft — a removed line or replaced value kept with what it was, a value the person took before, or a granted value, that a change now alters flagged, and a person's value whose reach a change left unclear named with what it may reach and left open")
   | .mapGate       => (.interaction .constitution, "what the map got wrong, anywhere on it — or take the method, as shown or with what the same words change; silence holds and takes nothing")
   | .relay | .converge => (.interaction .extension, "the map, presented as a relay where the person's words settle the method — at the start, or by a taking — before the dispatch in the same turn")
   | .handoff       => (.dispatch, "delegate: after the relayed map, in the same turn, the ConductedMethod handed to the substrate, which executes it; the record an incoming pointer names stays where its locator names; then this run ends")
@@ -566,9 +559,6 @@ The map's first line says what the work is for and what it hands off. Prior-sess
 
 - **Conduction warrant**: Hyphegesis never conducts itself.
 - **Round composition**: Use everyday language, place each judgment beside its evidence and next-move implication, and keep analytical context before the gate. Read `references/round-composition.md` when terminology or wording must persist, content belongs to another turn, or placement relative to the gate is in question.
-- **Person's coordinates**: Read the authority the person entrusts as a broad direction; where an act falls outside it or its place inside it is unclear, the person sees it as a contrary ground before the handoff, on the map; after the handoff, it comes back as the Rule "Handoff carries its obligations" names.
-- **Handoff carries its obligations**: The substrate runs what does not rest on the person without waiting for them and, when the method has run, returns to them once with every line's results; what rests on the person — a step that cannot be undone, where a contrary ground the relayed map carried, or one execution brings evidence for, bears on it, among them — comes back in that return with what did not proceed because of it, and nothing is decided for them.
-- **Re-entry**: After a handoff, a later utterance that changes the method's direction opens a new run over the accumulated context, where what stood is read again, and that run's plan names the method it replaces; stopping what still runs is the substrate's. A question about status reopens nothing; an answer to what came back goes to it.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly; preserve content, wording, order, cadence, and turn boundaries fixed elsewhere, stating what changed and any overlapping constraint that remains.
 
 ## Adversarial Guards

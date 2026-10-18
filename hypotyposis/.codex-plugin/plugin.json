@@ -1,6 +1,6 @@
 {
   "name": "hypotyposis",
-  "version": "1.12.0",
+  "version": "1.13.0",
   "description": "React to concrete versions until you can point at one you met and say: this is the form, for this purpose — /sketch (ὑποτύπωσις: an outline, a first sketch)",
   "author": {
     "name": "Jongwon Choi",

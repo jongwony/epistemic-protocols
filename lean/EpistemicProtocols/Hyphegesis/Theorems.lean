@@ -138,7 +138,7 @@ theorem handoff_only_by_person (respond session : Context P → Response P) (c :
     exact .inr (e ▸ f)
   | holding c₁ => rw [ho] at h; simp [handedOffBy] at h
 
-theorem handoff_carries_obligations (c : Context P) :
+theorem emitted_fields_are_readings (c : Context P) :
     (emitted c).plan = draft c ∧ (emitted c).record = record c ∧
       (emitted c).residual = residual c ∧ (emitted c).deferred = deferred c ∧
       (emitted c).required = required c ∧ (emitted c).feasibility = feasibility c ∧
