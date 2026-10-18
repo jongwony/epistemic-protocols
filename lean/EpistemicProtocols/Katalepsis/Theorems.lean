@@ -101,9 +101,8 @@ theorem facts_supported (c : Context P) :
 
 theorem source_facts_observed (c : Context P) :
     ∀ x ∈ map c, ∀ f ∈ x.2.facts, ∀ (o : Cite c) h sp l,
-      f.material = .source o h sp l → o.src.val ≠ .assistant ∧ o.src.val ≠ .person := by
-  intro _ _ _ _ o h _ _ _
-  rcases h with h | h <;> simp [h]
+      f.material = .source o h sp l → o.src.val = .external ∨ o.src.val = .peer :=
+  fun _ _ _ _ _ h _ _ _ => h
 
 theorem scope_only_by_person {c : Context P} {s : Cite c}
     (ok : (scopeCoord (P := P)).admits s.src) : s.src.val = .person := ok
