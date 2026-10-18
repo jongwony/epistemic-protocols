@@ -67,7 +67,7 @@ claude plugin install katalepsis@epistemic-protocols
 
 | Aspect | Description |
 |--------|-------------|
-| **What the purpose turns on** | What the target does that the user's purpose needs — explained in one representation, deeper on request; the user's own reading of it is checked against the material that settles it |
+| **What the purpose turns on** | What the target does that the user's purpose needs — explained in one representation, deeper on request; the user's own reading of it has the facts that bear on it set beside it |
 | **Unvoiced edge** | An edge of what the target does that the user has not voiced and their purpose needs, grounded in the target's material — raised openly on the map like any other aspect |
 | **Contradiction** | Two sourced statements that cannot both hold on the same scope — taken up by whose it is: one the user holds a side of is shown with its working in one round (their words, the target's material, why they part, what they got right); one inside the target is shown as a finding about it; one against an earlier AI explanation is the AI's to correct |
 | **Check** | Something to see or try before trusting an aspect — run on the user's word, its result shown beside the aspect; where a check AI can reach would show what an aspect the purpose turns on rests on — the user's own reading included — AI runs the cheapest on its stated judgment before reporting, or else offers it with what running it needs; a result is a fact about the target, set beside the aspect; it says nothing about what the user understands, which only their own words give |
