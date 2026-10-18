@@ -461,8 +461,8 @@ def ResponseTurn (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin
     abstraction-to-be in the person's work among it — with what that work returned, and the sheet
     `respond` draws. Reversible work inside this protocol's domain goes as far as you can reach
     within this response, most important first; what comes first and how much is shown are yours
-    to infer, on what least loads the person's recognition. A case the work turns up comes to the
-    sheet as a case you found (`found`). -/
+    to infer, on what least loads the person's recognition. A case the work turns up that you bring
+    to the sheet enters as found by you (`found`). -/
 axiom response : (Context P → Response P) → Context P → List (ResponseTurn P)
 
 /-- The response, placed in the context. -/
