@@ -286,11 +286,10 @@ def answerCoord : Coord P Unit :=
 /-- **Your reading** of the latest utterance: `open_` where it identifies nothing. -/
 axiom answer : (c : Context P) → Occ (answerCoord (P := P)) c
 
-/-- **Your judgment**: the latest utterance bears on this recall — more cue, a correction naming an
-    earlier, a narrower, or a wider past, a place to look, a question
-    about what was shown, which may give reason to read more as `search` says, a remark or a form
-    instruction on what was shown, which re-renders it and adds no search, an invocation V-BINDING
-    reads as continuing this recall, a bare one included. Other work bears
+/-- **Your judgment**: the latest utterance bears on this recall — more cue, a correction, a place
+    to look, a question about what was shown, which may give reason to read more as `search` says, a
+    remark or a form instruction on what was shown, which re-renders it and adds no search, an
+    invocation V-BINDING reads as continuing this recall, a bare one included. Other work bears
     where the turn also carries one of these. A turn that points at another past — a different
     matter from this recall's — bears on this recall where it also carries one of these: the pass
     takes what it carries for this recall, and the other past is left for the person to take up, as
@@ -394,9 +393,8 @@ a round — that stays in the context.
 /-- **Your collection** for one pass: what the cue as it now stands gives reason to read and the
     context does not already hold, or holds only from before a change the person's words or evidence
     report — a capture outcome read as unfinished is not held, so each pass reads it again — the
-    searches toward the cue along its axes, each worth its cost, read on the accumulated context as
-    it now stands, following within the pass what each read exposes, as Where to look says, until
-    nothing worth its cost is left; the opening of each
+    searches toward the cue along its axes, each worth its cost, following within the pass what each
+    read exposes, as Where to look says, until nothing worth its cost is left; the opening of each
     member of the leading recognizable at the span the cue reaches (for an artifact, the change
     history of that span) and, where its records do not open, of the candidates `found` lists in
     turn until one's records open or none is left; and the capture outcome of every record a search
