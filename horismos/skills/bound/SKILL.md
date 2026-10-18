@@ -289,12 +289,12 @@ axiom readout : (c : Context P) → BoundaryEssence c
 
 /-- **Your judgment**: what reading the reachable sources returns for the map at `c`, at the start
     and at every reply that bears on the boundary — a fact a consequence rests on, a record an
-    opened axis needs, a file the person asked you to read. Observe what a consequence the map
-    shows rests on before showing it. Collect as far as the reachable sources go within what the
-    map turns on, through what you can read or run without changing existing state. What the
-    context already holds from a source is not fetched again unless a later turn — an utterance,
-    evidence, or a write of your own — says it changed. What you create only to look — a scratch
-    copy, a temp file — you remove afterwards. What you say you read, read whole. Where what
+    opened axis needs, a file the person asked you to read. Observe what a consequence the map shows
+    rests on before showing it. Collect as far as the reachable sources go within what the map turns
+    on, what matters most first, through what you can read or run without changing existing state.
+    What the context already holds from a source is not fetched again unless a later turn — an
+    utterance, evidence, or a write of your own — says it changed. What you create only to look — a
+    scratch copy, a temp file — you remove afterwards. What you say you read, read whole. Where what
     returns conflicts, name what conflicts with what. A source not reached is named, by name, in
     your turn that shows the map, and so enters what the map did not look at; what still remains
     open is the person's own unknown, carried in the residual. An observation that needs to change
@@ -436,12 +436,12 @@ abbrev Mode (P : Type) := Context P
 
 /-! ── PHASE TRANSITIONS ──
 A step is one arm of a structural recursion over the person's utterances, carrying the context as it
-stands and how the run stands. How the run stands is read at the person's utterance, with what
-observation returned joined to it as evidence turns [Tool], before your turn answers it; whether a
-turn of the person's is still owed is read there. `respond` is then that turn: a round (`round`, an
-Extension) where the run holds — and a run that holds holds with that round in its context — or the
-boundary shown as it stands (`converge`, an Extension) where it stands, its limits and dissent read
-with that turn.
+stands and how the run stands. How the run stands is read at a person's utterance that bears on the
+boundary, with what observation returned joined to it as evidence turns [Tool], before your turn
+answers it; whether a turn of the person's is still owed is read there. `respond` is then that
+turn: a round (`round`, an Extension) where the run holds — and a run that holds holds with that
+round in its context — or the boundary shown as it stands (`converge`, an Extension) where it
+stands, its limits and dissent read with that turn.
 `session` is the session's own answer to an utterance that does not bear on the boundary, which
 stays in the context; the run's status is carried to it unchanged, a run that holds holding the
 context as it now stands.
