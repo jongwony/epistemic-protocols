@@ -763,10 +763,9 @@ axiom carrierRecord : Context P → String
     `carrierRecord` names holds the whole packaged plan — not only an identity allocated for it. -/
 axiom CarrierComplete : Context P → Prop
 
-/-- **Your record**: the session the plan was taken in — the source session, whose governing
-    utterances a receiving side can read and within which the carrier record is found. Where the
-    environment carries more than one session id, which one reaches that session is yours to
-    read. -/
+/-- **Your record**: the session the plan was taken in — the source session, within which the
+    carrier record is found. Where the environment carries more than one session id, which one
+    reaches that session is yours to read. -/
 axiom sessionId : Context P → String
 
 /-- **Your reading**: what a receiving session needs to know the plan is for. -/
@@ -777,7 +776,7 @@ axiom snapshotAnchor : Context P → Option String
 
 /-- `GroundingInstruction`: the receiving procedure the block carries. -/
 def receivingProcedure : String :=
-  "Using /inquire where available or an equivalent grounding pass, dereference the carrier and its source session, follow the goal's cited evidence, and recover the current scope and authorized revisions from the governing utterances — a taking read with the sheet it took among them; preserve those limits through reassignment; the authority the plan carries does not widen there. Interpret each reservation under the recovered ground, following any further source its subject requires, and surface the plan's reservations with their settling grounds and the doubts it carries. A coordinator's summary does not substitute for source wording that settles authority; a judgment whose source is unreachable or no longer supports it stays open while independent reading continues. Grounding reads the plan and starts nothing; whoever runs it carries the obligations the plan holds."
+  "Dereference the carrier and its source session, using /inquire where available or an equivalent grounding pass; the authority the plan carries does not widen through reassignment."
 
 /-- `record_handoff`: the block over the carrier — entry points only, never a re-authored plan. -/
 def navigation (c : Context P) : NavigationBlock :=
@@ -1068,7 +1067,7 @@ Goal singleness, the host-contract subtraction, the out-of-scope classification,
 - **One sheet for the whole plan**: Show the whole plan on every turn that bears on the run — the goal, units, conditions, whole-goal conditions, the acceptance question, the authority, out-of-scope and subtracted obligations — every line drawn on every sheet, with the ledger of every change since the sheet the person answered. The plan and every question about it share that one sheet.
 - **Recommendation only where the ground separates**: Mark an action as recommended only where the ground clearly separates it from the others; comparable actions stand side by side with their consequences.
 - **The person takes and closes**: Only the person's taking closes the run, whatever its form; silence, a stop, or a turn to other work leaves the sheet holding. A taking adopts what the sheet showed and accepts the gaps shown; a value the draft proposed and the person took is recorded as the draft's and adopted, apart from values the person set. An answer to the focus closes nothing.
-- **Authority before departure**: Show on the sheet the authority the run will reach while the person is away — by kind, target, and limit — so the person settles it before they leave; read what they grant as a broad direction, and an act that falls outside it or whose place inside it is unclear is shown as a doubt on the sheet before the taking and, after the handoff, comes back as `handoffObligations` states.
+- **Authority before departure**: Show on the sheet the authority the run will reach while the person is away — by kind, target, and limit — so the person settles it before they leave; read what they grant as a broad direction, and an act that falls outside it or whose place inside it is unclear is shown as a doubt on the sheet before the taking.
 - **Contrary grounds ride the plan**: Show each doubt beside what it bears on, with what it rests on, before the person's turn it bears on. A doubt never refuses a taking; a plan taken over it carries it, and it is raised again only on new evidence.
 - **Whole certificate**: A unit's certificate carries every check, every accepted gap, and every held-open item of its done together; a passing check never stands for a done that a held-open judgment still awaits.
 - **Whole-goal acceptance**: The acceptance question is settled once, by the person: a criterion (theirs or the draft's, taken), a reservation, or a waiver. One value stands; a later settling replaces an earlier one, and emission never carries two.
