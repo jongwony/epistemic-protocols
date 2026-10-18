@@ -293,13 +293,13 @@ axiom readout : (c : Context P) → BoundaryEssence c
     shows rests on before showing it. Collect as far as the reachable sources go within what the
     map turns on, through what you can read or run without changing existing state. What the
     context already holds from a source is not fetched again unless a later turn — an utterance,
-    evidence, or a write of your own — says it changed. What you create only to look — a scratch copy, a temp file — you remove
-    afterwards. What you say you read, read whole. Where what returns conflicts, name what
-    conflicts with what. A source not reached is named, by name, in your turn that shows the map,
-    and so enters what the map did not look at; what still remains open is the person's own
-    unknown, carried in the residual. An observation that needs to change existing state, someone's
-    permission, or another's authority is named with what it needs and handed over, not observed.
-    Each return is an evidence turn. -/
+    evidence, or a write of your own — says it changed. What you create only to look — a scratch
+    copy, a temp file — you remove afterwards. What you say you read, read whole. Where what
+    returns conflicts, name what conflicts with what. A source not reached is named, by name, in
+    your turn that shows the map, and so enters what the map did not look at; what still remains
+    open is the person's own unknown, carried in the residual. An observation that needs to change
+    existing state, someone's permission, or another's authority is named with what it needs and
+    handed over, not observed. Each return is an evidence turn. -/
 axiom observe : Context P → List (Evidence P)
 
 /-- The context with what observation returned joined to it; the map is read there. -/
@@ -356,9 +356,7 @@ axiom owed : Context P → Bool
     disposition you doubt, a premise that may not hold, whether a choice stays inside an
     entrustment — attached to the boundary where the person set it over them; empty when there were
     none. Which choice to make inside an entrustment is yours to weigh where you make that choice.
-    A contrary ground you would raise first where the boundary would stand makes
-    the person's turn owed instead. The person's dispositions stand over them: you never rewrite or
-    veto one. -/
+    The person's dispositions stand over them: you never rewrite or veto one. -/
 axiom dissent : Context P → List String
 
 /-- One disposition on the record: the decision, the disposition, and the person's turn it stands
@@ -557,10 +555,10 @@ def grounding : Op → Annot × String
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution remains context-bound.
-Handing the boundary's work to another agent does not enlarge what an entrustment reaches. This
-protocol defines the boundary: the reversible work it does for the boundary is the observation the
-boundary needs (`observe`); past the seam, the work the boundary is for belongs to the next move,
-and this protocol does not execute or enforce it.
+This protocol defines the boundary: the reversible work it does for the boundary is the observation
+the boundary needs (`observe`); past the seam, the work the boundary is for belongs to the next
+move, and this protocol does not execute or enforce it. Handing either to another agent does not
+enlarge what an entrustment reaches.
 -/
 
 end
@@ -601,7 +599,7 @@ end Horismos
 - **Entrustment reach**: An entrustment reaches what was shown of it. A later act that cannot be undone is entrusted only where its consequence was shown by kind, target, and limit; an earlier authorization of the same kind, target, and limit is not asked for again.
 - **Dependency revision**: Reconcile changed ground and transitive dependents before the next round or the reading where the boundary stands, retaining supported decisions and recording unresolved consequences.
 - **Prior-map provenance**: Read an earlier boundary through the turns it cites. Its citation still points at the same source; whether that source still supports the settlement is judged against the context that now stands, and an unreachable or unsupported setting is advisory. An earlier decision relayed from a record is a cited fact, not a disposition of this run — whether it fixes a decision's content or who settles it.
-- **After closure**: Never rewrite or veto a user's disposition. Attach your contrary grounds to the boundary where the user set it over them, and raise a disposition again only on new evidence.
+- **After closure**: Raise a user's disposition again only on new evidence; `dissent` states how your contrary grounds attach and that you never rewrite or veto one.
 - **Closing**: Keep the way to accept the boundary as it stands recognizable in every round, with every irreversible AI-delegation proposal in view. The boundary stands where no turn of the user's is owed (your `owed` reading) and they accept it or no item awaits their disposition; silence and other work leave the run as it stood, and scan exhaustion or a visit count supplies no acceptance.
 - **Ambiguous response routing**: Read mixed responses whole; when materially different futures remain viable, continue and present those readings and their consequences. Commit nothing from an unresolved reading. Never ask the user to classify their own words into the disposition forms.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
