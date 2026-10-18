@@ -292,8 +292,8 @@ axiom readout : (c : Context P) → BoundaryEssence c
     at the start and at every reply that bears on the boundary. Observe what a consequence the map
     shows rests on before showing it. Collect as far as the reachable sources go within what the
     map turns on, through what you can read or run without changing existing state. What the
-    context already holds from a source is not fetched again unless an utterance or evidence says
-    it changed. What you create only to look — a scratch copy, a temp file — you remove
+    context already holds from a source is not fetched again unless a later turn — an utterance,
+    evidence, or a write of your own — says it changed. What you create only to look — a scratch copy, a temp file — you remove
     afterwards. What you say you read, read whole. Where what returns conflicts, name what
     conflicts with what. A source not reached is named, by name, in your turn that shows the map,
     and so enters what the map did not look at; what still remains open is the person's own
@@ -548,7 +548,7 @@ def Interaction.realization : Interaction → Continuation
 inductive Op | observe | readout | round | readAnswer | converge | seam
 
 def grounding : Op → Annot × String
-  | .observe      => (.observe, "record read, artifact read, artifact search, environment run: observation as `observe` states")
+  | .observe      => (.observe, "record read, artifact read, artifact search, external fetch, environment run: observation as `observe` states")
   | .readout      => (.sense, "Internal analysis: derive the whole map and the opened detail from the context as observation left it, at every round; read each disposition and content by the turn that set it, and an earlier decision fixing who settles one as a cited fact")
   | .round        => (.interaction .extension, "the whole map — the person's own lines as theirs, your additions marked as proposals, each decision with its evidence, what depends on it and what getting it wrong costs, and any entrustment's reach, every later act that cannot be undone in view — what the map did not look at — every source observation did not reach, by name — the choices still open beside the round's question, your contrary grounds, where you hold any, before the answer, and the way to accept the boundary as it stands kept recognizable; labels defined where they are used")
   | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on the boundary, and what it does there — dispositions, corrections, an opening, an acceptance — read whole against the fused context, whatever form it takes; a reading not yet settled — by this reply or a later one — makes the person's turn owed: the run holds and a round serves it, committing nothing; a request to see something is served by the turn that shows it")
@@ -557,9 +557,10 @@ def grounding : Op → Annot × String
 
 /-! ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution remains context-bound.
-Reassignment does not enlarge authority. This protocol defines the boundary: the reversible work it
-does for the boundary is the observation the boundary needs (`observe`); past the seam, the work the
-boundary is for belongs to the next move, and this protocol does not execute or enforce it.
+Handing the boundary's work to another agent does not enlarge what an entrustment reaches. This
+protocol defines the boundary: the reversible work it does for the boundary is the observation the
+boundary needs (`observe`); past the seam, the work the boundary is for belongs to the next move,
+and this protocol does not execute or enforce it.
 -/
 
 end
