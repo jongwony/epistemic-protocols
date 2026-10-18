@@ -48,11 +48,11 @@ AttributionLoss    : a past statement read as the person's decision because a to
 
 A pass that leaves nothing to present runs in the turn the searches ran in; nothing needs carrying to a later turn.
 
-Which round follows — the open question, the wider search, or the unresolved close — is as SKILL.md's `respond`, `settle`, and `expansion` say.
+Which follows — the open question or the unresolved close — is as SKILL.md's `round` and `settle` say.
 
 ```
 an index that is empty or whose capture failed
-  -- the records themselves remain searchable along the cue's axes; the capture outcome says whether the index was validated empty, failed, unfinished, or never written, and that is what the round reports about it
+  -- the records themselves remain searchable along the cue's axes; the capture outcome says whether the index was validated empty, failed, unfinished, or never written, and that is what the round or the close reports about it
   -- an empty index says nothing about whether the past took place
 the substitute channel
   -- a separate capture, not derived from the index: a fork's id stays findable there when the index is empty; its loss is not recoverable from the conversation records

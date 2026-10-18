@@ -29,10 +29,30 @@ theorem relay_before_instantiation (ai : AITurns P) (c : Context P) :
   simp only [List.append_assoc]
   exact ⟨_, rfl⟩
 
+/-- Where `FanCarried` reads none, `carry` makes nothing. -/
+theorem carry_uncalled (ai : AITurns P) (n : Nat) (c : Context P) (h : ¬ FanCarried c) :
+    carry ai n c = c := by
+  cases n <;> simp [carry, h]
+
+/-- A fan you carry is a fan — its spec relayed before it builds — followed by what it makes worth
+    gathering, and `carry` goes on from the context it left. -/
+theorem carry_fans (ai : AITurns P) (n : Nat) (c : Context P) (h : FanCarried c) :
+    carry ai (n + 1) c = carry ai n (consulted (fan ai c)) := by
+  simp [carry, h]
+
 theorem unrelated_adds_no_gate (ai : AITurns P) (c : Context P) (u : Utterance P)
     (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
     preview ai c (u :: us) = preview ai (fuse c u ++ [(ai.session (fuse c u)).val]) us := by
   simp [preview, h]
+
+theorem no_fan_without_judgment (ai : AITurns P) (c : Context P) (u : Utterance P)
+    (us : List (Utterance P)) (hr : Reaches (fuse c u))
+    (hk : filledValue (closing (fuse c u)) = none)
+    (hq : ¬ FanRequested (consulted (fuse c u))) (hc : ¬ FanCarried (consulted (fuse c u))) :
+    preview ai c (u :: us) =
+      preview ai (consulted (fuse c u) ++ [(ai.respond (consulted (fuse c u))).val]) us := by
+  have hn := carry_uncalled ai (reach (consulted (fuse c u))) _ hc
+  simp [preview, hr, hk, hq, hn]
 
 /-- One step either continues on some context or ends at a closing the person's turn filled. -/
 private theorem step (ai : AITurns P) (c : Context P) (u : Utterance P) (us : List (Utterance P))
