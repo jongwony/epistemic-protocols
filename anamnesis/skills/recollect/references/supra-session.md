@@ -11,16 +11,16 @@ Relation         = { from: Member, to: Member | Locator, what: String, support: 
 Locator          = { root: String, identity: Optional(String) }   -- the target of a relation that points at no record reached: a reference naming a record not found. A projection only, never a member: nothing is opened for it
 assemble(found, cue) → List(Recognizable)   -- the judgment: which found records make the one whole the cue means, by the relations the records support, stated in Recognizable.joins
                   -- a method that computes groups (co-occurrence, spectral, diffusion from the cue's records) may propose candidates; it does not decide what the whole is
-                  -- no fixed route: follow whichever relations the cue's axes make worth following, from the records found or across the population the context has bounded; a reach past that boundary is offered, not run
+                  -- no fixed route: follow whichever relations the cue's axes make worth following, from the records found or across the records searched, reaching as far as SKILL.md's `search` says
 
 ── INVARIANTS ──
   read-only               : assembly reads the records it joins and writes to none of them, nor to any index
   supported-relations     : a recognizable joins only members whose relations a record supports, and says what joins them
   partial-recovery        : a relation to a record not reached is kept as a Locator and reported; what it points at is unknown — not yet written, moved, or lost is not claimed without evidence
-  disclosed-coverage      : what was followed, what was not reached, and which roots were searched are reported beside the story or in the round that offers the wider search
+  disclosed-coverage      : what was followed, what was not reached, and which roots were searched are reported in the round or the close, beside the story where there is one
 
 ── KNOWN FAILURE MODES (wholes above one record) ──
-SparseRelations      : records found, and too few supported relations join them into the whole meant — nothing to present: the open question while the person has added nothing, then the wider search where one is worth offering, each reporting what was followed
+SparseRelations      : records found, and too few supported relations join them into the whole meant — nothing to present
 BrokenReference      : relations resolve mostly to records not reached — report them as notes; the assembled whole may be too thin to recognize
 WholeMisread         : the whole misread — seen when a correction describes a different whole; the next pass re-reads the cue and assembles again
 -- One record would have answered: no case here. A recognizable of one member is the whole, and a whole misread above one record is WholeMisread
