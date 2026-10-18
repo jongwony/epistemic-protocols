@@ -287,9 +287,9 @@ structure BoundaryEssence (c : Context P) where
     current sheet with a ledger of what changed. -/
 axiom readout : (c : Context P) → BoundaryEssence c
 
-/-- **Your judgment**: what reading the reachable sources returns for the map at `c` — a fact a
-    consequence rests on, a record an opened axis needs, a file the person asked you to read —
-    at the start and at every reply that bears on the boundary. Observe what a consequence the map
+/-- **Your judgment**: what reading the reachable sources returns for the map at `c`, at the start
+    and at every reply that bears on the boundary — a fact a consequence rests on, a record an
+    opened axis needs, a file the person asked you to read. Observe what a consequence the map
     shows rests on before showing it. Collect as far as the reachable sources go within what the
     map turns on, through what you can read or run without changing existing state. What the
     context already holds from a source is not fetched again unless a later turn — an utterance,
