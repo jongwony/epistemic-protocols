@@ -208,7 +208,7 @@ theorem unresolved_after_cue (c c' : Context P) (s : String) (q : List String)
     (h : settle c = some (.unresolved c' s q)) : AddedToCue c := by
   unfold settle at h
   split at h
-  · next hc => exact hc.2.1
+  · next hc => exact hc.2
   · cases h
 
 end Anamnesis
