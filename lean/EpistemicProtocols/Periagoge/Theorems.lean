@@ -38,9 +38,9 @@ theorem other_work_draws_nothing (respond session converge : Context P → Respo
 theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   ⟨(collect c).map (·.val), rfl⟩
 
-/-- What `present` adds after the context it draws on — the response, its sheet and the work carried
-    forward in it — holds no turn the person sent: carried work supplies no turn of theirs to a
-    recognition, a setting-aside, a line's standing, or words about an open item. -/
+/-- What `present` adds after the context it draws on — the response — holds no turn the person
+    sent: carried work supplies no turn of theirs to a recognition, a setting-aside, a line's
+    standing, or words about an open item. -/
 theorem present_adds_no_person_turn (respond : Context P → Response P) (c : Context P) :
     ∃ t, present respond c = c ++ t ∧ ∀ e ∈ t, e.origin ≠ .person := by
   refine ⟨(response respond c).map (·.val), rfl, ?_⟩

@@ -133,10 +133,10 @@ structure Instance where
     its basis, and closes nothing. -/
 axiom notActivated : Context P → Option String
 
-/-- **Your record**: the cases you found, by collection or by work you carried forward in a
-    response, and bring to the sheet — the rest of what collection turned up stays in the context
-    it was read into — that the person's words have neither taken up nor turned down. A case that
-    would decide against the candidate is among the cases you bring. -/
+/-- **Your record**: the cases you found and bring to the sheet — the rest of what collection
+    turned up stays in the context it was read into — that the person's words have neither taken
+    up nor turned down. A case that would decide against the candidate is among the cases you
+    bring. -/
 axiom found : Context P → List Instance
 
 /-- **Your reading**: the cases the person brought — named in their turns, or singled out by them
@@ -458,11 +458,11 @@ def ResponseTurn (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin
 
 /-- **Your response** to a turn that bears on the run and does not close it, the first included:
     the work inside this protocol's domain you carry forward on a judgment you state — using the
-    abstraction-to-be in the person's work among it — with what that work returned, and one sheet,
-    as `respond` draws it on what that work reached. Reversible work inside this protocol's domain
-    goes as far as you can reach within this response, most important first; what comes first and
-    how much is shown are yours to infer, on what least loads the person's recognition. A case the
-    work turns up comes to the sheet as a case you found (`found`). -/
+    abstraction-to-be in the person's work among it — with what that work returned, and the sheet
+    `respond` draws. Reversible work inside this protocol's domain goes as far as you can reach
+    within this response, most important first; what comes first and how much is shown are yours
+    to infer, on what least loads the person's recognition. A case the work turns up comes to the
+    sheet as a case you found (`found`). -/
 axiom response : (Context P → Response P) → Context P → List (ResponseTurn P)
 
 /-- The response, placed in the context. -/
