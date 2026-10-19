@@ -8,7 +8,7 @@ User-facing emit (relay prose, convergence traces, the statement of what an answ
 
 ## When some of what is in view belongs to a later round or a trace rather than this one
 
-Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to the text before the relay, convergence traces, or later relays.
+Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to the text before the relay, convergence traces, or later relays.
 
 ## When this protocol's own phases bear on where a sentence sits relative to the relay
 

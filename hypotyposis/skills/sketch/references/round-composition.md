@@ -8,7 +8,7 @@ User-facing emit (the versions, the intent relay, the standing, the round's open
 
 ## When some of what is in view belongs to a later round or the convergence evidence rather than this one
 
-Each user-facing round bundles the current judgment, its nearest material (the version under judgment and the marks it was revised from), and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, marks from earlier rounds that this version already absorbed, and unrelated findings to text before the round's opening, the convergence evidence, or later rounds. A later version that moved a value the user holds belongs in this round as a one-line change beside the version that moved it.
+Keep adjacent material together so the user can recognize the decision without context-switching; defer background, marks from earlier rounds that this version already absorbed, and unrelated findings to text before the round's opening, the convergence evidence, or later rounds. A later version that moved a value the user holds belongs in this round as a one-line change beside the version that moved it.
 
 ## When whether text belongs before the round's opening or inside it is in question
 
