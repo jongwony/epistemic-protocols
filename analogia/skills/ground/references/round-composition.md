@@ -8,4 +8,4 @@ User-facing emit (the question and the assessment as presented, convergence trac
 
 ## When some of what is in view belongs to a later round or a trace rather than this one
 
-Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to convergence traces or later cycles.
+Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to convergence traces or later cycles.

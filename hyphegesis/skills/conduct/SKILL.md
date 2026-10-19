@@ -305,11 +305,9 @@ structure Deferred where
 
 /-- **Your reading**: what the method leaves open, each read along two questions that may both hold:
     does its deciding evidence arrive only later, and can only the person supply or settle it? One
-    whose evidence arrives later is decided by the substrate only where a recorded grant's reach
-    covers it, shown on the map as covered by that grant; where the grant is open or its reach
-    unclear, and wherever only the person can supply or settle it, it returns to them (`toPerson`) —
-    a secret or credential to set, a runtime error the substrate cannot resolve, a deployment handed
-    to runtime, a fusion whose shape only the person can choose. -/
+    whose evidence arrives later is shown on the map as covered by a recorded grant only where that
+    grant's reach covers it; where the grant is open or its reach unclear, and wherever only the
+    person can supply or settle it, it returns to them (`toPerson`). -/
 axiom deferred : Context P → List Deferred
 
 /-- **Your reading**: how long the method's grants and readings hold — following a horizon the
@@ -559,7 +557,7 @@ The map's first line says what the work is for and what it hands off. Prior-sess
 
 - **Conduction warrant**: Hyphegesis never conducts itself.
 - **Round composition**: Use everyday language, place each judgment beside its evidence and next-move implication, and keep analytical context before the gate. Read `references/round-composition.md` when terminology or wording must persist, content belongs to another turn, or placement relative to the gate is in question.
-- **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly; preserve content, wording, order, cadence, and turn boundaries fixed elsewhere, stating what changed and any overlapping constraint that remains.
+- **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
 
 ## Adversarial Guards
 

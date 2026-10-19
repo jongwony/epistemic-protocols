@@ -219,7 +219,7 @@ axiom detections : Context P → List String
 /-- **Your judgment**: the cited turn dismisses uncertainty `x` — the person sets it aside, in
     whatever words, with whatever reason they give and none demanded — read against the context
     as it now stands. Whether an earlier dismissal still reaches `x` once new evidence bears on it
-    is read on the current context: a dismissed uncertainty may be raised again on new evidence. -/
+    is read on the current context. -/
 axiom DismissalSupported : Entry → Context P → Turn P → Unit → Prop
 
 /-- Only the person dismisses. -/
@@ -402,7 +402,7 @@ inductive Op | scan | collect | read | surface | readAnswer | converge | seam
 
 def grounding : Op → Annot × String
   | .scan       => (.sense, "Internal analysis: the inventory — what the prospect rests on that the fused context leaves uncertain, what collection returned included; no fixed taxonomy")
-  | .collect    => (.observe, "artifact read, artifact search, record read, external fetch, environment run: every read and run you can make on your own without changing existing state, to the limit of your reach, removing afterwards what you created only to look; what the context already holds from a source is not fetched again unless an utterance or evidence says it changed; what each returns enters the context as an evidence turn; an observation that needs to change existing state, a permission, or another's authority is named with what it needs and handed off, never run as collection")
+  | .collect    => (.observe, "record read, artifact read, artifact search, external fetch, environment run: collection as `collect` states")
   | .read       => (.sense, "Internal analysis: how each uncertainty stands — settled with its citation, ground short with its candidate, or unreached — and its reach, read on the context as it now stands")
   | .surface    => (.interaction .extension, "once everything reachable is reached, every open uncertainty handed back as the person's own unknown with its reach — the sources tried and those not reached, by name, with what each needs; what was found and where it falls short; where collected material conflicts, what conflicts with what; where a decision blocks further collection, which collection waits on it; what an answer would change; which of them is the person's to settle, as your reading for their correction; each settled one with its provenance — the evidence and where it was read, or the person's words, with your earlier candidate marked as yours; the detections, each with its source; your contrary grounds; the turn is not held")
   | .readAnswer => (.sense, "Internal analysis: the latest utterance read whole against the prospect and the fused context as it now stands — whether it bears on this run, and what it does there: settles, corrects, points to a source, says the person does not know either, dismisses, or exposes a new uncertainty")
@@ -430,7 +430,7 @@ When a prospect touches architecture decisions, API or protocol design, persiste
 
 ### User-facing realization
 
-Present what TOOL GROUNDING's `surface` entry names in everyday language and proceed. Where collected material conflicts, name what conflicts with what; where a decision blocks further collection, name which collection waits on it; say which open items read as the user's to settle, as a reading they can correct, and which items the AI found without full warrant; name each source it could not reach, with what it needs, so the user can point at one it missed; name a detection as one, on its own line. State what the protocol takes if an answer comes — a fact, a correction, a place to look, "I don't know either", a dismissal — without holding the turn for it and without a fixed menu. Keep every item open to free-response correction.
+Present what TOOL GROUNDING's `surface` entry names in everyday language and proceed. Say which items the AI found without full warrant; name each source it could not reach, with what it needs, so the user can point at one it missed; name a detection as one, on its own line. State what the protocol takes if an answer comes — a fact, a correction, a place to look, "I don't know either", a dismissal — without holding the turn for it and without a fixed menu. Keep every item open to free-response correction.
 
 Frame the uncertainty currently in play rather than emitting a completion tally. Read `references/round-composition.md` before composing when terminology must remain stable across the session, wording must be carried unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside a relay.
 
@@ -452,4 +452,4 @@ Frame the uncertainty currently in play rather than emitting a completion tally.
 - **Collection yields evidence or nothing, never a disposition**: An observation that resolved nothing attaches its null result and collection moves on. Only the user's words dismiss an uncertainty.
 - **Completion**: Completion is the end of collection. It settles nothing open, and the AI's own reading of what is open completes nothing and settles nothing.
 - **Boundary named, not crossed**: For every open uncertainty, say what was tried, what was not reached and what it needs, what was found, and where it falls short; leave its disposition to the user.
-- **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction forward until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
+- **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction forward until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.

@@ -385,4 +385,4 @@ Present what TOOL GROUNDING's `surface` entry names. Read `references/round-comp
 - **Recognition over Recall**: Present the coordinates an intent turns on with their anticipatable post-answer states, so the user recognizes what they would otherwise have to recall.
 - **Round composition**: Use everyday language, keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the questions.
 - **Focus and record**: As the Definition's MORPHISM invariant and `record` state.
-- **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
+- **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
