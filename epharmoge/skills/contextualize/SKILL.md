@@ -366,7 +366,8 @@ open Classical in
     not reached. Then what changed since the last sheet: each line added, removed, or changed
     names what moved — a write, a new observation, a person's turn, or a reading of yours
     corrected on unchanged ground, said to be a correction; a line that left says why. Then one
-    question over every open mismatch. What the utterance asked outside this run is
+    question over every open mismatch; take them one at a time where the person asks for it. What
+    the utterance asked outside this run is
     answered here; a step that rests on X and cannot be undone waits while something is open,
     and the open places are shown before it. Re-present the whole sheet where it changed or the
     person asked for it; a question about the sheet is answered with the gate said to stand. On
