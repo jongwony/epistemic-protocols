@@ -27,7 +27,8 @@ can introduce bugs"); or a contrary ground stated after the gate.
 This grader reads presence, attribution and placement. Whether the ground is the strongest one the
 draft could have raised is the run's judgment and is not graded.
 
-A contrary ground is something said against the drafted method, or in doubt of it. A finding the map uses to support its plan is not one, however
+A contrary ground is something said against the
+drafted method, or in doubt of it. A finding the map uses to support its plan is not one, however
 pertinent — "`report.api` orders records by issue date, so each exporter re-sorts by id" is a step
 of the plan with its reason. The same finding counts when it is offered against the map: as the
 draft's weakest assumption ("this assumes the golden files cover the date ordering"), as a line or
