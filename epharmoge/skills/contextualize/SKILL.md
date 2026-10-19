@@ -499,7 +499,7 @@ Where a place reads as another owner's, the options name the concrete split, for
 - **Non-circularity**: As `Mismatch.against` states — what the result must fit is never the assistant's own words.
 - **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own moves bear on where a sentence sits relative to a gate.
 - **One sheet**: As `respond` states — every place on one sheet, one question over the open ones.
-- **Recognition over categories**: As `respond` and the `gate` grounding state — concrete actions with their consequences and contrary grounds, never category titles.
+- **Recognition over categories**: As `respond` states — concrete actions with their consequences and contrary grounds, never category titles.
 - **Reach named**: As `observe` and `reach` state.
 - **Relay runs as Extension**: As `perform` and `SettledSupported` state — what is settled is carried out within what this run may write; only what the person holds waits for their turn.
 - **The person resolves**: As `ResolutionSupported`, `SettledSupported`, and `respond` state — including the quoted disclosure of a turn read as a resolution.

@@ -430,7 +430,7 @@ When a prospect touches architecture decisions, API or protocol design, persiste
 
 ### User-facing realization
 
-Present what TOOL GROUNDING's `surface` entry names in everyday language and proceed. State what the protocol takes if an answer comes — a fact, a correction, a place to look, "I don't know either", a dismissal — without holding the turn for it and without a fixed menu. Keep every item open to free-response correction.
+Present what TOOL GROUNDING's `surface` entry names in everyday language and proceed. Where collected material conflicts, name what conflicts with what; where a decision blocks further collection, name which collection waits on it; say which open items read as the user's to settle, as a reading they can correct, and which items the AI found without full warrant; name each source it could not reach, with what it needs, so the user can point at one it missed; name a detection as one, on its own line. State what the protocol takes if an answer comes — a fact, a correction, a place to look, "I don't know either", a dismissal — without holding the turn for it and without a fixed menu. Keep every item open to free-response correction.
 
 Frame the uncertainty currently in play rather than emitting a completion tally. Read `references/round-composition.md` before composing when terminology must remain stable across the session, wording must be carried unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside a relay.
 
