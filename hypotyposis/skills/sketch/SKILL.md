@@ -578,5 +578,5 @@ Where the session can render a figure, a page, or a motion, show the version ren
 ## Rules
 
 - **Round composition**: Compose each round so the reader can act without reassembly — use everyday language, keep each judgment beside its evidence and next-move implication, and place analytical context before its opening. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, content belongs to another round or the convergence evidence, or whether text belongs before the round's opening or inside it is in question.
-- **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Content, wording, order, cadence, and turn boundaries fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
+- **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
 - **Contract execution**: As FLOW, the judgments' doc comments, the `RecognizedForm` doc, LOOP, TOOL GROUNDING's `intentRelay` and `present` entries, and CONVERGENCE state.
