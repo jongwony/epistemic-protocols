@@ -31,7 +31,7 @@ Merismos(G) → start(c) → apportion(c, utterances), where c is the fused sess
     acceptance question, the authority, and how each value came to stand → record
   [nothing could be read from the goal's scope: relay(too thin) → report]
   present the whole plan on one sheet, the ledger of what changed since the sheet the person
-    answered, your doubts beside what each bears on, and one focus with concrete actions → Stop
+    answered, your doubts beside what each bears on, and the focus with concrete actions → Stop
   next utterance u, fused into c →
     [it does not bear on this run, or it stops here]     the session answers it; the run holds
   otherwise c₁ := pass(fuse(c, u)) →
@@ -55,7 +55,7 @@ AutonomousGoal × ExecutionHorizon
   → derive(unit) → certificate         -- the irreducible core, part two: per obligation a verifiable predicate, a residual left unguarded, or a reservation naming the ground that settles it
   → derive_plan(goal, units) → P       -- conditions whose subject is the whole goal, never distributed across units, none naming an order
   → authority(goal, units)             -- what the unattended run will reach that needs the person's authority, by kind, target, and limit
-  → sheet(plan, ledger, dissent, focus)  -- the whole plan on every turn that bears on the run, every change since the sheet the person answered, your doubts, and one focus
+  → sheet(plan, ledger, dissent, focus)  -- the whole plan on every turn that bears on the run, every change since the sheet the person answered, your doubts, and the focus
   → take(person)                       -- the person takes the plan with everything it holds in view; that taking adopts what the draft proposed, the authority shown included, and accepts the residuals shown
   → emit(goal_entries) → package → park_carrier → record_handoff → handoff(run)
   → ConditionBearingUnitPlan
@@ -562,16 +562,14 @@ structure Action where
   edit        : String
   consequence : String
 
-/-- The one open point the sheet asks about. -/
+/-- An open point the sheet asks about. -/
 structure Focus where
   item    : String
   actions : List Action
 
-/-- **Your selection** of the focus: a request that bundles several stated outcomes first, then
-    a hole in coverage, then a unit that does not fit, then the acceptance question, then the
-    point whose change would most change the plan; `none` where nothing is open and the question
-    is whether to take the plan. -/
-axiom focus : Context P → Option Focus
+/-- **Your selection** of the focus: the open points the sheet asks about; empty where nothing is
+    open and the question is whether to take the plan. -/
+axiom focus : Context P → List Focus
 
 /-- **Your judgment**: the ground clearly separates action `i` of `f` from the others — not that it
     is somewhat better. -/
@@ -987,7 +985,7 @@ def grounding : Op → Annot × String
   | .collect       => (.observe, "record read, artifact read, artifact search: the goal's cited material and seam evidence over its substrate; read-only")
   | .judge         => (.sense, "Internal analysis: the whole plan afresh against the whole context — whether the request bundles several stated outcomes, obligations with the host's standing contract subtracted, the out-of-scope set, the units as a partition with each fit and seam, each unit's conditions, the plan conditions, the acceptance question, the authority the run will reach, how each value came to stand, and your doubts with what each bears on; a person's value stands on the scope their words reach")
   | .record        => (.track, "record: the pass's record of the plan as judged, the ledger, and the focus")
-  | .sheet         => (.interaction .constitution, "the whole plan on one sheet, each value marked the person's or the draft's, the authority the run will reach; the ledger of every change since the sheet the person answered; your doubts, each beside what it bears on, with what it rests on; then one focus with concrete actions, each with its consequence, a recommendation only where the ground clearly separates it; with nothing open, whether to take the plan; wherever a taking would close the run, that it hands the plan off in the same turn unless the person keeps the start. Silence holds and takes nothing")
+  | .sheet         => (.interaction .constitution, "the whole plan on one sheet, each value marked the person's or the draft's, the authority the run will reach; the ledger of every change since the sheet the person answered; your doubts, each beside what it bears on, with what it rests on; then the focus with concrete actions, each with its consequence, a recommendation only where the ground clearly separates it; with nothing open, whether to take the plan; wherever a taking would close the run, that it hands the plan off in the same turn unless the person keeps the start. Silence holds and takes nothing")
   | .readTurn      => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — whether it bears on this run at all, and there an edit and its scope, an answer to the focus, a settling of the acceptance question, a change to the authority, a taking over a fit, a taking of the plan — whatever form it takes")
   | .emit          => (.track, "record: on a taking over a closable plan, one entry per unit with its ref and its whole certificate, one per plan condition, and exactly one envelope — accepted gaps, reservations, the out-of-scope set, the subtraction, and the waiver apart from the reserved criterion")
   | .package       => (.sense, "Internal analysis: the returned plan read back from the emitted entries, with the authority, the doubts the taking carried, and the obligations every run of it carries, and each value's provenance")
@@ -1042,9 +1040,9 @@ Every turn that bears on the run shows the whole plan on one sheet, in everyday 
 
 Under the sheet, the ledger of every change since the sheet the person answered: their edits first, then each value re-filled because of them, then anything else that moved. A removed unit and a replaced value stay in the ledger with what they were. Then your doubts, each beside what it bears on, with what it rests on.
 
-Then one focus, with concrete actions and what each would do. Mark one action as recommended only where the ground clearly separates it from the others; where the actions are comparable, leave them side by side with their consequences.
+Then the focus, with concrete actions and what each would do. Mark one action as recommended only where the ground clearly separates it from the others; where the actions are comparable, leave them side by side with their consequences.
 
-The person may answer in their own words, and one answer may edit several units. An answer to the focus settles that point only; a taking is said of the plan and takes everything the sheet shows, adopting what the draft proposed — the authority shown included — and accepting the gaps shown. Where a taking does not close — the plan's structure does not yet allow it, or something it would take was not yet shown — the next sheet says so and what stands in the way. A unit that does not fit is taken only by words that take it over its fit; for a fit that could not be judged, those words name the uncertainty. With nothing open, the focus asks whether to take the plan and says what a taking would not yet satisfy. Wherever a taking would close the run, the sheet says that it hands the plan off in the same turn, unless the person keeps the start for themselves. Wherever you read one of the person's earlier turns as setting a value, say which turn and what you took from it, quoting their words.
+The person may answer in their own words, and one answer may edit several units. An answer to the focus settles only what it answers; a taking is said of the plan and takes everything the sheet shows, adopting what the draft proposed — the authority shown included — and accepting the gaps shown. Where a taking does not close — the plan's structure does not yet allow it, or something it would take was not yet shown — the next sheet says so and what stands in the way. A unit that does not fit is taken only by words that take it over its fit; for a fit that could not be judged, those words name the uncertainty. With nothing open, the focus asks whether to take the plan and says what a taking would not yet satisfy. Wherever a taking would close the run, the sheet says that it hands the plan off in the same turn, unless the person keeps the start for themselves. Wherever you read one of the person's earlier turns as setting a value, say which turn and what you took from it, quoting their words.
 
 A completion condition is an executable stop-time predicate; an invariant condition is a boundary the interval preserves while completing. A check the run itself could change so that it passes is said so. Where an obligation could become a predicate once sharpened, the draft proposes the sharpened check as that obligation's whole check, marked as the draft's; a taking adopts it, and where the person declines it the gap stands. A check that covers only part of an obligation leaves the rest beside it as a gap or a held-open item, so the two read apart. A unit whose done rests only on accepted gaps is shown as one the run cannot tell is done. An item only live judgment can settle is held open with the ground that will settle it. An obligation requiring interception before action is out of scope and names what must intercept it.
 

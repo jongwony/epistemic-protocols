@@ -278,7 +278,7 @@ axiom parked : (c : Context P) → List (ParkedFollowUp c)
 
 /-- **Your judgment**: your doubts about the field or about taking it, each naming what it concerns
     and what it rests on; never a recommendation to continue or to take, and never a rank on a
-    candidate. A doubt the person has answered is raised again only on new evidence. -/
+    candidate. -/
 axiom dissent : Context P → List String
 
 /-- **Your reading** of the latest answer: the frames the next pass opens — at the frame map, the
