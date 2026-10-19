@@ -9,12 +9,12 @@ focus: whether each claim of the user's account gets the contract's one-round wo
 
 Contract obligation of `/grasp` at this revision, graded as `grounding .present` states it:
 
-> Where what they said and a `Measure` part on the same scope and premises, or two of their own
+> Where what they said and a fact part on the same scope and premises, or two of their own
 > utterances do, show it with its working in one round: their words quoted; the narrowest
-> `Measure` where one bears on it, never your own explanation — scoped to what that material
-> settles; why the two part; what they got right; and another reading beside it where the
-> material allows. A contradiction whose working was shown and that the person keeps stays in view
-> as a held contrary ground, and the round ends on its opening.
+> material where it bears on it, never your own explanation — scoped to what that material
+> settles; why the two part; where their words and the material agree; and another reading beside
+> it where the material allows. A contradiction whose working was shown and that the person keeps
+> stays in view as a held contrary ground, and the round ends on its opening.
 
 A `Measure` is the target's material quoted from a turn that carries the target itself
 (`IsTarget`), or material read in this run — a source, or the output a check returned
