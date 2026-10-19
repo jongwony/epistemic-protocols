@@ -5,9 +5,14 @@ kind: manual
 window: every subject turn before the closing word (turns 1-5)
 focus: whether each turn ends on the one thing it hands the user, rather than answering its own question, proceeding as though it had been answered, or ending on nothing handed back
 ---
-# Each round ends on what it hands the user
+# Each gate stops for the user
 
-Contract obligation of `/grasp`: `grounding .present` fixes what a round ends on: "A round that shows a contradiction's working ends on that working, with nothing
+Contract obligation, shared by both forms of `/grasp`: every question the protocol puts to the
+user is realized as present-then-Stop. The list form states it as `Constitution → TextPresent+Stop`
+and the active-turn rule that every turn ends in one terminal shape; the Lean form as the
+`.present` operation's `.interaction .constitution` annotation, which `Interaction.realization`
+maps to `.stop`, with an unanswered gate holding (`silence`); and `grounding .present` fixes what a
+round ends on: "A round that shows a contradiction's working ends on that working, with nothing
 after it; every other round ends on one opening the person can take — respond to the map, ask to
 see or try something, go on, or say that what they understand now serves their purpose". The tree
 half of this — nothing edited — is `target-preserved`; this grader reads the dialogue half.
