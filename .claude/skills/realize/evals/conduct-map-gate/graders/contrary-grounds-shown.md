@@ -8,8 +8,8 @@ focus: whether the map carries the draft's own contrary grounds before the gate
 # The map shows its own contrary grounds
 
 Contract obligation (source: `hyphegesis/skills/conduct/SKILL.md` — `dissent`, and the `.map`
-entry of TOOL GROUNDING). The map is presented with the draft's contrary grounds, each naming
-what it bears on and what it rests on, so the person recognizes where the method might be wrong before taking it.
+entry of TOOL GROUNDING). The map is presented with the draft's contrary grounds, so the person
+recognizes where the method might be wrong before taking it.
 
 ## Met
 
