@@ -219,8 +219,8 @@ axiom unknowns : Context P → List String
 
 /-- **Your record**: your contrary grounds, each with what it bears on and what it rests on — a
     direction whose future no probe materialized, or a probe you read as not carrying its
-    direction, among them — shown and attached as `present` and CONVERGENCE say, and raised again
-    only on new evidence; empty when there were none. -/
+    direction, among them — shown and attached as `present` and CONVERGENCE say; empty when there
+    were none. -/
 axiom dissent : Context P → List String
 
 /-- **Your judgment**: the latest utterance bears on this run — a closing, a purpose, a reading or

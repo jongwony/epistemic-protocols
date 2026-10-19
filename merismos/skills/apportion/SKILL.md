@@ -585,7 +585,7 @@ axiom recommend : (c : Context P) → (f : Focus) → Option {i : Nat // Separat
     now stands; empty when you hold none. Each is shown beside what it bears on, before the
     person's turn it bears on, and refuses no taking. A taking over one keeps it attached to the
     plan — taken, and evidentially disputed — naming at emission the unit by the ref it is emitted
-    under; it is raised again only on new evidence. -/
+    under. -/
 axiom dissent : Context P → List String
 
 /-- **Your judgment**: the cited turn takes the plan as the latest sheet showed it, read against
@@ -1066,7 +1066,7 @@ Goal singleness, the host-contract subtraction, the out-of-scope classification,
 - **Recommendation only where the ground separates**: Mark an action as recommended only where the ground clearly separates it from the others; comparable actions stand side by side with their consequences.
 - **The person takes and closes**: Only the person's taking closes the run, whatever its form; silence, a stop, or a turn to other work leaves the sheet holding. A taking adopts what the sheet showed and accepts the gaps shown; a value the draft proposed and the person took is recorded as the draft's and adopted, apart from values the person set. An answer to the focus closes nothing.
 - **Authority before departure**: Show on the sheet the authority the run will reach while the person is away — by kind, target, and limit — so the person settles it before they leave; read what they grant as a broad direction, and an act that falls outside it or whose place inside it is unclear is shown as a doubt on the sheet before the taking.
-- **Contrary grounds ride the plan**: Show each doubt beside what it bears on, with what it rests on, before the person's turn it bears on. A doubt never refuses a taking; a plan taken over it carries it, and it is raised again only on new evidence.
+- **Contrary grounds ride the plan**: Show each doubt beside what it bears on, with what it rests on, before the person's turn it bears on. A doubt never refuses a taking; a plan taken over it carries it.
 - **Whole certificate**: A unit's certificate carries every check, every accepted gap, and every held-open item of its done together; a passing check never stands for a done that a held-open judgment still awaits.
 - **Whole-goal acceptance**: The acceptance question is settled once, by the person: a criterion (theirs or the draft's, taken), a reservation, or a waiver. One value stands; a later settling replaces an earlier one, and emission never carries two.
 - **Host contract subtraction**: Exclude goal-independent host procedure from `O_G`; it is inherited process, not an out-of-scope obligation. A requirement the goal states as its own outcome remains in scope. Show what was subtracted on every sheet and in the trace, so a misjudged subtraction stays correctable.

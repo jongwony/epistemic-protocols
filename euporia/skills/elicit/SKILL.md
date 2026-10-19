@@ -130,7 +130,7 @@ abbrev Entry := String
     context: the seed, every answer, what reads of the person's material returned, and the
     decision structure of the domain the intent sits in. A coordinate raised once stays here
     whether or not the current surface shows it; one the person's words retired stays too, marked
-    as retired in their words, and is not raised again unless they return to it. The person may
+    as retired in their words. The person may
     add, merge, reword, or retire any coordinate, the axis itself included. Whether a reworded coordinate is the same coordinate is
     your judgment; rewording it does not drop the value that stands on it. Guidance for the reading, not steps it must take: read
     the person's material where the intent turns on it rather than from scratch each round, and a

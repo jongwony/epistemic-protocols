@@ -261,9 +261,8 @@ axiom unestablished : Context P → List String
 /-- **Your record**: your contrary grounds, each with what it bears on — a version, a value, a
     check, a medium, a premise every version shares, a comparison, what a closing reaches, or the
     run as a whole — and what it rests on, and the person's answer to it where they gave one;
-    shown before the person's turn it bears on, as `present` says, and raised again only on new
-    evidence. New evidence about a version they already judged — a defect in its rendering
-    included — is shown as such in the next round. A closing over a contrary ground carries it.
+    shown before the person's turn it bears on, as `present` says. A closing over a contrary ground
+    carries it.
     Empty when there were none. -/
 axiom dissent : Context P → List String
 

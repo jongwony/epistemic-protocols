@@ -219,7 +219,7 @@ axiom detections : Context P → List String
 /-- **Your judgment**: the cited turn dismisses uncertainty `x` — the person sets it aside, in
     whatever words, with whatever reason they give and none demanded — read against the context
     as it now stands. Whether an earlier dismissal still reaches `x` once new evidence bears on it
-    is read on the current context: a dismissed uncertainty may be raised again on new evidence. -/
+    is read on the current context. -/
 axiom DismissalSupported : Entry → Context P → Turn P → Unit → Prop
 
 /-- Only the person dismisses. -/

@@ -326,8 +326,7 @@ def Activated (c : Context P) : Prop := Invoked c ∨ EmptyIntention c
     presentation says. -/
 axiom Elsewhere : Context P → Prop
 
-/-- **Your record**: your doubts that `r` is the past meant, each naming what it rests on; one the
-    person has answered is raised again only on new evidence. -/
+/-- **Your record**: your doubts that `r` is the past meant, each naming what it rests on. -/
 axiom dissent : (c : Context P) → Recognizable → List String
 
 /-- Once it has run, the person recognizes the past they were reaching for — a conversation, or a
