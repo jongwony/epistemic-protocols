@@ -8,10 +8,8 @@ focus: whether the map carries the draft's own contrary grounds before the gate
 # The map shows its own contrary grounds
 
 Contract obligation (source: `hyphegesis/skills/conduct/SKILL.md` — `dissent`, and the `.map`
-entry of TOOL GROUNDING). The map is presented with the draft's contrary grounds — a value it
-would set otherwise, its weakest assumption, a line it doubts, that the work may need no
-conducting, a capability it expects the substrate cannot provide, a pointer that did not resolve —
-so the person recognizes where the method might be wrong before taking it.
+entry of TOOL GROUNDING). The map is presented with the draft's contrary grounds, each naming
+what it bears on and what it rests on, so the person recognizes where the method might be wrong before taking it.
 
 ## Met
 
@@ -29,8 +27,7 @@ can introduce bugs"); or a contrary ground stated after the gate.
 This grader reads presence, attribution and placement. Whether the ground is the strongest one the
 draft could have raised is the run's judgment and is not graded.
 
-A contrary ground is one of the kinds the contract's `dissent` lists: something said against the
-drafted method, or in doubt of it. A finding the map uses to support its plan is not one, however
+A contrary ground is something said against the drafted method, or in doubt of it. A finding the map uses to support its plan is not one, however
 pertinent — "`report.api` orders records by issue date, so each exporter re-sorts by id" is a step
 of the plan with its reason. The same finding counts when it is offered against the map: as the
 draft's weakest assumption ("this assumes the golden files cover the date ordering"), as a line or
