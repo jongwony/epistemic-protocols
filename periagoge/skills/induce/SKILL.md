@@ -359,8 +359,8 @@ def provenanceOf (c : Context P) : List Provenance :=
 
 /-- **Your record**: your doubts, each with what it touches and what it rests on. A doubt never
     refuses a closing: a close carries the doubts shown before it — accepted, evidentially
-    disputed. A doubt formed at the recognition is
-    recorded as formed then, not among those the close carries. Empty when there were none. -/
+    disputed. A doubt formed at the recognition is recorded as formed then, not among those the
+    close carries. Empty when there were none. -/
 axiom dissent : Context P → List String
 
 /-- **Your judgment**: the cited turn — the latest utterance — closes the run: read whole against
