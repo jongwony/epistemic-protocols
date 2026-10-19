@@ -368,10 +368,11 @@ open Classical in
     a reading of yours corrected on unchanged ground, said to be a correction; a line that left
     says why. Then one question over every open mismatch, or one at a time where the person asks
     for it. What the utterance asked outside this run is answered here; a step that rests on X and
-    cannot be undone waits while something is open, and the open places are shown before it. Re-present the whole sheet where it changed or the
-    person asked for it; a question about the sheet is answered with the gate said to stand. On
-    completion, the closing sheet is CONVERGENCE's convergence evidence. Where the run may be cut off before it
-    completes, keep the current sheet in a durable record the person can find. -/
+    cannot be undone waits while something is open, and the open places are shown before it.
+    Re-present the whole sheet where it changed or the person asked for it; a question about the
+    sheet is answered with the gate said to stand. On completion, the closing sheet is
+    CONVERGENCE's convergence evidence. Where the run may be cut off before it completes, keep the
+    current sheet in a durable record the person can find. -/
 def settle (respond : Context P → Response P) (c : Context P) : Outcome P :=
   let t := c ++ [(respond c).val]
   if NothingOpen c then .completed (verdict c t) else .holding t
