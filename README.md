@@ -11,20 +11,7 @@ Writing that prompt is the hard part. It means recalling every unknown at once a
 What the prompt missed surfaces later, and the later it surfaces the more it costs: a wrong direction corrected at the plan level can cost one conversation turn, while one found after release to a live service costs rework that grows with everything built on it.
 The protocols make the AI a thinking partner at those decision points. It asks, and you answer with what the question brings to mind; it presents candidates, and you recognize which one fits. Many of the items that end up deciding the work are ones you could not have listed at the start.
 
-For example, "Write the email announcing next week's meeting":
-
-| Decision | Without a protocol | With `/inquire` |
-|---|---|---|
-| Who receives it | The AI decides alone | Asked — you recall and answer |
-| What the meeting is for (decide or share) | The AI decides alone | Asked — you recall and answer |
-| Date and place | Asked — you answer | Asked — you recall and answer |
-| Whether to ask for replies | The AI decides alone | Presented — you recognize it |
-| Length | The AI decides alone | Presented — you correct it |
-| Tone | The AI decides alone | The AI decides alone |
-
-This is an illustration, not a run result: which items come up, and how, varies with the model and the person. A decision the AI makes alone is not wrong for that; what differs is whether it passed through you. `/inquire` does not ask these one at a time: it first collects what it can reach on its own, then hands back what remains — the asked and the presented items arrive together in that one handback.
-
-The same difference, with several sub-agents at work — `/elicit` before the hand-off (click for the video):
+For example, the same request handed to three sub-agents — once in one line, once with `/elicit` first (click for the video):
 
 <a href="media/elicit.en.mp4"><img src="media/elicit.en.gif" alt="Side by side: a request handed off in one line, where three sub-agents fill the blanks differently, versus the same request started with /elicit, where the intent is read back with its open decisions before handing off" width="720"></a>
 
