@@ -1,8 +1,12 @@
-# `/elicit` — explainer episode
+# Explainer clips
 
 ## English
 
-A ~30-second motion explainer of `/elicit`, from a practical series that shows the protocols' use cases one protocol at a time, for readers who have never seen the project. Episodes are added one protocol at a time.
+This folder holds a practical series of short motion explainers that show the protocols' use cases one protocol at a time, for readers who have never seen the project. Episodes are added one protocol at a time; each is named `<command>.<lang>.*` — the rendered clip and its preview here, the source page under `src/`.
+
+### `/elicit`
+
+A ~30-second clip.
 
 The same request, "Research 3 competitors and make an exec report", goes two ways side by side:
 
@@ -21,13 +25,15 @@ The colors show how each value reached the work:
 
 Everything in the clip is illustrative, not a run result: the companies, churn reasons, logs and numbers.
 
-### Files
+#### Files
 
-- `elicit.en.html`, `elicit.ko.html`: the animation, as one self-contained page per language. Pretendard loads from jsdelivr.
+
+- `src/elicit.en.html`, `src/elicit.ko.html`: the animation, as one self-contained page per language. Pretendard loads from jsdelivr.
 - `elicit.en.mp4`, `elicit.ko.mp4`: the rendered clips (1280×720, silent).
+- `elicit.en.gif`, `elicit.ko.gif`: animated previews (720 px, 8 fps) that the READMEs embed, each linking to its clip.
 - `record.js`: records a page to mp4.
 
-### Re-rendering
+#### Re-rendering
 
 You need these tools first; they are not repository dependencies:
 
@@ -36,15 +42,24 @@ You need these tools first; they are not repository dependencies:
 - network access, to load the web font
 
 ```bash
-node record.js elicit.en.html elicit.en.mp4 30500
-node record.js elicit.ko.html elicit.ko.mp4 30500
+node record.js src/elicit.en.html elicit.en.mp4 30500
+node record.js src/elicit.ko.html elicit.ko.mp4 30500
 ```
 
-The last argument is how long to record, in milliseconds. The page's own timeline runs about 28 seconds.
+The last argument is how long to record, in milliseconds. The page's own timeline runs about 28 seconds. To rebuild a preview from its clip:
+
+```bash
+ffmpeg -i elicit.en.mp4 -vf "fps=8,scale=720:-1:flags=lanczos,palettegen=stats_mode=diff" palette.png
+ffmpeg -i elicit.en.mp4 -i palette.png -lavfi "fps=8,scale=720:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" elicit.en.gif
+```
 
 ## 한국어
 
-`/elicit`을 보여 주는 약 30초짜리 모션 설명 영상입니다. 이 프로젝트를 처음 보는 사람을 위해, 프로토콜의 쓰임새를 한 프로토콜씩 보여 주는 실전 시리즈의 한 편입니다. 편은 한 프로토콜씩 추가됩니다.
+이 폴더는 이 프로젝트를 처음 보는 사람을 위해 프로토콜의 쓰임새를 한 프로토콜씩 보여 주는 짧은 모션 설명 영상(실전 시리즈)을 모아 둡니다. 편은 한 프로토콜씩 추가되고, 각 편의 이름은 `<command>.<lang>.*`입니다. 렌더한 영상과 미리보기는 이 폴더에, 원본 페이지는 `src/`에 있습니다.
+
+### `/elicit`
+
+약 30초짜리 영상입니다.
 
 같은 요청 "경쟁사 3곳 조사해서 임원 보고서 만들어 줘"가 두 갈래로 나란히 진행됩니다.
 
@@ -63,13 +78,14 @@ The last argument is how long to record, in milliseconds. The page's own timelin
 
 영상 속 회사, 이탈 이유, 로그, 숫자는 모두 각색한 예시이고, 실제 실행 결과가 아닙니다.
 
-### 파일
+#### 파일
 
-- `elicit.en.html`, `elicit.ko.html`: 언어별로 한 페이지에 담긴 애니메이션 원본입니다. Pretendard 폰트는 jsdelivr에서 불러옵니다.
+- `src/elicit.en.html`, `src/elicit.ko.html`: 언어별로 한 페이지에 담긴 애니메이션 원본입니다. Pretendard 폰트는 jsdelivr에서 불러옵니다.
 - `elicit.en.mp4`, `elicit.ko.mp4`: 렌더한 영상입니다(1280×720, 무음).
+- `elicit.en.gif`, `elicit.ko.gif`: README에 넣는 움직이는 미리보기입니다(720px, 8fps). 누르면 영상으로 갑니다.
 - `record.js`: 페이지를 mp4로 녹화합니다.
 
-### 다시 렌더하기
+#### 다시 렌더하기
 
 다음 도구는 저장소 의존성이 아니므로 미리 갖춰 두어야 합니다.
 
@@ -78,8 +94,8 @@ The last argument is how long to record, in milliseconds. The page's own timelin
 - 웹 폰트를 불러올 네트워크
 
 ```bash
-node record.js elicit.en.html elicit.en.mp4 30500
-node record.js elicit.ko.html elicit.ko.mp4 30500
+node record.js src/elicit.en.html elicit.en.mp4 30500
+node record.js src/elicit.ko.html elicit.ko.mp4 30500
 ```
 
-마지막 인자는 녹화 시간(밀리초)입니다. 페이지 자체의 타임라인은 약 28초입니다.
+마지막 인자는 녹화 시간(밀리초)입니다. 페이지 자체의 타임라인은 약 28초입니다. 미리보기는 위 English 섹션의 `ffmpeg` 두 줄로 영상에서 다시 만듭니다.

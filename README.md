@@ -24,6 +24,12 @@ For example, "Write the email announcing next week's meeting":
 
 This is an illustration, not a run result: which items come up, and how, varies with the model and the person. A decision the AI makes alone is not wrong for that; what differs is whether it passed through you. `/inquire` does not ask these one at a time: it first collects what it can reach on its own, then hands back what remains — the asked and the presented items arrive together in that one handback.
 
+The same difference, with several sub-agents at work — `/elicit` before the hand-off (click for the video):
+
+<a href="media/elicit.en.mp4"><img src="media/elicit.en.gif" alt="Side by side: a request handed off in one line, where three sub-agents fill the blanks differently, versus the same request started with /elicit, where the intent is read back with its open decisions before handing off" width="720"></a>
+
+<sub>Companies, reasons and numbers in the clip are illustrative, not a run result.</sub>
+
 ## Where the protocols help
 
 Use the protocols to catch a wrong direction while planning, before it shapes later work. The same structured checkpoints also help when you hand work to an autonomous run, check a result against your actual situation, recall an earlier discussion, or make sure you understand something before building on it.
