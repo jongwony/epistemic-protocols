@@ -1,0 +1,131 @@
+<!doctype html><html><head><meta charset='utf-8'><style>
+@font-face{font-family:Pre;src:url(https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/Pretendard-Regular.otf)}
+@font-face{font-family:Pre;font-weight:bold;src:url(https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/Pretendard-Bold.otf)}
+:root{--auto:#8E8E93;--recall:#FF9F0A;--cued:#FFD60A;--recog:#30D158;--ai:#0A84FF;--warn:#FF453A;--fuse:linear-gradient(90deg,#0A84FF,#30D158)}
+*{box-sizing:border-box}
+html,body{margin:0;width:1280px;height:720px;overflow:hidden}
+body{font-family:Pre,"WenQuanYi Zen Hei",sans-serif;background:linear-gradient(160deg,#f7f9fc,#e6ecf7)}
+#stage{position:absolute;inset:0;display:flex;gap:28px;padding:26px 30px 34px;transition:transform 1.1s cubic-bezier(.65,0,.35,1)}
+.pane{position:relative;flex:1;background:#fff;border-radius:28px;box-shadow:0 20px 50px rgba(30,50,90,.14);display:flex;flex-direction:column;overflow:hidden}
+.top{padding:14px 22px;border-bottom:1px solid #e9ecf1;font-size:19px;font-weight:bold;letter-spacing:-.3px;color:#222}
+.chat{flex:1;padding:14px 18px;display:flex;flex-direction:column;gap:9px}
+.b{max-width:82%;padding:9px 15px;border-radius:20px;font-size:16px;line-height:1.38;word-break:keep-all;opacity:0;transform:translateY(10px) scale(.96);transition:all .35s cubic-bezier(.2,.8,.2,1.2)}
+.on{opacity:1!important;transform:none!important}
+.me{align-self:flex-end;background:var(--ai);color:#fff;border-bottom-right-radius:6px}
+.ai{align-self:flex-start;background:#f1f3f6;color:#222;border-bottom-left-radius:6px}
+.me.cued{background:var(--cued);color:#222}.me.recall{background:var(--recall)}.me.fuse{background:var(--fuse)}
+.ai.good{background:#e6f8ec;color:#137a35;font-weight:bold}.ai.bad{background:#fdeceb;color:#c0362c}
+.opts{align-self:flex-start;display:flex;gap:8px;opacity:0;transition:all .3s}
+.opt{border:1.5px solid #cdd3da;border-radius:999px;padding:5px 15px;font-size:15px;transition:opacity .4s}
+.dim .opt{opacity:.3}
+/* work board */
+.board{position:absolute;left:0;right:0;top:51px;bottom:0;background:#fbfcfe;transform:translateY(102%);transition:transform .8s cubic-bezier(.65,0,.35,1);padding:14px 14px 12px;display:flex;flex-direction:column;gap:10px}
+.board.up{transform:none}
+.bhead{display:flex;align-items:center;gap:8px;font-size:14px;color:#555}
+.dot{width:26px;height:26px;border-radius:50%;background:var(--ai);color:#fff;font-size:12px;font-weight:bold;display:flex;align-items:center;justify-content:center}
+.lanes{display:flex;gap:10px;align-items:flex-start}
+.lane{flex:1;background:#fff;border:1px solid #e3e7ee;border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:7px;opacity:0;transform:translateY(16px);transition:all .45s}
+.lane h4{margin:0;font-size:18px;color:var(--ai);display:flex;align-items:center;gap:6px}
+.chip{display:inline-block;border-radius:7px;padding:3px 9px;margin:0 3px 3px 0;font-size:14px;color:#fff}
+.g{background:var(--auto)}.y{background:var(--cued);color:#222}.fz{background:var(--fuse)}
+.log{font-size:15px;color:#555;line-height:1.6;min-height:76px}
+.log div{opacity:0;transition:opacity .3s}.log div.on{opacity:1}
+.log div::before{content:"› ";color:#bbb}
+.bar{height:8px;border-radius:3px;background:#eef1f5;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--ai);transition:width 3.6s linear}
+.bar.go i{width:100%}
+.tbl{display:grid;grid-template-columns:1fr 1fr;border:1px solid #e3e7ee;border-radius:8px;overflow:hidden;font-size:14px;opacity:0;transition:opacity .4s}
+.tbl span{padding:6px 8px;border-bottom:1px solid #eef1f5}
+.tbl .h{background:#f4f6f9;font-weight:bold;color:#444}
+.merge{border-radius:14px;padding:12px 16px;font-size:17px;font-weight:bold;opacity:0;transform:translateY(10px);transition:all .45s}
+.merge.badm{background:#fdeceb;color:#c0362c}.merge.goodm{background:#e6f8ec;color:#137a35}
+.merge table{width:100%;border-collapse:collapse;margin-top:8px;font-size:15px;font-weight:normal;color:#234}
+.merge td{padding:3px 6px;border-top:1px solid #cfe9d7}
+.shake{animation:sh .5s}@keyframes sh{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.pill{white-space:nowrap;position:fixed;left:50%;bottom:36px;z-index:9;transform:translateX(-50%) translateY(-10px);background:#111;color:#fff;font-weight:bold;font-size:24px;padding:11px 26px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transition:all .45s}
+.pill.on{transform:translateX(-50%)!important}
+.legend{position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:13px;color:#667}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin:0 5px 0 16px;vertical-align:-1px}
+.extra{color:#7b4dd6!important;font-weight:bold}
+.extra::before{content:"✨ "!important;color:#7b4dd6!important}
+.mx{margin-top:8px;font-size:14.5px;font-weight:normal;color:#5b3aa8;opacity:0;transition:opacity .4s}
+.mx.on{opacity:1}
+.merge table td{border-top:1px solid #cfe9d7}
+.pane{transition:opacity .7s,transform .7s cubic-bezier(.4,0,.2,1),filter .7s}
+.pane.dim{opacity:.38;filter:saturate(.35)}
+.pane.focus{transform:scale(1.025);box-shadow:0 26px 60px rgba(30,50,90,.22)}
+.cmd{display:inline-block;font-family:ui-monospace,"DejaVu Sans Mono",monospace;font-weight:bold;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.55);border-radius:7px;padding:0 6px;margin-right:6px}
+.rb{max-width:92%;line-height:1.45}
+.rd{font-size:12.5px;color:#888;font-weight:bold}
+.rq{font-size:16.5px;font-weight:bold;color:#1c2b44}
+.rq u{text-decoration:none;background:linear-gradient(transparent 60%,#ffe58f 60%)}
+.oq{font-size:15px;margin-top:3px}.oq span{display:block;font-size:13px;color:#8a6d00;margin-left:12px}
+
+.src{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.sc{background:#fff;border:1px solid #e3e7ee;border-radius:14px;padding:9px 11px;opacity:0;transform:translateY(14px);transition:all .45s}
+.sc h5{margin:0 0 4px;font-size:15.5px;color:#334}
+.sc .r{font-size:14px;line-height:1.4;opacity:0;transition:opacity .35s;word-break:keep-all}
+.sc.ok{border-color:#9fe0b2;background:#f3fcf6}.sc.ok .r{color:#137a35}
+.sc.cf{border-color:#ffb3c2;background:#fff2f5}.sc.cf .r{color:#c4204a}
+.sc.lk{border-color:#d7dbe2;background:#f4f5f7}.sc.lk .r{color:#6b7280}
+.sc.ex{border-color:#c9b5f2;background:#f7f2ff}.sc.ex .r{color:#5b3aa8;font-weight:bold}
+.sc.skip{opacity:.35!important;transform:none}.sc.skip .r{color:#999}
+.sc.use{border-color:#bfc3ca;background:#f6f6f7}.sc.use .r{color:#555}
+.scan{height:4px;border-radius:2px;background:#eef1f5;overflow:hidden;margin-top:6px}
+.scan i{display:block;height:100%;width:0;background:var(--ai);transition:width .9s linear}
+.sc.go .scan i{width:100%}
+.hb{max-width:94%;line-height:1.42}
+.hl{font-size:14.5px;margin-top:4px}
+.hl b{display:inline-block;min-width:74px;font-size:12.5px;border-radius:6px;padding:1px 6px;margin-right:6px;text-align:center;color:#fff}
+.k1{background:#30D158}.k2{background:#FF375F}.k3{background:#8E8E93}.k4{background:#7b4dd6}.k5{background:#0A84FF}
+.hl.x{color:#5b3aa8;font-weight:bold}
+.foot{font-size:12.5px;color:#7a8394;margin-top:7px;border-top:1px dashed #d5dae2;padding-top:5px}
+.me.recall{background:var(--recall)}
+</style></head><body><div id='stage'>
+<div class="pane" id="PL"><div class="top">바로 맡기기</div><div class="chat"><div class="b me" id="l1">다음 주 고객 이탈 회의 자료 만들어 줘</div>
+  <div class="b ai" id="l2">알겠어요. 바로 만들게요!</div>
+  <div class="b ai good" id="l3" style="background:#f1f3f6;color:#222;font-weight:normal">회의 자료 완성했어요 📄 이탈률 4% · 주요 이유: 가격</div>
+  <div class="b ai bad" id="l3b">(회의 다음 날) 임원: “대시보드엔 6%던데요?”</div>
+  <div class="b me recall" id="l4">이 숫자 어디서 가져왔어? 대시보드 기준으로 다시, 그리고 환불 데이터도…</div></div>
+ <div class="board" id="lb"><div class="bhead"><span class="dot">AI</span>손에 잡힌 자료 하나로 바로 만듦</div>
+  <div class="src"><div class="sc" data-k="skip" id="L0"><h5>📅 캘린더</h5><div class="r">열어 보지 않음</div><div class="scan"><i></i></div></div><div class="sc" data-k="skip" id="L1"><h5>📝 지난 회의록</h5><div class="r">열어 보지 않음</div><div class="scan"><i></i></div></div><div class="sc" data-k="skip" id="L2"><h5>📊 이탈 대시보드</h5><div class="r">열어 보지 않음</div><div class="scan"><i></i></div></div><div class="sc" data-k="use" id="L3"><h5>📁 영업 자료</h5><div class="r">이탈률 4% → 그대로 사용</div><div class="scan"><i></i></div></div><div class="sc" data-k="skip" id="L4"><h5>💳 환불 데이터</h5><div class="r">열어 보지 않음</div><div class="scan"><i></i></div></div><div class="sc" data-k="skip" id="L5"><h5>　</h5><div class="r">　</div><div class="scan"><i></i></div></div></div>
+  <div class="merge" id="lm" style="background:#f1f3f6;color:#555">회의 자료 ✓ — 영업 자료 하나만 보고 만듦</div></div></div>
+<div class="pane" id="PR"><div class="top">먼저 맥락부터 모으기</div><div class="chat">
+  <div class="b me" id="r1"><span class="cmd">/inquire</span>다음 주 고객 이탈 회의를 준비하려고 해</div>
+  <div class="b ai rb" id="r2"><div class="rd">이 준비가 기대는 것 → 찾아볼 곳</div>
+  <div class="oq">· 일정·참석자 → 캘린더</div><div class="oq">· 지난번 약속 → 지난 회의록</div>
+  <div class="oq">· 최신 이탈률 → 대시보드, 영업 자료</div><div class="oq">· 환불 현황 → 환불 데이터</div>
+  <div class="foot" style="margin-top:5px">묻기 전에, 닿는 데까지 먼저 찾아볼게요</div></div>
+  <div class="b ai hb" id="r3"><div class="rd">찾아본 결과 — 한 번에 정리</div>
+ <div class="hl"><b class="k1">확인됨</b>회의 10/27(화), 임원 5명 <span style="color:#999">· 캘린더</span></div>
+ <div class="hl"><b class="k2">서로 다름</b>이탈률: 대시보드 6% vs 영업 자료 4% <span style="color:#999">· 영업 자료는 2분기 기준</span></div>
+ <div class="hl"><b class="k3">닿지 못함</b>환불 데이터 <span style="color:#999">· 재무팀 권한이 필요해요</span></div>
+ <div class="hl x"><b class="k4">✨ 발견</b>묻지 않았지만, 이탈 고객 10명 중 4명이 요금제 변경 직후 떠났어요</div>
+ <div class="hl"><b class="k5">정하실 것</b>회의에 어느 숫자를 쓸지</div>
+ <div class="foot">아는 것·고칠 것·찾아볼 곳, 무엇이든 답해 주세요. 답이 없어도 열린 칸은 표시해 두고 진행해요</div></div><div class="b me fuse" id="r4">6%가 맞아. 요금제 얘기는 몰랐네, 그걸 첫 장으로 회의 자료 만들어 줘</div><div class="b ai good" id="r5">회의 자료 완성했어요 📄 첫 장: 요금제 변경 직후 이탈 · 이탈률 6% (환불 칸은 비워 두고 표시)</div></div>
+ <div class="board" id="rb"><div class="bhead"><span class="dot">AI</span>묻기 전에, 닿는 데까지 직접 찾아봄</div>
+  <div class="src"><div class="sc" data-k="ok" id="R0"><h5>📅 캘린더</h5><div class="r">회의 10/27(화) · 임원 5명</div><div class="scan"><i></i></div></div><div class="sc" data-k="ok" id="R1"><h5>📝 지난 회의록</h5><div class="r">남은 할 일: 온보딩 개선</div><div class="scan"><i></i></div></div><div class="sc" data-k="ok" id="R2"><h5>📊 이탈 대시보드</h5><div class="r">3분기 이탈률 6%</div><div class="scan"><i></i></div></div><div class="sc" data-k="cf" id="R3"><h5>📁 영업 자료</h5><div class="r">이탈률 4% · 2분기 기준 → 대시보드와 다름</div><div class="scan"><i></i></div></div><div class="sc" data-k="lk" id="R4"><h5>💳 환불 데이터</h5><div class="r">🔒 닿지 못함 · 재무팀 권한 필요</div><div class="scan"><i></i></div></div><div class="sc" data-k="ex" id="R5"><h5>✨ 대시보드 속</h5><div class="r">묻지 않은 발견: 이탈 10명 중 4명이 요금제 변경 직후</div><div class="scan"><i></i></div></div></div>
+  <div class="merge goodm" id="rm">찾은 곳 5 · 닿지 못한 곳 1 · 서로 다른 숫자 1건</div></div></div>
+</div><div class="pill" id="c1">찾아온 결과를 보고 떠오르는 생각을 기록하세요</div><div class="pill" id="c3">빠진 맥락은 결과를 받은 뒤에야 드러난다</div><div class="legend"><i style="background:var(--auto)"></i>AI가 알아서<i style="background:var(--recall)"></i>혼자 떠올림<i style="background:var(--recog)"></i>출처로 확인됨<i style="background:#FF375F"></i>서로 다름<i style="background:var(--fuse)"></i>보고 나서 떠오름<i style="background:#7b4dd6"></i>묻지 않았지만 찾음 ✨</div><script>const at=(t,f)=>setTimeout(f,t), $=id=>document.getElementById(id), on=id=>$(id).classList.add('on'), off=id=>$(id).classList.remove('on');
+const focus=k=>['PL','PR'].forEach(p=>{const e=$(p);e.classList.toggle('focus',p===k);e.classList.toggle('dim',!!k&&p!==k)});
+const hide=id=>{$(id).style.display='none'};
+const scan=(id,t)=>{at(t,()=>{const e=$(id);e.style.opacity=1;e.style.transform='none';e.classList.add('go')});at(t+900,()=>{const e=$(id);e.classList.add(e.dataset.k);e.querySelector('.r').style.opacity=1})};
+
+at(500,()=>{on('l1');on('r1')});
+at(1400,()=>{on('l2');on('r2')});
+at(1500,()=>focus('PR'));at(4300,()=>{focus(null);$('lb').classList.add('up');$('rb').classList.add('up')});
+[0,1,2,4,5].forEach(i=>at(4900,()=>{const e=$('L'+i);e.style.opacity=.35;e.classList.add('skip');e.querySelector('.r').style.opacity=1}));
+scan('L3',5000);
+at(6500,()=>on('lm'));
+[0,1,2,3,4,5].forEach(i=>scan('R'+i,5000+i*1300));
+at(10900,()=>{focus('PR')});
+at(13300,()=>on('rm'));
+at(15300,()=>{$('lb').classList.remove('up');$('rb').classList.remove('up');hide('r2');hide('l2')});
+at(16000,()=>{on('r3');on('l3')});
+at(17300,()=>on('c1'));
+at(20500,()=>on('r4'));
+at(22300,()=>{off('c1');on('r5')});
+at(23900,()=>{focus('PL');on('c3')});
+at(24400,()=>on('l3b')); at(25700,()=>on('l4'));
+at(28100,()=>{off('c3');focus(null)});
+</script></body></html>

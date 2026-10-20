@@ -4,6 +4,10 @@ Recognize what the work rests on — what was settled and from where, what rests
 
 > [한국어](./README_ko.md)
 
+<a href="../media/inquire.en.mp4"><img src="../media/inquire.en.gif" alt="Side by side: a request to make a meeting deck built at once from one file, versus /inquire on what the person is preparing, where the AI looks as far as it can reach and hands back what it confirmed, what conflicts, what it could not reach, and a finding nobody asked about" width="720"></a>
+
+<sub>`/inquire` in use (click for the video). Values in the clip are illustrative, not a run result.</sub>
+
 ## What is Aitesis?
 
 A modern reinterpretation of Greek αἴτησις (a requesting) — a protocol that **collects context to the limit of what the AI can reach on its own, writes down for each uncertainty what that reached and what it could not reach, and hands what only the user can settle — or what no source it reached settles — back to the user as their own unknown**.
