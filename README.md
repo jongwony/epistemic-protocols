@@ -17,6 +17,12 @@ For example, the same request handed to three sub-agents — once in one line, o
 
 <sub>Companies, reasons and numbers in the clip are illustrative, not a run result.</sub>
 
+Or when you set out to do something — here, preparing next week's churn meeting — `/inquire` first gathers what the work rests on from every source it can reach, then hands back in one pass what it confirmed, what conflicts, what it could not reach, and what only you decide (click for the video):
+
+<a href="media/inquire.en.mp4"><img src="media/inquire.en.gif" alt="Side by side: a meeting deck requested in one line, built from the one source at hand, versus /inquire with what the person is preparing, where the AI checks every reachable source and hands back confirmed facts, a conflicting number, an unreachable source and an unasked-for finding at once" width="720"></a>
+
+<sub>Meetings, sources and numbers in the clip are illustrative, not a run result.</sub>
+
 ## Where the protocols help
 
 Use the protocols to catch a wrong direction while planning, before it shapes later work. The same structured checkpoints also help when you hand work to an autonomous run, check a result against your actual situation, recall an earlier discussion, or make sure you understand something before building on it.
