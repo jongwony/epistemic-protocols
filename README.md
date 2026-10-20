@@ -92,7 +92,7 @@ Skills that act at their own decision points — around the protocols, on the wo
 | Command | When to use |
 |---------|-------------|
 | **Finding the protocol** | |
-| `/onboard` | New here — get one recommendation from your recent sessions, then optionally learn by scenario, trial, and quiz |
+| `/onboard` | New here — get a recommendation from your recent sessions, then optionally learn by scenario, trial, and quiz |
 | `/probe` | Something feels off and you cannot name what is stuck — you can then say what it is: a shown candidate, your own words, or none shown, having seen what each rests on and what rules it out |
 | **Shaping the work** | |
 | `/reduced-space-test` | A claim that a stand-in behaves like the real target — test it in a bounded space and carry the untested remainder forward explicitly |

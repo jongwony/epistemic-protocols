@@ -26,7 +26,7 @@
 최근 세션 기반 빠른 추천으로 시작하고, 원하면 가이드 학습으로 이어간다.
 
 ```
-Quick Proof:    ENTRY → QUICKSCAN → PICK-1 → EVIDENCE → TRIAL → INSIGHT → NEXT
+Quick Proof:    ENTRY → QUICKSCAN → PICK → EVIDENCE → TRIAL → INSIGHT → NEXT
 Targeted:       ENTRY → QUICKSCAN → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
 Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 ```
@@ -35,8 +35,8 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 |------|------|
 | 0. Entry | 경로 선택: 빠른 추천 / 특정 프로토콜 학습 / 전체 둘러보기 |
 | 1. Quick Scan | 최근 세션 메타데이터를 인라인으로 수집 (Glob + Read) |
-| 2a. Pick-1 | Quick path: `/elicit`, `/inquire` 중 1개 추천 선택 |
-| 2b. Evidence | Quick path: 근거 카드 1개 표시 (최대 2줄) |
+| 2a. Pick | Quick path: `/elicit`, `/inquire` 중 맞는 것을 가장 강한 것부터 추천 |
+| 2b. Evidence | Quick path: 추천마다 근거 카드 (최대 2줄) |
 | 2. Map | Targeted path: 컴팩트 매핑 테이블로 프로토콜 매칭 |
 | 3. Scenario | Targeted path: 프리셋 시나리오로 개입 지점 제시 |
 | 4. Trial | 미니 연습 프롬프트로 실제 프로토콜 실행 |
@@ -44,8 +44,7 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 | 6. Guide | Targeted path: 학습 요약 + 다음 프로토콜 제안 |
 
 주요 특징:
-- **학습보다 가치 증명 먼저**: quick path는 3분 이내에 가치를 체감
-- **한 번에 하나만**: 추천 1개, 근거 카드 1개, 체험 1회 — 카탈로그 불필요
+- **학습보다 가치 증명 먼저**: quick path는 3분 이내에 가치를 체감 — 카탈로그 불필요
 - **Onboarding Pool**: `/elicit`, `/inquire` — Quick 추천 + Targeted 폴백 통합
 - 실제 프로토콜 시험 실행 (프로토콜당 2-3 교환)
 - Targeted path는 전체 학습 경험 유지 (시나리오, 퀴즈, 가이드)

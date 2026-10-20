@@ -26,7 +26,7 @@ A utility plugin spanning epistemic protocol onboarding, work orchestration, and
 Start with a quick recommendation based on your recent sessions, then optionally continue to guided learning.
 
 ```
-Quick Proof:    ENTRY → QUICKSCAN → PICK-1 → EVIDENCE → TRIAL → INSIGHT → NEXT
+Quick Proof:    ENTRY → QUICKSCAN → PICK → EVIDENCE → TRIAL → INSIGHT → NEXT
 Targeted:       ENTRY → QUICKSCAN → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
 Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 ```
@@ -35,8 +35,8 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 |-------|-------------|
 | 0. Entry | Choose path: quick recommendation / targeted learning / browse all |
 | 1. Quick Scan | Collect recent session metadata inline (Glob + Read) |
-| 2a. Pick-1 | Quick path: select 1 recommendation from `/elicit`, `/inquire` |
-| 2b. Evidence | Quick path: show 1 evidence card (max 2 lines) |
+| 2a. Pick | Quick path: recommend from `/elicit`, `/inquire`, strongest match first |
+| 2b. Evidence | Quick path: an evidence card per recommendation (max 2 lines) |
 | 2. Map | Targeted path: match patterns to protocols via compact mapping |
 | 3. Scenario | Targeted path: present intervention point with preset scenarios |
 | 4. Trial | Execute actual protocol with mini practice prompt |
@@ -44,8 +44,7 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 | 6. Guide | Targeted path: learning summary + next protocol suggestion |
 
 Key features:
-- **Value before learning**: quick path proves value in under 3 minutes
-- **One at a time**: 1 recommendation, 1 evidence card, 1 trial — no catalog required
+- **Value before learning**: quick path proves value in under 3 minutes — no catalog required
 - **Onboarding Pool**: `/elicit`, `/inquire` — unified for Quick and Targeted fallback
 - Real protocol trial execution (2-3 exchanges per protocol)
 - Targeted path preserves full learning experience (scenarios, quizzes, guide)
