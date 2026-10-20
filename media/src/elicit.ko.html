@@ -1,0 +1,149 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Pre;src:url(https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/Pretendard-Regular.otf)}
+@font-face{font-family:Pre;font-weight:bold;src:url(https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/Pretendard-Bold.otf)}
+:root{--auto:#8E8E93;--recall:#FF9F0A;--cued:#FFD60A;--recog:#30D158;--ai:#0A84FF;--warn:#FF453A;--fuse:linear-gradient(90deg,#0A84FF,#30D158)}
+*{box-sizing:border-box}
+html,body{margin:0;width:1280px;height:720px;overflow:hidden}
+body{font-family:Pre,"WenQuanYi Zen Hei",sans-serif;background:linear-gradient(160deg,#f7f9fc,#e6ecf7)}
+#stage{position:absolute;inset:0;display:flex;gap:28px;padding:26px 30px 34px;transition:transform 1.1s cubic-bezier(.65,0,.35,1)}
+.pane{position:relative;flex:1;background:#fff;border-radius:28px;box-shadow:0 20px 50px rgba(30,50,90,.14);display:flex;flex-direction:column;overflow:hidden}
+.top{padding:14px 22px;border-bottom:1px solid #e9ecf1;font-size:19px;font-weight:bold;letter-spacing:-.3px;color:#222}
+.chat{flex:1;padding:14px 18px;display:flex;flex-direction:column;gap:9px}
+.b{max-width:82%;padding:9px 15px;border-radius:20px;font-size:16px;line-height:1.38;word-break:keep-all;opacity:0;transform:translateY(10px) scale(.96);transition:all .35s cubic-bezier(.2,.8,.2,1.2)}
+.on{opacity:1!important;transform:none!important}
+.me{align-self:flex-end;background:var(--ai);color:#fff;border-bottom-right-radius:6px}
+.ai{align-self:flex-start;background:#f1f3f6;color:#222;border-bottom-left-radius:6px}
+.me.cued{background:var(--cued);color:#222}.me.recall{background:var(--recall)}.me.fuse{background:var(--fuse)}
+.ai.good{background:#e6f8ec;color:#137a35;font-weight:bold}.ai.bad{background:#fdeceb;color:#c0362c}
+.opts{align-self:flex-start;display:flex;gap:8px;opacity:0;transition:all .3s}
+.opt{border:1.5px solid #cdd3da;border-radius:999px;padding:5px 15px;font-size:15px;transition:opacity .4s}
+.dim .opt{opacity:.3}
+/* work board */
+.board{position:absolute;left:0;right:0;top:51px;bottom:0;background:#fbfcfe;transform:translateY(102%);transition:transform .8s cubic-bezier(.65,0,.35,1);padding:14px 14px 12px;display:flex;flex-direction:column;gap:10px}
+.board.up{transform:none}
+.bhead{display:flex;align-items:center;gap:8px;font-size:14px;color:#555}
+.dot{width:26px;height:26px;border-radius:50%;background:var(--ai);color:#fff;font-size:12px;font-weight:bold;display:flex;align-items:center;justify-content:center}
+.lanes{display:flex;gap:10px;align-items:flex-start}
+.lane{flex:1;background:#fff;border:1px solid #e3e7ee;border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:7px;opacity:0;transform:translateY(16px);transition:all .45s}
+.lane h4{margin:0;font-size:18px;color:var(--ai);display:flex;align-items:center;gap:6px}
+.chip{display:inline-block;border-radius:7px;padding:3px 9px;margin:0 3px 3px 0;font-size:14px;color:#fff}
+.g{background:var(--auto)}.y{background:var(--cued);color:#222}.fz{background:var(--fuse)}
+.log{font-size:15px;color:#555;line-height:1.6;min-height:76px}
+.log div{opacity:0;transition:opacity .3s}.log div.on{opacity:1}
+.log div::before{content:"› ";color:#bbb}
+.bar{height:8px;border-radius:3px;background:#eef1f5;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--ai);transition:width 3.6s linear}
+.bar.go i{width:100%}
+.tbl{display:grid;grid-template-columns:1fr 1fr;border:1px solid #e3e7ee;border-radius:8px;overflow:hidden;font-size:14px;opacity:0;transition:opacity .4s}
+.tbl span{padding:6px 8px;border-bottom:1px solid #eef1f5}
+.tbl .h{background:#f4f6f9;font-weight:bold;color:#444}
+.merge{border-radius:14px;padding:12px 16px;font-size:17px;font-weight:bold;opacity:0;transform:translateY(10px);transition:all .45s}
+.merge.badm{background:#fdeceb;color:#c0362c}.merge.goodm{background:#e6f8ec;color:#137a35}
+.merge table{width:100%;border-collapse:collapse;margin-top:8px;font-size:15px;font-weight:normal;color:#234}
+.merge td{padding:3px 6px;border-top:1px solid #cfe9d7}
+.shake{animation:sh .5s}@keyframes sh{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.pill{white-space:nowrap;position:fixed;left:50%;bottom:36px;z-index:9;transform:translateX(-50%) translateY(-10px);background:#111;color:#fff;font-weight:bold;font-size:24px;padding:11px 26px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transition:all .45s}
+.pill.on{transform:translateX(-50%)!important}
+.legend{position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:13px;color:#667}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin:0 5px 0 16px;vertical-align:-1px}
+.extra{color:#7b4dd6!important;font-weight:bold}
+.extra::before{content:"✨ "!important;color:#7b4dd6!important}
+.mx{margin-top:8px;font-size:14.5px;font-weight:normal;color:#5b3aa8;opacity:0;transition:opacity .4s}
+.mx.on{opacity:1}
+.merge table td{border-top:1px solid #cfe9d7}
+.pane{transition:opacity .7s,transform .7s cubic-bezier(.4,0,.2,1),filter .7s}
+.pane.dim{opacity:.38;filter:saturate(.35)}
+.pane.focus{transform:scale(1.025);box-shadow:0 26px 60px rgba(30,50,90,.22)}
+.cmd{display:inline-block;font-family:ui-monospace,"DejaVu Sans Mono",monospace;font-weight:bold;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.55);border-radius:7px;padding:0 6px;margin-right:6px}
+.rb{max-width:92%;line-height:1.45}
+.rd{font-size:12.5px;color:#888;font-weight:bold}
+.rq{font-size:16.5px;font-weight:bold;color:#1c2b44}
+.rq u{text-decoration:none;background:linear-gradient(transparent 60%,#ffe58f 60%)}
+.oq{font-size:15px;margin-top:3px}.oq span{display:block;font-size:13px;color:#8a6d00;margin-left:12px}
+</style></head><body>
+<div id="stage">
+<div class="pane" id="PL"><div class="top">짧게 맡기기</div>
+ <div class="chat">
+  <div class="b me" id="l1">경쟁사 3곳 조사해서 임원 보고서 만들어 줘</div>
+  <div class="b ai" id="l2">알겠어요. 3명에게 나눠 맡길게요!</div>
+  <div class="b ai bad" id="l3">보고서 완성했어요 📄 (표마다 기준이 달라 하나로 합치지 못했어요)</div>
+  <div class="b me" id="l4">아니 그거 말고…</div>
+  <div class="b me recall" id="l5">A·B·C사로, 최근 1년, 기준은… 아 그리고 임원회의용이니까 짧게, 그리고 또…</div>
+ </div>
+ <div class="board" id="lb">
+  <div class="bhead"><span class="dot">AI</span>세 명에게 각자 맡김 — 빈칸은 각자 알아서</div>
+  <div class="lanes">
+   <div class="lane"><h4>조사 1</h4><div><span class="chip g">기간 1년</span><span class="chip g">가격</span></div>
+    <div class="log"><div>가격표 수집 · 1년치</div><div>평균 가격 계산</div><div>표 만들기</div></div><div class="bar"><i></i></div>
+    <div class="tbl"><span class="h">회사</span><span class="h">평균 가격</span><span>A사</span><span>₩12,000</span></div></div>
+   <div class="lane"><h4>조사 2</h4><div><span class="chip g">기간 3년</span><span class="chip g">점유율</span></div>
+    <div class="log"><div>점유율 자료 · 3년치</div><div>추이 계산</div><div>표 만들기</div></div><div class="bar"><i></i></div>
+    <div class="tbl"><span class="h">회사</span><span class="h">점유율</span><span>B사</span><span>18→24%</span></div></div>
+   <div class="lane"><h4>조사 3</h4><div><span class="chip g">최근 분기</span><span class="chip g">기능</span></div>
+    <div class="log"><div>기능 목록 · 최근 분기</div><div>기능 체크리스트</div><div>표 만들기</div></div><div class="bar"><i></i></div>
+    <div class="tbl"><span class="h">회사</span><span class="h">기능 수</span><span>C사</span><span>32개</span></div></div>
+  </div>
+  <div class="merge badm" id="lm">합치기 ✕ — 기간도 기준도 달라서 한 표로 묶을 수 없음</div>
+ </div>
+</div>
+<div class="pane" id="PR"><div class="top">먼저 묻고 맡기기</div>
+ <div class="chat">
+  <div class="b me" id="r1"><span class="cmd">/elicit</span>경쟁사 3곳 조사해서 임원 보고서 만들어 줘</div>
+  <div class="b ai rb" id="r2"><div class="rd">지금 이해한 의도</div><div class="rq">경쟁사 3곳을 <u>같은 기준</u>으로 비교한 임원 보고서</div>
+   <div class="rd" style="margin-top:8px">아직 열린 것</div>
+   <div class="oq">· 어느 회사 3곳인가요? <span>요청에 이름이 없어요</span></div>
+   <div class="oq">· 무엇을 기준으로 비교할까요? <span>정하지 않으면 에이전트마다 기준이 달라져요</span></div></div>
+  <div class="b me cued" id="r3">A사, B사, C사</div>
+  <div class="b me fuse" id="r4">아, 이번 회의 안건이 고객 이탈이야. 이탈 이유로 비교해 줘. 이 정도면 됐어</div>
+  <div class="b ai" id="r5">다시 읽으면: A·B·C사를 <b>이탈 이유</b>로 비교한 임원 보고서. 이대로 3명에게 맡길게요</div>
+  <div class="b ai good" id="r8">보고서 완성했어요 📄 세 회사 이탈 이유가 한 표에 정리됐어요</div>
+ </div>
+ <div class="board" id="rb">
+  <div class="bhead"><span class="dot">AI</span>세 명 모두 같은 지시로 일함</div>
+  <div class="lanes">
+   <div class="lane"><h4>조사 1</h4><div><span class="chip y">A사</span><span class="chip fz">이탈 이유</span></div>
+    <div class="log"><div>A사 고객 리뷰 수집</div><div>이탈 이유 분류</div><div class="extra">임원용 한 줄 요약</div></div><div class="bar"><i></i></div>
+    <div class="tbl"><span class="h">회사</span><span class="h">이탈 이유</span><span>A사</span><span>가격 인상</span></div></div>
+   <div class="lane"><h4>조사 2</h4><div><span class="chip y">B사</span><span class="chip fz">이탈 이유</span></div>
+    <div class="log"><div>B사 고객 리뷰 수집</div><div>이탈 이유 분류</div><div class="extra">임원용 한 줄 요약</div></div><div class="bar"><i></i></div>
+    <div class="tbl"><span class="h">회사</span><span class="h">이탈 이유</span><span>B사</span><span>상담 지연</span></div></div>
+   <div class="lane"><h4>조사 3</h4><div><span class="chip y">C사</span><span class="chip fz">이탈 이유</span></div>
+    <div class="log"><div>C사 고객 리뷰 수집</div><div>이탈 이유 분류</div><div class="extra">임원용 한 줄 요약</div></div><div class="bar"><i></i></div>
+    <div class="tbl"><span class="h">회사</span><span class="h">이탈 이유</span><span>C사</span><span>기능 부족</span></div></div>
+  </div>
+  <div class="merge goodm" id="rm">합치기 ✓ — 한 표로 나란히
+   <table><tr><td>A사</td><td>가격 인상</td></tr><tr><td>B사</td><td>상담 지연</td></tr><tr><td>C사</td><td>기능 부족</td></tr></table>
+   <div class="mx" id="mx1">✨ 공통점: 세 회사 모두 가입 3개월 안에 이탈이 몰림</div>
+   <div class="mx" id="mx2">✨ 다음 안건 제안: 첫 3개월 온보딩 개선</div></div>
+ </div>
+</div>
+</div>
+<div class="pill" id="c1">제안을 보고 떠오르는 생각을 기록하세요</div>
+<div class="pill" id="c3">빠진 조건은 결과를 받은 뒤에야 드러난다</div>
+<div class="legend"><i style="background:var(--auto)"></i>AI가 알아서<i style="background:var(--recall)"></i>혼자 떠올림<i style="background:var(--cued)"></i>물어봐서 떠올림<i style="background:var(--fuse)"></i>보고 나서 떠오름<i style="background:#7b4dd6"></i>요청 안 했지만 정리됨 ✨</div>
+<script>
+const at=(t,f)=>setTimeout(f,t), $=id=>document.getElementById(id), on=id=>$(id).classList.add('on'), off=id=>$(id).classList.remove('on');
+const focus=k=>['PL','PR'].forEach(p=>{const e=$(p);e.classList.toggle('focus',p===k);e.classList.toggle('dim',!!k&&p!==k)});
+const cam=(o,s)=>{const st=$('stage');st.style.transformOrigin=o;st.style.transform=`scale(${s})`};
+at(500,()=>{on('l1');on('r1')});
+at(1400,()=>on('l2')); at(2000,()=>{on('r2');focus('PR')});
+at(3300,()=>on('c1'));
+at(5000,()=>on('r3'));
+at(6300,()=>on('r4'));
+at(8000,()=>on('r5'));
+at(9300,()=>focus(null));
+// act 2: the work, large
+at(9600,()=>{off('c1');$('lb').classList.add('up');$('rb').classList.add('up')});
+document.querySelectorAll('.lane').forEach((l,i)=>at(10200+(i%3)*180,()=>l.classList.add('on')));
+at(10800,()=>document.querySelectorAll('.bar').forEach(b=>b.classList.add('go')));
+document.querySelectorAll('.lane').forEach(l=>l.querySelectorAll('.log div').forEach((d,j)=>at(10900+j*1150,()=>d.classList.add('on'))));
+at(14500,()=>document.querySelectorAll('.tbl').forEach(t=>t.style.opacity=1));
+at(15500,()=>{on('lm');on('rm');$('lm').classList.add('shake')});
+at(16600,()=>on('mx1')); at(17400,()=>on('mx2'));
+// act 3: back to the chat
+at(20800,()=>{$('lb').classList.remove('up');$('rb').classList.remove('up')});
+at(21500,()=>{on('l3');on('r8')});
+at(22600,()=>{focus('PL');on('c3')});
+at(23200,()=>on('l4')); at(24300,()=>on('l5'));
+at(26200,()=>{off('c3');focus(null)});
+</script></body></html>
