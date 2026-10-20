@@ -163,7 +163,7 @@ If no person turns were collected — a fresh install, or a host that keeps no s
 - Line 1: Cite the specific signal pattern from Quick Scan Profile that matched this protocol's "Key Patterns" column in Data Sources
 - Line 2: State the expected benefit, derived from the protocol's "When to Use" column in Data Sources
 
-Fallback (no session data): State that no patterns were detected, then cite the protocol's core value proposition from Data Sources "When to Use."
+Fallback (no session data, or no matched signal): State that no patterns were detected, then cite the protocol's core value proposition from Data Sources "When to Use."
 
 **Rules**:
 - Evidence is maximum 2 lines — a focused cue.
@@ -173,12 +173,12 @@ Fallback (no session data): State that no patterns were detected, then cite the 
 After presenting evidence, present:
 - Text: Trial invitation
 - Options:
-  - Try it now (one option per recommendation)
+  - Try /X now (one option per recommendation, naming its protocol)
   - Learn more about a recommendation
   - See a different recommendation (only while the pool holds one not yet shown)
   - Go to full learning path
 
-Branch: Try it now → Phase 4 (quick trial) with the protocol chosen, Learn more about a recommendation → show Data Sources row for that protocol then re-ask, See a different recommendation → pick next from pool and re-present from Phase 2a, Go to full learning path → set `path = targeted` and go to Phase 0 targeted flow.
+Branch: Try /X now → Phase 4 (quick trial) with that protocol, Learn more about a recommendation → show the Data Sources row for each recommendation on screen then re-ask, See a different recommendation → pick next from pool and present it alone from Phase 2a's Output, Go to full learning path → set `path = targeted` and go to Phase 0 targeted flow.
 
 ### Phase 2: Map (Targeted Path — Protocol Matching)
 
@@ -253,7 +253,7 @@ Present via gate interaction:
   - Try a different protocol
   - Continue to full onboarding
 
-Branch: That's enough for today → end session with brief closing, Try a different protocol → check pool exhaustion: if protocols not yet tried remain in Onboarding Pool, pick next and restart from Phase 2a; if pool exhausted (every pool protocol tried in session), present You've experienced all core recommendations and offer Targeted transition, Continue to full onboarding → set `path = targeted` and go to Phase 2 MAP with Quick Scan results.
+Branch: That's enough for today → end session with brief closing, Try a different protocol → check pool exhaustion: if protocols not yet tried remain in Onboarding Pool, pick the next untried one and present it alone from Phase 2a's Output; if pool exhausted (every pool protocol tried in session), present You've experienced all core recommendations and offer Targeted transition, Continue to full onboarding → set `path = targeted` and go to Phase 2 MAP with Quick Scan results.
 
 #### Targeted Path Trial
 
