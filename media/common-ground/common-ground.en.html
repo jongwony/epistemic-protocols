@@ -1,0 +1,149 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><style>
+@font-face{font-family:Pre;src:url(https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/Pretendard-Regular.otf)}
+@font-face{font-family:Pre;font-weight:bold;src:url(https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/Pretendard-Bold.otf)}
+:root{--auto:#8E8E93;--recall:#FF9F0A;--cued:#FFD60A;--recog:#30D158;--ai:#0A84FF;--warn:#FF453A;--fuse:linear-gradient(90deg,#0A84FF,#30D158)}
+*{box-sizing:border-box}
+html,body{margin:0;width:1280px;height:720px;overflow:hidden}
+body{font-family:Pre,"WenQuanYi Zen Hei",sans-serif;background:linear-gradient(160deg,#f7f9fc,#e6ecf7)}
+#stage{position:absolute;inset:0;display:flex;gap:28px;padding:26px 30px 34px;transition:transform 1.1s cubic-bezier(.65,0,.35,1)}
+.pane{position:relative;flex:1;background:#fff;border-radius:28px;box-shadow:0 20px 50px rgba(30,50,90,.14);display:flex;flex-direction:column;overflow:hidden}
+.top{padding:14px 22px;border-bottom:1px solid #e9ecf1;font-size:19px;font-weight:bold;letter-spacing:-.3px;color:#222}
+.chat{flex:1;padding:14px 18px;display:flex;flex-direction:column;gap:9px}
+.b{max-width:82%;padding:9px 15px;border-radius:20px;font-size:16px;line-height:1.38;word-break:keep-all;opacity:0;transform:translateY(10px) scale(.96);transition:all .35s cubic-bezier(.2,.8,.2,1.2)}
+.on{opacity:1!important;transform:none!important}
+.me{align-self:flex-end;background:var(--ai);color:#fff;border-bottom-right-radius:6px}
+.ai{align-self:flex-start;background:#f1f3f6;color:#222;border-bottom-left-radius:6px}
+.me.cued{background:var(--cued);color:#222}.me.recall{background:var(--recall)}.me.fuse{background:var(--fuse)}
+.ai.good{background:#e6f8ec;color:#137a35;font-weight:bold}.ai.bad{background:#fdeceb;color:#c0362c}
+.opts{align-self:flex-start;display:flex;gap:8px;opacity:0;transition:all .3s}
+.opt{border:1.5px solid #cdd3da;border-radius:999px;padding:5px 15px;font-size:15px;transition:opacity .4s}
+.dim .opt{opacity:.3}
+/* work board */
+.board{position:absolute;left:0;right:0;top:51px;bottom:0;background:#fbfcfe;transform:translateY(102%);transition:transform .8s cubic-bezier(.65,0,.35,1);padding:14px 14px 12px;display:flex;flex-direction:column;gap:10px}
+.board.up{transform:none}
+.bhead{display:flex;align-items:center;gap:8px;font-size:14px;color:#555}
+.dot{width:26px;height:26px;border-radius:50%;background:var(--ai);color:#fff;font-size:12px;font-weight:bold;display:flex;align-items:center;justify-content:center}
+.lanes{display:flex;gap:10px;align-items:flex-start}
+.lane{flex:1;background:#fff;border:1px solid #e3e7ee;border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:7px;opacity:0;transform:translateY(16px);transition:all .45s}
+.lane h4{margin:0;font-size:18px;color:var(--ai);display:flex;align-items:center;gap:6px}
+.chip{display:inline-block;border-radius:7px;padding:3px 9px;margin:0 3px 3px 0;font-size:14px;color:#fff}
+.g{background:var(--auto)}.y{background:var(--cued);color:#222}.fz{background:var(--fuse)}
+.log{font-size:15px;color:#555;line-height:1.6;min-height:76px}
+.log div{opacity:0;transition:opacity .3s}.log div.on{opacity:1}
+.log div::before{content:"› ";color:#bbb}
+.bar{height:8px;border-radius:3px;background:#eef1f5;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--ai);transition:width 3.6s linear}
+.bar.go i{width:100%}
+.tbl{display:grid;grid-template-columns:1fr 1fr;border:1px solid #e3e7ee;border-radius:8px;overflow:hidden;font-size:14px;opacity:0;transition:opacity .4s}
+.tbl span{padding:6px 8px;border-bottom:1px solid #eef1f5}
+.tbl .h{background:#f4f6f9;font-weight:bold;color:#444}
+.merge{border-radius:14px;padding:12px 16px;font-size:17px;font-weight:bold;opacity:0;transform:translateY(10px);transition:all .45s}
+.merge.badm{background:#fdeceb;color:#c0362c}.merge.goodm{background:#e6f8ec;color:#137a35}
+.merge table{width:100%;border-collapse:collapse;margin-top:8px;font-size:15px;font-weight:normal;color:#234}
+.merge td{padding:3px 6px;border-top:1px solid #cfe9d7}
+.shake{animation:sh .5s}@keyframes sh{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.pill{white-space:nowrap;position:fixed;left:50%;bottom:36px;z-index:9;transform:translateX(-50%) translateY(-10px);background:#111;color:#fff;font-weight:bold;font-size:24px;padding:11px 26px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transition:all .45s}
+.pill.on{transform:translateX(-50%)!important}
+.legend{position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:13px;color:#667}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin:0 5px 0 16px;vertical-align:-1px}
+.extra{color:#7b4dd6!important;font-weight:bold}
+.extra::before{content:"✨ "!important;color:#7b4dd6!important}
+.mx{margin-top:8px;font-size:14.5px;font-weight:normal;color:#5b3aa8;opacity:0;transition:opacity .4s}
+.mx.on{opacity:1}
+.merge table td{border-top:1px solid #cfe9d7}
+.pane{transition:opacity .7s,transform .7s cubic-bezier(.4,0,.2,1),filter .7s}
+.pane.dim{opacity:.38;filter:saturate(.35)}
+.pane.focus{transform:scale(1.025);box-shadow:0 26px 60px rgba(30,50,90,.22)}
+.cmd{display:inline-block;font-family:ui-monospace,"DejaVu Sans Mono",monospace;font-weight:bold;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.55);border-radius:7px;padding:0 6px;margin-right:6px}
+.rb{max-width:92%;line-height:1.45}
+.rd{font-size:12.5px;color:#888;font-weight:bold}
+.rq{font-size:16.5px;font-weight:bold;color:#1c2b44}
+.rq u{text-decoration:none;background:linear-gradient(transparent 60%,#ffe58f 60%)}
+.oq{font-size:15px;margin-top:3px}.oq span{display:block;font-size:13px;color:#8a6d00;margin-left:12px}
+</style></head><body>
+<div id="stage">
+<div class="pane" id="PL"><div class="top">Hand off in one line</div>
+ <div class="chat">
+  <div class="b me" id="l1">Research 3 competitors and make an exec report</div>
+  <div class="b ai" id="l2">Got it. I'll split this across 3 agents!</div>
+  <div class="b ai bad" id="l3">Report done 📄 (each table used a different basis, so they couldn't be merged)</div>
+  <div class="b me" id="l4">No, not that…</div>
+  <div class="b me recall" id="l5">Companies A, B, C, last 12 months, compared by… oh, and keep it short for execs, and also…</div>
+ </div>
+ <div class="board" id="lb">
+  <div class="bhead"><span class="dot">AI</span>Handed to three — each fills the blanks their own way</div>
+  <div class="lanes">
+   <div class="lane"><h4>Agent 1</h4><div><span class="chip g">1 year</span><span class="chip g">Price</span></div>
+    <div class="log"><div>Price lists · 1 yr</div><div>Average price</div><div>Build table</div></div><div class="bar"><i></i></div>
+    <div class="tbl"><span class="h">Company</span><span class="h">Avg. price</span><span>A</span><span>₩12,000</span></div></div>
+   <div class="lane"><h4>Agent 2</h4><div><span class="chip g">3 years</span><span class="chip g">Market share</span></div>
+    <div class="log"><div>Share data · 3 yrs</div><div>Compute trend</div><div>Build table</div></div><div class="bar"><i></i></div>
+    <div class="tbl"><span class="h">Company</span><span class="h">Market share</span><span>B</span><span>18→24%</span></div></div>
+   <div class="lane"><h4>Agent 3</h4><div><span class="chip g">Last quarter</span><span class="chip g">Features</span></div>
+    <div class="log"><div>Features · last qtr</div><div>Feature checklist</div><div>Build table</div></div><div class="bar"><i></i></div>
+    <div class="tbl"><span class="h">Company</span><span class="h">Features</span><span>C</span><span>32</span></div></div>
+  </div>
+  <div class="merge badm" id="lm">Merge ✕ — periods and bases differ, can't combine into one table</div>
+ </div>
+</div>
+<div class="pane" id="PR"><div class="top">Ask first, then hand off</div>
+ <div class="chat">
+  <div class="b me" id="r1"><span class="cmd">/elicit</span>Research 3 competitors and make an exec report</div>
+  <div class="b ai rb" id="r2"><div class="rd">Intent as understood</div><div class="rq">An exec report comparing 3 competitors on <u>the same basis</u></div>
+   <div class="rd" style="margin-top:8px">Still open</div>
+   <div class="oq">· Which 3 companies? <span>No names in the request</span></div>
+   <div class="oq">· What should they be compared by? <span>Left open, each agent picks its own basis</span></div></div>
+  <div class="b me cued" id="r3">A, B, and C</div>
+  <div class="b me fuse" id="r4">Oh, this meeting is about customer churn. Compare them by churn reasons. That's enough</div>
+  <div class="b ai" id="r5">Reading it back: an exec report comparing A, B, C by <b>churn reasons</b> — handing this to 3 agents now</div>
+  <div class="b ai good" id="r8">Report done 📄 All three companies' churn reasons in one table</div>
+ </div>
+ <div class="board" id="rb">
+  <div class="bhead"><span class="dot">AI</span>All three work from the same brief</div>
+  <div class="lanes">
+   <div class="lane"><h4>Agent 1</h4><div><span class="chip y">A</span><span class="chip fz">Churn reason</span></div>
+    <div class="log"><div>Collect A's reviews</div><div>Sort churn reasons</div><div class="extra">Exec one-liner</div></div><div class="bar"><i></i></div>
+    <div class="tbl"><span class="h">Company</span><span class="h">Churn reason</span><span>A</span><span>Price hike</span></div></div>
+   <div class="lane"><h4>Agent 2</h4><div><span class="chip y">B</span><span class="chip fz">Churn reason</span></div>
+    <div class="log"><div>Collect B's reviews</div><div>Sort churn reasons</div><div class="extra">Exec one-liner</div></div><div class="bar"><i></i></div>
+    <div class="tbl"><span class="h">Company</span><span class="h">Churn reason</span><span>B</span><span>Slow support</span></div></div>
+   <div class="lane"><h4>Agent 3</h4><div><span class="chip y">C</span><span class="chip fz">Churn reason</span></div>
+    <div class="log"><div>Collect C's reviews</div><div>Sort churn reasons</div><div class="extra">Exec one-liner</div></div><div class="bar"><i></i></div>
+    <div class="tbl"><span class="h">Company</span><span class="h">Churn reason</span><span>C</span><span>Missing features</span></div></div>
+  </div>
+  <div class="merge goodm" id="rm">Merge ✓ — side by side in one table
+   <table><tr><td>A</td><td>Price hike</td></tr><tr><td>B</td><td>Slow support</td></tr><tr><td>C</td><td>Missing features</td></tr></table>
+   <div class="mx" id="mx1">✨ Pattern: all three lose most customers within 3 months of sign-up</div>
+   <div class="mx" id="mx2">✨ Next agenda item: improve onboarding in the first 3 months</div></div>
+ </div>
+</div>
+</div>
+<div class="pill" id="c1">Write down what the proposal brings to mind</div>
+<div class="pill" id="c3">Missing conditions surface only after the result arrives</div>
+<div class="legend"><i style="background:var(--auto)"></i>AI decided alone<i style="background:var(--recall)"></i>Recalled alone<i style="background:var(--cued)"></i>Recalled when asked<i style="background:var(--fuse)"></i>Came to mind on seeing it<i style="background:#7b4dd6"></i>Organized without being asked ✨</div>
+<script>
+const at=(t,f)=>setTimeout(f,t), $=id=>document.getElementById(id), on=id=>$(id).classList.add('on'), off=id=>$(id).classList.remove('on');
+const focus=k=>['PL','PR'].forEach(p=>{const e=$(p);e.classList.toggle('focus',p===k);e.classList.toggle('dim',!!k&&p!==k)});
+const cam=(o,s)=>{const st=$('stage');st.style.transformOrigin=o;st.style.transform=`scale(${s})`};
+at(500,()=>{on('l1');on('r1')});
+at(1400,()=>on('l2')); at(2000,()=>{on('r2');focus('PR')});
+at(3300,()=>on('c1'));
+at(5000,()=>on('r3'));
+at(6300,()=>on('r4'));
+at(8000,()=>on('r5'));
+at(9300,()=>focus(null));
+// act 2: the work, large
+at(9600,()=>{off('c1');$('lb').classList.add('up');$('rb').classList.add('up')});
+document.querySelectorAll('.lane').forEach((l,i)=>at(10200+(i%3)*180,()=>l.classList.add('on')));
+at(10800,()=>document.querySelectorAll('.bar').forEach(b=>b.classList.add('go')));
+document.querySelectorAll('.lane').forEach(l=>l.querySelectorAll('.log div').forEach((d,j)=>at(10900+j*1150,()=>d.classList.add('on'))));
+at(14500,()=>document.querySelectorAll('.tbl').forEach(t=>t.style.opacity=1));
+at(15500,()=>{on('lm');on('rm');$('lm').classList.add('shake')});
+at(16600,()=>on('mx1')); at(17400,()=>on('mx2'));
+// act 3: back to the chat
+at(20800,()=>{$('lb').classList.remove('up');$('rb').classList.remove('up')});
+at(21500,()=>{on('l3');on('r8')});
+at(22600,()=>{focus('PL');on('c3')});
+at(23200,()=>on('l4')); at(24300,()=>on('l5'));
+at(26200,()=>{off('c3');focus(null)});
+</script></body></html>

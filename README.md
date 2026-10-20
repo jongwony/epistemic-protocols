@@ -22,7 +22,7 @@ For example, "Write the email announcing next week's meeting":
 | Length | The AI decides alone | Presented — you correct it |
 | Tone | The AI decides alone | The AI decides alone |
 
-This is an illustration, not a run result: which items come up, and how, varies with the model and the person. A decision the AI makes alone is not wrong for that; what differs is whether it passed through you.
+This is an illustration, not a run result: which items come up, and how, varies with the model and the person. A decision the AI makes alone is not wrong for that; what differs is whether it passed through you. `/inquire` does not ask these one at a time: it first collects what it can reach on its own, then hands back what remains — the asked and the presented items arrive together in that one handback.
 
 ## Where the protocols help
 
