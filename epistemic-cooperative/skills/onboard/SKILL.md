@@ -163,7 +163,7 @@ If no person turns were collected — a fresh install, or a host that keeps no s
 - Line 1: Cite the specific signal pattern from Quick Scan Profile that matched this protocol's "Key Patterns" column in Data Sources
 - Line 2: State the expected benefit, derived from the protocol's "When to Use" column in Data Sources
 
-Fallback (no session data, or no matched signal): State that no patterns were detected, then cite the protocol's core value proposition from Data Sources "When to Use."
+Fallback (no session data, or no matched signal): State that no pattern matched this protocol, then cite the protocol's core value proposition from Data Sources "When to Use."
 
 **Rules**:
 - Evidence is maximum 2 lines — a focused cue.
