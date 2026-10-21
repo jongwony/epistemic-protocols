@@ -23,7 +23,7 @@ Skip when:
 ## Workflow Overview
 
 ```
-Quick Proof:    ENTRY → QUICKSCAN → PICK-1 → EVIDENCE → TRIAL → INSIGHT → NEXT
+Quick Proof:    ENTRY → QUICKSCAN → PICK → EVIDENCE → TRIAL → INSIGHT → NEXT
 Targeted:       ENTRY → QUICKSCAN → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
 Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 ```
@@ -32,8 +32,8 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 |-------|-------|------|---------|
 | 0. Entry | Main | Gate | Path selection: quick/targeted |
 | 1. Quick Scan | Main | Glob, bounded head read | User Context Profile extraction |
-| 2a. Pick-1 | Main | — | Quick path: select 1 recommendation |
-| 2b. Evidence | Main | — | Quick path: show 1 evidence card |
+| 2a. Pick | Main | — | Quick path: recommendation |
+| 2b. Evidence | Main | — | Quick path: evidence card |
 | 2. Map | Main | — | Targeted path: Profile → Protocol matching |
 | 3. Scenario | Main | Gate | Targeted path: context-personalized intervention point |
 | 4. Trial | Main | Gate | Real protocol execution (quick: mini trial, targeted: full trial) |
@@ -129,13 +129,13 @@ From the collected turns, infer:
 - **Conversation patterns**: Request clarity level, incremental vs. batch requests, question types (how/why/what)
 - **Task types**: Ratio of feature development, debugging, refactoring, documentation
 
-If no person turns were collected — a fresh install, or a host that keeps no such records: Quick path proceeds to Pick-1 with fallback (`/elicit`); Targeted path falls back to Onboarding Pool (`/elicit`, `/inquire`).
+If no person turns were collected — a fresh install, or a host that keeps no such records: Quick path proceeds to Pick with fallback (`/elicit`); Targeted path falls back to Onboarding Pool (`/elicit`, `/inquire`).
 
 **Output for Phase 2**: User Context Profile (work domains, conversation patterns, task types). Quick Scan infers user context for protocol matching and scenario personalization.
 
-### Phase 2a: Pick-1 (Quick Path — Single Recommendation)
+### Phase 2a: Pick (Quick Path — Recommendation)
 
-**Quick path only.** Select exactly 1 protocol recommendation from the auto-recommend pool.
+**Quick path only.** Recommend from the auto-recommend pool.
 
 **Onboarding Pool**: `/elicit` (Euporia), `/inquire` (Aitesis). These two are chosen because users can quickly experience their value. Protocols like `/grasp` are user-initiated by nature and should not be proactively suggested in the first encounter.
 
@@ -149,23 +149,21 @@ If no person turns were collected — a fresh install, or a host that keeps no s
 **Decision logic**:
 1. Score each protocol by signal match count across the collected person turns
 2. **Ideation route-away**: ideation asks ("ideas for", "brainstorm") score no pool protocol — when they are the only matched signals, relay in one sentence that the ask itself maps to `/ideate` (user-initiated: named as the route for that ask, not presented as the onboarding recommendation), then continue via the Fallback rule; the Phase 2b evidence card follows its fallback form, since the recommendation rests on the default, not on a matched signal
-3. Select the single strongest match
+3. Recommend every matched protocol, the strongest match first
 4. Tie-break: `/elicit` > `/inquire`
 5. **Fallback**: If no signals detected (no records, or too few person turns) — or every detected signal was routed away — recommend `/elicit`
 
-**Output**: Present exactly one recommendation as a single sentence.
-
-Format: Present as a single sentence stating which protocol is most likely to help right now.
+**Output**: Present each recommendation as a single sentence stating how that protocol would help right now.
 
 ### Phase 2b: Evidence (Quick Path — Evidence Card)
 
-**Quick path only.** Present exactly 1 evidence card explaining why this recommendation was made.
+**Quick path only.** Present an evidence card for each recommendation, explaining why it was made.
 
 **Evidence generation** (per protocol, referencing Data Sources table):
 - Line 1: Cite the specific signal pattern from Quick Scan Profile that matched this protocol's "Key Patterns" column in Data Sources
 - Line 2: State the expected benefit, derived from the protocol's "When to Use" column in Data Sources
 
-Fallback (no session data): State that no patterns were detected, then cite the protocol's core value proposition from Data Sources "When to Use."
+Fallback (no session data, or no matched signal): State that no pattern matched this protocol, then cite the protocol's core value proposition from Data Sources "When to Use."
 
 **Rules**:
 - Evidence is maximum 2 lines — a focused cue.
@@ -175,12 +173,12 @@ Fallback (no session data): State that no patterns were detected, then cite the 
 After presenting evidence, present:
 - Text: Trial invitation
 - Options:
-  - Try it now
-  - Learn more about this recommendation
-  - See a different recommendation
+  - Try /X now (one option per recommendation, naming its protocol)
+  - Learn more about a recommendation
+  - See a different recommendation (only while the pool holds one not yet shown)
   - Go to full learning path
 
-Branch: Try it now → Phase 4 (quick trial), Learn more about this recommendation → show Data Sources row for the recommended protocol then re-ask, See a different recommendation → pick next from pool and re-present from Phase 2a, Go to full learning path → set `path = targeted` and go to Phase 0 targeted flow.
+Branch: Try /X now → Phase 4 (quick trial) with that protocol, Learn more about a recommendation → show the Data Sources row for each recommendation on screen then re-ask, See a different recommendation → pick next from pool and present it alone from Phase 2a's Output, Go to full learning path → set `path = targeted` and go to Phase 0 targeted flow.
 
 ### Phase 2: Map (Targeted Path — Protocol Matching)
 
@@ -255,7 +253,7 @@ Present via gate interaction:
   - Try a different protocol
   - Continue to full onboarding
 
-Branch: That's enough for today → end session with brief closing, Try a different protocol → check pool exhaustion: if unrecommended protocols remain in Onboarding Pool, pick next and restart from Phase 2a; if pool exhausted (every pool protocol recommended in session), present You've experienced all core recommendations and offer Targeted transition, Continue to full onboarding → set `path = targeted` and go to Phase 2 MAP with Quick Scan results.
+Branch: That's enough for today → end session with brief closing, Try a different protocol → check pool exhaustion: if protocols not yet tried remain in Onboarding Pool, pick the next untried one and present it alone from Phase 2a's Output; if pool exhausted (every pool protocol tried in session), present You've experienced all core recommendations and offer Targeted transition, Continue to full onboarding → set `path = targeted` and go to Phase 2 MAP with Quick Scan results.
 
 #### Targeted Path Trial
 
@@ -410,17 +408,16 @@ Quick path targets 3-4 calls. Targeted path targets 6-12 calls.
 ## Rules
 
 1. **Value before learning**: Quick path proves value in under 3 minutes. Learning (scenarios, quizzes) is available but not the default entry.
-2. **One at a time**: Quick path shows exactly 1 recommendation, 1 evidence card, 1 trial.
-3. **Onboarding Pool**: `/elicit`, `/inquire` are the unified recommendation set for both Quick path auto-recommend and Targeted path fallback. User-initiated protocols (`/grasp`, `/apportion`) and specialized protocols (`/contextualize`) are excluded. When pool is exhausted in Quick path, transition to Targeted path.
-4. **Experience over analysis**: This skill teaches through doing; its output is the trial and the terminal summary.
-5. **Privacy**: Never transmit session data externally. All analysis runs locally.
-6. **No subagent delegation**: Both Quick and Targeted paths use inline Quick Scan.
-7. **Trial authenticity**: Trial phase must execute the actual protocol, not simulate it. The user invokes the real slash command.
-8. **Immediate feedback**: Quiz answers get instant feedback. For incorrect answers, reasoning inquiry precedes correction (per Feedback section). Never batch quiz results.
-9. **No auto-install**: Guide installation but never install plugins automatically.
-10. **Session record access**: Read a conversation record only through a byte-bounded head read, never the whole file, and keep only the person's turns as Phase 1 defines them. Assistant turns, tool output, and injected text are not read into the profile.
-11. **Preset as safety net**: `references/scenarios.md` ensures every user gets a complete experience regardless of session history availability.
-12. **Single session**: The entire onboarding completes in one session. No cross-session state required.
+2. **Onboarding Pool**: `/elicit`, `/inquire` are the unified recommendation set for both Quick path auto-recommend and Targeted path fallback. User-initiated protocols (`/grasp`, `/apportion`) and specialized protocols (`/contextualize`) are excluded. When pool is exhausted in Quick path, transition to Targeted path.
+3. **Experience over analysis**: This skill teaches through doing; its output is the trial and the terminal summary.
+4. **Privacy**: Never transmit session data externally. All analysis runs locally.
+5. **No subagent delegation**: Both Quick and Targeted paths use inline Quick Scan.
+6. **Trial authenticity**: Trial phase must execute the actual protocol, not simulate it. The user invokes the real slash command.
+7. **Immediate feedback**: Quiz answers get instant feedback. For incorrect answers, reasoning inquiry precedes correction (per Feedback section). Never batch quiz results.
+8. **No auto-install**: Guide installation but never install plugins automatically.
+9. **Session record access**: Read a conversation record only through a byte-bounded head read, never the whole file, and keep only the person's turns as Phase 1 defines them. Assistant turns, tool output, and injected text are not read into the profile.
+10. **Preset as safety net**: `references/scenarios.md` ensures every user gets a complete experience regardless of session history availability.
+11. **Single session**: The entire onboarding completes in one session. No cross-session state required.
 
 ## Acknowledgments
 
