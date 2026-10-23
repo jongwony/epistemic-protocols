@@ -283,8 +283,7 @@ structure BoundaryEssence (c : Context P) where
     bears on the task, even where this round's discovery omits it: a person's disposition never
     drops out of the record unnoticed. You read it from the context as observation left it; a
     source it needs that observation did not return is not read here — it is named in what the
-    map did not look at. Guidance for the reading, not a step it must take: carry the map as the
-    current sheet with a ledger of what changed. -/
+    map did not look at. -/
 axiom readout : (c : Context P) → BoundaryEssence c
 
 /-- **Your judgment**: what reading the reachable sources returns for the map at `c`, at the start
