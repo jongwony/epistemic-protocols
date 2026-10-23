@@ -41,7 +41,7 @@ Same axis (context fitness), opposite timing, different object — before a resu
 
 ```
 Pass     → Observe everywhere the result lands, carry out settled fixes, observe again (silent)
-Sheet    → Every misfit at once, with concrete actions, what fits, what was not reached, what changed (one question)
+Sheet    → Every misfit at once, with concrete actions, what fits, what was not reached (one question)
 Answer   → Your one turn settles any number of them; the next pass carries them out
 Complete → A pass leaves nothing open — the closing sheet, no extra "done"
 ```

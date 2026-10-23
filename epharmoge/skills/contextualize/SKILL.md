@@ -38,7 +38,7 @@ artifact from elsewhere:
   → observe(reach)             -- every place X lands and every intent it answers to, without changing existing state; what could not be reached, named
   → judge(result, context)     -- where X as it now stands does not fit the context as it now stands; afresh on every pass
   → perform(settled)           -- the relay: every settled resolution within what this run may write, and what its own writes newly settle
-  → surface(sheet, changes)    -- every mismatch at once, with concrete actions, what fits, what was not reached, and what changed
+  → surface(sheet)             -- every mismatch at once, with concrete actions, what fits, and what was not reached
   → resolve(person's turn)     -- adapt, keep with their reason, stop using, not this result's — their words, a proposal they took, a grant of theirs
   → ContextualizedExecution
 requires: mismatch_detected(X)   -- the AI-opened path only (Layer 2); an invocation declares the deficit and enters without it
@@ -363,11 +363,9 @@ open Classical in
     resolutions that unblock it: the change carried out once they authorize it, the change they
     make themselves, handing it to its owner (nothing is sent), or leaving it. Mismatches that bear
     on each other grouped, with their combined consequence and actions over the group. Then
-    `reach`: what fits and what was not reached. Then what changed since the last sheet: each line
-    added, removed, or changed names what moved — a write, a new observation, a person's turn, or
-    a reading of yours corrected on unchanged ground, said to be a correction; a line that left
-    says why. Then one question over every open mismatch, or one at a time where the person asks
-    for it. What the utterance asked outside this run is answered here; a step that rests on X and
+    `reach`: what fits and what was not reached. A reading of yours corrected on unchanged ground
+    is said to be a correction. Then one question over every open mismatch, or one at a time
+    where the person asks for it. What the utterance asked outside this run is answered here; a step that rests on X and
     cannot be undone waits while something is open, and the open places are shown before it.
     Re-present the whole sheet where it changed or the person asked for it; a question about the
     sheet is answered with the gate said to stand. On completion, the closing sheet is
