@@ -472,8 +472,6 @@ end Probe
 | `/onboard` | Pattern-based recommendation + optional trial | Session history patterns | Recommended protocol + scenario + trial |
 | `/probe` | Grounded candidates for what is stuck, recognized by the user | Current user situation | The situation the user recognizes — a shown candidate, their own words, or none shown |
 
-The two coexist; neither replaces the other.
-
 ## Rules
 
 - **The person recognizes**: As `closing`, `AnswerSupported`, and `Owed` state.

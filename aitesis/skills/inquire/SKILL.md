@@ -432,7 +432,7 @@ When a prospect touches architecture decisions, API or protocol design, persiste
 
 Present what TOOL GROUNDING's `surface` entry names in everyday language and proceed. Say which items the AI found without full warrant; name each source it could not reach, with what it needs, so the user can point at one it missed; name a detection as one, on its own line. State what the protocol takes if an answer comes — a fact, a correction, a place to look, "I don't know either", a dismissal — without holding the turn for it and without a fixed menu. Keep every item open to free-response correction.
 
-Frame the uncertainty currently in play rather than emitting a completion tally. Read `references/round-composition.md` before composing when terminology must remain stable across the session, wording must be carried unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside a relay.
+Frame each round around the uncertainty currently in play. Read `references/round-composition.md` before composing when terminology must remain stable across the session, wording must be carried unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside a relay.
 
 ### Intensity
 
