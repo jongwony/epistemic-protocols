@@ -551,7 +551,7 @@ end Hyphegesis
 
 ### User-facing realization
 
-The map's first line says what the work is for and what it hands off. Prior-session recall indices may seed the lines but never settle them. Keep labels short, since display width is not character count and a column padded by counting characters breaks.
+The map's first line says what the work is for and what it hands off. Prior-session recall indices may seed the lines but never settle them.
 
 ## Rules
 
