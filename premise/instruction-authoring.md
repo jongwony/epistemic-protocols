@@ -40,6 +40,12 @@ Account for the cost of loading, revising, and applying an entry. Consider volat
 
 Compose context-specific values from durable principles at the point of need. Place mechanically specified logic in the rigid layer and context-dependent judgment in instructions with runtime ground. Stability of a carrier does not establish stability of the judgment it carries.
 
+## State and Ledger
+
+An instruction surface states what binds its reader now. How an entry came to be — its derivation, its provenance, the alternative it displaced, the friction that admitted it — belongs to the project's ledger, the record the project designates for its history, written in the change that lands the entry. So does the wording of an entry the surface no longer carries. Route each sentence to one of the two as it is written.
+
+The reader acts on the surface alone; an entry that needs its history to be understood is not yet a complete statement of what binds. Whoever later revises an entry, or restores a removed one, finds its ground and its former wording in the ledger.
+
 ## Subtraction at Revision Time
 
 Opening an always-loaded instruction surface for revision puts its existing entries in scope. Establish subtraction candidates before settling additions, and let the obligations the audit exposes shape the change. Audit the surface as opened; a candidate produced by that audit does not recursively trigger another audit.
