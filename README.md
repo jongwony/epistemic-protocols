@@ -98,11 +98,11 @@ Skills that act at their own decision points — around the protocols, on the wo
 | Command | When to use |
 |---------|-------------|
 | **Finding the protocol** | |
-| `/onboard` | New here, or back after new protocols arrived or your workflow changed — get a recommendation from your recent sessions, or learn by scenario, trial, and quiz |
+| `/onboard` | You want to find which protocols fit your work, or practise using them — whether new here or back after new protocols arrived or your workflow changed — get a recommendation from your recent sessions, or learn by scenario, trial, and quiz |
 | `/probe` | Something feels off and you cannot name what is stuck — you can then say what it is: a shown candidate, your own words, or none shown, having seen what each rests on and what rules it out |
 | **Shaping the work** | |
-| `/reduced-space-test` | A claim that a stand-in behaves like the real target — test it in a bounded space and carry the untested remainder forward explicitly |
-| `/gate-check` | Options for a reversible decision are about to be put to you and may not be genuinely different choices, or an answer to an earlier set settled nothing — an independent advisor rules the set genuine, collapsed, or malformed, and its cited grounds are verified first |
+| `/reduced-space-test` | A claim about behavior, performance, transfer, or value that reasoning alone cannot settle, where evidence from a stand-in for the real setting would — test it in a bounded space and carry the untested remainder forward explicitly |
+| `/gate-check` | Options for a reversible decision are about to be put to you and may not be genuinely different choices, or an answer to an earlier set settled nothing — an independent advisor checks whether the options form a real choice, and the grounds it cites are verified before the set reaches you |
 | **Auditing instruction prose** | |
 | `/white-bear` | Prose that names something the agent should not reach for — a forbidden act, a retired path, a rejected alternative — find the mentions that keep that wrong target in view without earning their place |
 | `/zero-shot` | Prose that anchors on examples where a principle would generalize — find and name those spots |
