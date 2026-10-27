@@ -64,7 +64,7 @@ Remove the candidate wholly or to a reduced form, and deliberately exercise its 
 
 Report only the readers and conditions actually exercised. Aim at readers on whom the obligation can surface: both readers prone to the guarded error and readers capable of prematurely closing a question that should remain open. Unexercised readers block a universal-removability claim, but do not establish a reason for retention.
 
-Outside the exercised scope, a deletion remains a probe. Leaving it in place requires a route for observed failure to reach someone able to restore it; that route is monitoring, not a successful result. Keep the removed wording and its derivation where a restoration can reach them, so a failed probe is recoverable.
+Outside the exercised scope, a deletion remains a probe. Leaving it in place requires a route for observed failure to reach someone able to restore it; that route is monitoring, not a successful result. The removed wording and its derivation go to the ledger (§State and Ledger), so a failed probe is recoverable.
 
 Run an ablation only where failure can be observed without committing an unrecoverable consequence, or where the consequence is recoverable. If that bound or the removal's recoverability is absent, inspect by other means or retain the entry pending an individually justified removal.
 
