@@ -72,8 +72,8 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | Protocol | Command | When to use | Once it has run |
 |----------|---------|-------------|-----------------|
 | [Aitesis](./aitesis) | `/inquire` | A task rests on missing context or unchecked assumptions, and you need to see what remains unknown | You can recognize what was settled and from where, what rests on weak or unreached ground, and what only you decide |
-| [Euporia](./euporia) | `/elicit` | You know roughly what you want but can't yet say which decisions it turns on — and your own material (codebase, rules, past sessions) and the domain's usual decisions hold the clues | You can say "this is my intent, aligned enough" — each recorded value stands on your own words, and what you left open is carried |
-| [Heuresis](./heuresis) | `/ideate` | You have no candidates yet, or the field narrowed too early — widen it before choosing any | You can look over one map of your idea field — each frame and the branches dug under it, every candidate with where it came from, what stays unexplored, and what you set out of scope or aside — and take that field forward, with nothing in it chosen or ranked; choosing among it is a separate act |
+| [Euporia](./euporia) | `/elicit` | You know roughly what you want but can't yet say which decisions it turns on — the clues can sit in your words, your own material (codebase, rules, past sessions), or the decisions the domain usually turns on | You can say "this is my intent, aligned enough" — each recorded value stands on your own words, and what you left open is carried |
+| [Heuresis](./heuresis) | `/ideate` | You have no candidates yet, the ones you have narrowed too early, or the field is thin — widen it before choosing any, or pick up a field you widened before | You can look over one map of your idea field — each frame and the branches dug under it, every candidate with where it came from, what stays unexplored, and what you set out of scope or aside — and take that field forward, with nothing in it chosen or ranked; choosing among it is a separate act |
 | [Proplasma](./proplasma) | `/preview` | You're about to commit to one of several directions, but you can't judge them from their descriptions — you'd have to see them first | You can say what each direction means for your purpose, whether that rests on a probe you saw, a description, your own account, or evidence, and which one you take |
 | [Hypotyposis](./hypotyposis) | `/sketch` | You have to make something and can't say what it should be, but you'd recognize it on sight | You can point at a version as you met it and say "this is the form, for this purpose", and see where it and the passed-over versions are |
 | [Analogia](./analogia) | `/ground` | You're carrying a framework, an analogy, or an earlier design over to a case, or checking an abstraction against its own cases, and it isn't clear what that comparison actually supports | You can say what carries each conclusion, what was checked and found, what would break it, and whether it holds, is blocked, or remains undetermined |
@@ -98,13 +98,13 @@ Skills that act at their own decision points — around the protocols, on the wo
 | Command | When to use |
 |---------|-------------|
 | **Finding the protocol** | |
-| `/onboard` | New here — get a recommendation from your recent sessions, then optionally learn by scenario, trial, and quiz |
+| `/onboard` | New here, or back after new protocols arrived or your workflow changed — get a recommendation from your recent sessions, or learn by scenario, trial, and quiz |
 | `/probe` | Something feels off and you cannot name what is stuck — you can then say what it is: a shown candidate, your own words, or none shown, having seen what each rests on and what rules it out |
 | **Shaping the work** | |
 | `/reduced-space-test` | A claim that a stand-in behaves like the real target — test it in a bounded space and carry the untested remainder forward explicitly |
-| `/gate-check` | An option set is about to be presented to you — an independent advisor rules it genuine, collapsed, or malformed, and its cited grounds are verified first |
+| `/gate-check` | Options for a reversible decision are about to be put to you and may not be genuinely different choices, or an answer to an earlier set settled nothing — an independent advisor rules the set genuine, collapsed, or malformed, and its cited grounds are verified first |
 | **Auditing instruction prose** | |
-| `/white-bear` | Prose that tells the agent what not to do — find prohibition framing and negated anchoring that keep the wrong target in view |
+| `/white-bear` | Prose that names something the agent should not reach for — a forbidden act, a retired path, a rejected alternative — find the mentions that keep that wrong target in view without earning their place |
 | `/zero-shot` | Prose that anchors on examples where a principle would generalize — find and name those spots |
 
 ### [Route](./route)
