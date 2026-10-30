@@ -167,6 +167,10 @@ test("the frame carries the contract's judgments and Rules as written", () => {
   for (const [, doc] of frame.judgments) assert.ok(routing.includes(doc));
   assert.ok(routing.includes(frame.rules));
   assert.ok(routing.indexOf(frame.rules) < routing.indexOf(TABLE_HEADER), "the table follows the frame");
+  // Where a row is missing, the frame itself says where a description is read from,
+  // and who reads a delegated agent's report.
+  assert.ok(routing.includes("from where the protocol states it"));
+  assert.ok(routing.includes("the agent that receives its report"));
 });
 
 test("frame and table each go out without the other", () => {

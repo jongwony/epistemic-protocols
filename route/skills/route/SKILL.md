@@ -9,7 +9,7 @@ Route the accumulated session context to the core epistemic protocol whose defic
 
 ## Definition
 
-**Route**: An act of bringing a present deficit to the protocol that resolves it, so that the person meets that protocol without recalling which protocols exist or which one fits. At a recognition point — the prompt, or a moment in the turn where preparing a response or action shows a deficit — Route reads the loaded core protocols' own descriptions against the context as it stands and yields the one outcome `route` gives: an invocation with Route's reading shown, pointer lines, or silence. How the fits compose — with each other and with the work underway, another protocol's checkpoint that still holds the person's judgment included — is Route's judgment, shown in its reading before the call: one protocol comes in, the fits beside it are shown with how they follow or stand beside it, the checkpoint stays the person's, and the run it belongs to goes on with what the invoked protocol leaves. Route closes nothing: each protocol's own gates hold the person's judgment, and a pointer is taken up, if at all, in the person's next turn. The judgment is made in the turn itself, in the main conversation, against the descriptions and the judgment text the session start delivers from this contract; `/route` is also a command the person may type, and nothing invokes it on its own. A delegated agent does not route: the agent that receives its report reads it for what only the person holds.
+**Route**: An act of bringing a present deficit to the protocol that resolves it, so that the person meets that protocol without recalling which protocols exist or which one fits. At a recognition point — the prompt, or a moment in the turn where preparing a response or action shows a deficit — Route reads the loaded core protocols' own descriptions against the context as it stands and yields the one outcome `route` gives: an invocation with Route's reading shown, pointer lines, or silence. How the fits compose — with each other and with the work underway, another protocol's checkpoint that still holds the person's judgment included — is Route's judgment, shown in its reading before the call: one protocol comes in, the fits beside it are shown with how they follow or stand beside it, the checkpoint stays the person's, and the run it belongs to goes on with what the invoked protocol leaves. Route closes nothing: each protocol's own gates hold the person's judgment, and a pointer is taken up, if at all, in the person's next turn. The judgment is made in the turn itself, against the descriptions and the judgment text the session start delivers from this contract; `/route` is also a command the person may type, and nothing invokes it on its own. Where a pass belongs, and what receiving a delegated agent's report asks, `route` states.
 
 ```lean
 /-!
@@ -227,17 +227,14 @@ judges the one outcome; an invocation hands off through `.invoke` [Tool].
     have said since it was presented, stays theirs, answered only by their own turn under its own
     contract; it does not stand against bringing a protocol in by being there, and neither Route
     nor what the invoked protocol leaves answers or closes it. The invoked protocol carries Route's
-    reading as Route's, never as the person's words. Guidance for the judgment, not steps it must
-    take: a protocol comes in where its fit is plain, nothing in the context counting against it, a
-    rival fit for the same deficit included, and uncertainty about the very ground the protocol
-    exists to investigate is not uncertainty about its fit; where several fits stand, which comes
-    first, which follows on what another leaves, and which stands beside it are read from the
-    context and shown; bringing one in does not compose where it would decide something the person
-    holds, move what they are working toward, or take them off work in hand more than it helps, and
-    work that rests on the ground the deficit leaves unestablished is not work in hand; a pointer
-    is given where it gives the person something they do not already have, a pointer already shown
-    making a second one redundant, never an invocation; where nothing is to be raised, the pass is
-    silent. -/
+    reading as Route's, never as the person's words. The pass belongs to the main conversation: a
+    delegated agent does not route, and the agent that receives its report reads it for what only
+    the person holds before the work relies on it. Guidance for the judgment, not steps it must
+    take: a protocol comes in where its fit is plain, and uncertainty about the very ground it exists
+    to investigate is not uncertainty about its fit; bringing one in does not compose where it would
+    decide something the person holds or move what they are working toward; a pointer is given where
+    it gives the person something they do not already have; where nothing is to be raised, the pass
+    is silent. -/
 axiom route : (k : Catalog) → (c : Context P) → ProtocolInvocation k c
 
 /-- The pass at a recognition point: `route` over the catalog the session shows. -/

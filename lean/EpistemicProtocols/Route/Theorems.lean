@@ -39,9 +39,8 @@ private theorem only_invoke_dispatches (k : Catalog) (c : Context P) (o : Protoc
   | point ls hne => simp [invokedBy] at h
   | silence => simp [invokedBy] at h
 
-/-- An invocation hands over at least one fit, every one of which names the invoked protocol and
-    rests on `FitSupported` for it: whatever `route` judges, no protocol comes in without a fit
-    of its own. -/
+/-- Where the pass invokes a protocol, some fit line names that protocol and rests on
+    `FitSupported` for it. -/
 theorem invoke_carries_fit (k : Catalog) (c : Context P) (e : Entry)
     (h : invokedBy (route k c) = some e) :
     ∃ l : Line k c, l.entry = e ∧ FitSupported c e l.reading l.grounds := by
@@ -77,6 +76,23 @@ theorem invokes_only_catalog (k : Catalog) (c : Context P) (e : Entry)
   obtain ⟨l, hl⟩ := List.exists_mem_of_ne_nil ls hne
   rw [← hn l hl]
   exact ⟨l.mem, k.excludes _ l.mem⟩
+
+/-- Over a catalog with no entries, every outcome is silence: an invocation and a pointer each hold
+    at least one line, and every line names a catalog entry. -/
+theorem empty_catalog_silent (k : Catalog) (c : Context P) (hk : k.entries = [])
+    (o : ProtocolInvocation k c) : o = .silence := by
+  have hno : ∀ l : Line k c, False := fun l => by
+    have h := l.mem
+    rw [hk] at h
+    simp at h
+  cases o with
+  | invoke e ls hne _ _ =>
+    obtain ⟨l, -⟩ := List.exists_mem_of_ne_nil ls hne
+    exact (hno l).elim
+  | point ls hne =>
+    obtain ⟨l, -⟩ := List.exists_mem_of_ne_nil ls hne
+    exact (hno l).elim
+  | silence => rfl
 
 /-- Every line — each one an invocation hands over and each pointer line alike — cites at least
     one turn of the context, none of them yours and none injected, and its fit is judged on those

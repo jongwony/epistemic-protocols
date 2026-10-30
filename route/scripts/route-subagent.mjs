@@ -8,9 +8,8 @@
  * Both hosts add a SubagentStart hook's additionalContext to the
  * subagent's own context before its first prompt, so the same index goes
  * out here, rendered the same way (route-premise.mjs). The routing part
- * does not: routing belongs to the conversation with the user, and the
- * agent that receives a subagent's report reads it for what only the user
- * holds.
+ * does not; where a pass belongs is stated in the /route contract's `route`
+ * judgment.
  *
  * A fork inherits the parent conversation, index included, so a subagent
  * whose type is `fork` gets nothing here. Any other type is taken as
