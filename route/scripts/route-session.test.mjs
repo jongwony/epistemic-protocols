@@ -12,8 +12,8 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { PREMISE_HEADER, PREMISE_INDEX } from "./route-premise.mjs";
-import { TABLE_HEADER, deriveProtocols, renderTable } from "./route-protocols.mjs";
-import { buildContext, render } from "./route-session.mjs";
+import { TABLE_HEADER, deriveProtocols, renderTable, selectProtocol } from "./route-protocols.mjs";
+import { PARTS, buildContext, render } from "./route-session.mjs";
 
 const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), "route-session.mjs");
 
@@ -117,11 +117,29 @@ test("the table header carries the directive's referent", () => {
   assert.match(TABLE_HEADER, /^Loaded core epistemic protocols/);
 });
 
-test("a row carries both ends of the morphism, and survives a missing resolution", () => {
+test("a row carries both ends of the morphism and the declared description, and survives either missing", () => {
   assert.equal(
-    renderTable([{ command: "x", deficit: "A", resolution: "B" }, { command: "y", deficit: "C", resolution: null }]),
-    `${TABLE_HEADER}\n/x A → B\n/y C`,
+    renderTable([
+      { command: "x", deficit: "A", resolution: "B", description: "Does x: then y." },
+      { command: "y", deficit: "C", resolution: null, description: "Does y." },
+      { command: "z", deficit: "D", resolution: "E", description: null },
+    ]),
+    `${TABLE_HEADER}\n/x A → B — Does x: then y.\n/y C — Does y.\n/z D → E`,
   );
+});
+
+test("the repo's own protocols render a table that fits one injection", () => {
+  // The host caps each additionalContext string at 10,000 characters; the
+  // table goes out as its own SessionStart entry, so it alone must fit.
+  const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+  const protocols = fs.readdirSync(repo, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && e.name !== "route")
+    .map((e) => selectProtocol(path.join(repo, e.name)))
+    .filter(Boolean);
+  assert.ok(protocols.length > 0);
+  assert.ok(protocols.every((p) => p.description), "every core protocol declares a description");
+  const table = renderTable(protocols);
+  assert.ok(table.length <= 10000, `the table is ${table.length} characters`);
 });
 
 // ---------------------------------------------------------------------------
@@ -132,9 +150,8 @@ test("derives one row per installed single-skill protocol, route excluded", () =
   const fixture = makeFixture(SUITE);
   try {
     const rows = deriveProtocols(fixture.env);
-    // The declared description rides along and stays off the table: the
-    // table's job is to trigger, and matching reads the description where
-    // matching happens. The advisory channel reads it from here too.
+    // The declared description rides along; the table and the advisory
+    // channel both read it from here.
     assert.deepEqual(rows, [
       { command: "recollect", deficit: "RecallAmbiguous", resolution: "RecalledContext", description: "Does a thing." },
       { command: "bound", deficit: "BoundaryUndefined", resolution: "DefinedBoundary", description: "Does a thing." },
@@ -296,20 +313,48 @@ test("no derived protocol and no index means nothing goes out", () => {
 // Emitted context
 // ---------------------------------------------------------------------------
 
-test("the table stays compressed — command, deficit and resolution names only", () => {
+test("each table row is one line: command, deficit → resolution, then the declared description whole", () => {
   const fixture = makeFixture(SUITE);
   try {
     const context = buildContext(fixture.env);
     assert.ok(context.startsWith(TABLE_HEADER));
-    assert.match(context, /^\/induce AbstractionInProcess → CrystallizedAbstraction$/m);
-    // No prose: every table row is exactly "/command Deficit → Resolution".
+    assert.match(context, /^\/induce AbstractionInProcess → CrystallizedAbstraction — Does a thing\.$/m);
     const rows = context.split("\n").slice(1);
     assert.equal(rows.length, 3);
-    for (const row of rows) assert.match(row, /^\/[a-z-]+ [A-Za-z]+ → [A-Za-z]+$/);
-    assert.doesNotMatch(context, /Does a thing/);
+    for (const row of rows) assert.match(row, /^\/[a-z-]+ [A-Za-z]+ → [A-Za-z]+ — Does a thing\.$/);
   } finally {
     cleanup(fixture);
   }
+});
+
+test("each part goes out alone: the table without the index, the index without the table", () => {
+  const fixture = makeFixture({ ...SUITE, premise: true });
+  try {
+    const table = buildContext(fixture.env, "table");
+    const premise = buildContext(fixture.env, "premise");
+    assert.ok(table.startsWith(TABLE_HEADER));
+    assert.doesNotMatch(table, new RegExp(PREMISE_HEADER));
+    assert.ok(premise.startsWith(PREMISE_HEADER));
+    assert.doesNotMatch(premise, new RegExp(TABLE_HEADER));
+    // With no part named, both go out joined, table first.
+    assert.equal(buildContext(fixture.env), `${table}\n${premise}`);
+  } finally {
+    cleanup(fixture);
+  }
+});
+
+test("hooks.json registers each part as its own SessionStart entry", () => {
+  // Separate entries give each part its own size cap, and one part's
+  // failure cannot suppress the other.
+  const hooks = JSON.parse(fs.readFileSync(path.join(path.dirname(SCRIPT), "..", "hooks", "hooks.json"), "utf8"));
+  const commands = hooks.hooks.SessionStart.map((entry) => {
+    assert.equal(entry.hooks.length, 1);
+    return entry.hooks[0].command;
+  });
+  assert.deepEqual(
+    commands,
+    PARTS.map((part) => `node "\${CLAUDE_PLUGIN_ROOT}/scripts/route-session.mjs" ${part}`),
+  );
 });
 
 test("the premise index follows the table on every source, its paths absolute", () => {
@@ -422,7 +467,7 @@ test("hook process exits 0 and derives from the fixture through the environment"
     const out = JSON.parse(result.stdout);
     assert.ok(out.hookSpecificOutput.additionalContext.startsWith(TABLE_HEADER));
     assert.doesNotMatch(out.hookSpecificOutput.additionalContext, /^\[route\]/m);
-    assert.match(out.hookSpecificOutput.additionalContext, /^\/bound BoundaryUndefined → DefinedBoundary$/m);
+    assert.match(out.hookSpecificOutput.additionalContext, /^\/bound BoundaryUndefined → DefinedBoundary — Does a thing\.$/m);
   } finally {
     cleanup(fixture);
   }

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * SessionStart hook — inject the installed-protocol deficit table once per
- * context epoch, with the premise index beneath it.
+ * context epoch, and the premise index beside it.
  *
  * A host's loaded-skills listing may carry each skill's description, or it
  * may carry the command identifiers alone; where it rations that listing
@@ -40,6 +40,12 @@
  * installing Route is the whole setup, and it goes out on every source for
  * the same reason the table does: compaction dropped it.
  *
+ * The table and the index go out as two parts, each registered as its own
+ * SessionStart entry (`table`, `premise` as the first argument): the host
+ * caps each additionalContext string at 10,000 characters, and past the cap
+ * it substitutes a file path and a preview. With no argument both parts are
+ * joined, table first, for a caller that reads the context directly.
+ *
  * Every failure path is open: an unreadable payload still yields whatever
  * can be derived, a derivation shortfall sends the index alone, and an
  * index that cannot be resolved is left out. A hook that blocks a session
@@ -51,23 +57,34 @@ import fs from "node:fs";
 import { premiseRoot, renderPremise } from "./route-premise.mjs";
 import { deriveProtocols, isMain, parsePayload, renderTable } from "./route-protocols.mjs";
 
-function buildContext(env) {
-  let table = "";
+const PARTS = ["table", "premise"];
+
+function buildTable(env) {
   try {
-    table = renderTable(deriveProtocols(env));
+    return renderTable(deriveProtocols(env));
   } catch {
     // Fail open: a derivation fault must not cost the index.
+    return "";
   }
-  let premise = "";
-  try {
-    premise = renderPremise(premiseRoot(env));
-  } catch {
-    // Fail open: the index is a companion to the routing, never a condition of it.
-  }
-  return [table, premise].filter(Boolean).join("\n");
 }
 
-function render(raw, env) {
+function buildPremise(env) {
+  try {
+    return renderPremise(premiseRoot(env));
+  } catch {
+    // Fail open: the index is a companion to the routing, never a condition of it.
+    return "";
+  }
+}
+
+/** One part (`table` or `premise`), or both joined where `part` names neither. */
+function buildContext(env, part) {
+  if (part === "table") return buildTable(env);
+  if (part === "premise") return buildPremise(env);
+  return [buildTable(env), buildPremise(env)].filter(Boolean).join("\n");
+}
+
+function render(raw, env, part) {
   const payload = parsePayload(raw);
   const eventName = typeof payload.hook_event_name === "string"
     ? payload.hook_event_name
@@ -76,16 +93,16 @@ function render(raw, env) {
     suppressOutput: true,
     hookSpecificOutput: {
       hookEventName: eventName,
-      additionalContext: buildContext(env),
+      additionalContext: buildContext(env, part),
     },
   });
 }
 
-export { buildContext, render };
+export { PARTS, buildContext, render };
 
 if (isMain(import.meta.url)) {
   let raw = "";
   try { raw = fs.readFileSync(0, "utf8"); } catch {}
-  process.stdout.write(render(raw) + "\n");
+  process.stdout.write(render(raw, undefined, process.argv[2]) + "\n");
   process.exit(0);
 }

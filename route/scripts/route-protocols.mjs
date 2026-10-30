@@ -21,7 +21,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const TABLE_HEADER = "Loaded core epistemic protocols, each as the deficit it resolves → the resolution it yields:";
+const TABLE_HEADER = "Loaded core epistemic protocols, each as the deficit it resolves → the resolution it yields, then the description it declares:";
 
 function readJson(file) {
   try {
@@ -103,10 +103,10 @@ function soleSkill(dir) {
  * wherever the SKILL.md carries it — description or body; a protocol without
  * one keeps its row, with the deficit alone.
  *
- * The frontmatter `description` is read too, and stays off the table: the
- * table's job is to trigger. It is the text /route's contract (`Entry`) names
- * as the sole source of what deficit a protocol resolves, so anything that has to tell two
- * protocols apart reads it from here rather than being told the difference.
+ * The frontmatter `description` is read too and goes on the protocol's row.
+ * It is the text /route's contract (`Entry`) names as the sole source of what
+ * deficit a protocol resolves, so anything that has to tell two protocols
+ * apart reads it from here rather than being told the difference.
  */
 function readProtocol(skillFile) {
   let text;
@@ -182,18 +182,17 @@ function deriveProtocols(env = {}) {
 }
 
 /**
- * Command, deficit and resolution names only — the morphism's two ends, and
- * nothing between them. The table's job is to trigger, not to match —
- * matching happens inside /route, which resolves each candidate's full
- * description there — so the prose the names abbreviate stays out. The
- * resolution is on the row because a deficit reads more sharply against the
- * state it resolves into: the pair names the transition, the deficit alone
- * only its start.
+ * One row per protocol: its command, the deficit it resolves → the
+ * resolution it yields, then the description it declares, whole. A protocol
+ * without a resolution or a description keeps the row with what it has.
  */
 function renderTable(protocols) {
   if (!protocols || protocols.length === 0) return "";
   const rows = protocols
-    .map((p) => (p.resolution ? `/${p.command} ${p.deficit} → ${p.resolution}` : `/${p.command} ${p.deficit}`))
+    .map((p) => {
+      const pair = p.resolution ? `${p.deficit} → ${p.resolution}` : p.deficit;
+      return p.description ? `/${p.command} ${pair} — ${p.description}` : `/${p.command} ${pair}`;
+    })
     .join("\n");
   return `${TABLE_HEADER}\n${rows}`;
 }
