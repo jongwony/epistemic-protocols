@@ -197,6 +197,73 @@ function renderTable(protocols) {
   return `${TABLE_HEADER}\n${rows}`;
 }
 
+/** The judgments the routing frame carries, in the order the contract declares them. */
+const FRAME_JUDGMENTS = Object.freeze(["FitSupported", "Plain", "Allowed", "lead", "Raise", "Fresh"]);
+
+const FRAME_HEADER = "Routing — at the prompt, and wherever preparing a response or action shows a gap in the ground the work rests on, read the core protocols the session can invoke against the context, with these judgments and rules from the /route contract; nothing invokes /route on its own, and the judgment is yours, in this turn, in the main conversation. Where the table below lists them, each row carries the description that protocol declares.";
+
+/** Collapse a source span to one line, so the frame and its source compare as text. */
+function flatten(text) {
+  return String(text).replace(/\s+/g, " ").trim();
+}
+
+/**
+ * The doc comment directly above `axiom <name>` in a Lean block, or null.
+ * Only an axiom's own doc is taken: the span between the last `/--` before
+ * the declaration and its closing `-/`, with nothing but whitespace after it.
+ */
+function axiomDoc(text, name) {
+  const decl = new RegExp(`\\n\\s*axiom ${name}\\b`).exec(text);
+  if (!decl) return null;
+  const open = text.lastIndexOf("/--", decl.index);
+  const close = text.lastIndexOf("-/", decl.index);
+  if (open < 0 || close < open || text.slice(close + 2, decl.index).trim() !== "") return null;
+  return flatten(text.slice(open + 3, close));
+}
+
+/** The `## Rules` section of a SKILL.md, up to the next heading or the end. */
+function rulesSection(text) {
+  const start = text.search(/^## Rules[ \t]*$/m);
+  if (start < 0) return null;
+  const body = text.slice(start).replace(/^## Rules[ \t]*\r?\n/, "");
+  const next = body.search(/^#{1,2} /m);
+  const rules = (next < 0 ? body : body.slice(0, next)).trim();
+  return rules || null;
+}
+
+/**
+ * The routing judgments and rules, read from Route's own SKILL.md — the
+ * contract stays their single home and the frame carries them as written.
+ * Null where the file or any part of it cannot be read.
+ */
+function readFrame(root = pluginRoot()) {
+  let text;
+  try {
+    text = fs.readFileSync(path.join(root, "skills", "route", "SKILL.md"), "utf8");
+  } catch {
+    return null;
+  }
+  const judgments = FRAME_JUDGMENTS.map((name) => [name, axiomDoc(text, name)]);
+  if (judgments.some(([, doc]) => !doc)) return null;
+  const rules = rulesSection(text);
+  if (!rules) return null;
+  return { judgments, rules };
+}
+
+/**
+ * The SessionStart routing part: the frame — header, judgments, rules — and
+ * then the table. Each goes out without the other where only one can be
+ * had: a host whose install record yields no table still gets the frame,
+ * and a frame that cannot be read leaves the table alone.
+ */
+function renderRouting(protocols, frame) {
+  const table = renderTable(protocols);
+  if (!frame) return table;
+  const judgments = frame.judgments.map(([name, doc]) => `- \`${name}\` — ${doc}`).join("\n");
+  const head = `${FRAME_HEADER}\nJudgments:\n${judgments}\nRules:\n${frame.rules}`;
+  return table ? `${head}\n${table}` : head;
+}
+
 function parsePayload(raw) {
   try {
     const parsed = JSON.parse(String(raw ?? "").trim());
@@ -217,7 +284,14 @@ function isMain(moduleUrl) {
 }
 
 export {
+  FRAME_HEADER,
+  FRAME_JUDGMENTS,
   TABLE_HEADER,
+  axiomDoc,
+  flatten,
+  readFrame,
+  renderRouting,
+  rulesSection,
   configDir,
   deriveProtocols,
   identify,

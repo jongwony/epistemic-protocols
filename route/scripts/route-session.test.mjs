@@ -1,6 +1,6 @@
-// Tests for route-session.mjs — the SessionStart injection of the derived
-// deficit table with the premise index beneath it, on every source alike —
-// and for the derivation in route-protocols.mjs it carries.
+// Tests for route-session.mjs — the SessionStart injection of the routing
+// frame and the derived table, with the premise index as a second part, on
+// every source alike — and for the derivation in route-protocols.mjs it carries.
 // Run with: node --test
 // Repo precedent: anamnesis/scripts/hypomnesis-write.test.mjs (node:test + node:assert).
 
@@ -12,7 +12,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { PREMISE_HEADER, PREMISE_INDEX } from "./route-premise.mjs";
-import { TABLE_HEADER, deriveProtocols, renderTable, selectProtocol } from "./route-protocols.mjs";
+import { FRAME_HEADER, FRAME_JUDGMENTS, TABLE_HEADER, deriveProtocols, flatten, readFrame, renderRouting, renderTable, selectProtocol } from "./route-protocols.mjs";
 import { PARTS, buildContext, render } from "./route-session.mjs";
 
 const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), "route-session.mjs");
@@ -111,9 +111,7 @@ function cleanup(fixture) {
   fs.rmSync(fixture.root, { recursive: true, force: true });
 }
 
-test("the table header carries the directive's referent", () => {
-  // The per-prompt directive says "a loaded core epistemic protocol"; the
-  // header must use the same words so the two injections read as one catalog.
+test("the table header names what its rows are", () => {
   assert.match(TABLE_HEADER, /^Loaded core epistemic protocols/);
 });
 
@@ -128,18 +126,58 @@ test("a row carries both ends of the morphism and the declared description, and 
   );
 });
 
-test("the repo's own protocols render a table that fits one injection", () => {
-  // The host caps each additionalContext string at 10,000 characters; the
-  // table goes out as its own SessionStart entry, so it alone must fit.
-  const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-  const protocols = fs.readdirSync(repo, { withFileTypes: true })
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+const ROUTE_SKILL = path.join(REPO, "route", "skills", "route", "SKILL.md");
+
+function repoProtocols() {
+  return fs.readdirSync(REPO, { withFileTypes: true })
     .filter((e) => e.isDirectory() && e.name !== "route")
-    .map((e) => selectProtocol(path.join(repo, e.name)))
+    .map((e) => selectProtocol(path.join(REPO, e.name)))
     .filter(Boolean);
+}
+
+test("the repo's own routing part — frame and table — fits one injection", () => {
+  // The host caps each additionalContext string at 10,000 characters; the
+  // routing part goes out as its own SessionStart entry, so it alone must fit.
+  const protocols = repoProtocols();
   assert.ok(protocols.length > 0);
   assert.ok(protocols.every((p) => p.description), "every core protocol declares a description");
-  const table = renderTable(protocols);
-  assert.ok(table.length <= 10000, `the table is ${table.length} characters`);
+  const frame = readFrame(path.join(REPO, "route"));
+  assert.ok(frame, "the frame reads from route's own SKILL.md");
+  const routing = renderRouting(protocols, frame);
+  assert.ok(routing.length <= 10000, `the routing part is ${routing.length} characters`);
+});
+
+test("the frame carries the contract's judgments and Rules as written", () => {
+  // Propagation: every judgment the frame carries is the doc comment above
+  // that axiom in the SKILL.md, and its rules are the Rules section, so the
+  // contract stays their only home.
+  const source = fs.readFileSync(ROUTE_SKILL, "utf8");
+  const frame = readFrame(path.join(REPO, "route"));
+  assert.deepEqual(frame.judgments.map(([name]) => name), [...FRAME_JUDGMENTS]);
+  for (const [name, doc] of frame.judgments) {
+    const at = source.indexOf(`\naxiom ${name} `);
+    assert.ok(at > 0, `axiom ${name} is declared`);
+    const span = source.slice(source.lastIndexOf("/--", at) + 3, source.lastIndexOf("-/", at));
+    assert.equal(doc, flatten(span), `${name} is carried as its source span`);
+  }
+  assert.equal(frame.rules, source.slice(source.indexOf("## Rules\n") + "## Rules\n".length).trim());
+  const routing = renderRouting(repoProtocols(), frame);
+  assert.ok(routing.startsWith(FRAME_HEADER));
+  for (const [, doc] of frame.judgments) assert.ok(routing.includes(doc));
+  assert.ok(routing.includes(frame.rules));
+  assert.ok(routing.indexOf(frame.rules) < routing.indexOf(TABLE_HEADER), "the table follows the frame");
+});
+
+test("frame and table each go out without the other", () => {
+  const rows = [{ command: "x", deficit: "A", resolution: "B", description: "Does x." }];
+  // A frame that cannot be read leaves the table alone.
+  assert.equal(renderRouting(rows, null), renderTable(rows));
+  assert.equal(readFrame("/nonexistent"), null);
+  // A host whose install record yields no table still gets the frame.
+  const frame = { judgments: [["FitSupported", "judged."]], rules: "1. rule" };
+  assert.equal(renderRouting([], frame), `${FRAME_HEADER}\nJudgments:\n- \`FitSupported\` — judged.\nRules:\n1. rule`);
+  assert.equal(renderRouting([], null), "");
 });
 
 // ---------------------------------------------------------------------------
@@ -150,8 +188,7 @@ test("derives one row per installed single-skill protocol, route excluded", () =
   const fixture = makeFixture(SUITE);
   try {
     const rows = deriveProtocols(fixture.env);
-    // The declared description rides along; the table and the advisory
-    // channel both read it from here.
+    // The declared description rides along on each row.
     assert.deepEqual(rows, [
       { command: "recollect", deficit: "RecallAmbiguous", resolution: "RecalledContext", description: "Does a thing." },
       { command: "bound", deficit: "BoundaryUndefined", resolution: "DefinedBoundary", description: "Does a thing." },
@@ -327,10 +364,10 @@ test("each table row is one line: command, deficit → resolution, then the decl
   }
 });
 
-test("each part goes out alone: the table without the index, the index without the table", () => {
+test("each part goes out alone: the routing part without the index, the index without it", () => {
   const fixture = makeFixture({ ...SUITE, premise: true });
   try {
-    const table = buildContext(fixture.env, "table");
+    const table = buildContext(fixture.env, "routing");
     const premise = buildContext(fixture.env, "premise");
     assert.ok(table.startsWith(TABLE_HEADER));
     assert.doesNotMatch(table, new RegExp(PREMISE_HEADER));
@@ -392,9 +429,9 @@ test("the premise index goes out even where no protocol resolved", () => {
   }
 });
 
-test("the injection carries no directive line — the table and index only", () => {
-  // The firing condition lives in the per-prompt directive at every turn;
-  // a session-start line for it went out once and aged out of the decision.
+test("without a readable frame the injection is the table and index only", () => {
+  // The fixture plugin root carries no skills/route/SKILL.md, so no frame is
+  // read and nothing tells the reader to invoke /route.
   const fixture = makeFixture(SUITE);
   try {
     const context = buildContext(fixture.env);
