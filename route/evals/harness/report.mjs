@@ -5,8 +5,8 @@
  * summed across cases and never a difference netted between arms, because a
  * gain on one case and a loss on another cancel in a net and the loss is what
  * a reader needs to see. The control case (`control-reading-relay`) is
- * reported in its own table, apart from the cases it guards, for the reason
- * the advisory fixtures count their spoiled cell apart.
+ * reported in its own table, apart from the cases it guards, since netting a
+ * spoiled case against a rescued one hides the spoil.
  *
  * The verdict that counts is the person's where one is recorded and the
  * judge's otherwise; a judge verdict nobody has adjudicated is marked as such,

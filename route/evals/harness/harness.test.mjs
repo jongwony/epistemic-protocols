@@ -13,7 +13,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-import { ARMS, checkVariants, evaluatorKeyEnv, patchSource, scrubbedEnv, withoutSessionStart } from "./arms.mjs";
+import { ARMS, checkVariants, patchSource, scrubbedEnv, withoutSessionStart } from "./arms.mjs";
 import { DEPENDENT_TOOLS, describeAction, dirtyAfter, firstAction, parseStream } from "./first-action.mjs";
 import { finalVerdict, judgePrompt, parseVerdict } from "./judge.mjs";
 import { estimateTokens, syntheticPrefix } from "./prefix.mjs";
@@ -213,7 +213,6 @@ test("the seed check passes only when every seeded end was read and nothing was 
   assert.deepEqual(ok.hostAttachments, ["credential_org"]);
   assert.equal(seedCheckVerdict({ variant: "short", tokens, reply, audit: { ...audit, sessionStartInjected: 1 } }).pass, false);
   assert.equal(seedCheckVerdict({ variant: "short", tokens, reply: reply.replace(tokens.head, "NONE"), audit }).pass, false);
-  assert.equal(seedCheckVerdict({ variant: "short", tokens, reply, audit: { ...audit, promptContexts: [] } }).pass, false);
   assert.equal(seedCheckVerdict({ variant: "head-only", tokens, reply: `HEAD=${tokens.head}\nFIRST=NONE\nLAST=NONE`, audit }).pass, true);
   assert.deepEqual(readAnswer("**HEAD=abc**\n FIRST = `x`.\n"), { HEAD: "abc", FIRST: "x" });
 });
@@ -300,7 +299,7 @@ test("every arm builds from this checkout and renders what it is defined to", ()
     assert.ok(prepared.checks.length > 0);
     for (const p of Object.values(prepared.plugins)) {
       const hooks = JSON.parse(fs.readFileSync(path.join(p.routeDir, "hooks", "hooks.json"), "utf8"));
-      assert.ok(!hooks.hooks.SessionStart && hooks.hooks.UserPromptSubmit && hooks.hooks.PreToolUse && hooks.hooks.SubagentStart);
+      assert.ok(!hooks.hooks.SessionStart && !hooks.hooks.UserPromptSubmit && hooks.hooks.PreToolUse && hooks.hooks.SubagentStart);
       assert.ok(!fs.existsSync(path.join(p.routeDir, "evals")));
       assert.ok(!/none|paths|shipped|clause/.test(path.basename(p.root)), "no arm name in a visible path");
     }
@@ -333,10 +332,8 @@ test("nothing that spends runs without a model and a ceiling", () => {
   assert.throws(() => options(["run", "--lengths", "medium"]), /unknown length/);
 });
 
-test("every cell runs without the evaluator key, and denies delegation at the call", () => {
-  const keyEnv = evaluatorKeyEnv(path.join(HERE, "..", "..", ".."));
-  assert.ok(keyEnv, "the shipped evaluator binding names its variable");
-  const env = scrubbedEnv({ TYPESAFE_API_KEY: "k", [keyEnv]: "k", CLAUDE_PLUGIN_ROOT: "/elsewhere", PATH: "/bin" }, [keyEnv]);
+test("every cell resolves its own copy, and denies delegation at the call", () => {
+  const env = scrubbedEnv({ EXTRA: "k", CLAUDE_PLUGIN_ROOT: "/elsewhere", PATH: "/bin" }, ["EXTRA"]);
   assert.deepEqual(env, { PATH: "/bin" });
   const [entry] = DENY_DELEGATION.hooks.PreToolUse;
   const matcher = new RegExp(entry.matcher);

@@ -37,9 +37,8 @@
  * checks the arms, renders every cell, and prints the matrix with an input
  * estimate per cell.
  *
- * Every cell's environment drops TYPESAFE_API_KEY (and the variable the
- * shipped evaluator binding names), so route's advisory line stays silent in
- * every arm alike. Results and work trees are not committed: results land in
+ * Every cell's environment drops an inherited CLAUDE_PLUGIN_ROOT, so each
+ * arm's scripts resolve their own copy. Results and work trees are not committed: results land in
  * `route/evals/premise-results/`, work trees under the system temp dir.
  *
  * Zero external dependencies: Node.js standard library only.
@@ -54,7 +53,7 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
-import { ARMS, buildArmPlugins, checkVariants, clauseBlock, evaluatorKeyEnv, renderPlugin, scrubbedEnv } from "./harness/arms.mjs";
+import { ARMS, buildArmPlugins, checkVariants, clauseBlock, renderPlugin, scrubbedEnv } from "./harness/arms.mjs";
 import { dirtyAfter, firstAction, parseStream } from "./harness/first-action.mjs";
 import { judgePrompt, parseVerdict } from "./harness/judge.mjs";
 import { estimateTokens, syntheticPrefix } from "./harness/prefix.mjs";
@@ -219,7 +218,7 @@ function prepareArms({ arms, protocols, workRoot, salt }) {
   const dirs = protocolDirs(protocols);
   const patches = [...new Set([...arms, "shipped"])];
   const plugins = buildArmPlugins({ repo: REPO, workRoot, arms: patches, protocolDirs: dirs, marketplace: marketplaceName(), salt });
-  const env = scrubbedEnv(process.env, [evaluatorKeyEnv(REPO)].filter(Boolean));
+  const env = scrubbedEnv(process.env);
   const rendered = Object.fromEntries(Object.entries(plugins).map(([patch, p]) => [patch, renderPlugin(p, env)]));
   const checks = checkVariants({ arms, rendered, plugins, expectTable: dirs.length > 0 });
   return { plugins, rendered, checks, protocolDirs: dirs };
@@ -315,7 +314,7 @@ function launch({ o, cell, cwd, configDir, settings, protocolDirs: dirs, remaini
     "--resume", sessionId,
     cell.prompt,
   ];
-  const env = { ...scrubbedEnv(process.env, [evaluatorKeyEnv(REPO)].filter(Boolean)), CLAUDE_CONFIG_DIR: configDir };
+  const env = { ...scrubbedEnv(process.env), CLAUDE_CONFIG_DIR: configDir };
   const r = spawnSync("claude", args, { cwd, env, encoding: "utf8", maxBuffer: 256 * 1024 * 1024, timeout: o.timeoutSeconds * 1000 });
   const after = readTranscript(transcriptPath(configDir, cwd, sessionId));
   return { r, sessionId, seed, after, audit: auditResume(after, seed) };
@@ -428,7 +427,7 @@ function seedCheck(o) {
   if (o.dryRun) {
     console.log(`seed-check cells (shipped arm, max turns 2), long prefix ~${o.longTokens} tokens:`);
     for (const c of cells) console.log(`  ${c.key.padEnd(22)} turns ${String(c.turns.length).padStart(3)}  est. input tokens ${c.estTokens}`);
-    console.log(`passes when: ${["head context read", "first seeded turn read", "last seeded turn read", "seeded entries intact after resume", "no session-start context injected at resume", "per-prompt route directive delivered"].join("; ")}`);
+    console.log(`passes when: ${["head context read", "first seeded turn read", "last seeded turn read", "seeded entries intact after resume", "no session-start context injected at resume"].join("; ")}`);
     fs.rmSync(workRoot, { recursive: true, force: true });
     return;
   }
@@ -497,7 +496,7 @@ function judge(o) {
       const remaining = o.maxCostUsd - spent;
       if (remaining < 0.01) { console.log(`stopping: $${spent.toFixed(4)} spent of $${o.maxCostUsd}`); break; }
       const prompt = judgePrompt(cases.get(r.case), r, r.redactions);
-      const env = { ...scrubbedEnv(process.env, [evaluatorKeyEnv(REPO)].filter(Boolean)), CLAUDE_CONFIG_DIR: path.join(scratch, "h") };
+      const env = { ...scrubbedEnv(process.env), CLAUDE_CONFIG_DIR: path.join(scratch, "h") };
       const out = spawnSync("claude", ["-p", "--output-format", "json", "--model", o.model, "--max-turns", "1", "--tools", "", "--no-session-persistence", "--max-budget-usd", remaining.toFixed(2), prompt],
         { cwd: scratch, env, encoding: "utf8", maxBuffer: 16 * 1024 * 1024, timeout: o.timeoutSeconds * 1000 });
       let parsed = null;
