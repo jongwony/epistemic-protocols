@@ -198,7 +198,7 @@ function renderTable(protocols) {
 }
 
 /** The judgments the routing frame carries, in the order the contract declares them. */
-const FRAME_JUDGMENTS = Object.freeze(["FitSupported", "Plain", "Allowed", "lead", "Raise", "Fresh"]);
+const FRAME_JUDGMENTS = Object.freeze(["FitSupported", "route"]);
 
 const FRAME_HEADER = "Routing — at the prompt, and wherever preparing a response or action shows a gap in the ground the work rests on, read the core protocols the session can invoke against the context, with these judgments and rules from the /route contract; nothing invokes /route on its own, and the judgment is yours, in this turn, in the main conversation. Where the table below lists them, each row carries the description that protocol declares.";
 
