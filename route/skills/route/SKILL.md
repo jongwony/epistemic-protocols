@@ -147,7 +147,12 @@ axiom declaredEnd : Entry → Option String
     declared end names what the person must then be able to recognize or settle about it. The fit
     is judged by what the resolution leaves the person: that you could establish the ground yourself
     does not defeat it, and having to read something does not by itself leave ground
-    unestablished. No protocol present in the context serves it: a protocol still running in the
+    unestablished. What a request leaves unwritten is evidence of a deficit, not of its absence: the
+    shorter the request against the work it opens, the more of what that work turns on is left for a
+    protocol to surface, and only where the prompt or the accumulated context already carries it is
+    none left. That the result would look alike with or without the protocol does not defeat the
+    fit either; the difference is whether the person can recognize what was settled and from where.
+    No protocol present in the context serves it: a protocol still running in the
     context serves the deficit instance it was brought in for and what its own contract takes up
     from the turns since, and not every deficit that comes up while it runs; one a next move the
     person declared is bringing in serves the instance that move names; an invocation that has
