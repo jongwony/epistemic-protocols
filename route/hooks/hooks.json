@@ -1,5 +1,5 @@
 {
-  "description": "SessionStart injects the routing part once per context epoch (startup, resume, clear, compact): the judgments and rules of Route's own contract, read from skills/route/SKILL.md and carried as written, then the derived table — each protocol's deficit → resolution and the description it declares — so the routing judgment is made in the turn itself, at the prompt and mid-turn, with nothing invoking /route on its own; the premise index with every path absolute goes out as a second entry, each its own injection since the host caps each one's size — scripts/route-session.mjs. SubagentStart puts the same premise index into a subagent's own context before its first prompt, except a fork, which inherits it, and the routing part does not go — scripts/route-subagent.mjs. PreToolUse delivers a premise entry again at the tool call the matcher decides is its moment — scripts/route-tool.mjs. Only `description` and `hooks` go in this file: Codex rejects any other top-level key and then registers none of these hooks.",
+  "description": "SessionStart injects the routing part once per context epoch (startup, resume, clear, compact): the judgments and rules of Route's own contract, read from skills/route/SKILL.md and carried as written, then the derived table — each protocol's deficit → resolution and the description it declares — so the routing judgment is made in the turn itself, at the prompt and mid-turn, with nothing invoking /route on its own; the premise index with every path absolute goes out as a second entry, each its own injection since the host caps each one's size — scripts/route-session.mjs. UserPromptSubmit adds one line beside each prompt that points at those judgments for that prompt — a cue that restates none of them and asks for no /route call — scripts/route-prompt.mjs. SubagentStart puts the same premise index into a subagent's own context before its first prompt, except a fork, which inherits it, and the routing part does not go — scripts/route-subagent.mjs. PreToolUse delivers a premise entry again at the tool call the matcher decides is its moment — scripts/route-tool.mjs. Only `description` and `hooks` go in this file: Codex rejects any other top-level key and then registers none of these hooks.",
   "hooks": {
     "SessionStart": [
       {
@@ -15,6 +15,16 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/route-session.mjs\" premise"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/route-prompt.mjs\""
           }
         ]
       }

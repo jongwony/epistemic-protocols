@@ -299,7 +299,7 @@ test("every arm builds from this checkout and renders what it is defined to", ()
     assert.ok(prepared.checks.length > 0);
     for (const p of Object.values(prepared.plugins)) {
       const hooks = JSON.parse(fs.readFileSync(path.join(p.routeDir, "hooks", "hooks.json"), "utf8"));
-      assert.ok(!hooks.hooks.SessionStart && !hooks.hooks.UserPromptSubmit && hooks.hooks.PreToolUse && hooks.hooks.SubagentStart);
+      assert.ok(!hooks.hooks.SessionStart && hooks.hooks.UserPromptSubmit && hooks.hooks.PreToolUse && hooks.hooks.SubagentStart);
       assert.ok(!fs.existsSync(path.join(p.routeDir, "evals")));
       assert.ok(!/none|paths|shipped|clause/.test(path.basename(p.root)), "no arm name in a visible path");
     }
