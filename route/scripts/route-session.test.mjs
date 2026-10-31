@@ -1,6 +1,6 @@
-// Tests for route-session.mjs — the SessionStart injection of the derived
-// deficit table with the premise index beneath it, on every source alike —
-// and for the derivation in route-protocols.mjs it carries.
+// Tests for route-session.mjs — the SessionStart injection of the purpose
+// paragraph and the derived table, with the premise index as a second part, on
+// every source alike — and for the derivation in route-protocols.mjs it carries.
 // Run with: node --test
 // Repo precedent: anamnesis/scripts/hypomnesis-write.test.mjs (node:test + node:assert).
 
@@ -12,8 +12,8 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { PREMISE_HEADER, PREMISE_INDEX } from "./route-premise.mjs";
-import { TABLE_HEADER, deriveProtocols, renderTable } from "./route-protocols.mjs";
-import { buildContext, render } from "./route-session.mjs";
+import { TABLE_HEADER, deriveProtocols, readPurpose, renderRouting, renderTable, selectProtocol } from "./route-protocols.mjs";
+import { PARTS, buildContext, render } from "./route-session.mjs";
 
 const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), "route-session.mjs");
 
@@ -111,17 +111,69 @@ function cleanup(fixture) {
   fs.rmSync(fixture.root, { recursive: true, force: true });
 }
 
-test("the table header carries the directive's referent", () => {
-  // The per-prompt directive says "a loaded core epistemic protocol"; the
-  // header must use the same words so the two injections read as one catalog.
+test("the table header names what its rows are", () => {
   assert.match(TABLE_HEADER, /^Loaded core epistemic protocols/);
 });
 
-test("a row carries both ends of the morphism, and survives a missing resolution", () => {
+test("a row carries both ends of the morphism and the declared description, and survives either missing", () => {
   assert.equal(
-    renderTable([{ command: "x", deficit: "A", resolution: "B" }, { command: "y", deficit: "C", resolution: null }]),
-    `${TABLE_HEADER}\n/x A → B\n/y C`,
+    renderTable([
+      { command: "x", deficit: "A", resolution: "B", description: "Does x: then y." },
+      { command: "y", deficit: "C", resolution: null, description: "Does y." },
+      { command: "z", deficit: "D", resolution: "E", description: null },
+    ]),
+    `${TABLE_HEADER}\n/x A → B — Does x: then y.\n/y C — Does y.\n/z D → E`,
   );
+});
+
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+const ROUTE_SKILL = path.join(REPO, "route", "skills", "route", "SKILL.md");
+
+function repoProtocols() {
+  return fs.readdirSync(REPO, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && e.name !== "route")
+    .map((e) => selectProtocol(path.join(REPO, e.name)))
+    .filter(Boolean);
+}
+
+test("the repo's own routing part — purpose and table — fits one injection", () => {
+  // The host caps each additionalContext string at 10,000 characters; the
+  // routing part goes out as its own SessionStart entry, so it alone must fit.
+  const protocols = repoProtocols();
+  assert.ok(protocols.length > 0);
+  assert.ok(protocols.every((p) => p.description), "every core protocol declares a description");
+  const purpose = readPurpose(path.join(REPO, "route"));
+  assert.ok(purpose, "the purpose reads from route's own SKILL.md");
+  const routing = renderRouting(protocols, purpose);
+  assert.ok(routing.length <= 10000, `the routing part is ${routing.length} characters`);
+});
+
+test("the routing part carries the Purpose section as written, then the table", () => {
+  // Propagation: the purpose is the SKILL.md `## Purpose` section verbatim,
+  // so that section stays its only home.
+  const source = fs.readFileSync(ROUTE_SKILL, "utf8");
+  const purpose = readPurpose(path.join(REPO, "route"));
+  const at = source.indexOf("\n## Purpose\n");
+  assert.ok(at > 0, "the SKILL.md has a Purpose section");
+  const rest = source.slice(at + "\n## Purpose\n".length);
+  const next = rest.search(/^#{1,2} /m);
+  assert.equal(purpose, (next < 0 ? rest : rest.slice(0, next)).trim());
+  assert.ok(purpose.startsWith("**Why these protocols exist.**"));
+  const routing = renderRouting(repoProtocols(), purpose);
+  assert.ok(routing.startsWith(purpose));
+  assert.ok(routing.indexOf(purpose) < routing.indexOf(TABLE_HEADER), "the table follows the purpose");
+  // The judgment text of the /route contract is not injected.
+  assert.ok(!routing.includes("**Your judgment**"));
+});
+
+test("purpose and table each go out without the other", () => {
+  const rows = [{ command: "x", deficit: "A", resolution: "B", description: "Does x." }];
+  // A purpose that cannot be read leaves the table alone.
+  assert.equal(renderRouting(rows, null), renderTable(rows));
+  assert.equal(readPurpose("/nonexistent"), null);
+  // A host whose install record yields no table still gets the purpose.
+  assert.equal(renderRouting([], "Why."), "Why.");
+  assert.equal(renderRouting([], null), "");
 });
 
 // ---------------------------------------------------------------------------
@@ -132,9 +184,7 @@ test("derives one row per installed single-skill protocol, route excluded", () =
   const fixture = makeFixture(SUITE);
   try {
     const rows = deriveProtocols(fixture.env);
-    // The declared description rides along and stays off the table: the
-    // table's job is to trigger, and matching reads the description where
-    // matching happens. The advisory channel reads it from here too.
+    // The declared description rides along on each row.
     assert.deepEqual(rows, [
       { command: "recollect", deficit: "RecallAmbiguous", resolution: "RecalledContext", description: "Does a thing." },
       { command: "bound", deficit: "BoundaryUndefined", resolution: "DefinedBoundary", description: "Does a thing." },
@@ -296,20 +346,48 @@ test("no derived protocol and no index means nothing goes out", () => {
 // Emitted context
 // ---------------------------------------------------------------------------
 
-test("the table stays compressed — command, deficit and resolution names only", () => {
+test("each table row is one line: command, deficit → resolution, then the declared description whole", () => {
   const fixture = makeFixture(SUITE);
   try {
     const context = buildContext(fixture.env);
     assert.ok(context.startsWith(TABLE_HEADER));
-    assert.match(context, /^\/induce AbstractionInProcess → CrystallizedAbstraction$/m);
-    // No prose: every table row is exactly "/command Deficit → Resolution".
+    assert.match(context, /^\/induce AbstractionInProcess → CrystallizedAbstraction — Does a thing\.$/m);
     const rows = context.split("\n").slice(1);
     assert.equal(rows.length, 3);
-    for (const row of rows) assert.match(row, /^\/[a-z-]+ [A-Za-z]+ → [A-Za-z]+$/);
-    assert.doesNotMatch(context, /Does a thing/);
+    for (const row of rows) assert.match(row, /^\/[a-z-]+ [A-Za-z]+ → [A-Za-z]+ — Does a thing\.$/);
   } finally {
     cleanup(fixture);
   }
+});
+
+test("each part goes out alone: the routing part without the index, the index without it", () => {
+  const fixture = makeFixture({ ...SUITE, premise: true });
+  try {
+    const table = buildContext(fixture.env, "routing");
+    const premise = buildContext(fixture.env, "premise");
+    assert.ok(table.startsWith(TABLE_HEADER));
+    assert.doesNotMatch(table, new RegExp(PREMISE_HEADER));
+    assert.ok(premise.startsWith(PREMISE_HEADER));
+    assert.doesNotMatch(premise, new RegExp(TABLE_HEADER));
+    // With no part named, both go out joined, table first.
+    assert.equal(buildContext(fixture.env), `${table}\n${premise}`);
+  } finally {
+    cleanup(fixture);
+  }
+});
+
+test("hooks.json registers each part as its own SessionStart entry", () => {
+  // Separate entries give each part its own size cap, and one part's
+  // failure cannot suppress the other.
+  const hooks = JSON.parse(fs.readFileSync(path.join(path.dirname(SCRIPT), "..", "hooks", "hooks.json"), "utf8"));
+  const commands = hooks.hooks.SessionStart.map((entry) => {
+    assert.equal(entry.hooks.length, 1);
+    return entry.hooks[0].command;
+  });
+  assert.deepEqual(
+    commands,
+    PARTS.map((part) => `node "\${CLAUDE_PLUGIN_ROOT}/scripts/route-session.mjs" ${part}`),
+  );
 });
 
 test("the premise index follows the table on every source, its paths absolute", () => {
@@ -347,9 +425,9 @@ test("the premise index goes out even where no protocol resolved", () => {
   }
 });
 
-test("the injection carries no directive line — the table and index only", () => {
-  // The firing condition lives in the per-prompt directive at every turn;
-  // a session-start line for it went out once and aged out of the decision.
+test("without a readable purpose the injection is the table and index only", () => {
+  // The fixture plugin root carries no skills/route/SKILL.md, so no purpose is
+  // read and nothing tells the reader to invoke /route.
   const fixture = makeFixture(SUITE);
   try {
     const context = buildContext(fixture.env);
@@ -422,7 +500,7 @@ test("hook process exits 0 and derives from the fixture through the environment"
     const out = JSON.parse(result.stdout);
     assert.ok(out.hookSpecificOutput.additionalContext.startsWith(TABLE_HEADER));
     assert.doesNotMatch(out.hookSpecificOutput.additionalContext, /^\[route\]/m);
-    assert.match(out.hookSpecificOutput.additionalContext, /^\/bound BoundaryUndefined → DefinedBoundary$/m);
+    assert.match(out.hookSpecificOutput.additionalContext, /^\/bound BoundaryUndefined → DefinedBoundary — Does a thing\.$/m);
   } finally {
     cleanup(fixture);
   }

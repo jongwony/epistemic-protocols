@@ -300,11 +300,12 @@ test("every entry's lead is whole sentences its document says verbatim", () => {
   }
 });
 
-test("the shipped index stays inside one injection with the table beside it", () => {
-  // Claude Code caps each additionalContext string at 10,000 characters and
-  // the deficit table rides the same string at session start; past the cap
-  // the host substitutes a file path and a preview. 8,500 leaves the table
-  // its room. The root here is longer than an install path usually is.
+test("the shipped index stays inside one injection", () => {
+  // Claude Code caps each additionalContext string at 10,000 characters;
+  // past the cap the host substitutes a file path and a preview. The index
+  // goes out as its own SessionStart entry, and 8,500 keeps it clear of the
+  // cap with room to grow. The root here is longer than an install path
+  // usually is.
   const premise = path.join(REPO, "premise");
   const host = fs.mkdtempSync(path.join(os.tmpdir(), "route-premise-budget-"));
   const root = path.join(host, "x".repeat(Math.max(1, 100 - host.length)), "premise");

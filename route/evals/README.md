@@ -1,90 +1,37 @@
-# Advisory fixtures
+# Route evals
 
-What the advisory channel (`scripts/route-evaluator.mjs`) is measured against, and what the measurement is worth. `cases/premise.json` is a separate set, for the premise index the hooks deliver; [its section](#premise-application-cases) is at the end.
+Two sets live here. `cases/cases.json` holds routing cases — contexts with the routing outcome a person judged correct — and `cases/premise.json` holds the premise application cases the harness below runs; [their section](#premise-application-cases) is at the end.
 
-## The numbers mean nothing until someone adjudicates the labels
+## Routing cases
 
-Every fixture in `cases/` carries an `expected` field: the Route outcome a person judged correct for that context. **Those labels ship unadjudicated.** They were written alongside the harness, by the same hand, from the cases `route/README.md` describes — which makes them a shape to fill, not a ground truth. A run against them tells you the harness works. It tells you nothing about whether the advisory helps until someone who is not the author has gone through each case and either confirmed the label or changed it.
-
-Set `"adjudicated": true` on a case once that has happened. `route-evaluator-eval.mjs` reports adjudicated and unadjudicated cases separately and refuses to summarise across them, because a rate computed over labels nobody checked is a number with a confidence interval nobody can state.
-
-## Why spoiled cases are counted apart
-
-Netting a gain against a loss hides the loss, so the harness scores in pairs — the same case with the advisory and without — and reports the spoiled cell on its own, as a count, as a fraction of baseline-correct cases, and broken out by Route outcome.
-
-**Read `route-evaluator-eval.mjs`'s header before reading any cell.** It states what the baseline arm actually is and therefore what `right→wrong` can and cannot mean here; that boundary is narrower than the four-cell shape suggests, and the header is the one place it is stated.
-
-## What a fixture is
+Each case in `cases/cases.json` is a context and the routing outcome it should reach under the session-start frame: the judgments and Rules of `skills/route/SKILL.md` and the protocol table the `SessionStart` hook injects.
 
 ```json
 {
-  "id": "several-fit-inquire-contextualize",
-  "outcome": "several",
-  "prompt": "…the text the UserPromptSubmit hook would receive…",
+  "id": "singleton-inquire-status-quo",
+  "outcome": "singleton",
+  "prompt": "…the user's turn the routing judgment is made at…",
   "conversation": [
-    { "role": "user", "text": "…what the session accumulated before that prompt…" },
+    { "role": "user", "text": "…what the session accumulated before that turn…" },
     { "role": "assistant", "text": "…and the reply to it…" }
   ],
-  "expected": ["contextualize", "inquire"],
+  "expected": ["inquire"],
   "adjudicated": false,
   "note": "why this is the right answer, in the adjudicator's words"
 }
 ```
 
-`outcome` is one of `silence`, `singleton`, `several`, `monitor`.
+`outcome` is one of `silence`, `singleton`, `several`, `monitor`; `conversation` is optional.
 
-`conversation` is optional and is what the session accumulated before the prompt — the shape the channel sends when it is armed. A case that omits it is scored on the prompt alone, which is a narrower state than the channel ever sends. The harness writes these turns to a transcript and offers it **by path**, so the shipped walk assembles the state: the budget derived from what the question and the prompt leave under the endpoint ceiling, the newest-first fill, the harness wrappers stripped. Handing the turns to `advise` as an array instead would skip every one of those, and a run that skipped them would be scoring a state the channel never sends.
+**A label counts only once someone other than its author has adjudicated it.** The labels were written by the hand that wrote the cases, which makes them a shape to fill, not a ground truth. Set `"adjudicated": true` on a case once a second reader has confirmed or changed its label, and keep adjudicated and unadjudicated cases apart in any rate, since a rate over labels nobody checked has no interval anyone can state.
 
-A recording carries a digest of the turns it was asked with, so adding or changing a `conversation` makes the recording stale rather than silently regrading an old answer on a new question. `expected` is the protocol names a correct advisory would carry — `[]` for `silence`. `monitor` cases are the ones where a gate holds the user's judgment, and they are here to be *measured*, not to be routed: whether a gate still holds is a reading of that protocol's contract against what the user has said since, which is not something the evaluator is asked or able to answer. A `monitor` case is scored on whether the advisory stays out of the way.
+**Measure the behaviour, not the call.** What a run reads off a case is whether the needed epistemic action happened — the protocol reached before the work that rests on the ground, the reading shown as the agent's, a value only the user holds stated rather than defaulted, no protocol brought in where nothing was unestablished — never whether a particular skill was called. Count spoiled cases apart from rescued ones, since netting a gain against a loss hides the loss.
 
-The `installed-not-loaded` cases exist because the hook reads installed-and-enabled plugins from disk while Route's candidates come from what the harness loaded. They check that a name for an unloadable protocol is a degradation the reader's own check absorbs, not a wrong outcome.
-
-## Running it
-
-```bash
-# Replay the recorded answers — no network, no key, deterministic.
-node route/scripts/route-evaluator-eval.mjs
-
-# Call the evaluator live and record what it says, then score.
-TYPESAFE_API_KEY=... node route/scripts/route-evaluator-eval.mjs --live
-```
-
-**A live run reads the same variable that arms the advisory channel, so running it is the same consent.** This project counts holding a System One key in that variable, with the plugin enabled, as consent for the channel to send conversations, and the harness is not carved out of that.
-
-What separates a scoring run from a standing channel is process scope. The invocation above assigns the variable for that one command, so it does not reach sessions already running, nor sessions started from a shell that never exported it. `export TYPESAFE_API_KEY=…` instead and every session launched from that shell is armed for as long as it lives. Scoring with the variable unset is not an option — the run refuses without a key.
-
-`--live` writes each answer into `recorded/` keyed by case id, model and the criteria it was asked with. A replay whose recorded model differs from the configured one is reported rather than silently scored: the configured name may be an alias, and a fixture graded under one version and replayed under another is measuring two things. Recordings are not committed: each carries the model version that answered and the moment it answered, so it belongs to whoever ran it rather than to the checkout.
-
-## The mapping smoke asks something smaller, and can answer it
-
-`cases/smoke.json` and `scripts/route-evaluator-smoke.mjs` are a separate set with a separate claim. The eval above asks whether the advisory **helps**, which needs a label saying what a correct advisory would carry — a judgement, and the shipped ones are unadjudicated. The smoke asks only whether each deficit in the domain reaches its own resolution: one context per installed protocol, built to show that protocol's deficit, put through the live channel to see whether that protocol's name comes back.
-
-"This context shows deficit X" is true by the construction of the context, and each case's `note` states the construction. Nothing there claims X is the *right* routing — so a miss is a reach failure, not a verdict on the advisory.
-
-- The verdict is **membership**, not set equality: the protocol's name is among the names carried. A second name beside it is the eval's question, not this one's.
-- The domain is what `deriveProtocols()` returns — installed and enabled, read from disk, compared by identity. A derived protocol with no case and a case naming no derived protocol both fail the run, and nothing counts protocols.
-- One case is a settled-ground control expecting no name. Without it a run cannot tell reaching from the channel lighting up on everything.
-- A skip fails the run: a protocol nothing was observed for has not been shown to reach.
-
-```bash
-node route/scripts/route-evaluator-smoke.mjs            # replay recorded answers
-TYPESAFE_API_KEY=... node route/scripts/route-evaluator-smoke.mjs --live
-```
-
-**From a git worktree, pin `CLAUDE_PLUGIN_ROOT` at the installed plugin.** `deriveProtocols()` identifies this plugin's marketplace by the installed path and, failing that, by the name of the directory above it — which in a worktree is the worktree's name. Unpinned there, the domain comes back empty; the run refuses rather than reporting zero of zero reached, but the refusal is about the checkout, not about what is installed. The path to pin, and the commit that install is actually carrying:
-
-```bash
-node -e 'const j=require(process.env.HOME+"/.claude/plugins/installed_plugins.json");
-console.log(j.plugins["route@epistemic-protocols"][0])'
-```
-
-A merge does not update an install, and a session already running does not pick up one that has been updated. Both are worth checking before reading a run as an observation of current code.
-
-A live smoke reads the same variable as everything else here, so it is the same consent and the same process scope — assigned inline it arms that command and nothing else. Its answers land in `smoke-recorded/` and are not committed, for the reason the eval's recordings are not.
+No runner ships for this set yet. The arms, seeding and grading in `harness/` are the place a replay over these cases is built — short and long conversations, a deficit found mid-turn, after compaction, and with the purpose absent.
 
 ## Premise application cases
 
-`cases/premise.json` asks a different question from the advisory fixtures: where a premise binds, is the agent's first dependent action consistent with it? Each case builds a conversation up to one moment the agent can observe in its own work — recording a rule the person states, handing work to a recipient that does not see the conversation, receiving a delegated "done", taking an undoable step whose content depends on a judgment the person holds, writing the next repair in a chain of repairs on one axis — and names the action to grade (`firstAction`) with what passes and what fails. `governs` names the premise documents whose clauses decide the case.
+`cases/premise.json` asks a different question from the routing cases: where a premise binds, is the agent's first dependent action consistent with it? Each case builds a conversation up to one moment the agent can observe in its own work — recording a rule the person states, handing work to a recipient that does not see the conversation, receiving a delegated "done", taking an undoable step whose content depends on a judgment the person holds, writing the next repair in a chain of repairs on one axis — and names the action to grade (`firstAction`) with what passes and what fails. `governs` names the premise documents whose clauses decide the case.
 
 **Grade the first dependent action, and nothing before or after it.** Opening a premise document is not a pass and leaving it closed is not a fail: an action consistent with the clause passes without a read, and a read followed by an inconsistent action fails. A later correction is scored on its own, as recovery.
 
@@ -99,7 +46,7 @@ A live smoke reads the same variable as everything else here, so it is the same 
 
 `premise-harness.mjs` runs these cases as agent cells. A cell is one case under one arm at one length, once: the case's `scaffold` (a seed repository from `harness/scaffolds.mjs`) is laid out as the working tree, a stored session is written whose head carries the arm's session-start context and whose turns are the case's conversation, and `claude -p --resume` sends the case's prompt into it with the arm's copy of the route plugin and every core protocol plugin loaded, in an empty `CLAUDE_CONFIG_DIR`. The first dependent action is then read off the stream-json trace by code (`harness/first-action.mjs`): the first file write or delegation, or, where the turn ends without one, the first reply that carries no tool call. A shell call counts as a write when the cell's tree differs from its scaffold right after it, as a PostToolUse probe records (`harness/tree-probe.mjs`) — the command text cannot say whether it wrote. Reads and other tool calls before it are recorded as observations and never scored.
 
-Why the head is seeded rather than injected: on resume the host fires SessionStart again and attaches what it returns just before the new prompt, which would put the index at the end of a long conversation instead of where an uninterrupted session keeps it. So every arm's copy drops its SessionStart registration, and the arm's own session hook script renders the head before the cell runs. Everything else — the per-prompt directive, the tool-channel matcher, the subagent hook — runs as shipped and is the same in every arm.
+Why the head is seeded rather than injected: on resume the host fires SessionStart again and attaches what it returns just before the new prompt, which would put the index at the end of a long conversation instead of where an uninterrupted session keeps it. So every arm's copy drops its SessionStart registration, and the arm's own session hook script renders the head before the cell runs. Everything else — the tool-channel matcher, the subagent hook — runs as shipped and is the same in every arm.
 
 What each arm answers, holding the rest fixed:
 

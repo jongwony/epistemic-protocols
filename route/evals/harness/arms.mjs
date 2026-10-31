@@ -3,8 +3,8 @@
  * route plugin and checked against the shipped one before anything runs.
  *
  * An arm varies the premise delivery and nothing else. Every arm loads the
- * same route copy layout, the same protocol plugins, the same per-prompt
- * directive and the same tool matcher; what differs is what the copy's
+ * same route copy layout, the same protocol plugins and the same tool
+ * matcher; what differs is what the copy's
  * `route-premise.mjs` renders:
  *
  *   none     — no premise index at session start, and no premise line at a
@@ -32,8 +32,8 @@
  * what it returns just before the new prompt — the opposite end of the
  * context. So every copy drops its SessionStart registration, and the head is
  * rendered here, once per arm, by running that arm's own session hook script
- * against a render-only install record. SubagentStart, UserPromptSubmit and
- * PreToolUse stay registered as shipped.
+ * against a render-only install record. SubagentStart and PreToolUse stay
+ * registered as shipped.
  *
  * A variant that renders the same text as the one it is meant to differ from
  * would run one treatment under two names, so `checkVariants` refuses the run
@@ -88,21 +88,16 @@ function withoutSessionStart(hooksText) {
   return JSON.stringify(hooks, null, 2) + "\n";
 }
 
-/** The environment a route script runs under in this harness: no evaluator key. */
-function scrubbedEnv(base = process.env, keyEnvs = []) {
+/**
+ * The environment a route script runs under in this harness: the inherited
+ * CLAUDE_PLUGIN_ROOT dropped, so a script resolves the copy it belongs to, and
+ * any further variables the caller names cleared.
+ */
+function scrubbedEnv(base = process.env, drop = []) {
   const env = { ...base };
-  for (const name of new Set(["TYPESAFE_API_KEY", ...keyEnvs])) delete env[name];
+  for (const name of new Set(drop)) delete env[name];
   delete env.CLAUDE_PLUGIN_ROOT;
   return env;
-}
-
-/** The variable the shipped evaluator binding arms on. */
-function evaluatorKeyEnv(repo) {
-  try {
-    return JSON.parse(fs.readFileSync(path.join(repo, "route", "config", "evaluator.json"), "utf8")).apiKeyEnv || null;
-  } catch {
-    return null;
-  }
 }
 
 /**
@@ -297,7 +292,6 @@ export {
   buildArmPlugins,
   checkVariants,
   clauseBlock,
-  evaluatorKeyEnv,
   leadsIn,
   patchSource,
   renderPlugin,

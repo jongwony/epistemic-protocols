@@ -5,7 +5,7 @@
     "prompt": "Rename the `timeoutMs` field to `requestTimeoutMs` across the three files that read it.",
     "expected": [],
     "adjudicated": true,
-    "note": "Confirmed. Scope and target are both in the prompt - the field, the new name, and that three files read it. No protocol's deficit is present: nothing is missing that only the user holds, no mapping is in question, no framing is absent. Silence is the answer, and it is the common case."
+    "note": "Confirmed. Scope and target are both in the prompt - the field, the new name, and that three files read it. No protocol's deficit is present: the next move rests on no ground left unestablished, and finding the three files leaves the user nothing to recognize, no mapping is in question, no framing is absent. Silence is the answer."
   },
   {
     "id": "silence-answered-question",
@@ -33,7 +33,7 @@
       "inquire"
     ],
     "adjudicated": false,
-    "note": "The person asks what the work rests on before it moves: the intent to have its ground collected is in the utterance, so /inquire's deficit is recognized from what they said rather than inferred from the task's kind. A bare instruction to do the work names a task kind and is not this trigger. /bound does not fit: the gap is user-held fact, not an unscoped task awaiting delegation. /conduct does not either: what is missing is inputs, not the order of moves."
+    "note": "The person asks what the work rests on before it moves: the intent to have its ground collected is in the utterance, so /inquire's deficit is recognized from what they said rather than inferred from the task's kind. An instruction whose words already fix what to do names a task, not this trigger; work whose ground is not yet established is, whether or not the prompt asks for it in so many words (ROO-205 1df23c54). /bound does not fit: the gap is user-held fact, not an unscoped task awaiting delegation. /conduct does not either: what is missing is inputs, not the order of moves."
   },
   {
     "id": "singleton-ground",
@@ -178,6 +178,40 @@
     ],
     "expected": [],
     "adjudicated": false,
-    "note": "The boundary case for the whole channel: nothing in the prompt shows a deficit, and the one that surfaces while preparing the change is outside what a prompt-time evaluator can see. The static directive is what covers it, which is why the advisory never replaces the directive."
+    "note": "The boundary case for prompt-time routing: nothing in the prompt shows a deficit, and the one that surfaces while preparing the change is outside what a reading of the prompt alone can see. The session-start frame applied mid-turn is what covers it."
+  },
+  {
+    "id": "singleton-inquire-bare-issue-link",
+    "outcome": "singleton",
+    "prompt": "https://linear.app/example/issue/FD-2700/taxonomy-gateway-resolve-release-pipeline-and-confirm-production",
+    "conversation": [
+      {
+        "role": "user",
+        "text": "(the linked issue, read by the agent) Source patch merged. Production rollout blocked pending established deployment target / service disposition. Owner: confirm whether the service is intentionally undeployed or identify actual production hosting and release owner. Do not invent a new production deployment simply to close remediation."
+      }
+    ],
+    "expected": [
+      "inquire"
+    ],
+    "adjudicated": false,
+    "note": "A bare link whose issue asks to confirm where a service runs before any rollout: the next move rests on ground not yet established, and /inquire's end — what was settled and from where, what rests on weak ground, what only the user decides — is what the rollout decision needs. That the agent could collect the facts from the repositories itself does not defeat the fit (ROO-205 2a736c26). Observed misroute: session 7aa13582-afbe-41c6-9099-696b4fbc1691 went silent on this shape."
+  },
+  {
+    "id": "singleton-inquire-status-quo",
+    "outcome": "singleton",
+    "prompt": "Check the AI Data Governance status quo.",
+    "expected": [
+      "inquire"
+    ],
+    "adjudicated": false,
+    "note": "A request for the state of things: the result is itself a claim about state resting on sources of differing provenance and freshness, so the user needs to recognize where each part came from and where it is weak. The request is the collection intent (ROO-205 1df23c54); that the agent can look the sources up does not defeat the fit."
+  },
+  {
+    "id": "silence-git-pull",
+    "outcome": "silence",
+    "prompt": "git pull",
+    "expected": [],
+    "adjudicated": false,
+    "note": "The repository and branch are fixed by the working directory and nothing in context contradicts them; the result shows itself in git's output and leaves the user nothing to recognize. Having to read the repository state does not make ground unestablished (ROO-205 2a736c26)."
   }
 ]

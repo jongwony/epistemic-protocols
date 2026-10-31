@@ -21,7 +21,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const TABLE_HEADER = "Loaded core epistemic protocols, each as the deficit it resolves → the resolution it yields:";
+const TABLE_HEADER = "Loaded core epistemic protocols, each as the deficit it resolves → the resolution it yields, then the description it declares:";
 
 function readJson(file) {
   try {
@@ -103,10 +103,10 @@ function soleSkill(dir) {
  * wherever the SKILL.md carries it — description or body; a protocol without
  * one keeps its row, with the deficit alone.
  *
- * The frontmatter `description` is read too, and stays off the table: the
- * table's job is to trigger. It is the text /route's contract (`Entry`) names
- * as the sole source of what deficit a protocol resolves, so anything that has to tell two
- * protocols apart reads it from here rather than being told the difference.
+ * The frontmatter `description` is read too and goes on the protocol's row.
+ * It is the text /route's contract (`Entry`) names as the sole source of what
+ * deficit a protocol resolves, so anything that has to tell two protocols
+ * apart reads it from here rather than being told the difference.
  */
 function readProtocol(skillFile) {
   let text;
@@ -182,20 +182,54 @@ function deriveProtocols(env = {}) {
 }
 
 /**
- * Command, deficit and resolution names only — the morphism's two ends, and
- * nothing between them. The table's job is to trigger, not to match —
- * matching happens inside /route, which resolves each candidate's full
- * description there — so the prose the names abbreviate stays out. The
- * resolution is on the row because a deficit reads more sharply against the
- * state it resolves into: the pair names the transition, the deficit alone
- * only its start.
+ * One row per protocol: its command, the deficit it resolves → the
+ * resolution it yields, then the description it declares, whole. A protocol
+ * without a resolution or a description keeps the row with what it has.
  */
 function renderTable(protocols) {
   if (!protocols || protocols.length === 0) return "";
   const rows = protocols
-    .map((p) => (p.resolution ? `/${p.command} ${p.deficit} → ${p.resolution}` : `/${p.command} ${p.deficit}`))
+    .map((p) => {
+      const pair = p.resolution ? `${p.deficit} → ${p.resolution}` : p.deficit;
+      return p.description ? `/${p.command} ${pair} — ${p.description}` : `/${p.command} ${pair}`;
+    })
     .join("\n");
   return `${TABLE_HEADER}\n${rows}`;
+}
+
+/** The `## <heading>` section of a SKILL.md, up to the next heading or the end, or null. */
+function section(text, heading) {
+  const start = text.search(new RegExp(`^## ${heading}[ \t]*$`, "m"));
+  if (start < 0) return null;
+  const body = text.slice(start).replace(new RegExp(`^## ${heading}[ \t]*\r?\n`), "");
+  const next = body.search(/^#{1,2} /m);
+  const out = (next < 0 ? body : body.slice(0, next)).trim();
+  return out || null;
+}
+
+/**
+ * The purpose paragraph, read from the `## Purpose` section of Route's own
+ * SKILL.md and carried as written: that section is its single home. Null
+ * where the file or the section cannot be read.
+ */
+function readPurpose(root = pluginRoot()) {
+  let text;
+  try {
+    text = fs.readFileSync(path.join(root, "skills", "route", "SKILL.md"), "utf8");
+  } catch {
+    return null;
+  }
+  return section(text, "Purpose");
+}
+
+/**
+ * The SessionStart routing part: the purpose paragraph, then the table.
+ * Each goes out without the other where only one can be had.
+ */
+function renderRouting(protocols, purpose) {
+  const table = renderTable(protocols);
+  if (!purpose) return table;
+  return table ? `${purpose}\n${table}` : purpose;
 }
 
 function parsePayload(raw) {
@@ -219,6 +253,9 @@ function isMain(moduleUrl) {
 
 export {
   TABLE_HEADER,
+  readPurpose,
+  renderRouting,
+  section,
   configDir,
   deriveProtocols,
   identify,
