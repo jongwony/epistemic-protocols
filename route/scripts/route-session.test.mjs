@@ -1,5 +1,5 @@
-// Tests for route-session.mjs — the SessionStart injection of the routing
-// frame and the derived table, with the premise index as a second part, on
+// Tests for route-session.mjs — the SessionStart injection of the purpose
+// paragraph and the derived table, with the premise index as a second part, on
 // every source alike — and for the derivation in route-protocols.mjs it carries.
 // Run with: node --test
 // Repo precedent: anamnesis/scripts/hypomnesis-write.test.mjs (node:test + node:assert).
@@ -12,7 +12,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { PREMISE_HEADER, PREMISE_INDEX } from "./route-premise.mjs";
-import { FRAME_HEADER, FRAME_JUDGMENTS, TABLE_HEADER, deriveProtocols, flatten, readFrame, renderRouting, renderTable, selectProtocol } from "./route-protocols.mjs";
+import { TABLE_HEADER, deriveProtocols, readPurpose, renderRouting, renderTable, selectProtocol } from "./route-protocols.mjs";
 import { PARTS, buildContext, render } from "./route-session.mjs";
 
 const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), "route-session.mjs");
@@ -136,51 +136,43 @@ function repoProtocols() {
     .filter(Boolean);
 }
 
-test("the repo's own routing part — frame and table — fits one injection", () => {
+test("the repo's own routing part — purpose and table — fits one injection", () => {
   // The host caps each additionalContext string at 10,000 characters; the
   // routing part goes out as its own SessionStart entry, so it alone must fit.
   const protocols = repoProtocols();
   assert.ok(protocols.length > 0);
   assert.ok(protocols.every((p) => p.description), "every core protocol declares a description");
-  const frame = readFrame(path.join(REPO, "route"));
-  assert.ok(frame, "the frame reads from route's own SKILL.md");
-  const routing = renderRouting(protocols, frame);
+  const purpose = readPurpose(path.join(REPO, "route"));
+  assert.ok(purpose, "the purpose reads from route's own SKILL.md");
+  const routing = renderRouting(protocols, purpose);
   assert.ok(routing.length <= 10000, `the routing part is ${routing.length} characters`);
 });
 
-test("the frame carries the contract's judgments and Rules as written", () => {
-  // Propagation: every judgment the frame carries is the doc comment above
-  // that axiom in the SKILL.md, and its rules are the Rules section, so the
-  // contract stays their only home.
+test("the routing part carries the Purpose section as written, then the table", () => {
+  // Propagation: the purpose is the SKILL.md `## Purpose` section verbatim,
+  // so that section stays its only home.
   const source = fs.readFileSync(ROUTE_SKILL, "utf8");
-  const frame = readFrame(path.join(REPO, "route"));
-  assert.deepEqual(frame.judgments.map(([name]) => name), [...FRAME_JUDGMENTS]);
-  for (const [name, doc] of frame.judgments) {
-    const at = source.indexOf(`\naxiom ${name} `);
-    assert.ok(at > 0, `axiom ${name} is declared`);
-    const span = source.slice(source.lastIndexOf("/--", at) + 3, source.lastIndexOf("-/", at));
-    assert.equal(doc, flatten(span), `${name} is carried as its source span`);
-  }
-  assert.equal(frame.rules, source.slice(source.indexOf("## Rules\n") + "## Rules\n".length).trim());
-  const routing = renderRouting(repoProtocols(), frame);
-  assert.ok(routing.startsWith(FRAME_HEADER));
-  for (const [, doc] of frame.judgments) assert.ok(routing.includes(doc));
-  assert.ok(routing.includes(frame.rules));
-  assert.ok(routing.indexOf(frame.rules) < routing.indexOf(TABLE_HEADER), "the table follows the frame");
-  // Where a row is missing, the frame itself says where a description is read from,
-  // and who reads a delegated agent's report.
-  assert.ok(routing.includes("from where the protocol states it"));
-  assert.ok(routing.includes("the agent that receives its report"));
+  const purpose = readPurpose(path.join(REPO, "route"));
+  const at = source.indexOf("\n## Purpose\n");
+  assert.ok(at > 0, "the SKILL.md has a Purpose section");
+  const rest = source.slice(at + "\n## Purpose\n".length);
+  const next = rest.search(/^#{1,2} /m);
+  assert.equal(purpose, (next < 0 ? rest : rest.slice(0, next)).trim());
+  assert.ok(purpose.startsWith("**Why these protocols exist.**"));
+  const routing = renderRouting(repoProtocols(), purpose);
+  assert.ok(routing.startsWith(purpose));
+  assert.ok(routing.indexOf(purpose) < routing.indexOf(TABLE_HEADER), "the table follows the purpose");
+  // The judgment text of the /route contract is not injected.
+  assert.ok(!routing.includes("**Your judgment**"));
 });
 
-test("frame and table each go out without the other", () => {
+test("purpose and table each go out without the other", () => {
   const rows = [{ command: "x", deficit: "A", resolution: "B", description: "Does x." }];
-  // A frame that cannot be read leaves the table alone.
+  // A purpose that cannot be read leaves the table alone.
   assert.equal(renderRouting(rows, null), renderTable(rows));
-  assert.equal(readFrame("/nonexistent"), null);
-  // A host whose install record yields no table still gets the frame.
-  const frame = { judgments: [["FitSupported", "judged."]], rules: "1. rule" };
-  assert.equal(renderRouting([], frame), `${FRAME_HEADER}\nJudgments:\n- \`FitSupported\` — judged.\nRules:\n1. rule`);
+  assert.equal(readPurpose("/nonexistent"), null);
+  // A host whose install record yields no table still gets the purpose.
+  assert.equal(renderRouting([], "Why."), "Why.");
   assert.equal(renderRouting([], null), "");
 });
 
@@ -433,8 +425,8 @@ test("the premise index goes out even where no protocol resolved", () => {
   }
 });
 
-test("without a readable frame the injection is the table and index only", () => {
-  // The fixture plugin root carries no skills/route/SKILL.md, so no frame is
+test("without a readable purpose the injection is the table and index only", () => {
+  // The fixture plugin root carries no skills/route/SKILL.md, so no purpose is
   // read and nothing tells the reader to invoke /route.
   const fixture = makeFixture(SUITE);
   try {

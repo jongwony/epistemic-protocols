@@ -27,7 +27,7 @@ Each case in `cases/cases.json` is a context and the routing outcome it should r
 
 **Measure the behaviour, not the call.** What a run reads off a case is whether the needed epistemic action happened — the protocol reached before the work that rests on the ground, the reading shown as the agent's, a value only the user holds stated rather than defaulted, no protocol brought in where nothing was unestablished — never whether a particular skill was called. Count spoiled cases apart from rescued ones, since netting a gain against a loss hides the loss.
 
-No runner ships for this set yet. The arms, seeding and grading in `harness/` are the place a replay over these cases is built — short and long conversations, a deficit found mid-turn, after compaction, and with the frame absent.
+No runner ships for this set yet. The arms, seeding and grading in `harness/` are the place a replay over these cases is built — short and long conversations, a deficit found mid-turn, after compaction, and with the purpose absent.
 
 ## Premise application cases
 
@@ -46,7 +46,7 @@ No runner ships for this set yet. The arms, seeding and grading in `harness/` ar
 
 `premise-harness.mjs` runs these cases as agent cells. A cell is one case under one arm at one length, once: the case's `scaffold` (a seed repository from `harness/scaffolds.mjs`) is laid out as the working tree, a stored session is written whose head carries the arm's session-start context and whose turns are the case's conversation, and `claude -p --resume` sends the case's prompt into it with the arm's copy of the route plugin and every core protocol plugin loaded, in an empty `CLAUDE_CONFIG_DIR`. The first dependent action is then read off the stream-json trace by code (`harness/first-action.mjs`): the first file write or delegation, or, where the turn ends without one, the first reply that carries no tool call. A shell call counts as a write when the cell's tree differs from its scaffold right after it, as a PostToolUse probe records (`harness/tree-probe.mjs`) — the command text cannot say whether it wrote. Reads and other tool calls before it are recorded as observations and never scored.
 
-Why the head is seeded rather than injected: on resume the host fires SessionStart again and attaches what it returns just before the new prompt, which would put the index at the end of a long conversation instead of where an uninterrupted session keeps it. So every arm's copy drops its SessionStart registration, and the arm's own session hook script renders the head before the cell runs. Everything else — the per-prompt routing cue, the tool-channel matcher, the subagent hook — runs as shipped and is the same in every arm.
+Why the head is seeded rather than injected: on resume the host fires SessionStart again and attaches what it returns just before the new prompt, which would put the index at the end of a long conversation instead of where an uninterrupted session keeps it. So every arm's copy drops its SessionStart registration, and the arm's own session hook script renders the head before the cell runs. Everything else — the tool-channel matcher, the subagent hook — runs as shipped and is the same in every arm.
 
 What each arm answers, holding the rest fixed:
 

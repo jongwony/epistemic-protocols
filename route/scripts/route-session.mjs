@@ -1,20 +1,19 @@
 #!/usr/bin/env node
 /**
- * SessionStart hook — inject the routing frame and the installed-protocol
+ * SessionStart hook — inject the purpose paragraph and the installed-protocol
  * table once per context epoch, and the premise index beside them.
  *
- * The routing judgment is made in the turn itself, at the prompt and
- * wherever preparing a response or action shows a gap in the ground the
- * work rests on. What it needs is here: the judgments and rules of Route's
- * own contract, read from its SKILL.md and carried as written, and one row
- * per installed core protocol with the description it declares. A host's
+ * Whether a protocol comes in is judged in the turn itself. What the session
+ * start gives that judgment is why the protocols exist — the `## Purpose`
+ * section of Route's own SKILL.md, carried as written — and one row per
+ * installed core protocol with the description it declares. A host's
  * loaded-skills listing may drop those descriptions under a size budget,
  * so the table is supplied here rather than assumed, and it is derived,
  * never maintained (see route-protocols.mjs).
  *
  * SessionStart is the right place for it because the host fires this hook
  * at every context epoch — startup, resume, clear, compact — and so again
- * after compaction. The frame re-enters context exactly when compaction
+ * after compaction. The routing part re-enters context exactly when compaction
  * dropped it, without this hook reading the transcript or keeping a marker.
  * Injected here, it sits at the head of context, inside the cached prefix.
  * It goes out on every source alike: on resume, whether the earlier
@@ -36,7 +35,7 @@
  * directly.
  *
  * Every failure path is open: an unreadable payload still yields whatever
- * can be derived, a frame that cannot be read leaves the table alone, a
+ * can be derived, a purpose that cannot be read leaves the table alone, a
  * derivation shortfall sends the index alone, and an index that cannot be
  * resolved is left out. A hook that blocks a session is worse than one that
  * routes less.
@@ -45,13 +44,13 @@
 
 import fs from "node:fs";
 import { premiseRoot, renderPremise } from "./route-premise.mjs";
-import { deriveProtocols, isMain, parsePayload, readFrame, renderRouting } from "./route-protocols.mjs";
+import { deriveProtocols, isMain, parsePayload, readPurpose, renderRouting } from "./route-protocols.mjs";
 
 const PARTS = ["routing", "premise"];
 
 function buildRouting(env) {
   try {
-    return renderRouting(deriveProtocols(env), readFrame(env && env.pluginRoot));
+    return renderRouting(deriveProtocols(env), readPurpose(env && env.pluginRoot));
   } catch {
     // Fail open: a derivation fault must not cost the index.
     return "";
