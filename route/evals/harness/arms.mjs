@@ -32,7 +32,9 @@
  * what it returns just before the new prompt — the opposite end of the
  * context. So every copy drops its SessionStart registration, and the head is
  * rendered here, once per arm, by running that arm's own session hook script
- * against a render-only install record. SubagentStart and PreToolUse stay
+ * against a render-only install record — once per entry hooks.json registers
+ * (`routing`, `premise`), so the head is seeded as the two contexts the host
+ * would attach, each under its own size cap. SubagentStart and PreToolUse stay
  * registered as shipped.
  *
  * A variant that renders the same text as the one it is meant to differ from
@@ -47,7 +49,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { PREMISE_HEADER, PREMISE_INDEX, TOOL_HEADER, leadIn } from "../../scripts/route-premise.mjs";
-import { TABLE_HEADER } from "../../scripts/route-protocols.mjs";
+import { TABLE_HEADER, readPurpose } from "../../scripts/route-protocols.mjs";
 
 const ARMS = {
   none: { patch: "no-premise", clause: false },
@@ -147,8 +149,8 @@ function buildArmPlugins({ repo, workRoot, arms, protocolDirs, marketplace, salt
 }
 
 /** Runs one of the copy's hook scripts on `payload`; returns its additionalContext or "". */
-function runHook(plugin, script, payload, env) {
-  const r = spawnSync(process.execPath, [path.join(plugin.routeDir, "scripts", script)], {
+function runHook(plugin, script, payload, env, args = []) {
+  const r = spawnSync(process.execPath, [path.join(plugin.routeDir, "scripts", script), ...args], {
     input: JSON.stringify(payload),
     encoding: "utf8",
     env: { ...env, CLAUDE_CONFIG_DIR: plugin.renderConfig, CLAUDE_PLUGIN_ROOT: plugin.routeDir },
@@ -160,13 +162,18 @@ function runHook(plugin, script, payload, env) {
 }
 
 /**
- * What a plugin copy delivers: the session-start context, the tool-channel
- * lines at a delegation and at an instruction-surface edit, and the
- * subagent-start context.
+ * What a plugin copy delivers: the session-start contexts — `sessionParts`,
+ * one per SessionStart entry, and `session`, the same parts joined for the
+ * checks that read the head as a whole — the tool-channel lines at a
+ * delegation and at an instruction-surface edit, and the subagent-start
+ * context.
  */
 function renderPlugin(plugin, env) {
+  const start = { hook_event_name: "SessionStart", source: "startup" };
+  const sessionParts = ["routing", "premise"].map((part) => runHook(plugin, "route-session.mjs", start, env, [part]));
   return {
-    session: runHook(plugin, "route-session.mjs", { hook_event_name: "SessionStart", source: "startup" }, env),
+    sessionParts,
+    session: sessionParts.filter(Boolean).join("\n"),
     tool: {
       delegation: runHook(plugin, "route-tool.mjs", { hook_event_name: "PreToolUse", tool_name: "Agent", tool_input: { prompt: "x" } }, env),
       instruction: runHook(plugin, "route-tool.mjs", { hook_event_name: "PreToolUse", tool_name: "Edit", tool_input: { file_path: "/x/skills/a/SKILL.md" } }, env),
@@ -222,6 +229,9 @@ function checkVariants({ arms, rendered, plugins, expectTable = true }) {
   check(shipped.tool.instruction.startsWith(TOOL_HEADER) && hasLead(shipped.tool.instruction), "shipped: an instruction-surface edit gets a tool line quoting its lead");
   check(shipped.subagent.includes(PREMISE_HEADER), "shipped: a subagent gets the premise index");
   if (expectTable) check(routingPart(shipped.session).includes(TABLE_HEADER), "shipped: session context carries the deficit table");
+  const purpose = readPurpose(plugins["as-shipped"].routeDir);
+  check(!!purpose && shipped.sessionParts[0].startsWith(purpose), "shipped: the routing entry opens with the purpose");
+  check(shipped.sessionParts.every((p) => p.length <= 10000), "shipped: each session-start entry fits the host's 10,000-character cap");
 
   for (const arm of arms) {
     const r = rendered[ARMS[arm].patch];

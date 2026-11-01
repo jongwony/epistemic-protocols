@@ -236,7 +236,7 @@ function planCells({ cases, arms, lengths, reps, longTokens }, prepared) {
         for (const arm of arms) {
           const def = ARMS[arm];
           const plugin = prepared.plugins[def.patch];
-          const head = [prepared.rendered[def.patch].session].filter(Boolean);
+          const head = prepared.rendered[def.patch].sessionParts.filter(Boolean);
           const turns = LENGTHS[length](c, prefix);
           const prompt = def.clause ? `${c.prompt}\n\n${clauseBlock(c, plugin.premiseDir)}` : c.prompt;
           const estTokens = estimateTokens(head.join("\n")) + turns.reduce((s, t) => s + estimateTokens(t.text), 0) + estimateTokens(prompt);
@@ -417,7 +417,7 @@ function seedCheck(o) {
   const prefix = syntheticPrefix({ tokens: o.longTokens });
   const tokens = seedTokens(runId);
   const cells = SEED_VARIANTS.map((variant) => {
-    const head = [prepared.rendered["as-shipped"].session, headLine(tokens)].filter(Boolean);
+    const head = [...prepared.rendered["as-shipped"].sessionParts, headLine(tokens)].filter(Boolean);
     const turns = seedTurns(variant, tokens, prefix);
     return {
       key: `seed-check__${variant}`, variant, plugin, head, turns, prompt: SEED_PROMPT, maxTurns: 2,
