@@ -222,14 +222,22 @@ function readPurpose(root = pluginRoot()) {
   return section(text, "Purpose");
 }
 
+/** The commands a purpose names, each written as `` `/command` ``. */
+function namedCommands(purpose) {
+  return [...String(purpose ?? "").matchAll(/`\/([A-Za-z0-9_-]+)`/g)].map((m) => m[1]);
+}
+
 /**
  * The SessionStart routing part: the purpose paragraph, then the table.
- * Each goes out without the other where only one can be had.
+ * The purpose goes out only beside a table that carries a row for every
+ * command it names, since it tells the reader to invoke those and to read
+ * the descriptions below it; otherwise the table goes out alone, or nothing.
  */
 function renderRouting(protocols, purpose) {
   const table = renderTable(protocols);
-  if (!purpose) return table;
-  return table ? `${purpose}\n${table}` : purpose;
+  if (!purpose || !table) return table;
+  const commands = new Set(protocols.map((p) => p.command));
+  return namedCommands(purpose).every((c) => commands.has(c)) ? `${purpose}\n${table}` : table;
 }
 
 function parsePayload(raw) {
@@ -254,6 +262,7 @@ function isMain(moduleUrl) {
 export {
   TABLE_HEADER,
   readPurpose,
+  namedCommands,
   renderRouting,
   section,
   configDir,

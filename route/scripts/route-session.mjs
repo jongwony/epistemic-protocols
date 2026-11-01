@@ -35,10 +35,11 @@
  * directly.
  *
  * Every failure path is open: an unreadable payload still yields whatever
- * can be derived, a purpose that cannot be read leaves the table alone, a
- * derivation shortfall sends the index alone, and an index that cannot be
- * resolved is left out. A hook that blocks a session is worse than one that
- * routes less.
+ * can be derived; a purpose that cannot be read, or that names a protocol
+ * the table lacks, leaves the table alone; a derivation shortfall leaves the
+ * routing entry empty while the premise entry still goes out; and an index
+ * that cannot be resolved is left out. A hook that blocks a session is worse
+ * than one that routes less.
  * Zero external dependencies: Node.js standard library only.
  */
 
@@ -52,7 +53,7 @@ function buildRouting(env) {
   try {
     return renderRouting(deriveProtocols(env), readPurpose(env && env.pluginRoot));
   } catch {
-    // Fail open: a derivation fault must not cost the index.
+    // Fail open: a derivation fault leaves this entry empty, and the session starts.
     return "";
   }
 }
