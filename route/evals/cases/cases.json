@@ -33,7 +33,7 @@
       "inquire"
     ],
     "adjudicated": false,
-    "note": "The person asks what the work rests on before it moves: the intent to have its ground collected is in the utterance, so /inquire's deficit is recognized from what they said rather than inferred from the task's kind. An instruction whose words already fix what to do names a task, not this trigger; work whose ground is not yet established is, whether or not the prompt asks for it in so many words (ROO-205 1df23c54). /bound does not fit: the gap is user-held fact, not an unscoped task awaiting delegation. /conduct does not either: what is missing is inputs, not the order of moves."
+    "note": "The person asks what the work rests on before it moves: the intent to have its ground collected is in the utterance, so /inquire's deficit is recognized from what they said rather than inferred from the task's kind. An instruction whose words already fix what to do names a task, not this trigger; work whose ground is not yet established is, whether or not the prompt asks for it in so many words. /bound does not fit: the gap is user-held fact, not an unscoped task awaiting delegation. /conduct does not either: what is missing is inputs, not the order of moves."
   },
   {
     "id": "singleton-ground",
@@ -168,7 +168,7 @@
       "inquire"
     ],
     "adjudicated": false,
-    "note": "A bare link; the linked issue, which the agent reads once it opens the link, says a dependency fix has merged in one copy of the service and that rolling it out waits on where the service actually runs - whether it is deployed at all, and if so where and who releases it. So the issue asks to confirm where a service runs before any rollout: the next move rests on ground not yet established, and /inquire's end — what was settled and from where, what rests on weak ground, what only the user decides — is what the rollout decision needs. That the agent could collect the facts from the repositories itself does not defeat the fit (ROO-205 2a736c26). A routing pass was observed going silent on this shape."
+    "note": "A bare link; the linked issue, which the agent reads once it opens the link, says a dependency fix has merged in one copy of the service and that rolling it out waits on where the service actually runs - whether it is deployed at all, and if so where and who releases it. So the issue asks to confirm where a service runs before any rollout: the next move rests on ground not yet established, and /inquire's end — what was settled and from where, what rests on weak ground, what only the user decides — is what the rollout decision needs. That the agent could collect the facts from the repositories itself does not defeat the fit."
   },
   {
     "id": "singleton-inquire-status-quo",
@@ -178,7 +178,7 @@
       "inquire"
     ],
     "adjudicated": false,
-    "note": "A request for the state of things: the result is itself a claim about state resting on sources of differing provenance and freshness, so the user needs to recognize where each part came from and where it is weak. The request is the collection intent (ROO-205 1df23c54); that the agent can look the sources up does not defeat the fit."
+    "note": "A request for the state of things: the result is itself a claim about state resting on sources of differing provenance and freshness, so the user needs to recognize where each part came from and where it is weak. The request is the collection intent; that the agent can look the sources up does not defeat the fit."
   },
   {
     "id": "silence-git-pull",
@@ -186,6 +186,6 @@
     "prompt": "git pull",
     "expected": [],
     "adjudicated": false,
-    "note": "The repository and branch are fixed by the working directory and nothing in context contradicts them; the result shows itself in git's output and leaves the user nothing to recognize. Having to read the repository state does not make ground unestablished (ROO-205 2a736c26)."
+    "note": "The repository and branch are fixed by the working directory and nothing in context contradicts them; the result shows itself in git's output and leaves the user nothing to recognize. Having to read the repository state does not make ground unestablished."
   }
 ]
