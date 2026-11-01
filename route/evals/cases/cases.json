@@ -5,7 +5,7 @@
     "prompt": "Rename the `timeoutMs` field to `requestTimeoutMs` across the three files that read it.",
     "expected": [],
     "adjudicated": true,
-    "note": "Confirmed. Scope and target are both in the prompt - the field, the new name, and that three files read it. No protocol's deficit is present: the next move rests on no ground left unestablished, and finding the three files leaves the user nothing to recognize, no mapping is in question, no framing is absent. Silence is the answer."
+    "note": "Confirmed. Scope and target are both in the prompt - the field, the new name, and that three files read it. No protocol's deficit is present: the next move rests on no ground left unestablished, and finding the three files leaves the user nothing to recognize, no mapping is in question, no framing is absent. Silence is the answer: the user's own words settle what the rename rests on, so reading the code to carry it out is not gathering."
   },
   {
     "id": "silence-answered-question",
