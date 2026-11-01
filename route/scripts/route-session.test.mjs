@@ -158,7 +158,7 @@ test("the routing part carries the Purpose section as written, then the table", 
   const rest = source.slice(at + "\n## Purpose\n".length);
   const next = rest.search(/^#{1,2} /m);
   assert.equal(purpose, (next < 0 ? rest : rest.slice(0, next)).trim());
-  assert.ok(purpose.startsWith("**Why these protocols exist.**"));
+  assert.ok(purpose.startsWith("**Two protocols to reach for first.**"));
   const routing = renderRouting(repoProtocols(), purpose);
   assert.ok(routing.startsWith(purpose));
   assert.ok(routing.indexOf(purpose) < routing.indexOf(TABLE_HEADER), "the table follows the purpose");
