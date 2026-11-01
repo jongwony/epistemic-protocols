@@ -49,6 +49,22 @@ test("a seed puts the session-start context at the head, then the turns, chained
   assert.deepEqual([...seededMessageIds(entries)], [entries[3].message.id]);
 });
 
+test("a head of several outputs seeds one hook record per output, then one context attachment carrying them all", () => {
+  // The shape a startup with two SessionStart entries leaves in its transcript.
+  const entries = buildSeed({
+    cwd: "/w", sessionId: "s2", model: "m", hookCommand: "node hook.mjs",
+    head: [{ content: "PURPOSE\nTABLE", command: "node hook.mjs routing" }, { content: "INDEX", command: "node hook.mjs premise" }, "TOKEN"],
+  });
+  const hooks = entries.filter((e) => e.attachment?.type === "hook_success");
+  assert.deepEqual(hooks.map((e) => e.attachment.command), ["node hook.mjs routing", "node hook.mjs premise", "node hook.mjs"]);
+  assert.deepEqual(hooks.map((e) => JSON.parse(e.attachment.stdout).hookSpecificOutput.additionalContext), ["PURPOSE\nTABLE", "INDEX", "TOKEN"]);
+  assert.equal(new Set(hooks.map((e) => e.attachment.toolUseID)).size, 1);
+  const context = entries.filter((e) => e.attachment?.type === "hook_additional_context");
+  assert.equal(context.length, 1);
+  assert.deepEqual(context[0].attachment.content, ["PURPOSE\nTABLE", "INDEX", "TOKEN"]);
+  assert.equal(entries.indexOf(context[0]), hooks.length);
+});
+
 test("an empty head seeds no hook entries", () => {
   const entries = buildSeed({ cwd: "/w", sessionId: "s", head: [""], turns: [{ role: "user", text: "x" }], model: "m" });
   assert.deepEqual(entries.map((e) => e.type), ["user"]);

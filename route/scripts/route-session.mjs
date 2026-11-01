@@ -46,8 +46,6 @@ import fs from "node:fs";
 import { premiseRoot, renderPremise } from "./route-premise.mjs";
 import { deriveProtocols, isMain, parsePayload, readPurpose, renderRouting } from "./route-protocols.mjs";
 
-const PARTS = ["routing", "premise"];
-
 function buildRouting(env) {
   try {
     return renderRouting(deriveProtocols(env), readPurpose(env && env.pluginRoot));
@@ -66,11 +64,14 @@ function buildPremise(env) {
   }
 }
 
-/** One part (`routing` or `premise`), or both joined where `part` names neither. */
+/** Each part a SessionStart entry names as its argument, in the order hooks.json registers them. */
+const BUILDERS = { routing: buildRouting, premise: buildPremise };
+const PARTS = Object.keys(BUILDERS);
+
+/** One part, or every part joined where `part` names none. */
 function buildContext(env, part) {
-  if (part === "routing") return buildRouting(env);
-  if (part === "premise") return buildPremise(env);
-  return [buildRouting(env), buildPremise(env)].filter(Boolean).join("\n");
+  if (Object.hasOwn(BUILDERS, part)) return BUILDERS[part](env);
+  return PARTS.map((p) => BUILDERS[p](env)).filter(Boolean).join("\n");
 }
 
 function render(raw, env, part) {

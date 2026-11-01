@@ -54,6 +54,7 @@ import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
 import { ARMS, buildArmPlugins, checkVariants, clauseBlock, renderPlugin, scrubbedEnv } from "./harness/arms.mjs";
+import { PARTS } from "../scripts/route-session.mjs";
 import { dirtyAfter, firstAction, parseStream } from "./harness/first-action.mjs";
 import { judgePrompt, parseVerdict } from "./harness/judge.mjs";
 import { estimateTokens, syntheticPrefix } from "./harness/prefix.mjs";
@@ -236,10 +237,10 @@ function planCells({ cases, arms, lengths, reps, longTokens }, prepared) {
         for (const arm of arms) {
           const def = ARMS[arm];
           const plugin = prepared.plugins[def.patch];
-          const head = prepared.rendered[def.patch].sessionParts.filter(Boolean);
+          const head = sessionHead(prepared.rendered[def.patch].sessionParts);
           const turns = LENGTHS[length](c, prefix);
           const prompt = def.clause ? `${c.prompt}\n\n${clauseBlock(c, plugin.premiseDir)}` : c.prompt;
-          const estTokens = estimateTokens(head.join("\n")) + turns.reduce((s, t) => s + estimateTokens(t.text), 0) + estimateTokens(prompt);
+          const estTokens = estimateTokens(headText(head)) + turns.reduce((s, t) => s + estimateTokens(t.text), 0) + estimateTokens(prompt);
           if (!c.scaffold) throw new Error(`${c.id}: no scaffold`);
           cells.push({ key: `${c.id}__${arm}__${length}__r${rep}`, case: c, arm, length, rep, plugin, head, turns, prompt, estTokens });
         }
@@ -292,12 +293,29 @@ function layOutCell(workRoot, runId, key, scaffold) {
   return { cellDir, cwd: fs.realpathSync(repoDir), configDir, settings, treeLog };
 }
 
+/** The command a SessionStart entry runs, as hooks.json registers it; with no part, every part joined. */
+function hookCommand(part) {
+  return `node "\${CLAUDE_PLUGIN_ROOT}/scripts/route-session.mjs"${part ? ` ${part}` : ""}`;
+}
+
+const HOOK_COMMAND = hookCommand();
+
+/** The seeded head: each non-empty session-start part with the command whose entry produced it. */
+function sessionHead(parts) {
+  return PARTS.map((part, i) => ({ content: parts[i], command: hookCommand(part) })).filter((h) => h.content);
+}
+
+/** The head's text, for estimating its size. */
+function headText(head) {
+  return head.map((h) => (typeof h === "string" ? h : h.content)).join("\n");
+}
+
 /** Launches one resumed session; returns the trace, the seed and what the resume left. */
 function launch({ o, cell, cwd, configDir, settings, protocolDirs: dirs, remaining, version }) {
   const sessionId = crypto.randomUUID();
   const seed = buildSeed({
     cwd, sessionId, head: cell.head, turns: cell.turns, model: o.model, version,
-    hookCommand: 'node "${CLAUDE_PLUGIN_ROOT}/scripts/route-session.mjs"',
+    hookCommand: HOOK_COMMAND,
   });
   writeSeed(configDir, cwd, sessionId, seed);
   const args = [
@@ -417,11 +435,11 @@ function seedCheck(o) {
   const prefix = syntheticPrefix({ tokens: o.longTokens });
   const tokens = seedTokens(runId);
   const cells = SEED_VARIANTS.map((variant) => {
-    const head = [...prepared.rendered["as-shipped"].sessionParts, headLine(tokens)].filter(Boolean);
+    const head = [...sessionHead(prepared.rendered["as-shipped"].sessionParts), headLine(tokens)];
     const turns = seedTurns(variant, tokens, prefix);
     return {
       key: `seed-check__${variant}`, variant, plugin, head, turns, prompt: SEED_PROMPT, maxTurns: 2,
-      estTokens: estimateTokens(head.join("\n")) + turns.reduce((s, t) => s + estimateTokens(t.text), 0) + estimateTokens(SEED_PROMPT),
+      estTokens: estimateTokens(headText(head)) + turns.reduce((s, t) => s + estimateTokens(t.text), 0) + estimateTokens(SEED_PROMPT),
     };
   });
   if (o.dryRun) {

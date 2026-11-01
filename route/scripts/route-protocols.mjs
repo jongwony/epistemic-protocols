@@ -199,9 +199,10 @@ function renderTable(protocols) {
 
 /** The `## <heading>` section of a SKILL.md, up to the next heading or the end, or null. */
 function section(text, heading) {
-  const start = text.search(new RegExp(`^## ${heading}[ \t]*$`, "m"));
+  const name = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const start = text.search(new RegExp(`^## ${name}[ \t]*$`, "m"));
   if (start < 0) return null;
-  const body = text.slice(start).replace(new RegExp(`^## ${heading}[ \t]*\r?\n`), "");
+  const body = text.slice(start).replace(new RegExp(`^## ${name}[ \t]*\r?\n`), "");
   const next = body.search(/^#{1,2} /m);
   const out = (next < 0 ? body : body.slice(0, next)).trim();
   return out || null;
