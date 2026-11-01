@@ -72,11 +72,10 @@ test("a seed is written where the host looks for the session", () => {
 test("the resume audit counts a second session-start injection and records what the host added", () => {
   const seed = buildSeed({ cwd: "/w", sessionId: "s", head: ["H"], turns: [{ role: "user", text: "q" }, { role: "assistant", text: "a" }], model: "m" });
   const ctx = (event, content) => ({ type: "attachment", uuid: `u-${event}-${content}`, attachment: { type: "hook_additional_context", hookEvent: event, content: [content] } });
-  const clean = [...seed, ctx("UserPromptSubmit", "[route] directive"), { type: "attachment", uuid: "e1", attachment: { type: "credential_org" } }, { type: "user", uuid: "p" }];
+  const clean = [...seed, ctx("PreToolUse", "premise line"), { type: "attachment", uuid: "e1", attachment: { type: "credential_org" } }, { type: "user", uuid: "p" }];
   const a = auditResume(clean, seed);
   assert.equal(a.seededIntact, true);
   assert.equal(a.sessionStartInjected, 0);
-  assert.deepEqual(a.promptContexts, ["[route] directive"]);
   assert.deepEqual(a.hostAttachments, ["credential_org"]);
   const injected = auditResume([...seed, ctx("SessionStart", "H again")], seed);
   assert.equal(injected.sessionStartInjected, 1);
@@ -206,7 +205,7 @@ test("a verdict is read from the judge's reply, and a person's verdict stands ov
 
 test("the seed check passes only when every seeded end was read and nothing was re-injected", () => {
   const tokens = seedTokens("t");
-  const audit = { seededIntact: true, sessionStartInjected: 0, promptContexts: ["[route] When a request"], hostAttachments: ["credential_org"] };
+  const audit = { seededIntact: true, sessionStartInjected: 0, hostAttachments: ["credential_org"] };
   const reply = `HEAD=${tokens.head}\nFIRST=${tokens.first}\nLAST=${tokens.last}`;
   const ok = seedCheckVerdict({ variant: "short", tokens, reply, audit });
   assert.equal(ok.pass, true);

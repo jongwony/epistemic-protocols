@@ -4,7 +4,7 @@ Two sets live here. `cases/cases.json` holds routing cases — contexts with the
 
 ## Routing cases
 
-Each case in `cases/cases.json` is a context and the routing outcome it should reach under the session-start frame: the judgments and Rules of `skills/route/SKILL.md` and the protocol table the `SessionStart` hook injects.
+Each case in `cases/cases.json` is a context and the routing outcome it should reach under what the `SessionStart` hook injects: the `## Purpose` section of `skills/route/SKILL.md` and the protocol table beside it.
 
 ```json
 {
@@ -63,7 +63,7 @@ What each length answers:
 - `short` — the case's own conversation after the head: the index near the moment.
 - `long` — a deterministic synthetic coding session on an unrelated service (`harness/prefix.mjs`, sized by `--long-tokens`) between the head and the case's conversation: the index far from the moment, as the late-turn arm above asks. A compaction length — the same conversation compacted before the prompt — has a place in `LENGTHS` and is not built.
 
-Before reading any measurement, run the seed check on the same CLI version. The seeded session format is the host's unpublished transcript shape, held in one module (`harness/seed-transcript.mjs`), and the check is what re-runs it: it asks the resumed model for tokens only the seeded head and the first and last seeded turns carry, and fails if resuming injected a second session-start context.
+Before reading any measurement, run the seed check on the same CLI version. The seeded session format is the host's unpublished transcript shape, held in one module (`harness/seed-transcript.mjs`), and the check is what re-runs it: it asks the resumed model for tokens only the seeded head and the first and last seeded turns carry, and fails if resuming injected a second session-start context. It does not show that the arm's route copy loaded: nothing is injected per prompt, and a cell that calls no tool fires none of the copy's hooks, so that the copy loaded shows only in a cell whose calls reach the tool-channel matcher or a subagent.
 
 ```bash
 # Free: build and check the arms, render every cell, print the matrix with an input estimate per cell.
@@ -80,7 +80,7 @@ node route/evals/premise-harness.mjs judge --model <model> --max-cost-usd <usd> 
 node route/evals/premise-harness.mjs report [--run DIR]
 ```
 
-The ceiling is checked before every launch against the sum of each child's own `total_cost_usd`, and a child that reports no cost stops the run. Every cell's environment drops `TYPESAFE_API_KEY`, so the advisory line above stays silent in every arm. A delegation is denied at the call once its brief is on record, in every arm alike, so no subagent runs on work no case grades.
+The ceiling is checked before every launch against the sum of each child's own `total_cost_usd`, and a child that reports no cost stops the run. A delegation is denied at the call once its brief is on record, in every arm alike, so no subagent runs on work no case grades.
 
 The judge is blind: it sees the case's moment, conversation, prompt, graded action and `pass`/`fail` text, and the agent's action with what it said before it — not the arm, the length, the prefix, or what the agent read. Each result keeps the judge's verdict beside a `human` slot; a person's verdict there stands over the judge's, and the report lists every disagreement. The report counts each case × arm × length on its own and keeps `control-reading-relay` in a table apart; it sums nothing across cases and nets nothing between arms.
 

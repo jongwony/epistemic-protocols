@@ -47,6 +47,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { PREMISE_HEADER, PREMISE_INDEX, TOOL_HEADER, leadIn } from "../../scripts/route-premise.mjs";
+import { TABLE_HEADER } from "../../scripts/route-protocols.mjs";
 
 const ARMS = {
   none: { patch: "no-premise", clause: false },
@@ -193,8 +194,8 @@ function sameAs(a, pa, b, pb) {
   return norm(a, pa) === norm(b, pb);
 }
 
-/** The deficit table: whatever a session context carries above the premise header. */
-function tablePart(session) {
+/** The routing part — purpose and table: whatever a session context carries above the premise header. */
+function routingPart(session) {
   const at = session.indexOf(PREMISE_HEADER);
   return (at < 0 ? session : session.slice(0, at)).trim();
 }
@@ -220,14 +221,14 @@ function checkVariants({ arms, rendered, plugins, expectTable = true }) {
   check(shipped.tool.delegation.startsWith(TOOL_HEADER) && hasLead(shipped.tool.delegation), "shipped: a delegation call gets a tool line quoting its lead");
   check(shipped.tool.instruction.startsWith(TOOL_HEADER) && hasLead(shipped.tool.instruction), "shipped: an instruction-surface edit gets a tool line quoting its lead");
   check(shipped.subagent.includes(PREMISE_HEADER), "shipped: a subagent gets the premise index");
-  if (expectTable) check(tablePart(shipped.session).length > 0, "shipped: session context carries the deficit table");
+  if (expectTable) check(routingPart(shipped.session).includes(TABLE_HEADER), "shipped: session context carries the deficit table");
 
   for (const arm of arms) {
     const r = rendered[ARMS[arm].patch];
     if (arm === "none") {
       check(r.session !== shipped.session, "none: session context differs from shipped");
       check(!r.session.includes(PREMISE_HEADER) && !hasLead(r.session), "none: session context carries no premise index");
-      check(r.session.trim() === tablePart(shipped.session), "none: session context is the shipped deficit table alone");
+      check(r.session.trim() === routingPart(shipped.session), "none: session context is the shipped routing part alone");
       check(r.tool.delegation === "" && r.tool.instruction === "", "none: no tool-channel premise line");
       check(r.subagent === "", "none: no subagent premise index");
     } else if (arm === "paths") {
@@ -236,7 +237,7 @@ function checkVariants({ arms, rendered, plugins, expectTable = true }) {
       check(PREMISE_INDEX.every((e) => r.session.includes(path.join(plugins["no-lead"].premiseDir, e.file))), "paths: every document's path is listed");
       check(PREMISE_INDEX.every((e) => r.session.includes(e.moments)), "paths: every document's moments are listed");
       check(!hasLead(r.session), "paths: session context quotes no lead");
-      check(tablePart(r.session) === tablePart(shipped.session), "paths: deficit table identical to shipped");
+      check(routingPart(r.session) === routingPart(shipped.session), "paths: routing part identical to shipped");
       check(r.tool.delegation !== shipped.tool.delegation && r.tool.delegation.startsWith(TOOL_HEADER) && !hasLead(r.tool.delegation), "paths: delegation tool line names the document without its lead");
       check(r.tool.instruction !== shipped.tool.instruction && r.tool.instruction.startsWith(TOOL_HEADER) && !hasLead(r.tool.instruction), "paths: instruction-surface tool line names the document without its lead");
       check(r.subagent !== shipped.subagent && !hasLead(r.subagent), "paths: subagent index without leads");
@@ -247,7 +248,7 @@ function checkVariants({ arms, rendered, plugins, expectTable = true }) {
       check(leads.every((l) => r.session.includes(l.lead)), "lead-only: session context quotes every lead");
       check(!r.session.includes(p.premiseDir), "lead-only: session context names no document path");
       check(PREMISE_INDEX.every((e) => !r.session.includes(e.moments)), "lead-only: session context lists no moments");
-      check(tablePart(r.session) === tablePart(shipped.session), "lead-only: deficit table identical to shipped");
+      check(routingPart(r.session) === routingPart(shipped.session), "lead-only: routing part identical to shipped");
       check(sameAs(r.tool, p, shipped.tool, plugins["as-shipped"]), "lead-only: tool lines as shipped");
       check(!r.subagent.includes(p.premiseDir) && leads.every((l) => r.subagent.includes(l.lead)), "lead-only: subagent index is leads alone");
     } else if (arm === "shipped" || arm === "clause") {
@@ -296,6 +297,6 @@ export {
   patchSource,
   renderPlugin,
   scrubbedEnv,
-  tablePart,
+  routingPart,
   withoutSessionStart,
 };

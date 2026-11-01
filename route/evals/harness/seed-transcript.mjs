@@ -150,9 +150,9 @@ function hookContexts(entries) {
 /**
  * What the resume added after the seeded entries, read off the transcript it
  * left: how many session-start contexts it injected (zero is the condition a
- * cell depends on), the per-prompt hook contexts it carried, and which
- * attachment types the host added on its own — the cloud session's remote
- * context among them, recorded as a host fact rather than removed.
+ * cell depends on) and which attachment types the host added on its own —
+ * the cloud session's remote context among them, recorded as a host fact
+ * rather than removed.
  */
 function auditResume(after, seeded) {
   const seededIds = new Set(seeded.map((e) => e.uuid));
@@ -161,7 +161,6 @@ function auditResume(after, seeded) {
   return {
     seededIntact: seeded.every((e) => after.some((a) => a.uuid === e.uuid)),
     sessionStartInjected: contexts.filter((c) => c.event === "SessionStart").length,
-    promptContexts: contexts.filter((c) => c.event === "UserPromptSubmit").map((c) => c.content),
     hostAttachments: [...new Set(added
       .filter((e) => e.type === "attachment" && e.attachment?.type && e.attachment.type !== "hook_additional_context" && e.attachment.type !== "hook_success")
       .map((e) => e.attachment.type))].sort(),

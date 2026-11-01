@@ -23,7 +23,7 @@
     ],
     "expected": [],
     "adjudicated": false,
-    "note": "An approval. The most likely spoiled case in the set: an advisory here is a needless nudge over a turn that was already correct in saying nothing."
+    "note": "An approval: the turn before already answered, and a protocol or a pointer here is a needless nudge over a turn that was correct in saying nothing."
   },
   {
     "id": "singleton-inquire",
@@ -122,7 +122,7 @@
     ],
     "expected": [],
     "adjudicated": false,
-    "note": "A gate holds and this is a free response at it, which that protocol's contract reads first. Scored on the advisory staying out of the way: holding is a reading of a contract, not a detection."
+    "note": "A gate holds and this is a free response at it, which that protocol's contract reads first. Scored on routing staying out of the way: holding is a reading of a contract, not a detection."
   },
   {
     "id": "monitor-gate-holds-different-deficit",
@@ -140,27 +140,7 @@
     ],
     "expected": [],
     "adjudicated": false,
-    "note": "A different deficit surfaces while a gate holds. Whether to bring a protocol in beside that run is Route's own composition judgment, with the gate staying the person's; the hook must not pre-empt it."
-  },
-  {
-    "id": "installed-not-loaded",
-    "outcome": "singleton",
-    "prompt": "Walk me through what we settled about the caching layer three sessions ago.",
-    "conversation": [
-      {
-        "role": "user",
-        "text": "I don't have the caching notes in front of me."
-      },
-      {
-        "role": "assistant",
-        "text": "Nothing about the caching layer is in this session's context either."
-      }
-    ],
-    "expected": [
-      "recollect"
-    ],
-    "adjudicated": false,
-    "note": "Scored for the degradation it exercises rather than the pick: if this protocol is installed but not loaded, the advisory names something the reader cannot invoke and the reader's own check has to absorb it. The field is the advisory's output, not the reader's correct move - the reader's answer here is silence, and this harness does not measure that arm."
+    "note": "A different deficit surfaces while a gate holds. Whether to bring a protocol in beside that run is judged in the turn, with the gate staying the person's."
   },
   {
     "id": "silence-deficit-arrives-mid-turn",
@@ -178,7 +158,7 @@
     ],
     "expected": [],
     "adjudicated": false,
-    "note": "The boundary case for prompt-time routing: nothing in the prompt shows a deficit, and the one that surfaces while preparing the change is outside what a reading of the prompt alone can see. The session-start frame applied mid-turn is what covers it."
+    "note": "Labelled for the prompt: nothing in it shows a deficit, so the outcome at the prompt is silence. The deficit that surfaces while preparing the change is judged when it appears, under the same purpose and table, and this label does not score that moment."
   },
   {
     "id": "singleton-inquire-bare-issue-link",
