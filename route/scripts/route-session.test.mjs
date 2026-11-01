@@ -12,7 +12,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { PREMISE_HEADER, PREMISE_INDEX } from "./route-premise.mjs";
-import { TABLE_HEADER, deriveProtocols, namedCommands, readPurpose, renderRouting, renderTable, selectProtocol } from "./route-protocols.mjs";
+import { TABLE_HEADER, deriveProtocols, readPurpose, renderRouting, renderTable, selectProtocol } from "./route-protocols.mjs";
 import { PARTS, buildContext, render } from "./route-session.mjs";
 
 const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), "route-session.mjs");
@@ -166,29 +166,16 @@ test("the routing part carries the Purpose section as written, then the table", 
   assert.ok(!routing.includes("**Your judgment**"));
 });
 
-test("the purpose goes out only beside a table carrying every command it names", () => {
-  const rows = [
-    { command: "x", deficit: "A", resolution: "B", description: "Does x." },
-    { command: "y", deficit: "C", resolution: "D", description: "Does y." },
-  ];
-  const purpose = "Invoke `/x`, then `/y`; read the descriptions below.";
+test("purpose and table each go out without the other", () => {
+  const rows = [{ command: "x", deficit: "A", resolution: "B", description: "Does x." }];
+  const purpose = "Invoke `/x`; read the description each protocol declares.";
   assert.equal(renderRouting(rows, purpose), `${purpose}\n${renderTable(rows)}`);
   // A purpose that cannot be read leaves the table alone.
   assert.equal(renderRouting(rows, null), renderTable(rows));
   assert.equal(readPurpose("/nonexistent"), null);
-  // A command the purpose names that the table lacks leaves the table alone.
-  assert.equal(renderRouting(rows.slice(0, 1), purpose), renderTable(rows.slice(0, 1)));
-  // No table, no purpose: its "descriptions below" would point at nothing.
-  assert.equal(renderRouting([], purpose), "");
+  // A host whose install record yields no table — Codex among them — still gets the purpose.
+  assert.equal(renderRouting([], purpose), purpose);
   assert.equal(renderRouting([], null), "");
-});
-
-test("the repo's own purpose names only commands the repo's table carries", () => {
-  const purpose = readPurpose(path.join(REPO, "route"));
-  const commands = new Set(repoProtocols().map((p) => p.command));
-  const named = namedCommands(purpose);
-  assert.ok(named.length > 0, "the purpose names the protocols it asks for");
-  for (const c of named) assert.ok(commands.has(c), `/${c} is named by the purpose but has no row`);
 });
 
 // ---------------------------------------------------------------------------

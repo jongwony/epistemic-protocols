@@ -35,10 +35,9 @@
  * directly.
  *
  * Every failure path is open: an unreadable payload still yields whatever
- * can be derived; a purpose that cannot be read, or that names a protocol
- * the table lacks, leaves the table alone; a derivation shortfall leaves the
- * routing entry empty while the premise entry still goes out; and an index
- * that cannot be resolved is left out. A hook that blocks a session is worse
+ * can be derived; a purpose that cannot be read leaves the table alone; a
+ * derivation shortfall sends the purpose alone, while the premise entry
+ * still goes out; and an index that cannot be resolved is left out. A hook that blocks a session is worse
  * than one that routes less.
  * Zero external dependencies: Node.js standard library only.
  */
