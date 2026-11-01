@@ -315,7 +315,7 @@ end Route
 ## Rules
 
 1. **Bring it in, shown as your reading**: Where `route` brings a protocol in, show in one line what you read and what the protocol will leave the person — your reading, never the person's words — and one line for each fit raised beside it, saying how it stands to that protocol; then invoke it before the work that rests on that ground, carrying the same reading as its argument.
-2. **Point, or add nothing**: Otherwise, one line `↗ /command — reading` for each fit `route` points at; with none, add nothing.
+2. **Point, or add nothing**: Otherwise, one line `↗ /command — reading` for each fit `route` points at; with none, add nothing. Every line a pass shows, under this rule or the one before it, gives what in the context it rests on and the protocol's declared end where its description declares one (`Line.ending`); lines give reasons, never scores or ranks.
 3. **A holding checkpoint reads first**: A protocol whose checkpoint holds the person's judgment reads their turn by its own contract before any routing does.
 4. **Dependent work waits**: Work that rests on ground not yet established waits until a protocol or the person's own words take it up — a direction to go on included — and says what it waits on; independent work goes on, and a coordinate you name as the person's is stated, never filled by default.
 
