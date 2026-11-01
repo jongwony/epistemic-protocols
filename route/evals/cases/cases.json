@@ -164,17 +164,11 @@
     "id": "singleton-inquire-bare-issue-link",
     "outcome": "singleton",
     "prompt": "https://tracker.example/issue/OPS-12/service-a-resolve-release-pipeline-and-confirm-production",
-    "conversation": [
-      {
-        "role": "user",
-        "text": "(the linked issue, read by the agent) A dependency fix has merged in one copy of the service. Rolling it out waits on where the service actually runs: confirm whether it is deployed at all, and if so where and who releases it, before any rollout."
-      }
-    ],
     "expected": [
       "inquire"
     ],
     "adjudicated": false,
-    "note": "A bare link whose issue asks to confirm where a service runs before any rollout: the next move rests on ground not yet established, and /inquire's end — what was settled and from where, what rests on weak ground, what only the user decides — is what the rollout decision needs. That the agent could collect the facts from the repositories itself does not defeat the fit (ROO-205 2a736c26). A routing pass was observed going silent on this shape."
+    "note": "A bare link; the linked issue, which the agent reads once it opens the link, says a dependency fix has merged in one copy of the service and that rolling it out waits on where the service actually runs - whether it is deployed at all, and if so where and who releases it. So the issue asks to confirm where a service runs before any rollout: the next move rests on ground not yet established, and /inquire's end — what was settled and from where, what rests on weak ground, what only the user decides — is what the rollout decision needs. That the agent could collect the facts from the repositories itself does not defeat the fit (ROO-205 2a736c26). A routing pass was observed going silent on this shape."
   },
   {
     "id": "singleton-inquire-status-quo",
