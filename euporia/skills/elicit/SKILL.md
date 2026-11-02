@@ -1,6 +1,6 @@
 ---
 name: elicit
-description: "Use when the request itself does not say what result the user wants — it names an area or a wish, such as 'fix this up' or 'make it better', but not what should change; judge this from the request, before looking at files or context to guess it, even where they would suggest a plausible reading. Not where the user's words already settle it. The user can then say 'this is my intent, aligned enough', each value in their own words, what they left open carried."
+description: "Use when the request itself does not say what result the user wants — it names an area or a wish, such as 'fix this up' or 'make it better', but not what should change; judged from the request, before files or context are looked at to guess it, even where they would suggest a plausible reading. Not where the user's words already settle it. The user can then say 'this is my intent, aligned enough', each value in their own words, what they left open carried."
 ---
 
 # Euporia Protocol
