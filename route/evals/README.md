@@ -4,7 +4,7 @@ Two sets live here. `cases/cases.json` holds routing cases — contexts with the
 
 ## Routing cases
 
-Each case in `cases/cases.json` is a context and the routing outcome it should reach under what the `SessionStart` hook injects: the `## Purpose` section of `skills/route/SKILL.md` and the protocol table beside it.
+Each case in `cases/cases.json` is a context and the routing outcome it should reach under what the `SessionStart` hook injects: `purpose.md` and the protocol table beside it.
 
 ```json
 {

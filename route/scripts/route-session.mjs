@@ -4,8 +4,8 @@
  * table once per context epoch, and the premise index beside them.
  *
  * Whether a protocol comes in is judged in the turn itself. What the session
- * start gives that judgment is the `## Purpose` section of Route's own
- * SKILL.md, carried as written — the two protocols to reach for first — and one row per
+ * start gives that judgment is the plugin's `purpose.md`, carried as
+ * written — the two protocols to reach for first — and one row per
  * installed core protocol with the description it declares. A host's
  * loaded-skills listing may drop those descriptions under a size budget,
  * so the table is supplied here rather than assumed, and it is derived,

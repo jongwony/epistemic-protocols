@@ -127,7 +127,7 @@ test("a row carries both ends of the morphism and the declared description, and 
 });
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const ROUTE_SKILL = path.join(REPO, "route", "skills", "route", "SKILL.md");
+const ROUTE_PURPOSE = path.join(REPO, "route", "purpose.md");
 
 function repoProtocols() {
   return fs.readdirSync(REPO, { withFileTypes: true })
@@ -143,27 +143,29 @@ test("the repo's own routing part — purpose and table — fits one injection",
   assert.ok(protocols.length > 0);
   assert.ok(protocols.every((p) => p.description), "every core protocol declares a description");
   const purpose = readPurpose(path.join(REPO, "route"));
-  assert.ok(purpose, "the purpose reads from route's own SKILL.md");
+  assert.ok(purpose, "the purpose reads from route's own purpose.md");
   const routing = renderRouting(protocols, purpose);
   assert.ok(routing.length <= 10000, `the routing part is ${routing.length} characters`);
 });
 
-test("the routing part carries the Purpose section as written, then the table", () => {
-  // Propagation: the purpose is the SKILL.md `## Purpose` section verbatim,
-  // so that section stays its only home.
-  const source = fs.readFileSync(ROUTE_SKILL, "utf8");
+test("the routing part carries purpose.md as written, then the table", () => {
+  // Propagation: the purpose is purpose.md verbatim, so that file stays its
+  // only home.
+  const source = fs.readFileSync(ROUTE_PURPOSE, "utf8");
   const purpose = readPurpose(path.join(REPO, "route"));
-  const at = source.indexOf("\n## Purpose\n");
-  assert.ok(at > 0, "the SKILL.md has a Purpose section");
-  const rest = source.slice(at + "\n## Purpose\n".length);
-  const next = rest.search(/^#{1,2} /m);
-  assert.equal(purpose, (next < 0 ? rest : rest.slice(0, next)).trim());
+  assert.equal(purpose, source.trim());
   assert.ok(purpose.startsWith("**Two protocols to reach for first.**"));
   const routing = renderRouting(repoProtocols(), purpose);
   assert.ok(routing.startsWith(purpose));
   assert.ok(routing.indexOf(purpose) < routing.indexOf(TABLE_HEADER), "the table follows the purpose");
-  // The judgment text of the /route contract is not injected.
-  assert.ok(!routing.includes("**Your judgment**"));
+});
+
+test("route ships no skill, so it adds no row and no command", () => {
+  // The /route skill was retired (ROO-216): the plugin is the delivery layer
+  // alone, and nothing in the session start names a /route command.
+  assert.ok(!fs.existsSync(path.join(REPO, "route", "skills")));
+  assert.equal(selectProtocol(path.join(REPO, "route")), null);
+  assert.doesNotMatch(readPurpose(path.join(REPO, "route")), /\/route\b/);
 });
 
 test("purpose and table each go out without the other", () => {
@@ -428,8 +430,8 @@ test("the premise index goes out even where no protocol resolved", () => {
 });
 
 test("without a readable purpose the injection is the table and index only", () => {
-  // The fixture plugin root carries no skills/route/SKILL.md, so no purpose is
-  // read and nothing tells the reader to invoke /route.
+  // The fixture plugin root carries no purpose.md, so no purpose is read and
+  // nothing tells the reader to invoke /route.
   const fixture = makeFixture(SUITE);
   try {
     const context = buildContext(fixture.env);
