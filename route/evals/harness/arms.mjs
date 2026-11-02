@@ -3,8 +3,8 @@
  * route plugin and checked against the shipped one before anything runs.
  *
  * An arm varies the premise delivery and nothing else. Every arm loads the
- * same route copy layout, the same protocol plugins, the same per-prompt
- * directive and the same tool matcher; what differs is what the copy's
+ * same route copy layout, the same protocol plugins and the same tool
+ * matcher; what differs is what the copy's
  * `route-premise.mjs` renders:
  *
  *   none     — no premise index at session start, and no premise line at a
@@ -32,8 +32,10 @@
  * what it returns just before the new prompt — the opposite end of the
  * context. So every copy drops its SessionStart registration, and the head is
  * rendered here, once per arm, by running that arm's own session hook script
- * against a render-only install record. SubagentStart, UserPromptSubmit and
- * PreToolUse stay registered as shipped.
+ * against a render-only install record — once per entry hooks.json registers
+ * (`routing`, `premise`), so the head is seeded as the two contexts the host
+ * would attach, each under its own size cap. SubagentStart and PreToolUse stay
+ * registered as shipped.
  *
  * A variant that renders the same text as the one it is meant to differ from
  * would run one treatment under two names, so `checkVariants` refuses the run
@@ -47,6 +49,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { PREMISE_HEADER, PREMISE_INDEX, TOOL_HEADER, leadIn } from "../../scripts/route-premise.mjs";
+import { TABLE_HEADER, readPurpose } from "../../scripts/route-protocols.mjs";
+import { PARTS } from "../../scripts/route-session.mjs";
 
 const ARMS = {
   none: { patch: "no-premise", clause: false },
@@ -88,21 +92,16 @@ function withoutSessionStart(hooksText) {
   return JSON.stringify(hooks, null, 2) + "\n";
 }
 
-/** The environment a route script runs under in this harness: no evaluator key. */
-function scrubbedEnv(base = process.env, keyEnvs = []) {
+/**
+ * The environment a route script runs under in this harness: the inherited
+ * CLAUDE_PLUGIN_ROOT dropped, so a script resolves the copy it belongs to, and
+ * any further variables the caller names cleared.
+ */
+function scrubbedEnv(base = process.env, drop = []) {
   const env = { ...base };
-  for (const name of new Set(["TYPESAFE_API_KEY", ...keyEnvs])) delete env[name];
+  for (const name of new Set(drop)) delete env[name];
   delete env.CLAUDE_PLUGIN_ROOT;
   return env;
-}
-
-/** The variable the shipped evaluator binding arms on. */
-function evaluatorKeyEnv(repo) {
-  try {
-    return JSON.parse(fs.readFileSync(path.join(repo, "route", "config", "evaluator.json"), "utf8")).apiKeyEnv || null;
-  } catch {
-    return null;
-  }
 }
 
 /**
@@ -151,8 +150,8 @@ function buildArmPlugins({ repo, workRoot, arms, protocolDirs, marketplace, salt
 }
 
 /** Runs one of the copy's hook scripts on `payload`; returns its additionalContext or "". */
-function runHook(plugin, script, payload, env) {
-  const r = spawnSync(process.execPath, [path.join(plugin.routeDir, "scripts", script)], {
+function runHook(plugin, script, payload, env, args = []) {
+  const r = spawnSync(process.execPath, [path.join(plugin.routeDir, "scripts", script), ...args], {
     input: JSON.stringify(payload),
     encoding: "utf8",
     env: { ...env, CLAUDE_CONFIG_DIR: plugin.renderConfig, CLAUDE_PLUGIN_ROOT: plugin.routeDir },
@@ -164,13 +163,18 @@ function runHook(plugin, script, payload, env) {
 }
 
 /**
- * What a plugin copy delivers: the session-start context, the tool-channel
- * lines at a delegation and at an instruction-surface edit, and the
- * subagent-start context.
+ * What a plugin copy delivers: the session-start contexts — `sessionParts`,
+ * one per SessionStart entry, and `session`, the same parts joined for the
+ * checks that read the head as a whole — the tool-channel lines at a
+ * delegation and at an instruction-surface edit, and the subagent-start
+ * context.
  */
 function renderPlugin(plugin, env) {
+  const start = { hook_event_name: "SessionStart", source: "startup" };
+  const sessionParts = PARTS.map((part) => runHook(plugin, "route-session.mjs", start, env, [part]));
   return {
-    session: runHook(plugin, "route-session.mjs", { hook_event_name: "SessionStart", source: "startup" }, env),
+    sessionParts,
+    session: sessionParts.filter(Boolean).join("\n"),
     tool: {
       delegation: runHook(plugin, "route-tool.mjs", { hook_event_name: "PreToolUse", tool_name: "Agent", tool_input: { prompt: "x" } }, env),
       instruction: runHook(plugin, "route-tool.mjs", { hook_event_name: "PreToolUse", tool_name: "Edit", tool_input: { file_path: "/x/skills/a/SKILL.md" } }, env),
@@ -198,12 +202,6 @@ function sameAs(a, pa, b, pb) {
   return norm(a, pa) === norm(b, pb);
 }
 
-/** The deficit table: whatever a session context carries above the premise header. */
-function tablePart(session) {
-  const at = session.indexOf(PREMISE_HEADER);
-  return (at < 0 ? session : session.slice(0, at)).trim();
-}
-
 /**
  * Checks each selected arm renders what its definition says, against the
  * shipped rendering. Returns the list of checks that held; throws with every
@@ -225,14 +223,17 @@ function checkVariants({ arms, rendered, plugins, expectTable = true }) {
   check(shipped.tool.delegation.startsWith(TOOL_HEADER) && hasLead(shipped.tool.delegation), "shipped: a delegation call gets a tool line quoting its lead");
   check(shipped.tool.instruction.startsWith(TOOL_HEADER) && hasLead(shipped.tool.instruction), "shipped: an instruction-surface edit gets a tool line quoting its lead");
   check(shipped.subagent.includes(PREMISE_HEADER), "shipped: a subagent gets the premise index");
-  if (expectTable) check(tablePart(shipped.session).length > 0, "shipped: session context carries the deficit table");
+  if (expectTable) check(shipped.sessionParts[0].includes(TABLE_HEADER), "shipped: session context carries the deficit table");
+  const purpose = readPurpose(plugins["as-shipped"].routeDir);
+  check(!!purpose && shipped.sessionParts[0].startsWith(purpose), "shipped: the routing entry opens with the purpose");
+  check(shipped.sessionParts.every((p) => p.length <= 10000), "shipped: each session-start entry fits the host's 10,000-character cap");
 
   for (const arm of arms) {
     const r = rendered[ARMS[arm].patch];
     if (arm === "none") {
       check(r.session !== shipped.session, "none: session context differs from shipped");
       check(!r.session.includes(PREMISE_HEADER) && !hasLead(r.session), "none: session context carries no premise index");
-      check(r.session.trim() === tablePart(shipped.session), "none: session context is the shipped deficit table alone");
+      check(r.session.trim() === shipped.sessionParts[0].trim(), "none: session context is the shipped routing part alone");
       check(r.tool.delegation === "" && r.tool.instruction === "", "none: no tool-channel premise line");
       check(r.subagent === "", "none: no subagent premise index");
     } else if (arm === "paths") {
@@ -241,7 +242,7 @@ function checkVariants({ arms, rendered, plugins, expectTable = true }) {
       check(PREMISE_INDEX.every((e) => r.session.includes(path.join(plugins["no-lead"].premiseDir, e.file))), "paths: every document's path is listed");
       check(PREMISE_INDEX.every((e) => r.session.includes(e.moments)), "paths: every document's moments are listed");
       check(!hasLead(r.session), "paths: session context quotes no lead");
-      check(tablePart(r.session) === tablePart(shipped.session), "paths: deficit table identical to shipped");
+      check(r.sessionParts[0] === shipped.sessionParts[0], "paths: routing part identical to shipped");
       check(r.tool.delegation !== shipped.tool.delegation && r.tool.delegation.startsWith(TOOL_HEADER) && !hasLead(r.tool.delegation), "paths: delegation tool line names the document without its lead");
       check(r.tool.instruction !== shipped.tool.instruction && r.tool.instruction.startsWith(TOOL_HEADER) && !hasLead(r.tool.instruction), "paths: instruction-surface tool line names the document without its lead");
       check(r.subagent !== shipped.subagent && !hasLead(r.subagent), "paths: subagent index without leads");
@@ -252,7 +253,7 @@ function checkVariants({ arms, rendered, plugins, expectTable = true }) {
       check(leads.every((l) => r.session.includes(l.lead)), "lead-only: session context quotes every lead");
       check(!r.session.includes(p.premiseDir), "lead-only: session context names no document path");
       check(PREMISE_INDEX.every((e) => !r.session.includes(e.moments)), "lead-only: session context lists no moments");
-      check(tablePart(r.session) === tablePart(shipped.session), "lead-only: deficit table identical to shipped");
+      check(r.sessionParts[0] === shipped.sessionParts[0], "lead-only: routing part identical to shipped");
       check(sameAs(r.tool, p, shipped.tool, plugins["as-shipped"]), "lead-only: tool lines as shipped");
       check(!r.subagent.includes(p.premiseDir) && leads.every((l) => r.subagent.includes(l.lead)), "lead-only: subagent index is leads alone");
     } else if (arm === "shipped" || arm === "clause") {
@@ -297,11 +298,9 @@ export {
   buildArmPlugins,
   checkVariants,
   clauseBlock,
-  evaluatorKeyEnv,
   leadsIn,
   patchSource,
   renderPlugin,
   scrubbedEnv,
-  tablePart,
   withoutSessionStart,
 };

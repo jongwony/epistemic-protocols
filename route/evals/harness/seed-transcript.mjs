@@ -49,17 +49,23 @@ function seededUuid(seed) {
 /**
  * The entries of a seeded session, in order.
  *
- * `head` is the session-start context, one string per hook output, placed
- * where a startup session carries it: before the first turn. `hookCommand`
- * is what the stored hook record names as the command that produced it.
+ * `head` is the session-start context, one entry per hook output, placed
+ * where a startup session carries it: before the first turn. An entry is
+ * the context string, or `{ content, command }` naming the command its hook
+ * record stores; a bare string's record names `hookCommand`. As the host
+ * stores a startup, each output gets its own hook record, and one context
+ * attachment then carries every output.
  * `turns` are `{ role, text }`, alternating as the conversation had them.
  * Timestamps run one minute apart, ending a minute before `now`, so the
  * seeded conversation reads as having happened just before the prompt.
  */
 function buildSeed({ cwd, sessionId, head = [], hookCommand = "", turns = [], model, version = OBSERVED_VERSION, now = Date.now() }) {
   const common = { userType: "external", entrypoint: "cli", cwd, sessionId, version };
-  const contexts = head.filter((c) => typeof c === "string" && c.trim());
-  const steps = (contexts.length ? 2 : 0) + turns.length;
+  const outputs = head
+    .map((h) => (typeof h === "string" ? { content: h, command: hookCommand } : { content: h?.content, command: h?.command ?? hookCommand }))
+    .filter((h) => typeof h.content === "string" && h.content.trim());
+  const contexts = outputs.map((h) => h.content);
+  const steps = (outputs.length ? outputs.length + 1 : 0) + turns.length;
   let clock = now - (steps + 1) * 60_000;
   const tick = () => new Date((clock += 60_000)).toISOString();
   const entries = [];
@@ -70,19 +76,21 @@ function buildSeed({ cwd, sessionId, head = [], hookCommand = "", turns = [], mo
     parent = uuid;
   };
 
-  if (contexts.length) {
-    const stdout = contexts.map((c) => JSON.stringify({
-      suppressOutput: true,
-      hookSpecificOutput: { hookEventName: "SessionStart", additionalContext: c },
-    })).join("\n");
-    push({
-      type: "attachment",
-      attachment: {
-        type: "hook_success", hookName: "SessionStart:startup",
-        toolUseID: seededUuid(`${sessionId}:hook`), hookEvent: "SessionStart",
-        content: "", stdout: `${stdout}\n`, stderr: "", exitCode: 0, command: hookCommand, durationMs: 1,
-      },
-    });
+  if (outputs.length) {
+    for (const { content, command } of outputs) {
+      const stdout = JSON.stringify({
+        suppressOutput: true,
+        hookSpecificOutput: { hookEventName: "SessionStart", additionalContext: content },
+      });
+      push({
+        type: "attachment",
+        attachment: {
+          type: "hook_success", hookName: "SessionStart:startup",
+          toolUseID: seededUuid(`${sessionId}:hook`), hookEvent: "SessionStart",
+          content: "", stdout: `${stdout}\n`, stderr: "", exitCode: 0, command, durationMs: 1,
+        },
+      });
+    }
     push({
       type: "attachment",
       attachment: {
@@ -150,9 +158,9 @@ function hookContexts(entries) {
 /**
  * What the resume added after the seeded entries, read off the transcript it
  * left: how many session-start contexts it injected (zero is the condition a
- * cell depends on), the per-prompt hook contexts it carried, and which
- * attachment types the host added on its own — the cloud session's remote
- * context among them, recorded as a host fact rather than removed.
+ * cell depends on) and which attachment types the host added on its own —
+ * the cloud session's remote context among them, recorded as a host fact
+ * rather than removed.
  */
 function auditResume(after, seeded) {
   const seededIds = new Set(seeded.map((e) => e.uuid));
@@ -161,7 +169,6 @@ function auditResume(after, seeded) {
   return {
     seededIntact: seeded.every((e) => after.some((a) => a.uuid === e.uuid)),
     sessionStartInjected: contexts.filter((c) => c.event === "SessionStart").length,
-    promptContexts: contexts.filter((c) => c.event === "UserPromptSubmit").map((c) => c.content),
     hostAttachments: [...new Set(added
       .filter((e) => e.type === "attachment" && e.attachment?.type && e.attachment.type !== "hook_additional_context" && e.attachment.type !== "hook_success")
       .map((e) => e.attachment.type))].sort(),

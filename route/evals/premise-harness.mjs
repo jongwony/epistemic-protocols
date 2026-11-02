@@ -37,9 +37,8 @@
  * checks the arms, renders every cell, and prints the matrix with an input
  * estimate per cell.
  *
- * Every cell's environment drops TYPESAFE_API_KEY (and the variable the
- * shipped evaluator binding names), so route's advisory line stays silent in
- * every arm alike. Results and work trees are not committed: results land in
+ * Every cell's environment drops an inherited CLAUDE_PLUGIN_ROOT, so each
+ * arm's scripts resolve their own copy. Results and work trees are not committed: results land in
  * `route/evals/premise-results/`, work trees under the system temp dir.
  *
  * Zero external dependencies: Node.js standard library only.
@@ -54,7 +53,8 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
-import { ARMS, buildArmPlugins, checkVariants, clauseBlock, evaluatorKeyEnv, renderPlugin, scrubbedEnv } from "./harness/arms.mjs";
+import { ARMS, buildArmPlugins, checkVariants, clauseBlock, renderPlugin, scrubbedEnv } from "./harness/arms.mjs";
+import { PARTS } from "../scripts/route-session.mjs";
 import { dirtyAfter, firstAction, parseStream } from "./harness/first-action.mjs";
 import { judgePrompt, parseVerdict } from "./harness/judge.mjs";
 import { estimateTokens, syntheticPrefix } from "./harness/prefix.mjs";
@@ -219,7 +219,7 @@ function prepareArms({ arms, protocols, workRoot, salt }) {
   const dirs = protocolDirs(protocols);
   const patches = [...new Set([...arms, "shipped"])];
   const plugins = buildArmPlugins({ repo: REPO, workRoot, arms: patches, protocolDirs: dirs, marketplace: marketplaceName(), salt });
-  const env = scrubbedEnv(process.env, [evaluatorKeyEnv(REPO)].filter(Boolean));
+  const env = scrubbedEnv(process.env);
   const rendered = Object.fromEntries(Object.entries(plugins).map(([patch, p]) => [patch, renderPlugin(p, env)]));
   const checks = checkVariants({ arms, rendered, plugins, expectTable: dirs.length > 0 });
   return { plugins, rendered, checks, protocolDirs: dirs };
@@ -237,10 +237,10 @@ function planCells({ cases, arms, lengths, reps, longTokens }, prepared) {
         for (const arm of arms) {
           const def = ARMS[arm];
           const plugin = prepared.plugins[def.patch];
-          const head = [prepared.rendered[def.patch].session].filter(Boolean);
+          const head = sessionHead(prepared.rendered[def.patch].sessionParts);
           const turns = LENGTHS[length](c, prefix);
           const prompt = def.clause ? `${c.prompt}\n\n${clauseBlock(c, plugin.premiseDir)}` : c.prompt;
-          const estTokens = estimateTokens(head.join("\n")) + turns.reduce((s, t) => s + estimateTokens(t.text), 0) + estimateTokens(prompt);
+          const estTokens = estimateTokens(headText(head)) + turns.reduce((s, t) => s + estimateTokens(t.text), 0) + estimateTokens(prompt);
           if (!c.scaffold) throw new Error(`${c.id}: no scaffold`);
           cells.push({ key: `${c.id}__${arm}__${length}__r${rep}`, case: c, arm, length, rep, plugin, head, turns, prompt, estTokens });
         }
@@ -293,12 +293,29 @@ function layOutCell(workRoot, runId, key, scaffold) {
   return { cellDir, cwd: fs.realpathSync(repoDir), configDir, settings, treeLog };
 }
 
+/** The command a SessionStart entry runs, as hooks.json registers it; with no part, every part joined. */
+function hookCommand(part) {
+  return `node "\${CLAUDE_PLUGIN_ROOT}/scripts/route-session.mjs"${part ? ` ${part}` : ""}`;
+}
+
+const HOOK_COMMAND = hookCommand();
+
+/** The seeded head: each non-empty session-start part with the command whose entry produced it. */
+function sessionHead(parts) {
+  return PARTS.map((part, i) => ({ content: parts[i], command: hookCommand(part) })).filter((h) => h.content);
+}
+
+/** The head's text, for estimating its size. */
+function headText(head) {
+  return head.map((h) => (typeof h === "string" ? h : h.content)).join("\n");
+}
+
 /** Launches one resumed session; returns the trace, the seed and what the resume left. */
 function launch({ o, cell, cwd, configDir, settings, protocolDirs: dirs, remaining, version }) {
   const sessionId = crypto.randomUUID();
   const seed = buildSeed({
     cwd, sessionId, head: cell.head, turns: cell.turns, model: o.model, version,
-    hookCommand: 'node "${CLAUDE_PLUGIN_ROOT}/scripts/route-session.mjs"',
+    hookCommand: HOOK_COMMAND,
   });
   writeSeed(configDir, cwd, sessionId, seed);
   const args = [
@@ -315,7 +332,7 @@ function launch({ o, cell, cwd, configDir, settings, protocolDirs: dirs, remaini
     "--resume", sessionId,
     cell.prompt,
   ];
-  const env = { ...scrubbedEnv(process.env, [evaluatorKeyEnv(REPO)].filter(Boolean)), CLAUDE_CONFIG_DIR: configDir };
+  const env = { ...scrubbedEnv(process.env), CLAUDE_CONFIG_DIR: configDir };
   const r = spawnSync("claude", args, { cwd, env, encoding: "utf8", maxBuffer: 256 * 1024 * 1024, timeout: o.timeoutSeconds * 1000 });
   const after = readTranscript(transcriptPath(configDir, cwd, sessionId));
   return { r, sessionId, seed, after, audit: auditResume(after, seed) };
@@ -418,17 +435,17 @@ function seedCheck(o) {
   const prefix = syntheticPrefix({ tokens: o.longTokens });
   const tokens = seedTokens(runId);
   const cells = SEED_VARIANTS.map((variant) => {
-    const head = [prepared.rendered["as-shipped"].session, headLine(tokens)].filter(Boolean);
+    const head = [...sessionHead(prepared.rendered["as-shipped"].sessionParts), headLine(tokens)];
     const turns = seedTurns(variant, tokens, prefix);
     return {
       key: `seed-check__${variant}`, variant, plugin, head, turns, prompt: SEED_PROMPT, maxTurns: 2,
-      estTokens: estimateTokens(head.join("\n")) + turns.reduce((s, t) => s + estimateTokens(t.text), 0) + estimateTokens(SEED_PROMPT),
+      estTokens: estimateTokens(headText(head)) + turns.reduce((s, t) => s + estimateTokens(t.text), 0) + estimateTokens(SEED_PROMPT),
     };
   });
   if (o.dryRun) {
     console.log(`seed-check cells (shipped arm, max turns 2), long prefix ~${o.longTokens} tokens:`);
     for (const c of cells) console.log(`  ${c.key.padEnd(22)} turns ${String(c.turns.length).padStart(3)}  est. input tokens ${c.estTokens}`);
-    console.log(`passes when: ${["head context read", "first seeded turn read", "last seeded turn read", "seeded entries intact after resume", "no session-start context injected at resume", "per-prompt route directive delivered"].join("; ")}`);
+    console.log(`passes when: ${["head context read", "first seeded turn read", "last seeded turn read", "seeded entries intact after resume", "no session-start context injected at resume"].join("; ")}`);
     fs.rmSync(workRoot, { recursive: true, force: true });
     return;
   }
@@ -497,7 +514,7 @@ function judge(o) {
       const remaining = o.maxCostUsd - spent;
       if (remaining < 0.01) { console.log(`stopping: $${spent.toFixed(4)} spent of $${o.maxCostUsd}`); break; }
       const prompt = judgePrompt(cases.get(r.case), r, r.redactions);
-      const env = { ...scrubbedEnv(process.env, [evaluatorKeyEnv(REPO)].filter(Boolean)), CLAUDE_CONFIG_DIR: path.join(scratch, "h") };
+      const env = { ...scrubbedEnv(process.env), CLAUDE_CONFIG_DIR: path.join(scratch, "h") };
       const out = spawnSync("claude", ["-p", "--output-format", "json", "--model", o.model, "--max-turns", "1", "--tools", "", "--no-session-persistence", "--max-budget-usd", remaining.toFixed(2), prompt],
         { cwd: scratch, env, encoding: "utf8", maxBuffer: 16 * 1024 * 1024, timeout: o.timeoutSeconds * 1000 });
       let parsed = null;

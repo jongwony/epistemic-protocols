@@ -69,10 +69,9 @@ function readAnswer(text) {
  * The verdict on a seed-check cell, offline.
  *
  * `reply` is the final result text, `audit` is `auditResume`'s reading of
- * the transcript the resume left, `expectDirective` a string the per-prompt
- * route directive starts with (its presence shows the route copy loaded).
+ * the transcript the resume left.
  */
-function seedCheckVerdict({ variant, tokens, reply, audit, expectDirective = "[route]" }) {
+function seedCheckVerdict({ variant, tokens, reply, audit }) {
   const answer = readAnswer(reply);
   const want = {
     HEAD: tokens.head,
@@ -85,7 +84,6 @@ function seedCheckVerdict({ variant, tokens, reply, audit, expectDirective = "[r
     { name: "last seeded turn read", ok: answer.LAST === want.LAST, got: answer.LAST ?? null, want: want.LAST },
     { name: "seeded entries intact after resume", ok: !!audit?.seededIntact },
     { name: "no session-start context injected at resume", ok: audit?.sessionStartInjected === 0, got: audit?.sessionStartInjected ?? null },
-    { name: "per-prompt route directive delivered", ok: (audit?.promptContexts ?? []).some((c) => c.startsWith(expectDirective)) },
   ];
   return { pass: checks.every((c) => c.ok), checks, hostAttachments: audit?.hostAttachments ?? [] };
 }

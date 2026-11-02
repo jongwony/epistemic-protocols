@@ -13,7 +13,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-import { ARMS, checkVariants, evaluatorKeyEnv, patchSource, scrubbedEnv, withoutSessionStart } from "./arms.mjs";
+import { ARMS, checkVariants, patchSource, scrubbedEnv, withoutSessionStart } from "./arms.mjs";
 import { DEPENDENT_TOOLS, describeAction, dirtyAfter, firstAction, parseStream } from "./first-action.mjs";
 import { finalVerdict, judgePrompt, parseVerdict } from "./judge.mjs";
 import { estimateTokens, syntheticPrefix } from "./prefix.mjs";
@@ -49,6 +49,22 @@ test("a seed puts the session-start context at the head, then the turns, chained
   assert.deepEqual([...seededMessageIds(entries)], [entries[3].message.id]);
 });
 
+test("a head of several outputs seeds one hook record per output, then one context attachment carrying them all", () => {
+  // The shape a startup with two SessionStart entries leaves in its transcript.
+  const entries = buildSeed({
+    cwd: "/w", sessionId: "s2", model: "m", hookCommand: "node hook.mjs",
+    head: [{ content: "PURPOSE\nTABLE", command: "node hook.mjs routing" }, { content: "INDEX", command: "node hook.mjs premise" }, "TOKEN"],
+  });
+  const hooks = entries.filter((e) => e.attachment?.type === "hook_success");
+  assert.deepEqual(hooks.map((e) => e.attachment.command), ["node hook.mjs routing", "node hook.mjs premise", "node hook.mjs"]);
+  assert.deepEqual(hooks.map((e) => JSON.parse(e.attachment.stdout).hookSpecificOutput.additionalContext), ["PURPOSE\nTABLE", "INDEX", "TOKEN"]);
+  assert.equal(new Set(hooks.map((e) => e.attachment.toolUseID)).size, 1);
+  const context = entries.filter((e) => e.attachment?.type === "hook_additional_context");
+  assert.equal(context.length, 1);
+  assert.deepEqual(context[0].attachment.content, ["PURPOSE\nTABLE", "INDEX", "TOKEN"]);
+  assert.equal(entries.indexOf(context[0]), hooks.length);
+});
+
 test("an empty head seeds no hook entries", () => {
   const entries = buildSeed({ cwd: "/w", sessionId: "s", head: [""], turns: [{ role: "user", text: "x" }], model: "m" });
   assert.deepEqual(entries.map((e) => e.type), ["user"]);
@@ -72,11 +88,10 @@ test("a seed is written where the host looks for the session", () => {
 test("the resume audit counts a second session-start injection and records what the host added", () => {
   const seed = buildSeed({ cwd: "/w", sessionId: "s", head: ["H"], turns: [{ role: "user", text: "q" }, { role: "assistant", text: "a" }], model: "m" });
   const ctx = (event, content) => ({ type: "attachment", uuid: `u-${event}-${content}`, attachment: { type: "hook_additional_context", hookEvent: event, content: [content] } });
-  const clean = [...seed, ctx("UserPromptSubmit", "[route] directive"), { type: "attachment", uuid: "e1", attachment: { type: "credential_org" } }, { type: "user", uuid: "p" }];
+  const clean = [...seed, ctx("PreToolUse", "premise line"), { type: "attachment", uuid: "e1", attachment: { type: "credential_org" } }, { type: "user", uuid: "p" }];
   const a = auditResume(clean, seed);
   assert.equal(a.seededIntact, true);
   assert.equal(a.sessionStartInjected, 0);
-  assert.deepEqual(a.promptContexts, ["[route] directive"]);
   assert.deepEqual(a.hostAttachments, ["credential_org"]);
   const injected = auditResume([...seed, ctx("SessionStart", "H again")], seed);
   assert.equal(injected.sessionStartInjected, 1);
@@ -206,14 +221,13 @@ test("a verdict is read from the judge's reply, and a person's verdict stands ov
 
 test("the seed check passes only when every seeded end was read and nothing was re-injected", () => {
   const tokens = seedTokens("t");
-  const audit = { seededIntact: true, sessionStartInjected: 0, promptContexts: ["[route] When a request"], hostAttachments: ["credential_org"] };
+  const audit = { seededIntact: true, sessionStartInjected: 0, hostAttachments: ["credential_org"] };
   const reply = `HEAD=${tokens.head}\nFIRST=${tokens.first}\nLAST=${tokens.last}`;
   const ok = seedCheckVerdict({ variant: "short", tokens, reply, audit });
   assert.equal(ok.pass, true);
   assert.deepEqual(ok.hostAttachments, ["credential_org"]);
   assert.equal(seedCheckVerdict({ variant: "short", tokens, reply, audit: { ...audit, sessionStartInjected: 1 } }).pass, false);
   assert.equal(seedCheckVerdict({ variant: "short", tokens, reply: reply.replace(tokens.head, "NONE"), audit }).pass, false);
-  assert.equal(seedCheckVerdict({ variant: "short", tokens, reply, audit: { ...audit, promptContexts: [] } }).pass, false);
   assert.equal(seedCheckVerdict({ variant: "head-only", tokens, reply: `HEAD=${tokens.head}\nFIRST=NONE\nLAST=NONE`, audit }).pass, true);
   assert.deepEqual(readAnswer("**HEAD=abc**\n FIRST = `x`.\n"), { HEAD: "abc", FIRST: "x" });
 });
@@ -300,7 +314,7 @@ test("every arm builds from this checkout and renders what it is defined to", ()
     assert.ok(prepared.checks.length > 0);
     for (const p of Object.values(prepared.plugins)) {
       const hooks = JSON.parse(fs.readFileSync(path.join(p.routeDir, "hooks", "hooks.json"), "utf8"));
-      assert.ok(!hooks.hooks.SessionStart && hooks.hooks.UserPromptSubmit && hooks.hooks.PreToolUse && hooks.hooks.SubagentStart);
+      assert.ok(!hooks.hooks.SessionStart && !hooks.hooks.UserPromptSubmit && hooks.hooks.PreToolUse && hooks.hooks.SubagentStart);
       assert.ok(!fs.existsSync(path.join(p.routeDir, "evals")));
       assert.ok(!/none|paths|shipped|clause/.test(path.basename(p.root)), "no arm name in a visible path");
     }
@@ -333,10 +347,8 @@ test("nothing that spends runs without a model and a ceiling", () => {
   assert.throws(() => options(["run", "--lengths", "medium"]), /unknown length/);
 });
 
-test("every cell runs without the evaluator key, and denies delegation at the call", () => {
-  const keyEnv = evaluatorKeyEnv(path.join(HERE, "..", "..", ".."));
-  assert.ok(keyEnv, "the shipped evaluator binding names its variable");
-  const env = scrubbedEnv({ TYPESAFE_API_KEY: "k", [keyEnv]: "k", CLAUDE_PLUGIN_ROOT: "/elsewhere", PATH: "/bin" }, [keyEnv]);
+test("every cell resolves its own copy, and denies delegation at the call", () => {
+  const env = scrubbedEnv({ EXTRA: "k", CLAUDE_PLUGIN_ROOT: "/elsewhere", PATH: "/bin" }, ["EXTRA"]);
   assert.deepEqual(env, { PATH: "/bin" });
   const [entry] = DENY_DELEGATION.hooks.PreToolUse;
   const matcher = new RegExp(entry.matcher);

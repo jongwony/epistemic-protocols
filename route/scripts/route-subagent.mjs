@@ -7,9 +7,9 @@
  * SessionStart hook does not run for it and its context is its own brief.
  * Both hosts add a SubagentStart hook's additionalContext to the
  * subagent's own context before its first prompt, so the same index goes
- * out here, rendered the same way (route-premise.mjs). The deficit table
- * does not: it is the catalog the per-prompt directive routes against,
- * which belongs to the conversation with the user.
+ * out here, rendered the same way (route-premise.mjs). The routing part
+ * does not; where a pass belongs is stated in the /route contract's `route`
+ * judgment.
  *
  * A fork inherits the parent conversation, index included, so a subagent
  * whose type is `fork` gets nothing here. Any other type is taken as

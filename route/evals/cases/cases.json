@@ -5,7 +5,7 @@
     "prompt": "Rename the `timeoutMs` field to `requestTimeoutMs` across the three files that read it.",
     "expected": [],
     "adjudicated": true,
-    "note": "Confirmed. Scope and target are both in the prompt - the field, the new name, and that three files read it. No protocol's deficit is present: nothing is missing that only the user holds, no mapping is in question, no framing is absent. Silence is the answer, and it is the common case."
+    "note": "Confirmed. Scope and target are both in the prompt - the field, the new name, and that three files read it. No protocol's deficit is present: the next move rests on no ground left unestablished, and finding the three files leaves the user nothing to recognize, no mapping is in question, no framing is absent. Silence is the answer: the user's own words settle what the rename rests on, so reading the code to carry it out is not gathering."
   },
   {
     "id": "silence-answered-question",
@@ -23,7 +23,7 @@
     ],
     "expected": [],
     "adjudicated": false,
-    "note": "An approval. The most likely spoiled case in the set: an advisory here is a needless nudge over a turn that was already correct in saying nothing."
+    "note": "An approval: the turn before already answered, and a protocol or a pointer here is a needless nudge over a turn that was correct in saying nothing."
   },
   {
     "id": "singleton-inquire",
@@ -33,7 +33,7 @@
       "inquire"
     ],
     "adjudicated": false,
-    "note": "The person asks what the work rests on before it moves: the intent to have its ground collected is in the utterance, so /inquire's deficit is recognized from what they said rather than inferred from the task's kind. A bare instruction to do the work names a task kind and is not this trigger. /bound does not fit: the gap is user-held fact, not an unscoped task awaiting delegation. /conduct does not either: what is missing is inputs, not the order of moves."
+    "note": "The person asks what the work rests on before it moves: the intent to have its ground collected is in the utterance, so /inquire's deficit is recognized from what they said rather than inferred from the task's kind. An instruction whose words already fix what to do names a task, not this trigger; work whose ground is not yet established is, whether or not the prompt asks for it in so many words. /bound does not fit: the gap is user-held fact, not an unscoped task awaiting delegation. /conduct does not either: what is missing is inputs, not the order of moves."
   },
   {
     "id": "singleton-ground",
@@ -122,7 +122,7 @@
     ],
     "expected": [],
     "adjudicated": false,
-    "note": "A gate holds and this is a free response at it, which that protocol's contract reads first. Scored on the advisory staying out of the way: holding is a reading of a contract, not a detection."
+    "note": "A gate holds and this is a free response at it, which that protocol's contract reads first. Scored on routing staying out of the way: holding is a reading of a contract, not a detection."
   },
   {
     "id": "monitor-gate-holds-different-deficit",
@@ -140,27 +140,7 @@
     ],
     "expected": [],
     "adjudicated": false,
-    "note": "A different deficit surfaces while a gate holds. Whether to bring a protocol in beside that run is Route's own composition judgment, with the gate staying the person's; the hook must not pre-empt it."
-  },
-  {
-    "id": "installed-not-loaded",
-    "outcome": "singleton",
-    "prompt": "Walk me through what we settled about the caching layer three sessions ago.",
-    "conversation": [
-      {
-        "role": "user",
-        "text": "I don't have the caching notes in front of me."
-      },
-      {
-        "role": "assistant",
-        "text": "Nothing about the caching layer is in this session's context either."
-      }
-    ],
-    "expected": [
-      "recollect"
-    ],
-    "adjudicated": false,
-    "note": "Scored for the degradation it exercises rather than the pick: if this protocol is installed but not loaded, the advisory names something the reader cannot invoke and the reader's own check has to absorb it. The field is the advisory's output, not the reader's correct move - the reader's answer here is silence, and this harness does not measure that arm."
+    "note": "A different deficit surfaces while a gate holds. Whether to bring a protocol in beside that run is judged in the turn, with the gate staying the person's."
   },
   {
     "id": "silence-deficit-arrives-mid-turn",
@@ -178,6 +158,34 @@
     ],
     "expected": [],
     "adjudicated": false,
-    "note": "The boundary case for the whole channel: nothing in the prompt shows a deficit, and the one that surfaces while preparing the change is outside what a prompt-time evaluator can see. The static directive is what covers it, which is why the advisory never replaces the directive."
+    "note": "Labelled for the prompt: nothing in it shows a deficit, so the outcome at the prompt is silence. The deficit that surfaces while preparing the change is judged when it appears, under the same purpose and table, and this label does not score that moment."
+  },
+  {
+    "id": "singleton-inquire-bare-issue-link",
+    "outcome": "singleton",
+    "prompt": "https://tracker.example/issue/OPS-12/service-a-resolve-release-pipeline-and-confirm-production",
+    "expected": [
+      "inquire"
+    ],
+    "adjudicated": false,
+    "note": "A bare link; the linked issue, which the agent reads once it opens the link, says a dependency fix has merged in one copy of the service and that rolling it out waits on where the service actually runs - whether it is deployed at all, and if so where and who releases it. So the issue asks to confirm where a service runs before any rollout: the next move rests on ground not yet established, and /inquire's end — what was settled and from where, what rests on weak ground, what only the user decides — is what the rollout decision needs. That the agent could collect the facts from the repositories itself does not defeat the fit."
+  },
+  {
+    "id": "singleton-inquire-status-quo",
+    "outcome": "singleton",
+    "prompt": "Check the AI Data Governance status quo.",
+    "expected": [
+      "inquire"
+    ],
+    "adjudicated": false,
+    "note": "A request for the state of things: the result is itself a claim about state resting on sources of differing provenance and freshness, so the user needs to recognize where each part came from and where it is weak. The request is the collection intent; that the agent can look the sources up does not defeat the fit."
+  },
+  {
+    "id": "silence-git-pull",
+    "outcome": "silence",
+    "prompt": "git pull",
+    "expected": [],
+    "adjudicated": false,
+    "note": "The repository and branch are fixed by the working directory and nothing in context contradicts them; the result shows itself in git's output and leaves the user nothing to recognize. Having to read the repository state does not make ground unestablished."
   }
 ]

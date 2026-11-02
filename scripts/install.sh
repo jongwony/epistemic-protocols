@@ -18,9 +18,8 @@ MANIFEST_URL="https://raw.githubusercontent.com/$REPO/main/.claude-plugin/market
 # from the manifest; this is the one hand-maintained exclusion, guarded by
 # scripts/package.test.js against naming a plugin the manifest no longer has.
 # Nothing is left out:
-#   route — its session-start table and per-prompt directive let the agent
-#           reach a protocol without the user naming one; its advisory channel
-#           stays off until armed.
+#   route — its session-start purpose and protocol table let the agent
+#           reach a protocol without the user naming one.
 #   epistemic-cooperative — /onboard lets a new user try the protocols in a
 #           guided run, alongside /probe and review and audit tooling.
 # Leave either out after install with: claude plugin disable <name>@epistemic-protocols
