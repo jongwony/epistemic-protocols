@@ -270,24 +270,8 @@ describe('transformSkillMd', () => {
     assert.ok(result.includes('Body'));
   });
 
-  it('overrides long descriptions when override exists', () => {
-    // Installs its own fixture entry rather than naming a live skill: the table is
-    // empty whenever every source description fits the limit, and this test is about
-    // the override path, not about which skills happen to need one.
-    const longDesc = 'A'.repeat(201);
-    DESCRIPTION_OVERRIDES['__fixture-skill'] = 'Short override';
-    try {
-      const content = `---\nname: __fixture-skill\ndescription: ${longDesc}\n---\nBody`;
-      const result = transformSkillMd(content, '__fixture-skill');
-      const { fields } = parseFrontmatter(result);
-      assert.equal(fields.get('description'), 'Short override');
-    } finally {
-      delete DESCRIPTION_OVERRIDES['__fixture-skill'];
-    }
-  });
-
   it('preserves long descriptions when no override defined', () => {
-    const longDesc = 'A'.repeat(201);
+    const longDesc = 'A'.repeat(DESCRIPTION_LIMIT + 1);
     const content = `---\nname: custom\ndescription: ${longDesc}\n---\nBody`;
     const result = transformSkillMd(content, 'custom');
     const { fields } = parseFrontmatter(result);
@@ -1273,10 +1257,7 @@ describe('default installer skip list', () => {
 
 describe('packaged discovery metadata', () => {
   it('keeps every packaged description within the discovery limit', () => {
-    // The override path used to bypass the length warning entirely: the check fired
-    // only when NO override existed, so an over-limit override shipped silently.
-    // This asserts the thing that is actually statically decidable — the description a
-    // runtime reader receives, after transformation, and its length.
+    // Measures the description a runtime reader receives, after transformation.
     const offenders = [];
     for (const plugin of PLUGINS) {
       const skillPath = path.join(__dirname, '..', plugin.dir, 'skills', plugin.skill, 'SKILL.md');
@@ -1305,17 +1286,18 @@ describe('packaged discovery metadata', () => {
     assert.deepEqual(offenders, [], offenders.join('; '));
   });
 
-  it('keeps an override only where its source description exceeds the discovery limit', () => {
-    const dormant = [];
+  it('ships each SKILL.md description as written, with no override', () => {
+    assert.deepEqual(Object.keys(DESCRIPTION_OVERRIDES), [], 'DESCRIPTION_OVERRIDES must stay empty');
+    const changed = [];
     for (const plugin of PLUGINS) {
-      if (!Object.hasOwn(DESCRIPTION_OVERRIDES, plugin.skill)) continue;
       const skillPath = path.join(__dirname, '..', plugin.dir, 'skills', plugin.skill, 'SKILL.md');
-      const { fields } = parseFrontmatter(fs.readFileSync(skillPath, 'utf8'));
-      if ((fields.get('description') || '').length <= DESCRIPTION_LIMIT) dormant.push(plugin.skill);
+      if (!fs.existsSync(skillPath)) continue;
+      const source = fs.readFileSync(skillPath, 'utf8');
+      const before = parseFrontmatter(source).fields.get('description') || '';
+      const after = parseFrontmatter(transformSkillMd(source, plugin.skill)).fields.get('description') || '';
+      if (before !== after) changed.push(plugin.skill);
     }
-    const known = new Set(PLUGINS.map((p) => p.skill));
-    const orphan = Object.keys(DESCRIPTION_OVERRIDES).filter((k) => !known.has(k));
-    assert.deepEqual([...dormant, ...orphan], [], `overrides that never fire: ${[...dormant, ...orphan].join(', ')}`);
+    assert.deepEqual(changed, [], `packaged description differs from SKILL.md: ${changed.join(', ')}`);
   });
 });
 
