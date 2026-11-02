@@ -1,6 +1,6 @@
 ---
 name: bound
-description: "The user cannot yet see what a task needs decided, or what to keep or entrust: they can then see each decision, what rests on it, its cost if wrong, what settled it, and what stays open and with whom."
+description: "Use when what a task needs decided is not yet visible — which decisions it turns on, what to keep or entrust, and with whom — before work proceeds on that undrawn boundary; not where the direction a source gives already settles it, or nothing would await the user. The user can then see each decision, what rests on it, its cost if wrong, what settled it, and what stays open and with whom."
 ---
 
 # Horismos Protocol

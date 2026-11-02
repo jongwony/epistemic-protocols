@@ -1,6 +1,6 @@
 ---
 name: grasp
-description: "Something in play — code, a document, a result — the user can't follow yet or nods along to unsure: they can then say their understanding serves their purpose, on a map checked with them."
+description: "Use when the user signals they want to understand something already in play — a result, a document, a file, work done for them — that they cannot follow yet or nod along to unsure; not for an unrelated question or an account that already shows understanding. The user can then say their understanding serves their purpose, on a map checked with them."
 ---
 
 # Katalepsis Protocol

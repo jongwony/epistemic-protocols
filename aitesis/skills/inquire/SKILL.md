@@ -1,6 +1,6 @@
 ---
 name: inquire
-description: "A task rests on missing context or unchecked assumptions: the user can then recognize what was settled and from where, what rests on weak or unreached ground, and what only they decide."
+description: "Use before gathering context — opening a link or issue, reading records, threads, documents, files or state to establish what is the case, a status check included — even where the agent could gather it itself; not where the user's words already settle what the work rests on, such as a command they named. The user can then recognize what was settled and from where, what rests on weak or unreached ground, and what only they decide."
 ---
 
 # Aitesis Protocol

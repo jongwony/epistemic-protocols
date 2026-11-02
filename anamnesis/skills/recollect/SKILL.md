@@ -1,6 +1,6 @@
 ---
 name: recollect
-description: "The user vaguely recalls a past discussion, line of work, topic, or settled concept but cannot name it: find it in past records to recognize in a story, knowing it took place, not that it still holds."
+description: "Use when the user reaches for something past they cannot name or locate — a discussion, line of work, topic, session or settled concept — by a vague time, an existence claim without a locator, or visible recall effort; not when they give an exact reference or seek new information. Finds it in past records so the user recognizes it in a story, knowing it took place, not that it still holds."
 ---
 
 # Anamnesis Protocol

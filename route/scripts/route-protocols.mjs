@@ -104,9 +104,9 @@ function soleSkill(dir) {
  * one keeps its row, with the deficit alone.
  *
  * The frontmatter `description` is read too and goes on the protocol's row.
- * It is each protocol's own declaration of what deficit it resolves, so
- * anything that has to tell two protocols apart reads it from here rather
- * than being told the difference.
+ * It is each protocol's own statement of when to use it and what the user can
+ * then recognize, so anything that has to tell two protocols apart reads it
+ * from here rather than being told the difference.
  */
 function readProtocol(skillFile) {
   let text;

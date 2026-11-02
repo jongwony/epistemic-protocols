@@ -1,6 +1,6 @@
 ---
 name: apportion
-description: "One goal is about to be handed to an autonomous run: the user takes a plan of units with checks, accepted gaps and held judgments, seeing what needed settling first and what returns at the end."
+description: "Use when the user is about to hand one goal to an autonomous run, or asks for it to be planned for one, and no plan yet says when each unit is done. The user takes a plan of units with checks, accepted gaps and held judgments, seeing what needed settling first and what returns at the end."
 ---
 
 # Merismos Protocol

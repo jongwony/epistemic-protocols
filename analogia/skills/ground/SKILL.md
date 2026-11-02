@@ -1,6 +1,6 @@
 ---
 name: ground
-description: "A framework, analogy, or earlier design is carried to a case, or an abstraction tested: the user can say what carries each conclusion, what would break it, and if it holds, is blocked, or is open."
+description: "Use when a framework, analogy, earlier design or sibling structure is to be carried to a case, or an abstraction tested against its own cases, and what it licenses there is still open — judged from the request, before either side is read and compared; not where what the mapping licenses is already settled, or the user only wants an explanation. The user can then say what carries each conclusion, what would break it, and whether it holds, is blocked, or is open."
 ---
 
 # Analogia Protocol

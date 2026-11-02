@@ -29,22 +29,6 @@ const _records = discoverPlugins({ projectRoot });
 
 const PLUGINS = _records.map(r => ({ dir: r.dir, skill: r.skill }));
 
-// Compact description overrides for packaged discovery metadata.
-//
-// An entry fires only while its source description exceeds DESCRIPTION_LIMIT,
-// and it replaces that description in the packaged artifact. The replacement is
-// silent, which is what let authored and shipped descriptions diverge unnoticed:
-// a skill could carry one description in its SKILL.md and ship another. So an
-// entry whose source already fits the limit is deleted rather than kept as a
-// dormant safety net, and the table is empty at present — every packaged skill
-// ships the description its SKILL.md actually carries.
-//
-// An over-limit description with no entry here is caught twice: the build-time
-// warning below, and the `packaged discovery metadata` test in package.test.js,
-// which measures the post-transform description. Shorten the source rather than
-// adding an entry back.
-const DESCRIPTION_OVERRIDES = {};
-
 const EXCLUDE_NAMES = new Set([
   '.DS_Store', '__MACOSX', '.claude-plugin', 'plugin.json',
   'README.md', 'README_ko.md',
@@ -118,7 +102,9 @@ Static checks validate protocol integrity before every commit. Run \`node .claud
 - \`/onboard\` — quest-based protocol learning (quick recommendation + targeted scenarios)
 - \`/probe\` — recognize what is stuck from grounded candidates for it (a shown candidate, your own words, or none shown)`;
 
-const DESCRIPTION_LIMIT = 200;
+// The packaged ZIP ships each SKILL.md description as written; buildSkillArtifact
+// rejects one longer than this, and the fix is a shorter SKILL.md description.
+const DESCRIPTION_LIMIT = 500;
 // LINE_GUIDELINE is informational — emits a packaging warning but does not fail the build.
 // 510 was set to absorb the longest SKILL.md files already over the prior 500 baseline;
 // per-protocol grandfathered overage is acknowledged and reported as a warning per file,
@@ -288,15 +274,10 @@ function serializeFrontmatter(fields) {
 // Section 3: Transformer
 // ============================================================
 
-function transformSkillMd(content, skillName) {
+function transformSkillMd(content) {
   const { fields, body } = parseFrontmatter(content);
 
   for (const field of STRIP_FIELDS) fields.delete(field);
-
-  const desc = fields.get('description');
-  if (desc && desc.length > DESCRIPTION_LIMIT && DESCRIPTION_OVERRIDES[skillName]) {
-    fields.set('description', DESCRIPTION_OVERRIDES[skillName]);
-  }
 
   return serializeFrontmatter(fields) + '\n' + body;
 }
@@ -730,21 +711,13 @@ function buildSkillArtifact(
       }
       const { fields } = parseFrontmatter(content);
       const desc = fields.get('description');
-      const override = DESCRIPTION_OVERRIDES[plugin.skill];
-      if (desc && desc.length > DESCRIPTION_LIMIT && !override) {
-        warnings.push(
-          `${plugin.dir}: description is ${desc.length} chars ` +
-          `(over ${DESCRIPTION_LIMIT}-char limit, no override defined)`
+      if (desc && desc.length > DESCRIPTION_LIMIT) {
+        throw new Error(
+          `${plugin.dir}: SKILL.md description is ${desc.length} chars, over the ` +
+          `${DESCRIPTION_LIMIT}-char packaged limit — shorten the SKILL.md description`
         );
       }
-      if (override && override.length > DESCRIPTION_LIMIT) {
-        warnings.push(
-          `${plugin.dir}: description override is ${override.length} chars ` +
-          `(over ${DESCRIPTION_LIMIT}-char limit) — an override replaces the source ` +
-          `description in packaged metadata, so it answers to the same limit`
-        );
-      }
-      data = Buffer.from(transformSkillMd(content, plugin.skill), 'utf8');
+      data = Buffer.from(transformSkillMd(content), 'utf8');
     }
     return { name: file.zipPath, data };
   }).sort((a, b) => compareCodexPaths(a.name, b.name));
@@ -870,7 +843,7 @@ function buildRuntimeContractView(plugin) {
   for (const file of files) {
     if (file.isSkillMd) {
       const content = fs.readFileSync(file.sourcePath, 'utf8');
-      transformedSkillMd = transformSkillMd(content, plugin.skill);
+      transformedSkillMd = transformSkillMd(content);
       skillEntryCount++;
     }
     packagedEntries.push(file.zipPath);
@@ -1091,7 +1064,6 @@ if (require.main === module) {
 
 module.exports = {
   DESCRIPTION_LIMIT,
-  DESCRIPTION_OVERRIDES,
   PLUGINS,
   CODEX_SUBMIT_PLUGINS,
   buildSkillArtifact,

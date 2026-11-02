@@ -1,6 +1,6 @@
 ---
 name: contextualize
-description: "A result may not fit where it lands or may leave out what was asked: the user sees each misfit found, settled or withdrawn, and the fixes carried out and reread until nothing is open."
+description: "Use when a result, this session's or one brought in, may not fit where it lands or may leave out what was asked, or when the user asks to check that fit; opened without the user's call only where a mismatch has actually been detected, saying so. The user sees each misfit found, settled or withdrawn, and the fixes carried out and reread until nothing is open."
 ---
 
 # Epharmoge Protocol
