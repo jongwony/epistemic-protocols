@@ -1162,7 +1162,6 @@ describe('package.js CLI', () => {
         'probe.zip',
         'recollect.zip',
         'reduced-space-test.zip',
-        'route.zip',
         'sketch.zip',
         'white-bear.zip',
         'zero-shot.zip',
@@ -1219,9 +1218,15 @@ describe('plugin directory registration', () => {
   const KNOWN_UTILITY_DIRS = ['epistemic-cooperative', 'route'];
 
   it('every plugin directory on disk is registered as a protocol or a utility', () => {
-    const dirs = [...new Set(
-      discoverPlugins({ projectRoot: path.resolve(__dirname, '..') }).map(r => r.dir)
-    )].sort();
+    // Every directory with a plugin manifest, read off the disk rather than
+    // through discoverPlugins(), which yields skill records and so cannot see
+    // a plugin that ships hooks alone (route).
+    const root = path.resolve(__dirname, '..');
+    const dirs = fs.readdirSync(root, { withFileTypes: true })
+      .filter(e => e.isDirectory() && !e.name.startsWith('.'))
+      .map(e => e.name)
+      .filter(d => fs.existsSync(path.join(root, d, '.claude-plugin', 'plugin.json')))
+      .sort();
     assert.deepEqual(
       dirs,
       [...CANONICAL_PROTOCOL_SET, ...KNOWN_UTILITY_DIRS].sort(),

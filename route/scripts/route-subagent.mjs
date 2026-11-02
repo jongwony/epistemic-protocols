@@ -8,8 +8,8 @@
  * Both hosts add a SubagentStart hook's additionalContext to the
  * subagent's own context before its first prompt, so the same index goes
  * out here, rendered the same way (route-premise.mjs). The routing part
- * does not; where a pass belongs is stated in the /route contract's `route`
- * judgment.
+ * does not: purpose.md makes every protocol the main conversation's, so a
+ * delegated agent invokes none of them.
  *
  * A fork inherits the parent conversation, index included, so a subagent
  * whose type is `fork` gets nothing here. Any other type is taken as

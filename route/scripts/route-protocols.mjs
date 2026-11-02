@@ -104,9 +104,9 @@ function soleSkill(dir) {
  * one keeps its row, with the deficit alone.
  *
  * The frontmatter `description` is read too and goes on the protocol's row.
- * It is the text /route's contract (`Entry`) names as the sole source of what
- * deficit a protocol resolves, so anything that has to tell two protocols
- * apart reads it from here rather than being told the difference.
+ * It is each protocol's own declaration of what deficit it resolves, so
+ * anything that has to tell two protocols apart reads it from here rather
+ * than being told the difference.
  */
 function readProtocol(skillFile) {
   let text;
@@ -197,30 +197,19 @@ function renderTable(protocols) {
   return `${TABLE_HEADER}\n${rows}`;
 }
 
-/** The `## <heading>` section of a SKILL.md, up to the next heading or the end, or null. */
-function section(text, heading) {
-  const name = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const start = text.search(new RegExp(`^## ${name}[ \t]*$`, "m"));
-  if (start < 0) return null;
-  const body = text.slice(start).replace(new RegExp(`^## ${name}[ \t]*\r?\n`), "");
-  const next = body.search(/^#{1,2} /m);
-  const out = (next < 0 ? body : body.slice(0, next)).trim();
-  return out || null;
-}
-
 /**
- * The purpose paragraph, read from the `## Purpose` section of Route's own
- * SKILL.md and carried as written: that section is its single home. Null
- * where the file or the section cannot be read.
+ * The purpose paragraph, read from the plugin's `purpose.md` and carried as
+ * written: that file is its single home. Null where the file cannot be read
+ * or holds nothing.
  */
 function readPurpose(root = pluginRoot()) {
   let text;
   try {
-    text = fs.readFileSync(path.join(root, "skills", "route", "SKILL.md"), "utf8");
+    text = fs.readFileSync(path.join(root, "purpose.md"), "utf8");
   } catch {
     return null;
   }
-  return section(text, "Purpose");
+  return text.trim() || null;
 }
 
 /**
@@ -256,7 +245,6 @@ export {
   TABLE_HEADER,
   readPurpose,
   renderRouting,
-  section,
   configDir,
   deriveProtocols,
   identify,
