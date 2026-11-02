@@ -1,6 +1,6 @@
 ---
 name: preview
-description: "The user is about to commit to one of several directions they cannot judge from descriptions: they can then say what each means for their purpose, on what ground, and which one they take."
+description: "Use when the user is about to commit to one of several directions they cannot judge from descriptions — a choice deferred to a principle, the options reworked instead of chosen, or 'I'd have to see it'. The user can then say what each means for their purpose, on what ground, and which one they take."
 ---
 
 # Proplasma Protocol

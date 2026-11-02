@@ -1,6 +1,6 @@
 ---
 name: induce
-description: "Cases at hand seem to share what no one named yet, or what a name in use no longer says: the user can then name it, say which cases it takes in and leaves out, and recognize it as serving their goal."
+description: "Use when the user senses that cases at hand share something no one has named yet, or that a name in use no longer says what its cases show, and wants it named; applying a fixed meaning to a disputed case is not this. The user can then name it, say which cases it takes in and leaves out, and recognize it as serving their goal."
 ---
 
 # Periagoge Protocol

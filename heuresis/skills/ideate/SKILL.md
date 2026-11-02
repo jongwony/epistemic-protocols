@@ -1,6 +1,6 @@
 ---
 name: ideate
-description: "The idea field is empty, narrowed too early, or thin: the user can then see one map from their words and what they name — frames, branches, idea origins, the unexplored — and take it, nothing chosen."
+description: "Use when the user asks to widen, open or rethink a field of ideas that is empty, narrowed too early, or thin; a field merely looking narrow does not start it. The user can then see one map from their words and what they name — frames, branches, idea origins, the unexplored — and take it, nothing chosen."
 ---
 
 # Heuresis Protocol

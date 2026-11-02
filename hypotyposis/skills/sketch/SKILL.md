@@ -1,6 +1,6 @@
 ---
 name: sketch
-description: "Something has to be made that the user cannot describe but would recognize on sight: they can then point at a version they met and say 'this is the form, for this purpose', seeing where each is."
+description: "Use when something has to be made that the user cannot describe but would recognize on sight — a plan that cannot reach a first draft, a description rewritten instead of made, a request to see something first, or 'I'd know it when I see it'. The user can then point at a version they met and say 'this is the form, for this purpose', seeing where each is."
 ---
 
 # Hypotyposis Protocol

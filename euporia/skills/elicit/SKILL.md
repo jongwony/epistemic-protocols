@@ -1,6 +1,6 @@
 ---
 name: elicit
-description: "The user knows roughly what they want but not which decisions it turns on: they can then say 'this is my intent, aligned enough', each value on their own words, what they left open carried."
+description: "Use when a request leaves open what the user wants done — before reading or acting to fill that in yourself, even where the files or context would suggest a plausible reading; not where the user's words already settle it. The user can then say 'this is my intent, aligned enough', each value in their own words, what they left open carried."
 ---
 
 # Euporia Protocol

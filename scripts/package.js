@@ -29,21 +29,31 @@ const _records = discoverPlugins({ projectRoot });
 
 const PLUGINS = _records.map(r => ({ dir: r.dir, skill: r.skill }));
 
-// Compact description overrides for packaged discovery metadata.
-//
-// An entry fires only while its source description exceeds DESCRIPTION_LIMIT,
-// and it replaces that description in the packaged artifact. The replacement is
-// silent, which is what let authored and shipped descriptions diverge unnoticed:
-// a skill could carry one description in its SKILL.md and ship another. So an
-// entry whose source already fits the limit is deleted rather than kept as a
-// dormant safety net, and the table is empty at present — every packaged skill
-// ships the description its SKILL.md actually carries.
+// Discovery descriptions for the packaged ZIP, which is uploaded to claude.ai
+// and held there to DESCRIPTION_LIMIT. A SKILL.md description answers to the
+// Agent Skills standard instead and may run longer; where it exceeds
+// DESCRIPTION_LIMIT, its entry here is what the packaged artifact ships in its
+// place. An entry answers to the same limit, and one whose source fits the
+// limit never fires — delete it rather than keep it.
 //
 // An over-limit description with no entry here is caught twice: the build-time
 // warning below, and the `packaged discovery metadata` test in package.test.js,
-// which measures the post-transform description. Shorten the source rather than
-// adding an entry back.
-const DESCRIPTION_OVERRIDES = {};
+// which measures the post-transform description.
+const DESCRIPTION_OVERRIDES = {
+  apportion: "One goal is about to be handed to an autonomous run: the user takes a plan of units with checks, accepted gaps and held judgments, seeing what needed settling first and what returns at the end.",
+  bound: "The user cannot yet see what a task needs decided, or what to keep or entrust: they can then see each decision, what rests on it, its cost if wrong, what settled it, and what stays open and with whom.",
+  conduct: "Work needs several lines of thinking and how they run is not obvious: the user can then say how they order, combine, stop and where results go, what they entrusted and kept, and own the method.",
+  contextualize: "A result may not fit where it lands or may leave out what was asked: the user sees each misfit found, settled or withdrawn, and the fixes carried out and reread until nothing is open.",
+  elicit: "The user knows roughly what they want but not which decisions it turns on: they can then say 'this is my intent, aligned enough', each value on their own words, what they left open carried.",
+  grasp: "Something in play — code, a document, a result — the user can't follow yet or nods along to unsure: they can then say their understanding serves their purpose, on a map checked with them.",
+  ground: "A framework, analogy, or earlier design is carried to a case, or an abstraction tested: the user can say what carries each conclusion, what would break it, and if it holds, is blocked, or is open.",
+  ideate: "The idea field is empty, narrowed too early, or thin: the user can then see one map from their words and what they name — frames, branches, idea origins, the unexplored — and take it, nothing chosen.",
+  induce: "Cases at hand seem to share what no one named yet, or what a name in use no longer says: the user can then name it, say which cases it takes in and leaves out, and recognize it as serving their goal.",
+  inquire: "A task rests on missing context or unchecked assumptions: the user can then recognize what was settled and from where, what rests on weak or unreached ground, and what only they decide.",
+  preview: "The user is about to commit to one of several directions they cannot judge from descriptions: they can then say what each means for their purpose, on what ground, and which one they take.",
+  recollect: "The user vaguely recalls a past discussion, line of work, topic, or settled concept but cannot name it: find it in past records to recognize in a story, knowing it took place, not that it still holds.",
+  sketch: "Something has to be made that the user cannot describe but would recognize on sight: they can then point at a version they met and say 'this is the form, for this purpose', seeing where each is.",
+};
 
 const EXCLUDE_NAMES = new Set([
   '.DS_Store', '__MACOSX', '.claude-plugin', 'plugin.json',

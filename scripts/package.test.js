@@ -1290,6 +1290,33 @@ describe('packaged discovery metadata', () => {
     }
     assert.deepEqual(offenders, [], `over ${DESCRIPTION_LIMIT}-char discovery limit: ${offenders.join('; ')}`);
   });
+
+  it('keeps every source description within the Agent Skills limits', () => {
+    const offenders = [];
+    for (const plugin of PLUGINS) {
+      const skillPath = path.join(__dirname, '..', plugin.dir, 'skills', plugin.skill, 'SKILL.md');
+      if (!fs.existsSync(skillPath)) continue;
+      const { fields } = parseFrontmatter(fs.readFileSync(skillPath, 'utf8'));
+      const desc = fields.get('description') || '';
+      if (!desc.trim()) offenders.push(`${plugin.dir}/${plugin.skill}: empty`);
+      if (desc.length > 1024) offenders.push(`${plugin.dir}/${plugin.skill}: ${desc.length} chars`);
+      if (/[<>]/.test(desc)) offenders.push(`${plugin.dir}/${plugin.skill}: angle bracket`);
+    }
+    assert.deepEqual(offenders, [], offenders.join('; '));
+  });
+
+  it('keeps an override only where its source description exceeds the discovery limit', () => {
+    const dormant = [];
+    for (const plugin of PLUGINS) {
+      if (!Object.hasOwn(DESCRIPTION_OVERRIDES, plugin.skill)) continue;
+      const skillPath = path.join(__dirname, '..', plugin.dir, 'skills', plugin.skill, 'SKILL.md');
+      const { fields } = parseFrontmatter(fs.readFileSync(skillPath, 'utf8'));
+      if ((fields.get('description') || '').length <= DESCRIPTION_LIMIT) dormant.push(plugin.skill);
+    }
+    const known = new Set(PLUGINS.map((p) => p.skill));
+    const orphan = Object.keys(DESCRIPTION_OVERRIDES).filter((k) => !known.has(k));
+    assert.deepEqual([...dormant, ...orphan], [], `overrides that never fire: ${[...dormant, ...orphan].join(', ')}`);
+  });
 });
 
 it('ships an executable standalone capture-outcome reader with recollect', () => {
