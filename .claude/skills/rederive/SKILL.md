@@ -57,7 +57,7 @@ One skill per run, whose formal block is Lean or becomes Lean in the run: a core
 
 ## Checklist (reading step)
 
-- **Translation or re-derivation** — does a stage machine (projected gate or phase state) return inside the fused context; do rule chains that guarded a changing Λ survive (premise "Cases in Place of a Judgment")?
+- **Translation or re-derivation** — does a stage machine (projected gate or phase state) return inside the fused context; do rule chains that guarded a changing Λ survive (premise "Cases in Place of a Judgment"); does each decomposition the contract carries — sub-judgments, filters, derived defs — take its disposition, slow-layer carrier or scaffolding, before any repair to its parts?
 - **Λ ablation** — each state field: a projection of the fused context → deleted; the occupant of an open coordinate → a `Coord` with citation, admits and supports; harness state (interrupt, steering, persistence) → a named delegation point, not a type; none of these → removed.
 - **Gate earns its place** — a judgment gate stands where its answer is irreversible or is the held judgment the closure needs; a reversible step the person can interrupt through the harness takes no added gate. Reversibility grants no relay.
 - **Relay reach** — the AI fills a judgment coordinate only where reachable evidence settles it or a grant covers it; discretion is not relay; a delegated fill is recorded as the AI's.
