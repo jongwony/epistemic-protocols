@@ -28,7 +28,6 @@ const {
   collectReleaseFiles,
   isForbiddenCodexPath,
   DESCRIPTION_LIMIT,
-  DESCRIPTION_OVERRIDES,
   parseFrontmatter,
   readCodexManifestVersion,
   runRelease,
@@ -261,7 +260,7 @@ describe('serializeFrontmatter', () => {
 describe('transformSkillMd', () => {
   it('strips disallowed fields', () => {
     const content = '---\nname: gap\nallowed-tools: Read\nlicense: MIT\ncompatibility: v2\nmetadata: extra\n---\nBody';
-    const result = transformSkillMd(content, 'gap');
+    const result = transformSkillMd(content);
     assert.ok(!result.includes('allowed-tools'));
     assert.ok(!result.includes('license'));
     assert.ok(!result.includes('compatibility'));
@@ -270,17 +269,9 @@ describe('transformSkillMd', () => {
     assert.ok(result.includes('Body'));
   });
 
-  it('preserves long descriptions when no override defined', () => {
-    const longDesc = 'A'.repeat(DESCRIPTION_LIMIT + 1);
-    const content = `---\nname: custom\ndescription: ${longDesc}\n---\nBody`;
-    const result = transformSkillMd(content, 'custom');
-    const { fields } = parseFrontmatter(result);
-    assert.equal(fields.get('description'), longDesc);
-  });
-
   it('preserves short descriptions unchanged', () => {
     const content = '---\nname: gap\ndescription: Short description\n---\nBody';
-    const result = transformSkillMd(content, 'gap');
+    const result = transformSkillMd(content);
     const { fields } = parseFrontmatter(result);
     assert.equal(fields.get('description'), 'Short description');
   });
@@ -1256,20 +1247,44 @@ describe('default installer skip list', () => {
 // ============================================================
 
 describe('packaged discovery metadata', () => {
-  it('keeps every packaged description within the discovery limit', () => {
+  it('ships each SKILL.md description as written, within the packaged limit', () => {
     // Measures the description a runtime reader receives, after transformation.
-    const offenders = [];
+    const changed = [];
+    const over = [];
     for (const plugin of PLUGINS) {
       const skillPath = path.join(__dirname, '..', plugin.dir, 'skills', plugin.skill, 'SKILL.md');
       if (!fs.existsSync(skillPath)) continue;
-      const transformed = transformSkillMd(fs.readFileSync(skillPath, 'utf8'), plugin.skill);
-      const { fields } = parseFrontmatter(transformed);
-      const desc = fields.get('description') || '';
-      if (desc.length > DESCRIPTION_LIMIT) {
-        offenders.push(`${plugin.dir}/${plugin.skill}: ${desc.length} chars`);
-      }
+      const source = fs.readFileSync(skillPath, 'utf8');
+      const before = parseFrontmatter(source).fields.get('description') || '';
+      const after = parseFrontmatter(transformSkillMd(source)).fields.get('description') || '';
+      if (before !== after) changed.push(plugin.skill);
+      if (after.length > DESCRIPTION_LIMIT) over.push(`${plugin.dir}/${plugin.skill}: ${after.length} chars`);
     }
-    assert.deepEqual(offenders, [], `over ${DESCRIPTION_LIMIT}-char discovery limit: ${offenders.join('; ')}`);
+    assert.deepEqual(changed, [], `packaged description differs from SKILL.md: ${changed.join(', ')}`);
+    assert.deepEqual(over, [], `over ${DESCRIPTION_LIMIT}-char packaged limit: ${over.join('; ')}`);
+  });
+
+  it('fails the build on a description over the packaged limit', () => {
+    const plugin = { dir: 'epharmoge', skill: 'contextualize' };
+    const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'release-description-limit-'));
+    try {
+      fs.cpSync(path.join(__dirname, '..', plugin.dir), path.join(root, plugin.dir), { recursive: true });
+      const skillPath = path.join(root, plugin.dir, 'skills', plugin.skill, 'SKILL.md');
+      const source = fs.readFileSync(skillPath, 'utf8');
+      const long = 'Use when ' + 'a'.repeat(DESCRIPTION_LIMIT);
+      const replaced = source.replace(/^description: .*$/m, `description: "${long}"`);
+      assert.notEqual(replaced, source, 'fixture premise: the description line was replaced');
+      fs.writeFileSync(skillPath, replaced);
+      for (const profile of ['release', 'codex-submit']) {
+        assert.throws(
+          () => buildSkillArtifact(plugin, { root, profile }),
+          /over the 500-char packaged limit — shorten the SKILL\.md description/,
+          profile
+        );
+      }
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
   });
 
   it('keeps every source description within the Agent Skills limits', () => {
@@ -1284,20 +1299,6 @@ describe('packaged discovery metadata', () => {
       if (/[<>]/.test(desc)) offenders.push(`${plugin.dir}/${plugin.skill}: angle bracket`);
     }
     assert.deepEqual(offenders, [], offenders.join('; '));
-  });
-
-  it('ships each SKILL.md description as written, with no override', () => {
-    assert.deepEqual(Object.keys(DESCRIPTION_OVERRIDES), [], 'DESCRIPTION_OVERRIDES must stay empty');
-    const changed = [];
-    for (const plugin of PLUGINS) {
-      const skillPath = path.join(__dirname, '..', plugin.dir, 'skills', plugin.skill, 'SKILL.md');
-      if (!fs.existsSync(skillPath)) continue;
-      const source = fs.readFileSync(skillPath, 'utf8');
-      const before = parseFrontmatter(source).fields.get('description') || '';
-      const after = parseFrontmatter(transformSkillMd(source, plugin.skill)).fields.get('description') || '';
-      if (before !== after) changed.push(plugin.skill);
-    }
-    assert.deepEqual(changed, [], `packaged description differs from SKILL.md: ${changed.join(', ')}`);
   });
 });
 

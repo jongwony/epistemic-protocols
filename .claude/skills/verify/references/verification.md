@@ -60,7 +60,7 @@ Use these during protocol edits and reviews. Do not promote them to static failu
 Two properties are worth knowing before reading it, because neither is obvious from the code alone:
 
 - **A `SKILL.md`'s body is preserved verbatim; its frontmatter is not.** `transformSkillMd()` parses the frontmatter, drops the strip-fields, and reserializes it, so the packaged file is not byte-identical to the source. Everything below the frontmatter is passed through unchanged — the packaging never rewrites the contract text — so what a runtime user reads there is what the repository holds.
-- **The packaged description is the `SKILL.md` description.** `DESCRIPTION_OVERRIDES` stays empty, and `package.test.js` asserts both that each packaged description equals its source and that it fits the packaged limit — so an over-limit description is shortened at its source, never replaced in the artifact.
+- **The packaged description is the `SKILL.md` description.** The build fails on a description over the packaged limit, and `package.test.js` asserts both that each packaged description equals its source and that it fits that limit — so an over-limit description is shortened at its source.
 
 ## Runtime Contract Surfaces
 
