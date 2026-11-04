@@ -23,7 +23,7 @@ defect. What this rule carries is where those obligations are discharged in this
 and the order they bind in.
 
 **The audit's outcome goes in the commit.** The subtraction candidates the audit produced and
-what was decided about each, the alternative rejected, the friction that admitted a new entry
+what was decided about each, the friction that admitted a new entry
 — each is a then-record and goes in the commit message of the change (`AGENTS.md` §Settled
 Directions, Ledger binding), and the surface keeps only what asserts now.
 
