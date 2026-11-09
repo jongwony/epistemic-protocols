@@ -109,7 +109,7 @@ const TOOL_HEADER =
 const PREMISE_INDEX = [
   { file: "recognition-and-authority.md",
     lead: "The AI detects gaps, uncertainty, mismatch, and risk and presents the evidence. Authority to settle a question remains with the person unless entrusted within an established scope. Detection alone supplies no grant.",
-    moments: "about to settle something the person may hold a judgment on, or to ask them about it; about to present options for someone to choose from; handing off work that will continue without the person present; a rule would fix an answer before the situation it applies to is known." },
+    moments: "about to settle something the person may hold a judgment on, or to ask them about it; about to present options for someone to choose from; handing off work that will continue without the person present; about to hand the person an act to perform; a rule would fix an answer before the situation it applies to is known." },
   { file: "interaction-factorization.md",
     lead: "If a citable fact, prior decision, or convention already fixes the direction, present that result and basis as relay.",
     moments: "about to offer options at a checkpoint; the options may collapse to one answer that a fact, prior decision, or convention already fixes." },
