@@ -23,7 +23,7 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 /-! ── FLOW ──
 Hypotyposis(I) → start(c) → sketch(c, utterances), where c is the fused session context:
   start: what bears on the form is gathered; then your reading, on it, that this is not this
-    protocol's case (`notActivated`), in plain words with its basis → not activated; otherwise
+    protocol's case (`notActivated`), with its basis → not activated; otherwise
     → production, then the productions you carry on your own proposals, as `Proposes` and `reach`
     read them → round
   production(c): the intent relayed whole — your reading of the purpose, marked as yours unless
@@ -142,8 +142,8 @@ variable {P : Type}
     form; nothing in it has to specify the form first. Source-neutral; read from the context. -/
 abbrev FormIntentSeed (P : Type) := Context P
 
-/-- **Your reading**, before anything is produced: why this is not this protocol's case, in plain
-    words with its basis — no form is about to be made; the person can already say what the form
+/-- **Your reading**, before anything is produced: why this is not this protocol's case, with its
+    basis — no form is about to be made; the person can already say what the form
     should be, or the context already settles it, so no encounter is needed to settle the intent;
     the choice is among directions already named whose futures cannot be judged, rather than a
     form to make; or the work is to understand, check, or carry out something that exists rather
@@ -536,7 +536,7 @@ inductive Op | detect | notActivatedRelay | gather | intentRelay | produce | pro
 
 def grounding : Op → Annot × String
   | .detect            => (.sense, "Internal analysis: whether this is the protocol's case, as `notActivated` reads it")
-  | .notActivatedRelay => (.interaction .extension, "before activation only: your `notActivated` reading, in plain words with its basis; not activated")
+  | .notActivatedRelay => (.interaction .extension, "before activation only: your `notActivated` reading, with its basis; not activated")
   | .gather            => (.observe, "artifact read, artifact search, record read, external fetch, environment run: what `gathered` reads or runs, now, as its doc states — at the start, after a production's relay and before any version is made, after its versions to check them, and on a turn that bears on the run and does not close it; what it returns enters the context as an evidence turn before the round that shows it")
   | .intentRelay       => (.interaction .extension, "the production intent whole before any version is made — your reading of the purpose, marked as yours unless they said it, each part with what it rests on, a default marked as one; what the next versions try, and which retained versions each revises or that it starts fresh; how many and, where they will be offered as alternatives, how they differ; the medium each is realized in, one this session can realize, and what it can show of the qualities the judgment concerns and what it cannot — a version whose judged quality only a medium this session cannot supply would show, or whose right-or-wrong quality only a reference it cannot reach would check, is not made yet: that capability is named, with what it would show or check, and the version waits, as `present` holds it; where each will be, and whether in a scratch place or inside a project whose history commits keep, and whether the place holds content no commit keeps; and the reference a standard outside both parties' preference is checked against — each with the basis that chose it. On every later production the whole intent again. Any of it can be sent back at the next round")
   | .produce           => (.transform, "artifact write, environment run: what `produce` writes, as its doc states; a narration version writes no file — it is your own turn (`narrate`), recorded on the version")

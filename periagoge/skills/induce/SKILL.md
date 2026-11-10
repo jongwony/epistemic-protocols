@@ -551,7 +551,7 @@ def grounding : Op → Annot × String
   | .sheet    => (.interaction .extension, "the sheet the Protocol section describes under \"The sheet\", within the response `response` composes")
   | .carry    => (.transform, "artifact read, artifact write, environment run: the work `response` carries forward; what it returns enters the context")
   | .readTurn => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there — a move, a value taken, a reading set aside or brought back, words about an open item, a closing — read whole against the fused context as it now stands, as `Reaches`, `ClosingSupported`, `SetAsideSupported`, `StandingSupported`, and `OpenSupported` read it")
-  | .declare  => (.interaction .extension, "before activation, on an invocation only — AI-guided activation stays silent —, your `notActivated` reading in plain words with its basis, and what was searched")
+  | .declare  => (.interaction .extension, "before activation, on an invocation only — AI-guided activation stays silent —, your `notActivated` reading with its basis, and what was searched")
   | .converge => (.interaction .extension, "at a crystallization, the convergence evidence CONVERGENCE names: the closing turn quoted beside the trace and the dissent")
   | .seam     => (.interaction .extension, "after a crystallization, or not activating on an invocation, proceed to the next move the person declared, citing that turn; after a crystallization, that move goes from wherever it stands, carried to the abstraction as it crystallized")
 
@@ -566,7 +566,7 @@ end Periagoge
 
 ## Mode Activation
 
-`/induce` remains directly invocable, and an invocation is read through `notActivated` before any sheet, and a reading that it is not this protocol's case is said in plain words with its basis; AI-guided activation stays silent and follows the same reading. A named abstraction whose meaning is being reconsidered from its cases is in process; applying a fixed meaning to a disputed case is not.
+`/induce` remains directly invocable, and an invocation is read through `notActivated` before any sheet, and a reading that it is not this protocol's case is said with its basis; AI-guided activation stays silent and follows the same reading. A named abstraction whose meaning is being reconsidered from its cases is in process; applying a fixed meaning to a disputed case is not.
 
 Bind the seed from an explicit argument first, then the most recent cluster of cases, then a surfaced essence. On an invocation, where no essence is sensed, show what was searched and invite the user to name what feels in process; where no second case is found, say what was searched and invite one. Prior-session recall may seed examples or neighbouring abstractions but never settles crystallization.
 
@@ -574,7 +574,7 @@ Bind the seed from an explicit argument first, then the most recent cluster of c
 
 ### The sheet
 
-Every sheet is in everyday language. Mark each value on the sheet as set by the user's words, taken by them from what you showed, or still a proposal, marked with who put it forward. Each sheet opens with any case you found since the last sheet, marked as found by you, so the user meets it before their next turn; a found case stays yours until the user's words take it up.
+Mark each value on the sheet as set by the user's words, taken by them from what you showed, or still a proposal, marked with who put it forward. Each sheet opens with any case you found since the last sheet, marked as found by you, so the user meets it before their next turn; a found case stays yours until the user's words take it up.
 
 Then the goal: what the abstraction is for. Where the user has said it, quote their words; otherwise give your reading. Under it, the working candidate — a name and a rule — from the first sheet, with the ground it stands on and, where that ground is short, what is short beside it as a point still open — a row of its own that leaves no case out is such a shortfall, shown with what case would have to be left out for the name to say something —, always on a reading still in play: where the user sets that reading aside, or every reading is set aside, put forward one on a live reading or on a new reading of your own, its weak ground shown. Both move: the run's work is moving the goal and the candidate until the abstraction matches what the user means.
 

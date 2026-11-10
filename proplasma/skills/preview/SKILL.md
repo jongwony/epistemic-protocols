@@ -23,7 +23,7 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 /-! ── FLOW ──
 Proplasma(X) → start(c) → preview(c, utterances), where c is the fused session context:
   start: what bears on the decision is gathered; then your reading, on it, that this is not this
-    protocol's case (`notActivated`), in plain words with its basis → not activated; otherwise
+    protocol's case (`notActivated`), with its basis → not activated; otherwise
     → fan → carry → round
   fan(c): the spec relayed whole — your reading of the purpose, marked as yours unless they said
     it; the axes the purpose turns on; the placeholder policy; which candidates get probes and why
@@ -149,7 +149,7 @@ abbrev Direction := String
     different values. -/
 abbrev DirectionAxis := String
 
-/-- **Your reading**, before activation: why this is not this protocol's case, in plain words
+/-- **Your reading**, before activation: why this is not this protocol's case,
     with its basis — no direction commitment is imminent, or fewer than two candidates stand to
     compare; the futures are already recognizable from their descriptions; the turn asks what one
     option means or what doing it would involve, which is answered as asked rather than previewed;
@@ -503,7 +503,7 @@ inductive Op | detect | notActivatedRelay | gather | specRelay | instantiate | i
 
 def grounding : Op → Annot × String
   | .detect            => (.sense, "Internal analysis: whether this is the protocol's case, as `notActivated` reads it")
-  | .notActivatedRelay => (.interaction .extension, "before activation only: your `notActivated` reading, in plain words with its basis; not activated")
+  | .notActivatedRelay => (.interaction .extension, "before activation only: your `notActivated` reading, with its basis; not activated")
   | .gather            => (.observe, "artifact read, artifact search, record read, external fetch, environment run: what `gathered` reads or runs, now, as its doc states; what it returns enters the context as an evidence turn, on the footing `ContrastMap` gives it, before the round that shows it")
   | .specRelay         => (.interaction .extension, "the spec whole before any probe is generated — your reading of the purpose, marked as yours unless they said it; the axes the purpose turns on; the placeholder policy: each probe overtly synthetic, its structure faithful to its direction and its data values fake, evidence for no claim, and where a placeholder may blur a difference; which candidates get probes — enough that at least two futures stand in view once the probes already made are counted, a candidate the person named, or a composition, being probed alone against them — and, where candidates wait, which and why; and the tier — each with the basis that chose it. On every later fan the whole spec again. It yields no turn")
   | .instantiate       => (.transform, "artifact write, environment run: temp-isolated placeholder probes over the candidates the relay named for probes, each realization registered at creation; existing project files never modified; the Vignette tier writes no file — its narration is your own turn (`narrate`), recorded on the probe")

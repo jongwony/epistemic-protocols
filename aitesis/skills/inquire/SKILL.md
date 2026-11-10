@@ -367,7 +367,7 @@ When a prospect touches architecture decisions, API or protocol design, persiste
 
 ### User-facing realization
 
-Present what `surface` names in everyday language and proceed; name a detection as one, on its own line. State what the protocol takes if an answer comes — a fact, a correction, a place to look, "I don't know either", a dismissal — without a fixed menu. Every item stays open to free-response correction.
+Present what `surface` names and proceed; name a detection as one, on its own line. State what the protocol takes if an answer comes — a fact, a correction, a place to look, "I don't know either", a dismissal — without a fixed menu. Every item stays open to free-response correction.
 
 Frame each round around the uncertainty currently in play. Read `references/round-composition.md` before composing when terminology must remain stable across the session, wording must be carried unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside a relay.
 

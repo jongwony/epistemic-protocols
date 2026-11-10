@@ -135,7 +135,7 @@ axiom target : Context P → Option Result
     it needs. Each return is an evidence turn. -/
 axiom observe : Context P → List (Evidence P)
 
-/-- One place X does not fit: what does not fit, in plain words; where in X, or where it lands;
+/-- One place X does not fit: what does not fit; where in X, or where it lands;
     the turn of the context it does not fit, which is never the assistant's own (`Cite`), so the
     comparison stays non-circular. -/
 structure Mismatch (c : Context P) where
@@ -467,7 +467,7 @@ Layer 1 activates whenever the user invokes `/contextualize`, on any result they
 
 ## Protocol
 
-The formal blocks define execution. This section fixes the user-facing rendering: the sheet `respond` names, in everyday words. For a nightly report whose schedule was written this session:
+The formal blocks define execution. This section fixes the user-facing rendering: the sheet `respond` names. For a nightly report whose schedule was written this session:
 
 ```
 Two places do not fit; both wait on you.
