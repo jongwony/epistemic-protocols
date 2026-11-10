@@ -999,7 +999,7 @@ const readsThroughShell = (command) => !command.includes('/plugins/cache/') && R
 
 // Deterministic graders. Each returns true / false / null (not applicable).
 // These read behaviour, not wording: the protocols are required to render in the
-// user's everyday language, so a lexical check would be testing the renderer.
+// reader's own words and language, so a lexical check would be testing the renderer.
 const GRADERS = {
   // Both dimensions, because either fails silently. The sham arm's entire treatment
   // arrives through --settings, which does nothing unless setup() copied the style file

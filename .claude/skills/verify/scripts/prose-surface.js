@@ -139,8 +139,8 @@ function checkLanguagePurity(ctx) {
 // ============================================================
 // Enforces the presence of the user-facing disciplines that shape
 // runtime protocol output. Round composition folds placement (context before
-// the gate, not inside it), vocabulary (plain rendering held across the
-// session), and per-round adjacency/context-switch cost into one inline rule,
+// the gate, not inside it), vocabulary (the reader's own words, held across
+// the session), and per-round adjacency/context-switch cost into one inline rule,
 // with the occasion-bound detail moved to each skill's own
 // references/round-composition.md; Form feedback handles how a round's
 // density is set and stays a separate rule. These must live in each core

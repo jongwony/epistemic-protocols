@@ -5,9 +5,9 @@ and what is deliberately not built yet.
 
 ## Behaviour is checkable; wording is not
 
-Every protocol carries a Round composition rule requiring its output to be rendered in
-the reader's everyday language rather than the formal vocabulary of its own
-definition. A correct gate may therefore share no words with the block that defines
+Every protocol carries a Round composition rule requiring its output to state who does
+what, in words the reader already uses or meets often and in the language the reader is
+using, rather than in the formal vocabulary of its own definition. A correct gate may therefore share no words with the block that defines
 it, and may be rendered differently in a different session or a different language.
 
 A regex over protocol output tests the renderer, not the contract. This repository has
