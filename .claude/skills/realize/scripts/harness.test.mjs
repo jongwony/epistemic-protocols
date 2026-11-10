@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import {
   chmodSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync,
-  rmSync, symlinkSync, writeFileSync,
+  realpathSync, rmSync, symlinkSync, writeFileSync,
 } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
@@ -618,12 +618,13 @@ console.log(JSON.stringify({ type: 'result', is_error: false, total_cost_usd: 0.
   delete env.REALIZE_WORK_DIR;
   env.TMPDIR = join(root, 'tmp');
   mkdirSync(env.TMPDIR);
+  const mountRoot = realpathSync(env.TMPDIR);
   try {
     assert.equal(invoke(env, 'run', 'inquire').status, 0);
     const cwds = readFileSync(env.FAKE_CLAUDE_LOG, 'utf8').trim().split('\n');
     assert.ok(cwds.length > 0);
     for (const cwd of cwds) {
-      assert.ok(cwd.startsWith(env.TMPDIR), cwd);
+      assert.ok(cwd.startsWith(mountRoot), cwd);
       assert.doesNotMatch(cwd, /\/\.claude\//);
     }
   } finally {
