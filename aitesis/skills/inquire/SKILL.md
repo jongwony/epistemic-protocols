@@ -367,12 +367,12 @@ When a prospect touches architecture decisions, API or protocol design, persiste
 
 ### User-facing realization
 
-Present what `surface` names in everyday language and proceed; name a detection as one, on its own line. State what the protocol takes if an answer comes — a fact, a correction, a place to look, "I don't know either", a dismissal — without a fixed menu. Every item stays open to free-response correction.
+Present what `surface` names and proceed; name a detection as one, on its own line. State what the protocol takes if an answer comes — a fact, a correction, a place to look, "I don't know either", a dismissal — without a fixed menu. Every item stays open to free-response correction.
 
 Frame each round around the uncertainty currently in play. Read `references/round-composition.md` before composing when terminology must remain stable across the session, wording must be carried unchanged, material belongs to another round or trace, or phase order determines whether text belongs before or inside a relay.
 
 ## Rules
 
-- **Round composition**: Compose each round so the reader can act on it without reassembling it — use everyday language, keep the judgment beside its nearest evidence and next-move implication, and place analytical context before the relay.
+- **Round composition**: Compose each round so the reader can act on it without reassembling it — state who does what, in words the reader already uses or meets often, composed from the meaning in the language they are using; keep the judgment beside its nearest evidence and next-move implication; and place analytical context before the relay.
 - **Option-set relay test**: Handing back is a relay: it presents and proceeds. The user's answer, when it comes, is read whole; silence settles and dismisses nothing.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction forward until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.

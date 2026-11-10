@@ -854,8 +854,8 @@ open Classical in
     limit; the out-of-scope obligations with their substrates; what was subtracted as the host's
     standing contract; any hole; where the request bundles several stated outcomes, each stated
     outcome and their bond in the host's standing procedural contract, as the question of which
-    goal this apportionment takes; each field labelled by the question it answers, in the person's
-    everyday words; each value marked the person's or the draft's. Then your doubts, each beside
+    goal this apportionment takes; each field labelled by the question it answers;
+    each value marked the person's or the draft's. Then your doubts, each beside
     what it bears on, with what it rests on. Then the focus with its actions, each with its consequence, an action marked recommended
     only as `recommend` carries it; with nothing open, whether to take the plan and what a taking
     would not yet satisfy; wherever a taking would close the run, that it hands the plan off in the
@@ -911,7 +911,7 @@ navigation block alone where no run was started, the turn saying which.
 The taking adopted what the draft proposed, the authority shown included, and accepted every
 residual shown; it established nothing about whether a check is the right one, and a doubt it was
 taken over rides the plan attached to what it bears on.
-Convergence evidence, at emission: (a) the goal restated as its units, one plain sentence each;
+Convergence evidence, at emission: (a) the goal restated as its units, one sentence each;
 (b) per unit, the obligations, the seam with its citation or heuristic declaration, the fit or the
 person's taking over it with their words, the certificate — every check, every accepted gap, every
 reservation with its ground — and the capability requirements and feasibility notes; (c) the plan
@@ -1009,7 +1009,7 @@ Relay and deactivate when the goal's scope yields no obligation. Your reading th
 
 ### The sheet
 
-Every turn that bears on the run shows the whole plan on one sheet, in everyday language, opening with the goal in one plain sentence and carrying what `respond` names: each unit with its obligations stated by what they require, its fit and why, its seam with its citation or its declaration that the goal evidences none, what carrying it out needs, and its certificate; then the whole-goal conditions, the acceptance question, the authority the run will reach while the person is away — each by kind, target, and limit — the out-of-scope obligations with who must catch them, and what was subtracted as the host's own standing procedure. Every line is drawn on every sheet, unchanged ones included. The sheet separates its fields with the structure the host renders — headings, tables, lists — so each field reads on its own under a label that is the question it answers, worded in the person's everyday language, and each value shows whether it is the person's or the draft's. A decision, an issue, or an earlier option is named by what it holds; an identifier only the session can decode stands at most beside those words. A host that can fold the sheet may; the contract shows it whole.
+Every turn that bears on the run shows the whole plan on one sheet, opening with the goal in one sentence and carrying what `respond` names: each unit with its obligations stated by what they require, its fit and why, its seam with its citation or its declaration that the goal evidences none, what carrying it out needs, and its certificate; then the whole-goal conditions, the acceptance question, the authority the run will reach while the person is away — each by kind, target, and limit — the out-of-scope obligations with who must catch them, and what was subtracted as the host's own standing procedure. Every line is drawn on every sheet, unchanged ones included. The sheet separates its fields with the structure the host renders — headings, tables, lists — so each field reads on its own under a label that is the question it answers, and each value shows whether it is the person's or the draft's. A decision, an issue, or an earlier option is named by what it holds; an identifier only the session can decode stands at most beside those words. A host that can fold the sheet may; the contract shows it whole.
 
 Under the sheet, your doubts, each beside what it bears on, with what it rests on.
 
@@ -1034,7 +1034,7 @@ Goal singleness, the host-contract subtraction, the out-of-scope classification,
 ## Rules
 
 - **Handoff carries its obligations**: Every taken plan carries `handoffObligations`. The plan travels by its navigation block, never copied.
-- **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
+- **Round composition**: Compose each round so the reader can act on it without reassembling it — sentences that state who does what, in words the reader already uses or meets often rather than this file's formal vocabulary, composed from the meaning in the language they are using; the judgment set beside the evidence it rests on together with the differential implication that matters for the next move; and analytical context laid out before a gate rather than inside it. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own phases bear on where a sentence sits relative to a gate.
 - **One sheet for the whole plan**: Show the whole plan on every turn that bears on the run — the goal, units, conditions, whole-goal conditions, the acceptance question, the authority, out-of-scope and subtracted obligations — every line drawn on every sheet. The plan and every question about it share that one sheet.
 - **Recommendation only where the ground separates**: Mark an action as recommended only where the ground clearly separates it from the others; comparable actions stand side by side with their consequences.
 - **The person takes and closes**: Only the person's taking closes the run, whatever its form; silence, a stop, or a turn to other work leaves the sheet holding. A taking adopts what the sheet showed and accepts the gaps shown; a value the draft proposed and the person took is recorded as the draft's and adopted, apart from values the person set. An answer to the focus closes nothing.

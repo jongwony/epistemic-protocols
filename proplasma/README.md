@@ -28,7 +28,7 @@ Some direction choices are unrecognizable from words (`DirectionUnrecognizable`)
 
 **The trichotomy**: understanding lacking → `/grasp` (verify that I understood); boundary lacking → `/bound` (settle how far); **future unrecognizable → `/preview` (see the directions, then judge)**.
 
-**When it does not activate**: before anything is built, the AI reads whether this is the protocol's case — two or more candidates, a commitment at hand, futures a placeholder depiction can carry — and where it is not (the futures already read from their descriptions, a question about what one option means, a choice that turns on whether an analogy or account already in play licenses its inferences rather than on how each future would look, a decision only real evidence can settle, a field too thin to compare), it says so in plain words with its basis and what would settle the need.
+**When it does not activate**: before anything is built, the AI reads whether this is the protocol's case — two or more candidates, a commitment at hand, futures a placeholder depiction can carry — and where it is not (the futures already read from their descriptions, a question about what one option means, a choice that turns on whether an analogy or account already in play licenses its inferences rather than on how each future would look, a decision only real evidence can settle, a field too thin to compare), it says so with its basis and what would settle the need.
 
 ## Three Breach Conditions
 

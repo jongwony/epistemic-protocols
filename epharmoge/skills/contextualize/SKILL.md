@@ -135,7 +135,7 @@ axiom target : Context P → Option Result
     it needs. Each return is an evidence turn. -/
 axiom observe : Context P → List (Evidence P)
 
-/-- One place X does not fit: what does not fit, in plain words; where in X, or where it lands;
+/-- One place X does not fit: what does not fit; where in X, or where it lands;
     the turn of the context it does not fit, which is never the assistant's own (`Cite`), so the
     comparison stays non-circular. -/
 structure Mismatch (c : Context P) where
@@ -467,7 +467,7 @@ Layer 1 activates whenever the user invokes `/contextualize`, on any result they
 
 ## Protocol
 
-The formal blocks define execution. This section fixes the user-facing rendering: the sheet `respond` names, in everyday words. For a nightly report whose schedule was written this session:
+The formal blocks define execution. This section fixes the user-facing rendering: the sheet `respond` names. For a nightly report whose schedule was written this session:
 
 ```
 Two places do not fit; both wait on you.
@@ -495,7 +495,7 @@ Where a place reads as another owner's, the options name the concrete split, for
 ## Rules
 
 - **Non-circularity**: As `Mismatch.against` states — what the result must fit is never the assistant's own words.
-- **Round composition**: Compose each round so the reader can act on it without reassembling it — everyday language rather than this file's formal vocabulary, the judgment set beside the evidence it rests on together with the differential implication that matters for the next move, and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own moves bear on where a sentence sits relative to a gate.
+- **Round composition**: Compose each round so the reader can act on it without reassembling it — sentences that state who does what, in words the reader already uses or meets often rather than this file's formal vocabulary, composed from the meaning in the language they are using; the judgment set beside the evidence it rests on together with the differential implication that matters for the next move; and analytical context laid out before a gate rather than inside it, so the gate carries the question and each option's differential implication. Read `references/round-composition.md` before composing when a term's rendering has to hold across the session or wording has to be carried through unchanged, when some of what is in view belongs to a later round or a trace rather than this one, or when this protocol's own moves bear on where a sentence sits relative to a gate.
 - **One sheet**: As `respond` states — every place on one sheet, one question over the open ones.
 - **Recognition over categories**: As `respond` states — concrete actions with their consequences and contrary grounds, never category titles.
 - **Reach named**: As `observe` and `reach` state.

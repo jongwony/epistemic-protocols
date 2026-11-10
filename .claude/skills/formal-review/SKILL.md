@@ -121,5 +121,5 @@ If the scope is a working tree (no PR), there is no PR to post to — present th
 5. **Verify before post** — run the Phase 3 direction-error guard against the diff-header fate before any comment is posted; an Added-but-described-as-deleted file augments the review with a direction-misread warning.
 6. **Substrate writes route to harness permission** — posting the consolidated PR comment is an external, human-visible GitHub mutation; surface what will be posted and let the harness gate the execution. The skill does not absorb that substrate decision.
 7. **Context-question separation at gates** — present all analysis and evidence as text before any gate; a gate carries only the question and the options with their differential implications.
-8. **Plain everyday language** in all user-facing emit — no internal protocol jargon at the user-facing surface.
+8. **User-facing emit states who does what**, in words the reader already uses or meets often, composed from the meaning in the language they are using — no internal protocol jargon at the user-facing surface.
 9. **One consolidated comment** — all surviving findings go in a single PR comment, each referencing its `path:line` in text; preserve lens tags and severity on every finding; skip duplicates.
