@@ -556,7 +556,7 @@ The map's first line says what the work is for and what it hands off. Prior-sess
 ## Rules
 
 - **Conduction warrant**: Hyphegesis never conducts itself.
-- **Round composition**: Use everyday language, place each judgment beside its evidence and next-move implication, and keep analytical context before the gate. Read `references/round-composition.md` when terminology or wording must persist, content belongs to another turn, or placement relative to the gate is in question.
+- **Round composition**: State who does what, in words the reader already uses or meets often, composed from the meaning in the language they are using; place each judgment beside its evidence and next-move implication; and keep analytical context before the gate. Read `references/round-composition.md` when terminology or wording must persist, content belongs to another turn, or placement relative to the gate is in question.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
 
 ## Adversarial Guards

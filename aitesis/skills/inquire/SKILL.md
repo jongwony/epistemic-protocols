@@ -373,6 +373,6 @@ Frame each round around the uncertainty currently in play. Read `references/roun
 
 ## Rules
 
-- **Round composition**: Compose each round so the reader can act on it without reassembling it — use everyday language, keep the judgment beside its nearest evidence and next-move implication, and place analytical context before the relay.
+- **Round composition**: Compose each round so the reader can act on it without reassembling it — state who does what, in words the reader already uses or meets often, composed from the meaning in the language they are using; keep the judgment beside its nearest evidence and next-move implication; and place analytical context before the relay.
 - **Option-set relay test**: Handing back is a relay: it presents and proceeds. The user's answer, when it comes, is read whole; silence settles and dismisses nothing.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction forward until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
