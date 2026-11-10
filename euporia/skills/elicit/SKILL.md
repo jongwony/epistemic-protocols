@@ -9,7 +9,7 @@ Resolve abstract aporia by surfacing the decisions an intent turns on until the 
 
 ## Definition
 
-**Euporia** (εὐπορία): A dialogical act of opening a way through abstract aporia — the person holds a direction but cannot name up front which decisions it turns on. The AI traces those decision coordinates from the person's own material, from their words, and from the decision structure of the domain the intent sits in, and surfaces each with where it comes from and what leaving it open changes. What is surfaced is focus: re-read every turn, it decides nothing. Only the person's words move a value from focus into the record, and each recorded value carries who proposed it and how it came to stand; what is still open is carried as residual. The run closes when the person says the intent is aligned enough — every coordinate need not be filled; they can stop at any time, and the run stays as it stood. The resolution establishes the person's recognized intent, not the factual correctness of its parts.
+**Euporia** (εὐπορία): A dialogical act of opening a way through abstract aporia — the person holds a direction but cannot name up front which decisions it turns on. The AI traces those decision coordinates from the person's own material, from their words, and from the decision structure of the domain the intent sits in, and surfaces each with where it comes from and what leaving it open changes. The run closes when the person says the intent is aligned enough — every coordinate need not be filled; they can stop at any time, and the run stays as it stood. The resolution establishes the person's recognized intent, not the factual correctness of its parts.
 
 ```lean
 /-!
@@ -40,7 +40,7 @@ IntentSeed
   → stand                -- a person's turn makes a value stand in the intent, under the record rule (`StandingSupported`)
   → resolve(intent)      -- the person says the intent is aligned enough
   → ResolvedEndpoint
-requires: aporia(I)                           -- declared by invoking /elicit, never judged; judged only on the AI-guided path, where not starting leaves no outcome
+requires: aporia(I)
 deficit:  AbstractAporia                      -- activation precondition (Layer 1/2)
 preserves: I                                  -- the seed turn is never rewritten; the context only grows
 invariant: Reverse Induction over Axis-Fixed Extraction  -- coordinates emerge from the intent; no fixed axis taxonomy
@@ -110,8 +110,8 @@ noncomputable section
 
 variable {P : Type}
 
-/-- `I`, the intent seed: the utterance that carries the intent and the context it lands in. The
-    seed is a turn of the context and is never rewritten. Source-neutral; read from the context. -/
+/-- `I`, the intent seed: the utterance that carries the intent and the context it lands in.
+    Source-neutral; read from the context. -/
 abbrev IntentSeed (P : Type) := Context P
 
 /-- The deficit: the person holds a direction but has not fixed which decisions it turns on — a
@@ -140,11 +140,8 @@ axiom coordinates : Context P → List Entry
 /-- Who first put a value forward: you, or the person. -/
 inductive Proposer | draft | person
 
-/-- What the turn that made a value stand did: gave it in its own words, took a value put forward
-    before, or gave a grant that reaches your choice. -/
 inductive Standing | set | adopted | granted
 
-/-- What stands on a coordinate: the value, who first put it forward, and how it came to stand. -/
 structure Determination where
   value    : Entry
   proposer : Proposer
