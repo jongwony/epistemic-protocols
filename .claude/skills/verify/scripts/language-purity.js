@@ -4,6 +4,7 @@
  *
  * Whitelist preserves intentional Korean regions:
  *   - **\/README_ko.md            Korean README localizations
+ *   - media/src/*.ko.html         Korean localizations of the media sources
  *   - .claude/skills/release/**   Release notes skill (Korean by purpose)
  *   - docs/**                     Repo documentation reports
  *   - .claude/rules/editing-conventions.md  Korean commit convention text
@@ -32,6 +33,7 @@ function lineHasHangul(line) {
 
 const WHITELIST_PATTERNS = [
   /(^|\/)README_ko\.md$/,
+  /^media\/src\/[^/]+\.ko\.html$/,        // Korean localizations of the media sources
   /(^|\/)README\.md$/,                    // English README + Korean localization link
   /^\.claude\/skills\/release(\/|$)/,
   /(^|\/)docs(\/|$)/,                     // repo and per-plugin docs
