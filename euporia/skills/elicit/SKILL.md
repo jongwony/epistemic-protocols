@@ -110,7 +110,8 @@ noncomputable section
 
 variable {P : Type}
 
-/-- `I`, the intent seed: the utterance that carries the intent and the context it lands in. Source-neutral; read from the context. -/
+/-- `I`, the intent seed: the utterance that carries the intent and the context it lands in.
+    Source-neutral; read from the context. -/
 abbrev IntentSeed (P : Type) := Context P
 
 /-- The deficit: the person holds a direction but has not fixed which decisions it turns on — a
@@ -180,6 +181,8 @@ def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
   | .open_ _   => false
   | .filled .. => true
 
+/-- One recorded value: the coordinate, what stands on it, and the person's turn it stands on,
+    with that turn's support. -/
 structure Recorded (c : Context P) where
   coord     : Entry
   det       : Determination
@@ -273,7 +276,7 @@ Priority: explicit_arg > recent_intent_seed > surfaced_aporia
 -/
 
 /-! ── PHASE TRANSITIONS ──
-`respond` is the next
+A step is one arm of a structural recursion over the person's utterances. `respond` is the next
 surface, as TOOL GROUNDING's `surface` entry names it; `session` is the session's own answer to an
 utterance that does not bear on the run, which stays in the context without being a surface of
 this run.
@@ -293,6 +296,11 @@ def elicit (respond session : Context P → Response P) :
 def start (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
   elicit respond session (c ++ [(respond c).val]) us
+
+/-! ── LOOP ──
+Every answer is read against the whole context as it now stands: nothing counts rounds, and no
+earlier answer is held apart from what later ones say. No fixed cap: each surface is dialogue.
+-/
 
 /-! ── CONVERGENCE ──
 converged: a ResolvedEndpoint the person's utterance closed; holding is a run no turn of the
@@ -373,4 +381,5 @@ Present what TOOL GROUNDING's `surface` entry names. Read `references/round-comp
 
 - **Recognition over Recall**: Present the coordinates an intent turns on with their anticipatable post-answer states, so the user recognizes what they would otherwise have to recall.
 - **Round composition**: Use everyday language, keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the questions.
+- **Focus and record**: As the Definition's MORPHISM invariant and `record` state.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
