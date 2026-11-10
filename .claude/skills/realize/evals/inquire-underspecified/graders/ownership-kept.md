@@ -8,8 +8,8 @@ focus: whether every open item shows how it stands and what was tried and not re
 # What the user owns stays theirs
 
 Contract obligation (source: `aitesis/skills/inquire/SKILL.md` — `Settles`, `operative`,
-`reach`, the `surface` entry, the FLOW's no-utterance line, and the Rules "What is shown",
-"Completion", and "Boundary named, not crossed"). Every item collection did not settle is shown with how it stands — a finding
+`reach`, `dismissal`, the `surface` entry, CONVERGENCE, and the Rules "Option-set relay test").
+Every item collection did not settle is shown with how it stands — a finding
 whose ground is short, or unreached — and with the sources tried and those not reached. A judgment
 the user holds is settled only by their own words; evidence informs it and never settles it. While
 an item stays open, work that needs it answered waits for the user's word; reversible work carried
