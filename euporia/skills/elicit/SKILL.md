@@ -9,7 +9,7 @@ Resolve abstract aporia by surfacing the decisions an intent turns on until the 
 
 ## Definition
 
-**Euporia** (εὐπορία): A dialogical act of opening a way through abstract aporia — the person holds a direction but cannot name up front which decisions it turns on. The AI traces those decision coordinates from the person's own material, from their words, and from the decision structure of the domain the intent sits in, and surfaces each with where it comes from and what leaving it open changes. What is surfaced is focus: re-read every turn, it decides nothing. Only the person's words move a value from focus into the record, and each recorded value carries who proposed it and how it came to stand; what is still open is carried as residual. The run closes when the person says the intent is aligned enough — every coordinate need not be filled; they can stop at any time, and the run stays as it stood. The resolution establishes the person's recognized intent, not the factual correctness of its parts.
+**Euporia** (εὐπορία): A dialogical act of opening a way through abstract aporia — the person holds a direction but cannot name up front which decisions it turns on. The AI traces those decision coordinates from the person's own material, from their words, and from the decision structure of the domain the intent sits in, and surfaces each with where it comes from and what leaving it open changes. The run closes when the person says the intent is aligned enough — every coordinate need not be filled; they can stop at any time, and the run stays as it stood. The resolution establishes the person's recognized intent, not the factual correctness of its parts.
 
 ```lean
 /-!
@@ -40,7 +40,7 @@ IntentSeed
   → stand                -- a person's turn makes a value stand in the intent, under the record rule (`StandingSupported`)
   → resolve(intent)      -- the person says the intent is aligned enough
   → ResolvedEndpoint
-requires: aporia(I)                           -- declared by invoking /elicit, never judged; judged only on the AI-guided path, where not starting leaves no outcome
+requires: aporia(I)
 deficit:  AbstractAporia                      -- activation precondition (Layer 1/2)
 preserves: I                                  -- the seed turn is never rewritten; the context only grows
 invariant: Reverse Induction over Axis-Fixed Extraction  -- coordinates emerge from the intent; no fixed axis taxonomy
@@ -110,8 +110,7 @@ noncomputable section
 
 variable {P : Type}
 
-/-- `I`, the intent seed: the utterance that carries the intent and the context it lands in. The
-    seed is a turn of the context and is never rewritten. Source-neutral; read from the context. -/
+/-- `I`, the intent seed: the utterance that carries the intent and the context it lands in. Source-neutral; read from the context. -/
 abbrev IntentSeed (P : Type) := Context P
 
 /-- The deficit: the person holds a direction but has not fixed which decisions it turns on — a
@@ -140,11 +139,8 @@ axiom coordinates : Context P → List Entry
 /-- Who first put a value forward: you, or the person. -/
 inductive Proposer | draft | person
 
-/-- What the turn that made a value stand did: gave it in its own words, took a value put forward
-    before, or gave a grant that reaches your choice. -/
 inductive Standing | set | adopted | granted
 
-/-- What stands on a coordinate: the value, who first put it forward, and how it came to stand. -/
 structure Determination where
   value    : Entry
   proposer : Proposer
@@ -184,8 +180,6 @@ def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
   | .open_ _   => false
   | .filled .. => true
 
-/-- One recorded value: the coordinate, what stands on it, and the person's turn it stands on,
-    with that turn's support. -/
 structure Recorded (c : Context P) where
   coord     : Entry
   det       : Determination
@@ -279,7 +273,7 @@ Priority: explicit_arg > recent_intent_seed > surfaced_aporia
 -/
 
 /-! ── PHASE TRANSITIONS ──
-A step is one arm of a structural recursion over the person's utterances. `respond` is the next
+`respond` is the next
 surface, as TOOL GROUNDING's `surface` entry names it; `session` is the session's own answer to an
 utterance that does not bear on the run, which stays in the context without being a surface of
 this run.
@@ -299,11 +293,6 @@ def elicit (respond session : Context P → Response P) :
 def start (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
   elicit respond session (c ++ [(respond c).val]) us
-
-/-! ── LOOP ──
-Every answer is read against the whole context as it now stands: nothing counts rounds, and no
-earlier answer is held apart from what later ones say. No fixed cap: each surface is dialogue.
--/
 
 /-! ── CONVERGENCE ──
 converged: a ResolvedEndpoint the person's utterance closed; holding is a run no turn of the
@@ -384,5 +373,4 @@ Present what TOOL GROUNDING's `surface` entry names. Read `references/round-comp
 
 - **Recognition over Recall**: Present the coordinates an intent turns on with their anticipatable post-answer states, so the user recognizes what they would otherwise have to recall.
 - **Round composition**: Use everyday language, keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the questions.
-- **Focus and record**: As the Definition's MORPHISM invariant and `record` state.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
