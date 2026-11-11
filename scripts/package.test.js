@@ -13,7 +13,7 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('zlib');
-const { CANONICAL_PRECEDENCE, CANONICAL_PROTOCOL_SET } = require('./load-protocols');
+const { CANONICAL_PRECEDENCE, CANONICAL_PROTOCOL_SET, LEAN_CONTRACT_CONTRIBUTOR_SKILLS } = require('./load-protocols');
 // Full protocol registry, derived — display-first Anamnesis + canonical precedence chain +
 // structurally-last Katalepsis (same construction as load-protocols protocolOrder()).
 const ALL_PROTOCOLS = ['Anamnesis', ...CANONICAL_PRECEDENCE, 'Katalepsis'];
@@ -1212,6 +1212,19 @@ describe('plugin directory registration', () => {
       'adding the zip name there silences that assertion while leaving the directory ' +
       'unregistered — register it here first.'
     );
+  });
+});
+
+describe('contributor skills stay out of the packaged plugin set', () => {
+  it('no packaged plugin is, or carries, a skill LEAN_CONTRACT_CONTRIBUTOR_SKILLS lists', () => {
+    // The list enrolls a `.claude/skills/<skill>` contract in the Lean path
+    // alone. PLUGINS is what the build packages, so a listed skill reaching it
+    // would ship contributor tooling.
+    assert.deepEqual(PLUGINS.filter(p => p.dir.startsWith('.')), [], 'no packaged plugin lives in a dot-directory');
+    for (const entry of LEAN_CONTRACT_CONTRIBUTOR_SKILLS) {
+      assert.match(entry, /^\.claude\/skills\/[^/]+$/, `${entry} is a contributor skill directory`);
+      assert.ok(!PLUGINS.some(p => `${p.dir}/skills/${p.skill}` === entry || p.dir === entry.split('/')[0]), `${entry} is in no packaged plugin`);
+    }
   });
 });
 

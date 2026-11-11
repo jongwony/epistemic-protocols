@@ -13,6 +13,7 @@ const path = require('path');
 const {
   CANONICAL_PROTOCOL_SET,
   LEAN_CONTRACT_UTILITIES,
+  LEAN_CONTRACT_CONTRIBUTOR_SKILLS,
   discoverPlugins,
   protocolFiles,
 } = require(path.resolve(__dirname, '../../../../scripts/load-protocols.js'));
@@ -113,6 +114,7 @@ function createContext(projectRoot) {
     CANONICAL_PROTOCOLS,
     CANONICAL_PROTOCOL_SET,
     LEAN_CONTRACT_UTILITIES,
+    LEAN_CONTRACT_CONTRIBUTOR_SKILLS,
     protocolInputs,
     walkFiles,
   };
