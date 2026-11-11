@@ -65,7 +65,7 @@ const LEAN_CONTRACT_UTILITIES = Object.freeze(['epistemic-cooperative/skills/pro
 // list and enrolls each entry under the rules a canonical protocol's block
 // meets: a `.claude/skills/*/SKILL.md` with a ```lean fence enters the path by
 // being listed here.
-const LEAN_CONTRACT_CONTRIBUTOR_SKILLS = Object.freeze([]);
+const LEAN_CONTRACT_CONTRIBUTOR_SKILLS = Object.freeze(['.claude/skills/rederive']);
 
 // Per-call memoization cache. discoverPlugins() instantiates a fresh cache
 // so callers within a single process pay one read per plugin.json regardless

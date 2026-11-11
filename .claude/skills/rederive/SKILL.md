@@ -10,6 +10,349 @@ One skill per run, whose formal block is Lean or becomes Lean in the run: a core
 
 **What a re-derivation answers to.** The target is the morphism that the `AGENTS.md` Northstar and the premise axiom Context and Utterance as First-Class Ground (`premise/recognition-and-authority.md`) admit, in the form `lean/EpistemicProtocols/Ground.lean` fixes: the fused context — turns bound to who sent them — and the person's utterance are the ground; the structure fixes only what the harness knows; everything else is the model's inference, declared as a documented judgment inside the types. The solution is derived from the gathered pre-understanding and taken at the fusion gate before the current contract is read; the pre-Lean DSL, the current block, any open PR and earlier decides are evidence read against that solution, never the target.
 
+## Definition
+
+The run as a contract: its gates, how a turn at a gate is read, how a run ends, and where a finding returns it. The Steps after the block say how each operation is carried out.
+
+```lean
+/-!
+How to read this block. It is core Lean 4 and elaborates as written, and you are the model it is
+written for: you read it, and by inference over the context you settle each element it leaves
+open. Every `axiom` is one of those judgments — a black box to the contract, yours to make from
+the material in front of you; its doc comment says what you judge there, and nothing in this
+block decides it for you. Every `def`, `inductive`, and `structure` is fixed by the contract.
+The Steps after the block say how each operation is carried out and what each gate shows; they
+add no gate, no end, and no return path this block does not have.
+-/
+
+/-! ── FLOW ──
+Rederive(protocol) → start(c) → run(fusion, c, arrivals), where c is the fused session context:
+  before a gate is shown, the work `before` lists for it runs and joins the context
+    [a finding of that work moves the ground of a part already taken]  → the fusion gate instead
+  fusion gate → sketch gate → rehearsal fusion: each is shown, and then holds for a turn
+  next arrival a — the contributor's utterance, or their words as a record or a peer relays them:
+    [it settles nothing]  answered; the gate holds
+    [it stops the run]    what was gathered and derived is recorded; the run ends, nothing closed
+    [it moves the pre-understanding, or the ground of a part already taken]  → the fusion gate
+    [it corrects what the gate shows, the taken parts standing]  the work before this gate again
+    [it takes what the gate showed]
+      fusion:    recorded; the current contract is read against the solution
+                 [nothing to change] the diagnosis is recorded; the run ends   [else] → sketch gate
+      sketch:    recorded; the fork edits; the edit is rehearsed → the rehearsal fusion
+      rehearsal: [the revision that stands was rehearsed]  → the hand-off; the run ends
+                 [an edit came after the last rehearsal]   rehearsed again; this gate again
+  no arrival: the gate holds; nothing is taken and nothing ends
+-/
+
+namespace Rederive
+
+/-! ── GROUND ──
+The session primitive this contract reads.
+-/
+
+inductive Origin | person | assistant | external | peer | injected | unknown
+  deriving DecidableEq
+
+/-- A turn is who sent it and what it says. What the turn does — a statement, a request, an
+    instruction, a report of what was observed — is read from its content, never stored here. -/
+structure Turn (P : Type) where
+  origin  : Origin
+  content : P
+
+abbrev Context (P : Type) := List (Turn P)
+
+/-- An origin that may ground: the harness says who sent a turn, and that is all this admits on.
+    The assistant's own turns, injected text, and turns of unknown origin ground nothing. -/
+def Grounding := {o : Origin // o ≠ .assistant ∧ o ≠ .injected ∧ o ≠ .unknown}
+
+/-- Any turn a person sent, whatever it does. -/
+def Utterance (P : Type) := {e : Turn P // e.origin = .person}
+def Response (P : Type) := {e : Turn P // e.origin = .assistant}
+/-- A turn from outside the conversation: what a tool or the environment returned, or a peer's
+    report. A person's account of what they observed is an utterance, read as such. -/
+def Evidence (P : Type) := {e : Turn P // e.origin = .external ∨ e.origin = .peer}
+
+def fuse {P : Type} (c : Context P) (u : Utterance P) : Context P := c ++ [u.val]
+
+/-- One turn of the context, with the origin it grounds on. -/
+structure Cite {P : Type} (c : Context P) where
+  idx : Nat
+  lt  : idx < c.length
+  src : Grounding
+  ok  : (c[idx]'lt).origin = src.val
+
+/-- `admits` reads only who sent the cited turn; `supports` is the model's reading of what that
+    turn says, including what it does — a statement, a request, a report of an observation. -/
+structure Coord (P A : Type) where
+  admits   : Grounding → Prop
+  supports : Context P → Turn P → A → Prop
+
+/-- `open_` may carry a candidate citation whose support is still short. -/
+inductive Occ {P A : Type} (q : Coord P A) (c : Context P)
+  | open_  (candidate : Option (Cite c))
+  | filled (a : A) (src : Cite c) (allowed : q.admits src.src)
+      (supported : q.supports c (c[src.idx]'src.lt) a)
+
+/-- The same turn, cited from a longer context; what it supports is judged again against the
+    context that now stands. -/
+def Cite.lift {P : Type} {c : Context P} (s : Cite c) (t : Context P) : Cite (c ++ t) :=
+  { idx := s.idx
+    lt := by have := s.lt; simp; omega
+    src := s.src
+    ok := by rw [List.getElem_append_left s.lt]; exact s.ok }
+
+/-! ── TYPES ── -/
+
+noncomputable section
+
+variable {P : Type}
+
+/-- A turn that may settle a gate: the contributor's own utterance, or their words as a record or
+    a peer session relays them — a decide on the chart, a hand-over from another session. -/
+abbrev Arrival (P : Type) := Utterance P ⊕ Evidence P
+
+def Arrival.turn : Arrival P → Turn P
+  | .inl u => u.val
+  | .inr e => e.val
+
+def arrive (c : Context P) (a : Arrival P) : Context P := c ++ [a.turn]
+
+/-- The gates of a run, each holding a judgment that is the contributor's: the derived solution,
+    the sketch, and what the edited contract produced in rehearsal. -/
+inductive Gate | fusion | sketch | rehearsal
+
+/-- How a turn at a gate is read. Premise: one turn carries one of these or none. A turn that
+    carries none settles nothing — a question, an appraisal, a request to look at something — and
+    is answered with the gate left open. -/
+inductive Reading
+  /-- the contributor takes what the gate showed, all of it, with no second permission for any
+      line -/
+  | takes
+  /-- the contributor corrects or replaces part of what the gate shows, and every part already
+      taken keeps its ground: a redraw, or a fix -/
+  | applies
+  /-- the turn moves the pre-understanding, or the ground of a part already taken, naming the
+      part it moves -/
+  | movesGround
+  /-- the contributor ends the run -/
+  | stops
+
+/-- **Your judgment**: the cited turn reads this way, read whole against the context as it now
+    stands. A finding of your own or of a consult is no turn of the contributor's: it is brought
+    to the gate, and what is read is their turn on it. -/
+axiom ReadingSupported : Context P → Turn P → Reading → Prop
+
+/-- A gate is settled on any turn that may ground; which turn carries the contributor's reading
+    is `ReadingSupported`'s. -/
+def readingCoord : Coord P Reading :=
+  { admits := fun _ => True, supports := ReadingSupported }
+
+/-- **Your reading** of the latest arrival: `open_` where it settles nothing. -/
+axiom reading : (c : Context P) → Occ (readingCoord (P := P)) c
+
+/-- **Your work** before a gate is shown — the operations `before` lists for it, carried out as
+    the Steps state — each read and each delegated result returning as an evidence turn. A
+    finding that applies a taken part is fixed inside this work. On a return to a gate, only what
+    the latest turn or finding moved is done again. -/
+axiom prepared : Gate → Context P → List (Evidence P)
+
+/-- **Your record** on the protocol chart of what the latest turn settled or ended: a decide for
+    each point a taking at the fusion or the sketch gate settled, its reason and its rejected
+    alternative in the contributor's words — a slot their words leave empty is asked, never
+    inferred; the diagnosis, where nothing is to change; what was gathered and derived, where the
+    contributor stops. -/
+axiom recorded : Context P → List (Evidence P)
+
+/-- **Your judgment** (Re-entry): a finding of the work just done moves the ground of a part
+    already taken. -/
+axiom FindingMovesGround : Context P → Prop
+
+/-- **Your diagnosis**, from reading the current contract against the taken solution: it is
+    already a Lean block, lacks nothing the solution asks, and carries nothing the solution does
+    not. -/
+axiom NothingToChange : Context P → Prop
+
+/-- **Your reading**: this turn reports a change to the contract under re-derivation — the fork's
+    edit, a fix, or a change anyone else made on its branch. -/
+axiom Edits : Turn P → Prop
+
+/-- **Your reading**: this turn is the record of a rehearsal of the contract as it then stood. -/
+axiom Rehearses : Turn P → Prop
+
+/-- The revision that stands was rehearsed: the context holds a rehearsal record with no edit
+    after it. -/
+def Rehearsed (c : Context P) : Prop :=
+  ∃ i, ∃ h : i < c.length, Rehearses (c[i]'h) ∧
+    ∀ j, ∀ hj : j < c.length, i < j → ¬ Edits (c[j]'hj)
+
+/-- **Your record**: scene by scene, what the rehearsal did not reach — the closures only the
+    person makes among them — each with what reaching it needs. -/
+axiom unreached : Context P → List String
+
+/-- What a run hands off once the contributor has taken the rehearsal result. Verifying the
+    contract in use lies past this hand-off, which names it and prescribes nothing about it. -/
+structure HandOff (P : Type) where
+  context   : Context P
+  fusedAt   : Nat
+  unreached : List String
+
+/-- The end of a run whose reading found nothing to change, with the turn that took the solution
+    it was read against. -/
+structure Diagnosis (P : Type) where
+  context : Context P
+  takenAt : Nat
+
+inductive Outcome (P : Type)
+  /-- the run stands at a gate with nothing further taken: no arrival came, or the contributor
+      stopped — a stop is no result, and it stays in the context. Work carried past a held gate
+      is provisional, recorded apart from any decide, and is no arrival. -/
+  | holding (g : Gate) (c : Context P)
+  | noChange (d : Diagnosis P)
+  | handedOff (h : HandOff P)
+
+/-! ── MODE STATE ──
+Λ is the fused context: what was taken, edited, and rehearsed is read from its turns, and no field
+stores it. The gate argument of `run` is the gate last shown.
+-/
+
+abbrev Mode (P : Type) := Context P
+
+/-! ── PHASE TRANSITIONS ──
+The work before a gate appends what `prepared` returns [Tool]; `respond` presents the gate from the
+context that work leaves, with its findings grouped by the part they bear on; `session` answers a
+turn that settles nothing.
+-/
+
+/-- The reading the run acts on: the latest turn's. A turn already read is not read into a second
+    taking. -/
+def latest (c : Context P) : Option (Reading × Nat) :=
+  match reading c with
+  | .open_ _ => none
+  | .filled a s _ _ => if s.idx + 1 = c.length then some (a, s.idx) else none
+
+def settle (c : Context P) : Context P := c ++ (recorded c).map (·.val)
+
+def pass (g : Gate) (c : Context P) : Context P := c ++ (prepared g c).map (·.val)
+
+open Classical in
+/-- The gate shown on the context a pass leaves, with its presentation appended: the gate the pass
+    led up to, or — where a finding of the pass moves the ground of a part already taken — the
+    fusion gate, after the work before it. -/
+def shown (respond : Gate → Context P → Response P) (g : Gate) (c₁ : Context P) :
+    Gate × Context P :=
+  if FindingMovesGround c₁ then
+    let c₂ := pass .fusion c₁
+    (.fusion, c₂ ++ [(respond .fusion c₂).val])
+  else (g, c₁ ++ [(respond g c₁).val])
+
+open Classical in
+def run (respond : Gate → Context P → Response P) (session : Context P → Response P) :
+    Gate → Context P → List (Arrival P) → Outcome P
+  | g, c, []      => .holding g c
+  | g, c, a :: as =>
+    let c' := arrive c a
+    match latest c' with
+    | none => run respond session g (c' ++ [(session c').val]) as
+    | some (.stops, _) => .holding g (settle c')
+    | some (.movesGround, _) =>
+      let next := shown respond .fusion (pass .fusion c')
+      run respond session next.1 next.2 as
+    | some (.applies, _) =>
+      let next := shown respond g (pass g c')
+      run respond session next.1 next.2 as
+    | some (.takes, n) =>
+      match g with
+      | .fusion =>
+        let c₁ := pass .sketch (settle c')
+        if NothingToChange c₁ then .noChange ⟨settle c₁, n⟩
+        else
+          let next := shown respond .sketch c₁
+          run respond session next.1 next.2 as
+      | .sketch =>
+        let next := shown respond .rehearsal (pass .rehearsal (settle c'))
+        run respond session next.1 next.2 as
+      | .rehearsal =>
+        if Rehearsed c' then .handedOff ⟨c', n, unreached c'⟩
+        else
+          let next := shown respond .rehearsal (pass .rehearsal c')
+          run respond session next.1 next.2 as
+
+def start (respond : Gate → Context P → Response P) (session : Context P → Response P)
+    (c : Context P) (as : List (Arrival P)) : Outcome P :=
+  let next := shown respond .fusion (pass .fusion c)
+  run respond session next.1 next.2 as
+
+/-! ── CONVERGENCE ──
+handed off: the contributor's turn took the rehearsal result on a revision rehearsed since its last
+edit; the HandOff is relayed as the rehearsal-fusion step states. Where that gate was not answered,
+a hand-off prepared provisionally says the fusion was not taken, and no `handedOff` is claimed.
+no change: the diagnosis is recorded and relayed; nothing is edited.
+Convergence evidence: (pre-understanding → taken solution → reading → sketch → edit → rehearsal →
+the contributor's turn on what the contract produced → HandOff). Demonstrated, not asserted.
+-/
+
+/-! ── TOOL GROUNDING ──
+What each operation of this contract does. An interaction with the person is one of two kinds,
+and its kind fixes how it continues once its text is presented. A Constitution settles a judgment
+through the person's turn. An Extension settles none for the person: it passes on a result its
+cited ground fixes, or carries reversible work forward on a judgment the AI states, which stays
+the AI's proposal until the person takes it. Beyond the Constitution operations a contract
+annotates, whether work goes forward this way or waits for the person's answer is the AI's
+judgment in the situation, and work that cannot be undone waits for the authorization it needs.
+Work carried forward, on a grant or a stated judgment or as clear work, returns with an account
+of how the request was read, what was judged on what basis — naming an alternative set aside
+where it may be preferred — and how far the work went.
+-/
+
+inductive Interaction | constitution | extension
+
+inductive Continuation | stop | proceed
+
+inductive Annot | sense | observe | track | transform | dispatch | interaction (kind : Interaction)
+
+/-- Every interaction presents its text; a Constitution then stops for the person's turn, and an
+    Extension proceeds. -/
+def Interaction.realization : Interaction → Continuation
+  | .constitution => .stop
+  | .extension    => .proceed
+
+inductive Op
+  | gather | search | derive | consult | read | sketch | record | edit | rehearse
+  | fuse | gate | readTurn | converge | handOff
+
+def grounding : Op → Annot × String
+  | .gather   => (.observe, "artifact read, record read: the pre-understanding, as the gathering step lists it; read-only")
+  | .search   => (.dispatch, "delegate: the literature search of the gathering step")
+  | .derive   => (.sense, "Internal analysis: the protocol's epistemic solution, each part with what grounds it")
+  | .consult  => (.dispatch, "delegate: the independent derivation before the fusion gate; the sketch consult before the sketch gate")
+  | .read     => (.observe, "artifact read in a scratch tree: the current contract against the taken solution; failures recorded, nothing fixed")
+  | .sketch   => (.sense, "Internal analysis: the sketch, with each lost obligation's disposition")
+  | .record   => (.track, "record: on the protocol chart, as `recorded` states")
+  | .edit     => (.dispatch, "delegate: the fork's edit, with the decides as its spec and the verification run")
+  | .rehearse => (.dispatch, "delegate: the edited contract run in a fresh context on the gathered scenes, as the rehearsal step states")
+  | .fuse     => (.interaction .constitution, "the fusion gate, as its step states")
+  | .gate     => (.interaction .constitution, "the sketch gate, as the sketch step states")
+  | .readTurn => (.sense, "Internal analysis: how the latest arrival reads at the gate that stands, as `ReadingSupported` states")
+  | .converge => (.interaction .constitution, "the rehearsal fusion, as its step states")
+  | .handOff  => (.interaction .extension, "HandOff, relayed as the rehearsal-fusion step states; where nothing is to change, the diagnosis")
+
+/-- The work that leads up to each gate, in order: what `prepared` carries out for it. -/
+def before : Gate → List Op
+  | .fusion    => [.gather, .search, .derive, .consult]
+  | .sketch    => [.read, .sketch, .consult]
+  | .rehearsal => [.edit, .rehearse]
+
+/-- The operation that shows each gate. -/
+def shows : Gate → Op
+  | .fusion    => .fuse
+  | .sketch    => .gate
+  | .rehearsal => .converge
+
+end
+
+end Rederive
+```
+
 ## Steps
 
 1. **Trigger** — a contributor names the protocol. Resolve its chart; where the protocol's earlier chart is Done, open a new chart linked to it and to ROO-67 (ROO-67 decide 5e64392d). The order across protocols is the contributor's and session-local; nothing here fixes it.
