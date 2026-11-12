@@ -13,7 +13,9 @@
  * curated fact — a directory carrying a plugin.json does not thereby become
  * a protocol — so it is stated where it can be reviewed. Which utility skills
  * carry their contract as a Lean block is declared here too
- * (LEAN_CONTRACT_UTILITIES), for the Lean verification path alone.
+ * (LEAN_CONTRACT_UTILITIES), and which contributor skills under
+ * `.claude/skills/` do (LEAN_CONTRACT_CONTRIBUTOR_SKILLS), both for the Lean
+ * verification path alone.
  *
  * Active set = the above minus plugins whose plugin.json carries
  * "deprecated": true. Deprecation lives in per-plugin self-description per
@@ -54,6 +56,16 @@ const CANONICAL_PROTOCOL_SET = [
 // changes nothing else — it stays a utility to every other consumer of this
 // module.
 const LEAN_CONTRACT_UTILITIES = Object.freeze(['epistemic-cooperative/skills/probe']);
+
+// Contributor skills whose contract is a Lean block, as skill directories
+// relative to the project root (`.claude/skills/<skill>`). A contributor skill
+// is project-local tooling no plugin carries: discoverPlugins() never walks
+// `.claude/`, so no record, plugin set, or package holds one, and listing a
+// skill here changes none of that. The Lean verification path alone reads this
+// list and enrolls each entry under the rules a canonical protocol's block
+// meets: a `.claude/skills/*/SKILL.md` with a ```lean fence enters the path by
+// being listed here.
+const LEAN_CONTRACT_CONTRIBUTOR_SKILLS = Object.freeze(['.claude/skills/rederive']);
 
 // Per-call memoization cache. discoverPlugins() instantiates a fresh cache
 // so callers within a single process pay one read per plugin.json regardless
@@ -231,6 +243,7 @@ module.exports = {
   CANONICAL_PRECEDENCE,
   CANONICAL_PROTOCOL_SET,
   LEAN_CONTRACT_UTILITIES,
+  LEAN_CONTRACT_CONTRIBUTOR_SKILLS,
   discoverPlugins,
   protocolOrder,
   protocolFiles,

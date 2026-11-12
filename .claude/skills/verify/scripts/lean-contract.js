@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
  * Lean contract build: turns each enrolled SKILL.md Lean block — every
- * canonical protocol's, and each utility's that `scripts/load-protocols.js`
- * LEAN_CONTRACT_UTILITIES lists — into the Lake package's `Contract.<NS>`
+ * canonical protocol's, each utility's that `scripts/load-protocols.js`
+ * LEAN_CONTRACT_UTILITIES lists, and each contributor skill's that its
+ * LEAN_CONTRACT_CONTRIBUTOR_SKILLS lists — into the Lake package's `Contract.<NS>`
  * module under `lean/.contract/`, which is gitignored — the SKILL.md block
  * stays the single source, and a generated file is never edited by hand.
  * Each contract's guarantees are stated and
@@ -34,6 +35,9 @@ const CANONICAL_TOOL_GROUNDING = path.join('lean', 'EpistemicProtocols', 'ToolGr
 const TOOL_GROUNDING_THEOREMS = path.join('lean', 'EpistemicProtocols', 'ToolGrounding', 'Theorems.lean');
 // The checked-in Lean tooling: the audit and its fixtures. Not part of any contract.
 const LEAN_TOOLING_DIRS = Object.freeze([path.join('lean', 'Audit'), path.join('lean', 'Tests')]);
+
+// Where contributor skills live: one directory per skill, each with a SKILL.md.
+const CONTRIBUTOR_SKILLS_DIR = '.claude/skills';
 
 // A line opening a ```lean fence, read apart from whether a block extracts.
 const LEAN_FENCE_OPEN = /^```lean(?:\s|$)/m;
@@ -198,6 +202,57 @@ function utilityEnrollment(root, { records, listed, core }) {
   return { files, problems };
 }
 
+// The contributor SKILL.md files the Lean path enrolls. `listed` is the
+// registry's LEAN_CONTRACT_CONTRIBUTOR_SKILLS. `files` are the listed skills'
+// SKILL.md paths, each then held to the rules a protocol's block meets;
+// `problems` ([{ relPath, reason }]) are the entries that cannot be enrolled —
+// one that is not a `.claude/skills/<skill>` directory, one with no SKILL.md —
+// and every `.claude/skills/*/SKILL.md` the list leaves out that has a line
+// opening a ```lean fence, whether or not the fence closes. Plugin discovery
+// is not consulted: a contributor skill is no plugin's.
+function contributorEnrollment(root, { listed }) {
+  const files = [];
+  const problems = [];
+  const enrolled = new Set();
+  for (const entry of listed) {
+    const relPath = path.join(entry, 'SKILL.md');
+    const parts = entry.split('/');
+    if (parts.length !== 3 || parts.slice(0, 2).join('/') !== CONTRIBUTOR_SKILLS_DIR || !parts[2]) {
+      problems.push({ relPath, reason: `listed in LEAN_CONTRACT_CONTRIBUTOR_SKILLS but is not a \`${CONTRIBUTOR_SKILLS_DIR}/<skill>\` directory — a plugin's skill is enrolled as a canonical protocol or through LEAN_CONTRACT_UTILITIES` });
+    } else if (!fs.existsSync(path.join(root, relPath))) {
+      problems.push({ relPath, reason: 'listed in LEAN_CONTRACT_CONTRIBUTOR_SKILLS but no SKILL.md is at this path' });
+    } else if (!enrolled.has(entry)) {
+      enrolled.add(entry);
+      files.push(relPath);
+    }
+  }
+  const skillsDir = path.join(root, CONTRIBUTOR_SKILLS_DIR);
+  const names = fs.existsSync(skillsDir)
+    ? fs.readdirSync(skillsDir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name).sort()
+    : [];
+  for (const name of names) {
+    if (enrolled.has(`${CONTRIBUTOR_SKILLS_DIR}/${name}`)) continue;
+    const relPath = path.join(CONTRIBUTOR_SKILLS_DIR, name, 'SKILL.md');
+    const full = path.join(root, relPath);
+    if (fs.existsSync(full) && LEAN_FENCE_OPEN.test(fs.readFileSync(full, 'utf8'))) {
+      problems.push({ relPath, reason: 'carries a ```lean fence but is not listed in LEAN_CONTRACT_CONTRIBUTOR_SKILLS — a Lean block outside the list is neither elaborated nor audited' });
+    }
+  }
+  return { files, problems };
+}
+
+// The one enrollment result beyond the canonical protocols, read by both the
+// standalone command below and the lean-definition check: the listed utilities
+// and the listed contributor skills, with every entry and every unlisted Lean
+// fence that cannot be enrolled. `registry` carries the three lists of
+// `scripts/load-protocols.js` for the tree at `root`; `records` are that
+// tree's discoverPlugins() records.
+function enrollment(root, registry, records) {
+  const utilities = utilityEnrollment(root, { records, listed: registry.LEAN_CONTRACT_UTILITIES, core: registry.CANONICAL_PROTOCOL_SET });
+  const contributors = contributorEnrollment(root, { listed: registry.LEAN_CONTRACT_CONTRIBUTOR_SKILLS });
+  return { files: [...utilities.files, ...contributors.files], problems: [...utilities.problems, ...contributors.problems] };
+}
+
 function leanBlocksFrom(root, relPaths) {
   const blocks = [];
   for (const relPath of relPaths) {
@@ -267,8 +322,10 @@ module.exports = {
   canonicalGroundText,
   canonicalToolGroundingText,
   check,
+  contributorEnrollment,
   diagnostics,
   docTheoremNames,
+  enrollment,
   extractLeanBlock,
   groundSpan,
   leanBlocksFrom,
@@ -289,19 +346,16 @@ if (require.main === module) {
   }
   const root = path.resolve(rootArg || '.');
   const registry = require(path.join(root, 'scripts/load-protocols.js'));
-  const utilities = utilityEnrollment(root, {
-    records: registry.discoverPlugins({ projectRoot: root }),
-    listed: registry.LEAN_CONTRACT_UTILITIES,
-    core: registry.CANONICAL_PROTOCOL_SET,
-  });
-  const relPaths = [...registry.protocolFiles({ projectRoot: root }), ...utilities.files];
+  const listed = enrollment(root, registry, registry.discoverPlugins({ projectRoot: root }));
+  const relPaths = [...registry.protocolFiles({ projectRoot: root }), ...listed.files];
   const blocks = leanBlocksFrom(root, relPaths);
-  // Every protocol and every listed utility is enrolled or the command fails:
-  // a block left out of the plan is a block nothing audits.
+  // Every protocol, every listed utility and every listed contributor skill is
+  // enrolled or the command fails: a block left out of the plan is a block
+  // nothing audits.
   const plan = planContracts(root, blocks);
   const withBlock = new Set(blocks.map((b) => b.relPath));
   const unenrolled = [
-    ...utilities.problems,
+    ...listed.problems,
     ...relPaths.filter((p) => !withBlock.has(p)).map((relPath) => ({ relPath, reason: 'no Lean Definition block' })),
     ...plan.skipped,
   ];

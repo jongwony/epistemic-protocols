@@ -5,9 +5,10 @@
  * tree (or a throwaway fixture), never the live tree.
  *
  *   lean-bridge.js         lean-definition reaches every canonical protocol,
- *                          whose Definition block is Lean 4, and every utility
- *                          LEAN_CONTRACT_UTILITIES lists; each rule it holds
- *                          rejects its counterexample
+ *                          whose Definition block is Lean 4, every utility
+ *                          LEAN_CONTRACT_UTILITIES lists, and every contributor
+ *                          skill LEAN_CONTRACT_CONTRIBUTOR_SKILLS lists; each
+ *                          rule it holds rejects its counterexample
  *   artifact-sync.js       version-staleness measures a change from its base;
  *                          structure holds the section schema and MORPHISM
  *                          anatomy; cross-ref-scan holds the Type signature
@@ -34,7 +35,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(here, '../../../..');
 const checkerRelative = '.claude/skills/verify/scripts/static-checks.js';
 const require = createRequire(import.meta.url);
-const { LEAN_CONTRACT_UTILITIES, protocolFiles } = require(path.join(projectRoot, 'scripts/load-protocols.js'));
+const { LEAN_CONTRACT_UTILITIES, LEAN_CONTRACT_CONTRIBUTOR_SKILLS, protocolFiles } = require(path.join(projectRoot, 'scripts/load-protocols.js'));
 
 // Runs the verifier at `checker` (the one inside `root` by default) over `root`.
 function run(root, { checker = path.join(root, checkerRelative), env = process.env } = {}) {
@@ -77,7 +78,7 @@ function isLeanProtocol(file) {
 }
 
 const leanFiles = protocolFiles({ projectRoot }).filter(isLeanProtocol).sort();
-const enrolledLeanFiles = [...leanFiles, ...LEAN_CONTRACT_UTILITIES.map((dir) => `${dir}/SKILL.md`)].sort();
+const enrolledLeanFiles = [...leanFiles, ...[...LEAN_CONTRACT_UTILITIES, ...LEAN_CONTRACT_CONTRIBUTOR_SKILLS].map((dir) => `${dir}/SKILL.md`)].sort();
 const target = leanFiles[0];
 const elaborated = clean.pass.some((r) => r.check === LEAN && r.file === target);
 
@@ -106,7 +107,7 @@ function withCopy(body) {
   };
   const failures = () => run(root).fail.filter((r) => r.check === LEAN).map((r) => r.message);
   try {
-    body({ read, write, remove, restore, failures, verdict: () => run(root) });
+    body({ root, read, write, remove, restore, failures, verdict: () => run(root) });
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -148,12 +149,34 @@ const listUtilities = (registry, dirs) => {
   assert.equal((registry.match(new RegExp(LIST_DECLARATION.source, 'gm')) || []).length, 1, `precondition: ${REGISTRY} declares LEAN_CONTRACT_UTILITIES once`);
   return registry.replace(LIST_DECLARATION, () => `const LEAN_CONTRACT_UTILITIES = Object.freeze(${JSON.stringify([...LEAN_CONTRACT_UTILITIES, ...dirs])});`);
 };
+// Contributor skills for enrollment fixtures, under `.claude/skills/`, where no
+// plugin carries them: `enrolled` carries the target's Lean block under its
+// own namespace, `headless` a ```lean fence under no `## Definition` heading,
+// `blockless` a bare ``` block, `unlisted` a Lean block of yet another
+// namespace, and `unclosed` a ```lean fence that never closes.
+// `listContributors` rewrites a tree's registry to enroll the contributor
+// skills the live registry lists plus `dirs`.
+const CONTRIBUTOR_NS = 'FixtureContributor';
+const contributorSkill = (name) => `.claude/skills/fixture-${name}`;
+const contributorHead = (name) => `---\nname: fixture-${name}\ndescription: A fixture contributor skill.\n---\n\n`;
+const contributorFiles = {
+  [`${contributorSkill('enrolled')}/SKILL.md`]: withBlock(renameNs(block, CONTRIBUTOR_NS)),
+  [`${contributorSkill('headless')}/SKILL.md`]: `${contributorHead('headless')}\`\`\`lean\nnamespace ${CONTRIBUTOR_NS}Headless\nend ${CONTRIBUTOR_NS}Headless\n\`\`\`\n`,
+  [`${contributorSkill('blockless')}/SKILL.md`]: `${contributorHead('blockless')}## Definition\n\n\`\`\`\nFLOW: none\n\`\`\`\n`,
+  [`${contributorSkill('unlisted')}/SKILL.md`]: withBlock(renameNs(block, `${CONTRIBUTOR_NS}Unlisted`)),
+  [`${contributorSkill('unclosed')}/SKILL.md`]: `${contributorHead('unclosed')}## Definition\n\n\`\`\`lean\nnamespace ${CONTRIBUTOR_NS}Unclosed\n`,
+};
+const CONTRIBUTOR_LIST_DECLARATION = /^const LEAN_CONTRACT_CONTRIBUTOR_SKILLS = Object\.freeze\(\[[^\]]*\]\);$/m;
+const listContributors = (registry, dirs) => {
+  assert.equal((registry.match(new RegExp(CONTRIBUTOR_LIST_DECLARATION.source, 'gm')) || []).length, 1, `precondition: ${REGISTRY} declares LEAN_CONTRACT_CONTRIBUTOR_SKILLS once`);
+  return registry.replace(CONTRIBUTOR_LIST_DECLARATION, () => `const LEAN_CONTRACT_CONTRIBUTOR_SKILLS = Object.freeze(${JSON.stringify([...LEAN_CONTRACT_CONTRIBUTOR_SKILLS, ...dirs])});`);
+};
 // A copy of the tree lean-contract.js reads: the registry, the canonical
-// shared modules, every protocol plugin, and every utility plugin the live
-// registry lists.
+// shared modules, every protocol plugin, every utility plugin the live
+// registry lists, and every contributor skill it lists.
 function copyLeanInputs(root) {
   const plugins = [...protocolFiles({ projectRoot }), ...LEAN_CONTRACT_UTILITIES].map((p) => p.split('/')[0]);
-  for (const relative of ['scripts', 'lean/EpistemicProtocols', ...new Set(plugins)]) {
+  for (const relative of ['scripts', 'lean/EpistemicProtocols', ...new Set(plugins), ...LEAN_CONTRACT_CONTRIBUTOR_SKILLS]) {
     cpSync(path.join(projectRoot, relative), path.join(root, relative), { recursive: true });
   }
 }
@@ -333,6 +356,60 @@ describe('lean bridge: lean-definition enrolls the utilities LEAN_CONTRACT_UTILI
       if (elaborated) assert.ok(result.pass.includes(reached[0]), `expected ${enrolled} to pass: ${reached[0].message}`);
       // The canonical protocol it lists is still enrolled as a protocol.
       if (elaborated) assert.ok(result.pass.some((r) => r.check === LEAN && r.file === target), `expected ${target} to still pass as a protocol`);
+    });
+  });
+});
+
+describe('lean bridge: lean-definition enrolls the contributor skills LEAN_CONTRACT_CONTRIBUTOR_SKILLS lists', () => {
+  it('holds a listed contributor skill to the protocol rules; fails a listed path whose file, Definition heading or Lean fence is gone, an unlisted contributor Lean fence (closed or not), and a listed plugin skill; reports the enrollment result the standalone command reports; and leaves the packaged plugin set without it', () => {
+    const coreDir = path.dirname(target);
+    withCopy(({ root, read, write, verdict }) => {
+      for (const [relative, text] of Object.entries(contributorFiles)) write(relative, text);
+      write(`lean/EpistemicProtocols/${CONTRIBUTOR_NS}/Theorems.lean`, renameNs(theorems, CONTRIBUTOR_NS));
+      write(REGISTRY, listContributors(read(REGISTRY), [...['enrolled', 'absent', 'headless', 'blockless'].map(contributorSkill), coreDir]));
+      const result = verdict();
+      const failed = result.fail.filter((r) => r.check === LEAN);
+      const failedFor = (file) => failed.filter((r) => r.file === file).map((r) => r.message);
+      const skillFile = (name) => `${contributorSkill(name)}/SKILL.md`;
+      for (const name of ['unlisted', 'unclosed']) {
+        expectSome(failedFor(skillFile(name)), 'carries a ```lean fence but is not listed in LEAN_CONTRACT_CONTRIBUTOR_SKILLS');
+      }
+      expectSome(failedFor(skillFile('absent')), 'no SKILL.md is at this path');
+      for (const name of ['headless', 'blockless']) {
+        expectSome(failedFor(skillFile(name)), 'is not a ```lean fence');
+      }
+      expectSome(failedFor(target), 'is not a `.claude/skills/<skill>` directory');
+      const expected = [...['unlisted', 'unclosed', 'absent', 'headless', 'blockless'].map(skillFile), target];
+      assert.deepEqual(failed.map((r) => r.file).filter((file) => !expected.includes(file)), [], 'no other Lean failure');
+
+      // The listed contributor skill is reached like a protocol: a pass once elaborated, the toolchain warn otherwise.
+      const enrolled = skillFile('enrolled');
+      const reached = [...result.pass, ...result.warn].filter((r) => r.check === LEAN && r.file === enrolled);
+      assert.equal(reached.length, 1, `expected one lean-definition verdict for ${enrolled}`);
+      if (elaborated) assert.ok(result.pass.includes(reached[0]), `expected ${enrolled} to pass: ${reached[0].message}`);
+      // The plugin skill it lists is still enrolled as a protocol.
+      if (elaborated) assert.ok(result.pass.some((r) => r.check === LEAN && r.file === target), `expected ${target} to still pass as a protocol`);
+
+      // One enrollment result: what the check failed as not enrolled is what
+      // `enrollment` returns for this tree, and the standalone command prints
+      // each of those lines.
+      const registry = require(path.join(root, REGISTRY));
+      const { enrollment } = require(path.join(root, '.claude/skills/verify/scripts/lean-contract.js'));
+      const problems = enrollment(root, registry, registry.discoverPlugins({ projectRoot: root })).problems.map((p) => `${p.relPath} — ${p.reason}`);
+      assert.equal(problems.length, 4, problems.join('\n'));
+      const prefix = 'Not enrolled in the Lean path: ';
+      assert.deepEqual(failed.filter((r) => r.message.startsWith(prefix)).map((r) => `${r.file} — ${r.message.slice(prefix.length)}`).sort(), [...problems].sort());
+      const cli = spawnSync(process.execPath, [path.join(root, '.claude/skills/verify/scripts/lean-contract.js'), 'generate', root], { encoding: 'utf-8' });
+      assert.equal(cli.status, 1);
+      const printed = cli.stderr.split('\n');
+      for (const problem of problems) assert.ok(printed.includes(`not enrolled: ${problem}`), `expected the command to print: ${problem}\n${cli.stderr}`);
+
+      // Enrollment reaches the Lean path only: the packaged plugin set is built
+      // from plugin discovery, which holds no contributor skill.
+      const { PLUGINS } = require(path.join(root, 'scripts/package.js'));
+      assert.ok(PLUGINS.length > 0, 'precondition: the copied tree packages its plugins');
+      assert.deepEqual(PLUGINS.filter((p) => p.dir.startsWith('.') || p.skill.startsWith('fixture-')), [], 'a contributor skill is in no packaged plugin set');
+      assert.ok(!registry.discoverPlugins({ projectRoot: root }).some((r) => path.relative(root, r.skillMdPath).startsWith('.claude')), 'plugin discovery holds no contributor skill');
     });
   });
 });
@@ -598,6 +675,61 @@ describe('lean bridge: the standalone lean-contract.js command enrolls the liste
       const absent = generate();
       assert.equal(absent.status, 1);
       assert.match(absent.stderr, /no active utility plugin carries this SKILL\.md/);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('lean bridge: the standalone lean-contract.js command enrolls the listed contributor skills', () => {
+  it('generates a listed contributor skill\'s contract, and fails an unlisted contributor Lean fence (closed or not), a listed skill whose fence is gone, and a listed skill whose file is gone', () => {
+    const root = mkdtempSync(path.join(tmpdir(), 'lean-contract-contributor-'));
+    try {
+      copyLeanInputs(root);
+      const put = (relative, text) => {
+        mkdirSync(path.dirname(path.join(root, relative)), { recursive: true });
+        writeFileSync(path.join(root, relative), text);
+      };
+      const registry = readFileSync(path.join(root, REGISTRY), 'utf-8');
+      const enroll = (dirs) => put(REGISTRY, listContributors(registry, dirs));
+      const cli = path.join(projectRoot, '.claude/skills/verify/scripts/lean-contract.js');
+      const generate = () => spawnSync(process.execPath, [cli, 'generate', root], { encoding: 'utf-8' });
+      const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const enrolled = `${contributorSkill('enrolled')}/SKILL.md`;
+      put(enrolled, contributorFiles[enrolled]);
+
+      enroll([contributorSkill('enrolled')]);
+      const listed = generate();
+      assert.equal(listed.status, 0, listed.stderr);
+      assert.ok(listed.stdout.split('\n').includes(path.join('lean', '.contract', 'Contract', `${CONTRIBUTOR_NS}.lean`)), listed.stdout);
+      // Enrollment leaves the contributor skill outside plugin discovery.
+      const { discoverPlugins } = require(path.join(root, REGISTRY));
+      assert.ok(!discoverPlugins({ projectRoot: root }).some((r) => path.relative(root, r.skillMdPath) === enrolled), 'a listed contributor skill is no plugin record');
+
+      enroll([]);
+      const unlisted = generate();
+      assert.equal(unlisted.status, 1);
+      assert.match(unlisted.stderr, new RegExp(`not enrolled: ${escape(enrolled)} — carries a \`\`\`lean fence but is not listed in LEAN_CONTRACT_CONTRIBUTOR_SKILLS`));
+
+      // A fence that never closes extracts no block, and still fails unlisted.
+      const unclosed = `${contributorSkill('unclosed')}/SKILL.md`;
+      put(unclosed, contributorFiles[unclosed]);
+      enroll([contributorSkill('enrolled')]);
+      const open = generate();
+      assert.equal(open.status, 1);
+      assert.match(open.stderr, new RegExp(`not enrolled: ${escape(unclosed)} — carries a \`\`\`lean fence but is not listed in LEAN_CONTRACT_CONTRIBUTOR_SKILLS`));
+      rmSync(path.join(root, unclosed));
+
+      enroll([contributorSkill('enrolled')]);
+      put(enrolled, contributorFiles[enrolled].replace('```lean\n', '```\n'));
+      const blockless = generate();
+      assert.equal(blockless.status, 1);
+      assert.match(blockless.stderr, new RegExp(`not enrolled: ${escape(enrolled)} — no Lean Definition block`));
+
+      rmSync(path.join(root, enrolled));
+      const absent = generate();
+      assert.equal(absent.status, 1);
+      assert.match(absent.stderr, new RegExp(`not enrolled: ${escape(enrolled)} — listed in LEAN_CONTRACT_CONTRIBUTOR_SKILLS but no SKILL\\.md is at this path`));
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

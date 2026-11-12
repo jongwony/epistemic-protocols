@@ -1,5 +1,5 @@
 /**
- * Lean bridge layer: the text that hands a protocol's Definition block to Lean,
+ * Lean bridge layer: the text that hands an enrolled Definition block to Lean,
  * and the check that runs Lean on it. Extraction of the block and its section
  * markers from Markdown, enrollment of each block as a `Contract.<NS>` module,
  * and `lean-definition`, which elaborates each block standalone, builds the
@@ -169,7 +169,7 @@ function leanFilesUnder(dir, rel = '') {
 }
 
 function checkLeanDefinition(ctx) {
-  const { projectRoot, results, protocolInputs, records, LEAN_CONTRACT_UTILITIES, CANONICAL_PROTOCOL_SET } = ctx;
+  const { projectRoot, results, protocolInputs, records, LEAN_CONTRACT_UTILITIES, LEAN_CONTRACT_CONTRIBUTOR_SKILLS, CANONICAL_PROTOCOL_SET } = ctx;
   const CHECK = 'lean-definition';
   const fail = (file, message) => results.fail.push({ check: CHECK, file, message });
   const canonical = (rel, extract) => {
@@ -188,18 +188,21 @@ function checkLeanDefinition(ctx) {
   const namespaces = new Map();
   const expectedLean = new Set(SHARED.flatMap(({ module, theorems }) => [module, theorems]));
 
-  // Enrollment: every canonical protocol, and every utility listed in
-  // LEAN_CONTRACT_UTILITIES, hands its Definition block to Lean under the same
-  // rules. A protocol with no SKILL.md, an enrolled block that is not a
-  // ```lean fence, a list entry that cannot be enrolled, and a utility Lean
-  // block the list leaves out each fail here rather than dropping out of what
-  // gets elaborated and audited.
-  const utilities = leanContract.utilityEnrollment(projectRoot, { records, listed: LEAN_CONTRACT_UTILITIES, core: CANONICAL_PROTOCOL_SET });
-  for (const { relPath, reason } of utilities.problems) fail(relPath, `Not enrolled in the Lean path: ${reason}`);
-  for (const relPath of [...protocolInputs(CHECK), ...utilities.files]) {
+  // Enrollment: every canonical protocol, every utility listed in
+  // LEAN_CONTRACT_UTILITIES, and every contributor skill listed in
+  // LEAN_CONTRACT_CONTRIBUTOR_SKILLS hands its Definition block to Lean under
+  // the same rules. A protocol with no SKILL.md, an enrolled file with no
+  // `## Definition` heading followed by a ```lean fence, a list entry that
+  // cannot be enrolled, and a utility or contributor Lean block its list leaves
+  // out each fail here rather than dropping out of what gets elaborated and
+  // audited. The listed entries come through the one enrollment result the
+  // standalone command reads.
+  const listed = leanContract.enrollment(projectRoot, { LEAN_CONTRACT_UTILITIES, LEAN_CONTRACT_CONTRIBUTOR_SKILLS, CANONICAL_PROTOCOL_SET }, records);
+  for (const { relPath, reason } of listed.problems) fail(relPath, `Not enrolled in the Lean path: ${reason}`);
+  for (const relPath of [...protocolInputs(CHECK), ...listed.files]) {
     const content = fs.readFileSync(path.join(projectRoot, relPath), 'utf8');
     if (!isLeanDefinition(content)) {
-      fail(relPath, 'Definition block is not a ```lean fence — every canonical protocol and every utility listed in LEAN_CONTRACT_UTILITIES hands its contract to Lean, and a block outside it is neither elaborated nor audited');
+      fail(relPath, 'Definition block is not a ```lean fence — every canonical protocol, every utility listed in LEAN_CONTRACT_UTILITIES and every contributor skill listed in LEAN_CONTRACT_CONTRIBUTOR_SKILLS hands its contract to Lean, and a block outside it is neither elaborated nor audited');
       failedFiles.add(relPath);
       continue;
     }
