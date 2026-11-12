@@ -164,9 +164,10 @@ axiom mismatches : (c : Context P) → List (Mismatch c)
     and nothing here asserts it either way. `adapt` and `discard` ask for a write; whether that
     write was carried out, and whether it repaired the mismatch, is read from what `perform`
     returned — the write and the reading back of it — and the sheet says which. A write that
-    repairs it takes it out of what is found. Premise: a turn of the person's gives a mismatch
-    one of these handlings or none. A turn that changes what X is for gives none — it joins the
-    context, and `mismatches` is judged afresh on it. -/
+    repairs it takes it out of what is found. Premise: for a given mismatch, a turn of the
+    person's gives one of these handlings or none. Saying what X is now for is not itself a
+    handling — that part of the turn joins the context, and `mismatches` is judged afresh on it;
+    a handling the same turn states is read as `ResolutionSupported` reads it. -/
 inductive Resolution
   /-- change X this way -/
   | adapt (direction : String)
@@ -319,20 +320,22 @@ stands is then read from it. `respond` presents the sheet, and the run's share e
 -/
 
 /-- A turn the relay returns: your own, stating a revised result or recording a discard, or what
-    an artifact write, or a reading the relay makes after one, returned. Never the person's, never
-    a peer's. -/
-def Write (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin = .external}
+    an artifact write, or a reading the relay makes after one, returned — from the environment or
+    from a peer. Never the person's. -/
+def Write (P : Type) :=
+  {e : Turn P // e.origin = .assistant ∨ e.origin = .external ∨ e.origin = .peer}
 
 /-- **Your action**, the relay: carry out every adaptation and every discard a settled handling
     asks — the person's, one under their grant, one evidence relays — that the context does not
     yet show carried out, the person's whole answer read and its combined consequence weighed
     first. Where nothing settled is left to carry out, it writes nothing and the first observation
     stands. Each write is read back as it lands, and after the last one X and every place X lands
-    are read again; what any of those readings newly settles is carried out in the same relay,
-    which ends on a reading that settles nothing further that this run may write. Only a settled
-    handling is carried out: a handling you marked as the one you would take is not written into
-    X before the person takes it. A write follows where X lives: an artifact is
-    written where it lies; a result that lives in the conversation — an answer, an analysis — is
+    are read again, as `observe` reads; what any of those readings newly settles is carried out
+    in the same relay, which ends on a reading that settles nothing further that this run may
+    write. Only a settled handling is carried out: a handling you marked as the one you would
+    take is not written into X before the person takes it. A write follows where X lives: an
+    artifact is written where it lies; a result that lives in the conversation — an answer, an
+    analysis — is
     adapted by your stating the revised result in your own turn. What this run may write is what
     the work in front of the person covers and they hold authority over, where the effect can be
     undone: their own resolution turn authorizes a write to anything they hold, an artifact
@@ -440,7 +443,7 @@ inductive Op | observe | judge | evidence | surface | adapt | discard | readTurn
 def grounding : Op → Annot × String
   | .observe   => (.observe, "artifact read, artifact search, record read, and a run that changes no existing state — no send, nothing left behind: what was meant to reach the result and every place the result lands; each return enters the context as an evidence turn; a place that needs a change to existing state, a permission, or another's authority is named with what it needs and left unreached")
   | .judge     => (.sense, "Internal analysis: the whole result as it now stands against the whole context as it now stands, afresh every pass — never the assistant's own words as what the result is held against; how the handling of each mismatch stands; what fits and what was not reached")
-  | .evidence  => (.interaction .extension, "where evidence alone settles a mismatch as SettledSupported says, withdraw your own flag or record the relayed resolution as yours, with that evidence; a person's turn that disputes it leaves it unsettled")
+  | .evidence  => (.interaction .extension, "where evidence alone settles a mismatch as SettledSupported says, withdraw your own flag or record the relayed resolution as yours, with that evidence")
   | .surface   => (.interaction .extension, "the sheet, as `respond` composes it")
   | .adapt     => (.transform, "artifact write, or the revised result stated in your own turn where the result lives in the conversation: an adaptation a settled handling asks, within what this run may write; what it returns enters the context and is read back in the same relay")
   | .discard   => (.transform, "within what this run may write, an artifact write that withdraws the result and puts the replacement in its place, or removes it when nothing takes its place; outside it, your turn recording that the result is no longer relied on")

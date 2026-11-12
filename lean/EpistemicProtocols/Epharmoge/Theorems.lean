@@ -110,14 +110,15 @@ private theorem returned_not_person {Q : Turn P → Prop} (h : ∀ e, Q e → e.
 
 /-- No turn a pass adds was sent by the person: observation returns what the environment or a peer
     reported, and the relay returns your own turn or what an artifact write, or a reading the
-    relay makes after one, returned. -/
+    relay makes after one, returned — from the environment or from a peer. -/
 theorem pass_adds_no_person_turn (c : Context P) :
     ∃ t, pass c = c ++ t ∧ ∀ e ∈ t, e.origin ≠ .person := by
   let c₁ := c ++ (observe c).map (·.val)
   have hev : ∀ e : Turn P, (e.origin = .external ∨ e.origin = .peer) → e.origin ≠ .person := by
     intro e h; rcases h with h | h <;> rw [h] <;> decide
-  have hwr : ∀ e : Turn P, (e.origin = .assistant ∨ e.origin = .external) → e.origin ≠ .person := by
-    intro e h; rcases h with h | h <;> rw [h] <;> decide
+  have hwr : ∀ e : Turn P,
+      (e.origin = .assistant ∨ e.origin = .external ∨ e.origin = .peer) → e.origin ≠ .person := by
+    intro e h; rcases h with h | h | h <;> rw [h] <;> decide
   refine ⟨(observe c).map (·.val) ++ (perform c₁).map (·.val), by simp [pass, c₁], ?_⟩
   intro e he
   simp only [List.mem_append] at he
