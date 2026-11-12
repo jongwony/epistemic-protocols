@@ -318,15 +318,17 @@ utterance that does not bear on this run.
 -/
 
 /-- A turn a write returns: your own, stating a revised result or recording a discard, or what an
-    artifact write returned. Never the person's, never a peer's. -/
+    artifact write, or the reading back of one, returned. Never the person's, never a peer's. -/
 def Write (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin = .external}
 
 /-- **Your action**, the relay: carry out every adaptation and every discard a settled handling
     asks — the person's, one under their grant, one evidence relays — that the context does not
     yet show carried out, the person's whole answer read and its combined consequence weighed
-    first, and what your own writes newly settle, until nothing newly settled is left. Only a
-    settled handling is carried out: a handling you marked as the one you would take is not
-    written into X before the person takes it. A write follows where X lives: an artifact is
+    first. Each write is read back as it lands — X, and the places that write bears on — and what
+    that reading newly settles is carried out in the same relay; the relay stops only when a
+    reading after its last write settles nothing further that this run may write. Only a settled
+    handling is carried out: a handling you marked as the one you would take is not written into
+    X before the person takes it. A write follows where X lives: an artifact is
     written where it lies; a result that lives in the conversation — an answer, an analysis — is
     adapted by your stating the revised result in your own turn. What this run may write is what
     the work in front of the person covers and they hold authority over, where the effect can be
@@ -337,7 +339,8 @@ def Write (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin = .ext
     effect. A write outside that is not carried out, even where evidence fixes its direction: it
     goes into `reach` with what it needs and is handed back as the person's; once their turn
     authorizes it, it is carried out. A discard there is the exception: its write is your turn
-    recording that X is no longer relied on. Returns what the writes returned. -/
+    recording that X is no longer relied on. Returns what the writes and their read-backs
+    returned. -/
 axiom perform : Context P → List (Write P)
 
 def pass (c : Context P) : Context P :=
@@ -370,7 +373,8 @@ def pass (c : Context P) : Context P :=
     or held, and those places are shown before it. Each sheet is CONVERGENCE's convergence
     evidence. -/
 def settle (respond : Context P → Response P) (c : Context P) : ContextualizedExecution P :=
-  ⟨c ++ [(respond c).val], target c, reach c, dissent c⟩
+  let t := c ++ [(respond c).val]
+  ⟨t, target c, reach c, dissent t⟩
 
 open Classical in
 def contextualize (respond session : Context P → Response P) :
@@ -397,14 +401,11 @@ handed back, unrepaired or held. A replacement this run wrote is judged by the n
 like the result it replaced. A mismatch left as it is carries the reason given and no claim that
 it does or does not stand. What is handed back stays the person's: no answer is owed, and a
 later turn of theirs that bears on it is carried out on the next pass. Convergence evidence: one
-line per mismatch found — what fell away or did not fit, where, and how it stands at the return:
-handed back, with the handling you would take where you marked one; the person's resolution
-with the turn it came from, quoted, the intent taken from it, and how it came to stand; a grant
-with what it covered; a relayed handling or a withdrawn flag with its evidence — beside the
-writes made with what each changed in X and what settled it, any that did not repair what they
-aimed at, the lines that left and why, what was checked and fits, what was not reached with what
-it needs, the dissent attached to the return, and what the return does not claim. Demonstrated,
-not asserted.
+line per mismatch found — what fell away or did not fit, where, and how it stands at the return,
+as `respond` shows it; a grant with what it covered — beside the writes made with what each
+changed in X and what settled it, any that did not repair what they aimed at, the lines that
+left and why, what was checked and fits, what was not reached with what it needs, the dissent
+attached to the return, and what the return does not claim. Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──

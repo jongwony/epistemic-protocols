@@ -12,4 +12,4 @@ Keep adjacent material together so the user can recognize the decision without c
 
 ## When this protocol's own moves bear on where a sentence sits relative to what is handed back
 
-Output all analysis, evidence, and rationale as text before the handed-back items. Each item's actions contain only action-specific differential implications. Where the person asked to go one at a time and a question is put, it contains only the essential question; context embedded in a question field is a protocol violation.
+What several handed-back items share — background, analysis — goes before them as text. Each item keeps its own quoted ground and its consequence beside its actions, and each action carries only its own differential implication. Where the person asked to go one at a time and a question is put, it contains only the essential question; context embedded in a question field is a protocol violation.

@@ -43,10 +43,11 @@ theorem reaching_passes_again (respond session : Context P → Response P) (c : 
         (settle respond (pass (fuse c u))) us := by
   simp [contextualize, h]
 
-/-- A return is the pass's context followed by the sheet. Nothing about how any mismatch stands
-    conditions it. -/
+/-- A return is the pass's context followed by the sheet, and the dissent attached to it is read on
+    that context, the sheet included. Nothing about how any mismatch stands conditions it. -/
 theorem settle_returns (respond : Context P → Response P) (c : Context P) :
-    (settle respond c).context = c ++ [(respond c).val] := rfl
+    (settle respond c).context = c ++ [(respond c).val] ∧
+      (settle respond c).dissent = dissent (c ++ [(respond c).val]) := ⟨rfl, rfl⟩
 
 /-- The person's resolution comes first, whatever evidence read. -/
 theorem person_first (c : Context P) (m : Mismatch c) (r : Resolution) (how : How)
@@ -108,7 +109,8 @@ private theorem returned_not_person {Q : Turn P → Prop} (h : ∀ e, Q e → e.
   exact h x.val x.property
 
 /-- No turn a pass adds was sent by the person: observation returns what the environment or a peer
-    reported, and a write returns your own turn or what an artifact write returned. -/
+    reported, and a write returns your own turn or what an artifact write, or the reading back of
+    one, returned. -/
 theorem pass_adds_no_person_turn (c : Context P) :
     ∃ t, pass c = c ++ t ∧ ∀ e ∈ t, e.origin ≠ .person := by
   let c₁ := c ++ (observe c).map (·.val)
