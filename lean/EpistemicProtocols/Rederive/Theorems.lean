@@ -23,8 +23,32 @@ instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.
 private theorem response_not_person (r : Response P) : r.val.origin ≠ .person := by
   rw [r.property]; decide
 
+private theorem evidence_not_person (es : List (Evidence P)) :
+    ∀ x ∈ es.map (·.val), x.origin ≠ .person := by
+  intro x hx
+  obtain ⟨y, _, rfl⟩ := List.mem_map.mp hx
+  rcases y.property with h | h <;> simp [h]
+
+private theorem shown_adds_no_person_turn (respond : Gate → Context P → Response P) (g : Gate)
+    (c : Context P) :
+    ∃ t, (shown respond g c).2 = c ++ t ∧ ∀ x ∈ t, x.origin ≠ .person := by
+  by_cases hf : FindingMovesGround c
+  · refine ⟨(prepared .solution c).map (·.val) ++ [(respond .solution (pass .solution c)).val],
+      by simp [shown, hf, pass], ?_⟩
+    intro x hx
+    rcases List.mem_append.mp hx with hx | hx
+    · exact evidence_not_person _ x hx
+    · have hx' := List.mem_singleton.mp hx
+      subst hx'
+      exact response_not_person _
+  · refine ⟨[(respond g c).val], by simp [shown, hf], ?_⟩
+    intro x hx
+    have hx' := List.mem_singleton.mp hx
+    subst hx'
+    exact response_not_person _
+
 /-- Work carried past a held gate adds no turn of the person's: the context grows only by your own
-    evidence turns and the showing of the gate reached, and where the run waits it does not grow. -/
+    evidence turns and the showing of a gate, and where the run waits it does not grow. -/
 theorem carried_adds_no_person_turn (respond : Gate → Context P → Response P) (g : Gate)
     (c : Context P) :
     ∃ t, (carry respond g c).2 = c ++ t ∧ ∀ x ∈ t, x.origin ≠ .person := by
@@ -32,15 +56,21 @@ theorem carried_adds_no_person_turn (respond : Gate → Context P → Response P
   cases carried g c with
   | nil => exact ⟨[], by simp, by simp⟩
   | cons e es =>
-    refine ⟨(e :: es).map (·.val) ++
-      [(respond (reached g c) (c ++ (e :: es).map (·.val))).val], by simp, ?_⟩
+    obtain ⟨t, ht, hp⟩ :=
+      shown_adds_no_person_turn respond (reached g c) (c ++ (e :: es).map (·.val))
+    refine ⟨(e :: es).map (·.val) ++ t, by simp only [ht, List.append_assoc], ?_⟩
     intro x hx
     rcases List.mem_append.mp hx with hx | hx
-    · obtain ⟨y, _, rfl⟩ := List.mem_map.mp hx
-      rcases y.property with h | h <;> simp [h]
-    · have hx' := List.mem_singleton.mp hx
-      subst hx'
-      exact response_not_person _
+    · exact evidence_not_person _ x hx
+    · exact hp x hx
+
+/-- Work carried past a held gate returns to the solution gate where a finding of that work moves
+    the ground of a part already taken: the gate that work reached is not the one shown. -/
+theorem carried_finding_returns_to_solution (respond : Gate → Context P → Response P) (g : Gate)
+    (c : Context P) (e : Evidence P) (es : List (Evidence P)) (h : carried g c = e :: es)
+    (hf : FindingMovesGround (c ++ (e :: es).map (·.val))) :
+    (carry respond g c).1 = .solution := by
+  simp only [carry, h, shown, hf, ↓reduceIte]
 
 /-- With no further arrival the run holds: whatever was carried past the gate, nothing is taken,
     no diagnosis and no hand-off is made, and no turn of the person's is added. -/
@@ -209,14 +239,15 @@ theorem edit_unrehearses (c : Context P) (t : Turn P) (he : Edits t) (hn : ¬ Re
     exact hn hreh
 
 /-- A run that ends with nothing to change carries its provenance: the diagnosis holds of the
-    reading made after an arrival's turn took the solution, and the end names that turn. -/
+    context the reading leaves — the reading alone, made after an arrival's turn took the solution
+    and before any sketch or consult — and the end names that turn. -/
 theorem no_change_by_diagnosis (respond : Gate → Context P → Response P)
     (session : Context P → Response P) :
     ∀ (as : List (Arrival P)) (g : Gate) (c : Context P) (d : Diagnosis P),
       run respond session g c as = .noChange d →
       ∃ c₀ a, latest (arrive c₀ a) = some (.takes, d.takenAt) ∧
-        NothingToChange (pass .sketch (settle (arrive c₀ a))) ∧
-        d.context = settle (pass .sketch (settle (arrive c₀ a))) := by
+        NothingToChange (afterReading (settle (arrive c₀ a))) ∧
+        d.context = settle (afterReading (settle (arrive c₀ a))) := by
   intro as
   induction as with
   | nil => intro g c d hr; simp [run] at hr

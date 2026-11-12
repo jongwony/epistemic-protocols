@@ -178,6 +178,11 @@ axiom recorded : Context P → List (Evidence P)
     provisional gate for the contributor. -/
 axiom FindingMovesGround : Context P → Prop
 
+/-- **Your reading** of the current contract against the solution once it is taken — or taken
+    provisionally, where work is carried past the solution gate — as `grounding` describes the
+    `read` operation, each read returning as an evidence turn. -/
+axiom contractRead : Context P → List (Evidence P)
+
 /-- **Your diagnosis**, from reading the current contract against the taken solution: it is
     already a Lean block, lacks nothing the solution asks, and carries nothing the solution does
     not. A contract whose block is not yet Lean always goes on to the sketch. -/
@@ -199,7 +204,9 @@ axiom Rehearses : Turn P → Prop
 axiom Sufficient : Context P → Prop
 
 /-- The revision that stands was rehearsed: the context holds the record of a rehearsal judged
-    sufficient, with no edit after it. -/
+    sufficient, with no edit after it. Before a taking at the rehearsal gate is acted on, whatever
+    changed in that contract since the rehearsal's record has joined the context as a turn, so
+    that this reads the revision that would be handed off. -/
 def Rehearsed (c : Context P) : Prop :=
   ∃ i, ∃ h : i < c.length, Rehearses (c[i]'h) ∧ Sufficient (c.take (i + 1)) ∧
     ∀ j, ∀ hj : j < c.length, i < j → ¬ Edits (c[j]'hj)
@@ -220,7 +227,8 @@ axiom narrative : Context P → List String
     as one comment on the protocol chart headed as provisional gate records, never as a decide —
     per gate what was shown, the options, the provisional choice with its ground, and what would
     change it — and the PR marks what rests on them as provisional. None of it is a taking, and it
-    claims no diagnosis and no hand-off. -/
+    claims no diagnosis and no hand-off. It is judged while no arrival is pending: a turn that
+    has come is read first, and nothing more is carried before it is. -/
 axiom carried : Gate → Context P → List (Evidence P)
 
 /-- **Your record**: the gate that work reached, whose showing the contributor meets on their
@@ -271,6 +279,9 @@ def settle (c : Context P) : Context P := c ++ (recorded c).map (·.val)
 
 def pass (g : Gate) (c : Context P) : Context P := c ++ (prepared g c).map (·.val)
 
+/-- The context once the current contract has been read against the solution. -/
+def afterReading (c : Context P) : Context P := c ++ (contractRead c).map (·.val)
+
 open Classical in
 /-- The gate shown on the context a pass leaves, with its showing appended: the gate the pass led
     up to, or — where a finding of the pass moves the ground of a part already taken — the
@@ -283,14 +294,13 @@ def shown (respond : Gate → Context P → Response P) (g : Gate) (c₁ : Conte
   else (g, c₁ ++ [(respond g c₁).val])
 
 /-- The run after work carried past a held gate: the gate that work reached, shown on the context
-    it leaves; as it stood, where the run waits. -/
+    it leaves — or, where a finding of that work moves the ground of a part already taken, the
+    solution gate, as `shown` has it; as it stood, where the run waits. -/
 def carry (respond : Gate → Context P → Response P) (g : Gate) (c : Context P) :
     Gate × Context P :=
   match carried g c with
   | [] => (g, c)
-  | e :: es =>
-    let c₁ := c ++ (e :: es).map (·.val)
-    (reached g c, c₁ ++ [(respond (reached g c) c₁).val])
+  | e :: es => shown respond (reached g c) (c ++ (e :: es).map (·.val))
 
 open Classical in
 def run (respond : Gate → Context P → Response P) (session : Context P → Response P) :
@@ -312,10 +322,10 @@ def run (respond : Gate → Context P → Response P) (session : Context P → R
     | some (.takes, n) =>
       match s.1 with
       | .solution =>
-        let c₁ := pass .sketch (settle c')
+        let c₁ := afterReading (settle c')
         if NothingToChange c₁ then .noChange ⟨settle c₁, n⟩
         else
-          let next := shown respond .sketch c₁
+          let next := shown respond .sketch (pass .sketch c₁)
           run respond session next.1 next.2 as
       | .sketch =>
         let next := shown respond .rehearsal (pass .rehearsal (settle c'))
@@ -389,7 +399,7 @@ def grounding : Op → Annot × String
 /-- The work that leads up to each gate, in order: what `prepared` carries out for it. -/
 def before : Gate → List Op
   | .solution  => [.gather, .search, .derive, .consult]
-  | .sketch    => [.read, .sketch, .consult]
+  | .sketch    => [.sketch, .consult]
   | .rehearsal => [.edit, .rehearse]
 
 /-- The operation that shows each gate. -/
