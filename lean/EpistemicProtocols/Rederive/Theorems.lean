@@ -20,23 +20,53 @@ variable {P : Type}
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 
-/-- With no arrival the run holds at the gate it stood at, on the context it had: nothing is
-    taken, nothing is recorded, and nothing ends. -/
-theorem silence (respond : Gate → Context P → Response P) (session : Context P → Response P)
-    (g : Gate) (c : Context P) : run respond session g c [] = .holding g c := by
-  simp [run]
+private theorem response_not_person (r : Response P) : r.val.origin ≠ .person := by
+  rw [r.property]; decide
 
-/-- A started run with no arrival holds at the gate its first pass showed; there is no taking of
-    yours. -/
+/-- Work carried past a held gate adds no turn of the person's: the context grows only by your own
+    evidence turns and the showing of the gate reached, and where the run waits it does not grow. -/
+theorem carried_adds_no_person_turn (respond : Gate → Context P → Response P) (g : Gate)
+    (c : Context P) :
+    ∃ t, (carry respond g c).2 = c ++ t ∧ ∀ x ∈ t, x.origin ≠ .person := by
+  unfold carry
+  cases carried g c with
+  | nil => exact ⟨[], by simp, by simp⟩
+  | cons e es =>
+    refine ⟨(e :: es).map (·.val) ++
+      [(respond (reached g c) (c ++ (e :: es).map (·.val))).val], by simp, ?_⟩
+    intro x hx
+    rcases List.mem_append.mp hx with hx | hx
+    · obtain ⟨y, _, rfl⟩ := List.mem_map.mp hx
+      rcases y.property with h | h <;> simp [h]
+    · have hx' := List.mem_singleton.mp hx
+      subst hx'
+      exact response_not_person _
+
+/-- With no further arrival the run holds: whatever was carried past the gate, nothing is taken,
+    no diagnosis and no hand-off is made, and no turn of the person's is added. -/
+theorem silence (respond : Gate → Context P → Response P) (session : Context P → Response P)
+    (g : Gate) (c : Context P) :
+    ∃ g' t, run respond session g c [] = .holding g' (c ++ t) ∧ ∀ x ∈ t, x.origin ≠ .person := by
+  obtain ⟨t, ht, hp⟩ := carried_adds_no_person_turn respond g c
+  exact ⟨(carry respond g c).1, t, by simp [run, ht], hp⟩
+
+/-- Where the run waits, silence leaves it exactly as it stood. -/
+theorem waiting_holds_as_it_stood (respond : Gate → Context P → Response P)
+    (session : Context P → Response P) (g : Gate) (c : Context P) (h : carried g c = []) :
+    run respond session g c [] = .holding g c := by
+  simp [run, carry, h]
+
+/-- A started run with no arrival holds; there is no taking of yours. -/
 theorem start_silence (respond : Gate → Context P → Response P)
     (session : Context P → Response P) (c : Context P) :
     ∃ g c', start respond session c [] = .holding g c' := by
   unfold start
-  exact ⟨_, _, silence respond session _ _⟩
+  simp only [run]
+  exact ⟨_, _, rfl⟩
 
 /-- The reading a run acts on cites the latest turn of the context — the arrival just fused, a
-    turn of an origin that may ground — and is supported there: no earlier turn is read into a
-    second taking. -/
+    turn of an origin that may ground — and is supported there: no earlier turn, and no turn of
+    work carried provisionally, is read into a taking. -/
 theorem acted_reading_cites_latest {c : Context P} {r : Reading} {n : Nat}
     (h : latest c = some (r, n)) :
     ∃ s : Cite c, s.idx = n ∧ s.idx + 1 = c.length ∧
@@ -54,28 +84,45 @@ theorem acted_reading_cites_latest {c : Context P} {r : Reading} {n : Nat}
       exact ⟨s, rfl, hl, sup⟩
     · simp at h
 
-/-- An arrival that settles nothing leaves the gate where it stood: the session answers it, and
-    the run goes on at the same gate. -/
+/-- An arrival that settles nothing leaves the gate that stands: the session answers it, and the
+    run goes on at that gate. -/
 theorem unsettled_keeps_gate (respond : Gate → Context P → Response P)
     (session : Context P → Response P) (g : Gate) (c : Context P) (a : Arrival P)
-    (as : List (Arrival P)) (h : latest (arrive c a) = none) :
+    (as : List (Arrival P)) (h : latest (arrive (carry respond g c).2 a) = none) :
     run respond session g c (a :: as) =
-      run respond session g (arrive c a ++ [(session (arrive c a)).val]) as := by
+      run respond session (carry respond g c).1
+        (arrive (carry respond g c).2 a ++ [(session (arrive (carry respond g c).2 a)).val])
+        as := by
+  simp [run, h]
+
+/-- A grant to proceed takes nothing: no decide is recorded on it and no run ends on it; the
+    session answers it and the run goes on at the gate that stands. -/
+theorem grant_takes_nothing (respond : Gate → Context P → Response P)
+    (session : Context P → Response P) (g : Gate) (c : Context P) (a : Arrival P)
+    (as : List (Arrival P)) (n : Nat)
+    (h : latest (arrive (carry respond g c).2 a) = some (.proceeds, n)) :
+    run respond session g c (a :: as) =
+      run respond session (carry respond g c).1
+        (arrive (carry respond g c).2 a ++ [(session (arrive (carry respond g c).2 a)).val])
+        as := by
   simp [run, h]
 
 /-- A stop ends the run holding: no result is made of it, and the stopping turn stays in the
     context with what was recorded for it. -/
 theorem stop_ends_holding (respond : Gate → Context P → Response P)
     (session : Context P → Response P) (g : Gate) (c : Context P) (a : Arrival P)
-    (as : List (Arrival P)) (n : Nat) (h : latest (arrive c a) = some (.stops, n)) :
-    run respond session g c (a :: as) = .holding g (settle (arrive c a)) := by
+    (as : List (Arrival P)) (n : Nat)
+    (h : latest (arrive (carry respond g c).2 a) = some (.stops, n)) :
+    run respond session g c (a :: as) =
+      .holding (carry respond g c).1 (settle (arrive (carry respond g c).2 a)) := by
   simp [run, h]
 
 private theorem handedOff_cases (respond : Gate → Context P → Response P)
     (session : Context P → Response P) :
     ∀ (as : List (Arrival P)) (g : Gate) (c : Context P) (h : HandOff P),
       run respond session g c as = .handedOff h →
-      Rehearsed h.context ∧ latest h.context = some (.takes, h.fusedAt) := by
+      ∃ c₀ a, h.context = settle (arrive c₀ a) ∧ Rehearsed (arrive c₀ a) ∧
+        latest (arrive c₀ a) = some (.takes, h.takenAt) := by
   intro as
   induction as with
   | nil => intro g c h hr; simp [run] at hr
@@ -83,6 +130,7 @@ private theorem handedOff_cases (respond : Gate → Context P → Response P)
     intro g c h hr
     simp only [run] at hr
     split at hr
+    · exact ih _ _ _ hr
     · exact ih _ _ _ hr
     · cases hr
     · exact ih _ _ _ hr
@@ -96,40 +144,59 @@ private theorem handedOff_cases (respond : Gate → Context P → Response P)
       · split at hr
         · next hreh =>
           cases hr
-          exact ⟨hreh, hl⟩
+          exact ⟨_, _, rfl, hreh, hl⟩
         · exact ih _ _ _ hr
 
-/-- A hand-off is reached only on a revision that was rehearsed: its context holds a rehearsal
-    record with no edit after it, through every return path. -/
+/-- A hand-off is reached only on a revision that was rehearsed: at the turn that licensed it, the
+    context held the record of a rehearsal judged sufficient with no edit after it, through every
+    return path and whatever was carried provisionally before. -/
 theorem handed_off_after_rehearsal (respond : Gate → Context P → Response P)
     (session : Context P → Response P) (g : Gate) (c : Context P) (as : List (Arrival P))
     (h : HandOff P) (hr : run respond session g c as = .handedOff h) :
-    Rehearsed h.context :=
-  (handedOff_cases respond session as g c h hr).1
+    ∃ c₀ a, h.context = settle (arrive c₀ a) ∧ Rehearsed (arrive c₀ a) := by
+  obtain ⟨c₀, a, h1, h2, _⟩ := handedOff_cases respond session as g c h hr
+  exact ⟨c₀, a, h1, h2⟩
+
+/-- The hand-off carries its provenance: it is licensed by an arrival — never by work carried
+    provisionally — whose turn is read as the contributor taking what the rehearsal gate showed,
+    and the hand-off names that turn. -/
+theorem handed_off_by_taking (respond : Gate → Context P → Response P)
+    (session : Context P → Response P) (g : Gate) (c : Context P) (as : List (Arrival P))
+    (h : HandOff P) (hr : run respond session g c as = .handedOff h) :
+    ∃ c₀ a, h.context = settle (arrive c₀ a) ∧
+      latest (arrive c₀ a) = some (.takes, h.takenAt) := by
+  obtain ⟨c₀, a, h1, _, h3⟩ := handedOff_cases respond session as g c h hr
+  exact ⟨c₀, a, h1, h3⟩
 
 /-- Taking the rehearsal result on a rehearsed revision hands off, on that turn. -/
 theorem taking_rehearsed_hands_off (respond : Gate → Context P → Response P)
-    (session : Context P → Response P) (c : Context P) (a : Arrival P) (as : List (Arrival P))
-    (n : Nat) (h : latest (arrive c a) = some (.takes, n)) (hr : Rehearsed (arrive c a)) :
-    run respond session .rehearsal c (a :: as) =
-      .handedOff ⟨arrive c a, n, unreached (arrive c a)⟩ := by
-  simp [run, h, hr]
+    (session : Context P → Response P) (g : Gate) (c : Context P) (a : Arrival P)
+    (as : List (Arrival P)) (n : Nat) (hg : (carry respond g c).1 = .rehearsal)
+    (h : latest (arrive (carry respond g c).2 a) = some (.takes, n))
+    (hr : Rehearsed (arrive (carry respond g c).2 a)) :
+    run respond session g c (a :: as) =
+      .handedOff ⟨settle (arrive (carry respond g c).2 a), n,
+        narrative (arrive (carry respond g c).2 a)⟩ := by
+  simp [run, h, hg, hr]
 
-/-- Taking the rehearsal result on a revision edited since its last rehearsal hands nothing off:
-    the revision is rehearsed again and a gate is shown again. -/
+/-- Taking the rehearsal result on a revision edited since its last sufficient rehearsal hands
+    nothing off: the revision is rehearsed again and a gate is shown again. -/
 theorem taking_unrehearsed_rehearses_again (respond : Gate → Context P → Response P)
-    (session : Context P → Response P) (c : Context P) (a : Arrival P) (as : List (Arrival P))
-    (n : Nat) (h : latest (arrive c a) = some (.takes, n)) (hr : ¬ Rehearsed (arrive c a)) :
-    run respond session .rehearsal c (a :: as) =
-      run respond session (shown respond .rehearsal (pass .rehearsal (arrive c a))).1
-        (shown respond .rehearsal (pass .rehearsal (arrive c a))).2 as := by
-  simp [run, h, hr]
+    (session : Context P → Response P) (g : Gate) (c : Context P) (a : Arrival P)
+    (as : List (Arrival P)) (n : Nat) (hg : (carry respond g c).1 = .rehearsal)
+    (h : latest (arrive (carry respond g c).2 a) = some (.takes, n))
+    (hr : ¬ Rehearsed (arrive (carry respond g c).2 a)) :
+    run respond session g c (a :: as) =
+      run respond session
+        (shown respond .rehearsal (pass .rehearsal (arrive (carry respond g c).2 a))).1
+        (shown respond .rehearsal (pass .rehearsal (arrive (carry respond g c).2 a))).2 as := by
+  simp [run, h, hg, hr]
 
 /-- An edit unrehearses: once a turn that reports an edit, and is not itself a rehearsal record,
     joins the context, the revision that stands is not rehearsed until a later rehearsal. -/
 theorem edit_unrehearses (c : Context P) (t : Turn P) (he : Edits t) (hn : ¬ Rehearses t) :
     ¬ Rehearsed (c ++ [t]) := by
-  rintro ⟨i, hi, hreh, hno⟩
+  rintro ⟨i, hi, hreh, _, hno⟩
   have hlen : (c ++ [t]).length = c.length + 1 := by simp
   by_cases hlt : i < c.length
   · have hj : c.length < (c ++ [t]).length := by omega
@@ -141,23 +208,15 @@ theorem edit_unrehearses (c : Context P) (t : Turn P) (he : Edits t) (hn : ¬ Re
     rw [ht] at hreh
     exact hn hreh
 
-/-- The hand-off carries its provenance: the turn it names is the latest turn of its context,
-    read as the contributor taking what the rehearsal fusion showed. -/
-theorem handed_off_by_taking (respond : Gate → Context P → Response P)
-    (session : Context P → Response P) (g : Gate) (c : Context P) (as : List (Arrival P))
-    (h : HandOff P) (hr : run respond session g c as = .handedOff h) :
-    latest h.context = some (.takes, h.fusedAt) :=
-  (handedOff_cases respond session as g c h hr).2
-
 /-- A run that ends with nothing to change carries its provenance: the diagnosis holds of the
-    reading made after a turn took the solution, and the end names that turn. -/
+    reading made after an arrival's turn took the solution, and the end names that turn. -/
 theorem no_change_by_diagnosis (respond : Gate → Context P → Response P)
     (session : Context P → Response P) :
     ∀ (as : List (Arrival P)) (g : Gate) (c : Context P) (d : Diagnosis P),
       run respond session g c as = .noChange d →
-      ∃ c₀, latest c₀ = some (.takes, d.takenAt) ∧
-        NothingToChange (pass .sketch (settle c₀)) ∧
-        d.context = settle (pass .sketch (settle c₀)) := by
+      ∃ c₀ a, latest (arrive c₀ a) = some (.takes, d.takenAt) ∧
+        NothingToChange (pass .sketch (settle (arrive c₀ a))) ∧
+        d.context = settle (pass .sketch (settle (arrive c₀ a))) := by
   intro as
   induction as with
   | nil => intro g c d hr; simp [run] at hr
@@ -165,6 +224,7 @@ theorem no_change_by_diagnosis (respond : Gate → Context P → Response P)
     intro g c d hr
     simp only [run] at hr
     split at hr
+    · exact ih _ _ _ hr
     · exact ih _ _ _ hr
     · cases hr
     · exact ih _ _ _ hr
@@ -174,7 +234,7 @@ theorem no_change_by_diagnosis (respond : Gate → Context P → Response P)
       · split at hr
         · next hd =>
           cases hr
-          exact ⟨_, hl, hd, rfl⟩
+          exact ⟨_, _, hl, hd, rfl⟩
         · exact ih _ _ _ hr
       · exact ih _ _ _ hr
       · split at hr
