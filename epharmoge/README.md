@@ -40,7 +40,7 @@ Same axis (context fitness), opposite timing, different object — before a resu
 ## Protocol Flow
 
 ```
-Pass    → Recover what was meant to reach the result, observe everywhere it lands, carry out what is settled, observe again (silent)
+Pass    → Recover what was meant to reach the result, observe everywhere it lands, carry out what is settled and read each change back (silent)
 Sheet   → What was corrected and what settled it; what is yours, with concrete actions and the one the AI would take; what fits; what was not reached
 Return  → The run's share ends with the sheet — no answer owed, no "done" asked
 Answer  → If you give one, the next pass carries it out and returns a new sheet

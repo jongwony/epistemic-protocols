@@ -24,7 +24,8 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 Epharmoge(X) → start(c) → contextualize(c, utterances), where c is the fused session context and
 X, the result under review, is whatever the invocation names — this session's output or an
 artifact from elsewhere:
-  pass(c): observe; perform — the relay; observe again
+  pass(c): observe; perform — the relay, which reads its own writes back until nothing more
+           is settled
   return: the sheet — what was corrected, what is handed back as the person's, what was not
           reached; the run's share ends here, with no answer owed
   next utterance u: c' := fuse(c, u), read whole →
@@ -37,7 +38,7 @@ artifact from elsewhere:
 (X, context)
   → observe(reach)             -- what was meant to reach X and every place X lands, without changing existing state; what could not be reached, named
   → judge(result, context)     -- where what the context holds for X did not reach it, or reached it wrongly, as both now stand; afresh on every pass
-  → perform(settled)           -- the relay: every settled handling within what this run may write, and what its own writes newly settle
+  → perform(settled)           -- the relay: every settled handling within what this run may write, each write read back, and what that reading newly settles
   → surface(sheet)             -- what was corrected and what settled it, what is handed back as the person's with the handling the AI would take, what fits, what was not reached; the run's share ends here
   → fuse(person's turn)        -- where one comes: their words, a proposal they took, a grant of theirs — carried out on the next pass
   → ContextualizedExecution
@@ -46,7 +47,7 @@ deficit:  ApplicationDecontextualized
 preserves: every turn of the context -- the context only grows (pass_extends); a write changes only what this run may write (perform)
 invariant: Fit, not correctness -- a return says what was recovered, corrected and read again; it gives no verdict on X's correctness
 invariant: the person holds what the context does not settle; a handling goes ahead unasked only where what settles it chooses nothing that is the person's (SettledSupported)
-invariant: transformative revalidation (NON-MONOTONE) -- a write changes what the next observation reads, so a pass can find more than the one before it; every pass judges the whole X against the whole context
+invariant: transformative revalidation (NON-MONOTONE) -- a write changes what the reading after it finds, so a pass can find more than the one before it; every pass judges the whole X against the whole context
 invariant: Focus never records -- the sheet, its order, and whether an utterance bears on the run are re-read every turn; only the person's turn, a grant of theirs, or evidence that fixes it moves a handling onto the record
 -/
 
@@ -162,10 +163,10 @@ axiom mismatches : (c : Context P) → List (Mismatch c)
     by evidence. There is no verdict beside it: whether the mismatch "really" stands is not asked,
     and nothing here asserts it either way. `adapt` and `discard` ask for a write; whether that
     write was carried out, and whether it repaired the mismatch, is read from what `perform`
-    returned and what the next observation found, and the sheet says which. A write that repairs
-    it takes it out of what is found. Premise: a turn of the person's gives a mismatch one of
-    these handlings or none. A turn that changes what X is for gives none — it joins the context,
-    and `mismatches` is judged afresh on it. -/
+    returned — the write and the reading back of it — and the sheet says which. A write that
+    repairs it takes it out of what is found. Premise: a turn of the person's gives a mismatch
+    one of these handlings or none. A turn that changes what X is for gives none — it joins the
+    context, and `mismatches` is judged afresh on it. -/
 inductive Resolution
   /-- change X this way -/
   | adapt (direction : String)
@@ -247,7 +248,7 @@ def filledValue {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Option 
   | .filled a .. => some a
 
 /-- How the handling of a mismatch stands. Whether a settled change was carried out is not read
-    here: `perform` returns it, the next observation reads it, and `reach` names what was not
+    here: `perform` returns it with the reading back of it, and `reach` names what was not
     carried out. -/
 inductive Standing
   /-- nothing settled its handling: it is handed back as the person's -/
@@ -311,22 +312,24 @@ structure ContextualizedExecution (P : Type) where
 -/
 
 /-! ── PHASE TRANSITIONS ──
-A pass is silent and orthogonal to the person's coordinate: observe the reach, `perform` the
-relay, observe again; every return enters the context, and how each mismatch stands is then read
-from it. `respond` presents the sheet, and the run's share ends with it. `session` answers an
-utterance that does not bear on this run.
+A pass is silent and orthogonal to the person's coordinate: observe the reach, then `perform` the
+relay, which reads its own writes back; every return enters the context, and how each mismatch
+stands is then read from it. `respond` presents the sheet, and the run's share ends with it.
+`session` answers an utterance that does not bear on this run.
 -/
 
-/-- A turn a write returns: your own, stating a revised result or recording a discard, or what an
-    artifact write, or the reading back of one, returned. Never the person's, never a peer's. -/
+/-- A turn the relay returns: your own, stating a revised result or recording a discard, or what
+    an artifact write, or a reading the relay makes after one, returned. Never the person's, never
+    a peer's. -/
 def Write (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin = .external}
 
 /-- **Your action**, the relay: carry out every adaptation and every discard a settled handling
     asks — the person's, one under their grant, one evidence relays — that the context does not
     yet show carried out, the person's whole answer read and its combined consequence weighed
-    first. Each write is read back as it lands — X, and the places that write bears on — and what
-    that reading newly settles is carried out in the same relay; the relay stops only when a
-    reading after its last write settles nothing further that this run may write. Only a settled
+    first. Where nothing settled is left to carry out, it writes nothing and the first observation
+    stands. Each write is read back as it lands, and after the last one X and every place X lands
+    are read again; what any of those readings newly settles is carried out in the same relay,
+    which ends on a reading that settles nothing further that this run may write. Only a settled
     handling is carried out: a handling you marked as the one you would take is not written into
     X before the person takes it. A write follows where X lives: an artifact is
     written where it lies; a result that lives in the conversation — an answer, an analysis — is
@@ -339,14 +342,13 @@ def Write (P : Type) := {e : Turn P // e.origin = .assistant ∨ e.origin = .ext
     effect. A write outside that is not carried out, even where evidence fixes its direction: it
     goes into `reach` with what it needs and is handed back as the person's; once their turn
     authorizes it, it is carried out. A discard there is the exception: its write is your turn
-    recording that X is no longer relied on. Returns what the writes and their read-backs
+    recording that X is no longer relied on. Returns what the writes and those readings
     returned. -/
 axiom perform : Context P → List (Write P)
 
 def pass (c : Context P) : Context P :=
   let c₁ := c ++ (observe c).map (·.val)
-  let c₂ := c₁ ++ (perform c₁).map (·.val)
-  c₂ ++ (observe c₂).map (·.val)
+  c₁ ++ (perform c₁).map (·.val)
 
 /-- `respond` presents the sheet, read on the context the pass left, in this order. What you
     corrected without asking, what matters most first: what the context had settled, quoted with
@@ -397,8 +399,8 @@ Every return is read where it fires and nowhere else. returned: a pass has run a
 shown, whether or not the person decided anything and whether or not something is handed back.
 A return claims what was recovered, corrected and read again, for the mismatches found within
 the reach. It makes no claim that X is correct, and it does not say X fits while something is
-handed back, unrepaired or held. A replacement this run wrote is judged by the next observation
-like the result it replaced. A mismatch left as it is carries the reason given and no claim that
+handed back, unrepaired or held. A replacement this run wrote is read back and judged like the
+result it replaced. A mismatch left as it is carries the reason given and no claim that
 it does or does not stand. What is handed back stays the person's: no answer is owed, and a
 later turn of theirs that bears on it is carried out on the next pass. Convergence evidence: one
 line per mismatch found — what fell away or did not fit, where, and how it stands at the return,
@@ -440,7 +442,7 @@ def grounding : Op → Annot × String
   | .judge     => (.sense, "Internal analysis: the whole result as it now stands against the whole context as it now stands, afresh every pass — never the assistant's own words as what the result is held against; how the handling of each mismatch stands; what fits and what was not reached")
   | .evidence  => (.interaction .extension, "where evidence alone settles a mismatch as SettledSupported says, withdraw your own flag or record the relayed resolution as yours, with that evidence; a person's turn that disputes it leaves it unsettled")
   | .surface   => (.interaction .extension, "the sheet, as `respond` composes it")
-  | .adapt     => (.transform, "artifact write, or the revised result stated in your own turn where the result lives in the conversation: an adaptation a settled handling asks, within what this run may write; what it returns enters the context and the next observation reads it")
+  | .adapt     => (.transform, "artifact write, or the revised result stated in your own turn where the result lives in the conversation: an adaptation a settled handling asks, within what this run may write; what it returns enters the context and is read back in the same relay")
   | .discard   => (.transform, "within what this run may write, an artifact write that withdraws the result and puts the replacement in its place, or removes it when nothing takes its place; outside it, your turn recording that the result is no longer relied on")
   | .readTurn  => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — whether it bears on the run, and what it does there: resolves, takes a proposal, corrects, disputes, grants, changes what the result is for, names something that does not fit, points at a place to look, asks about the sheet")
   | .converge  => (.interaction .extension, "the convergence evidence CONVERGENCE names, which each sheet carries")
