@@ -47,6 +47,7 @@ deficit:  ApplicationDecontextualized
 preserves: every turn of the context -- the context only grows (pass_extends); a write changes only what this run may write (perform)
 invariant: Fit, not correctness -- a return says what was recovered, corrected and read again; it gives no verdict on X's correctness
 invariant: the person holds what the context does not settle; a handling goes ahead unasked only on what the context already settles, choosing nothing that is the person's (SettledSupported), or inside a grant of theirs
+invariant: what cannot be undone waits -- an effect of this run, or a step the person asked for that rests on X, does not go out while this pass leaves something it rests on handed back, unrepaired or held; those places are shown first, and it goes only on the person's word given with them in view
 invariant: transformative revalidation (NON-MONOTONE) -- a write changes what the reading after it finds, so a pass can find more than the one before it; every pass judges the whole X against the whole context
 invariant: Focus never records -- the sheet, its order, and whether an utterance bears on the run are re-read every turn; only the person's turn, a grant of theirs, or evidence that fixes it moves a handling onto the record
 -/
@@ -335,11 +336,11 @@ def Write (P : Type) :=
     stands. Each write is read back as it lands, and after the last one X and every place X lands
     are read again, as `observe` reads; what any of those readings newly settles is carried out
     in the same relay, which ends on a reading that settles nothing further that this run may
-    write. Only a settled handling is carried out: a handling you marked as the one you would
-    take is not written into X before the person takes it. A write follows where X lives: an
-    artifact is written where it lies; a result that lives in the conversation — an answer, an
-    analysis — is
-    adapted by your stating the revised result in your own turn. What this run may write is what
+    write. Only a settled handling is carried out: marking a handling as the one you would take
+    settles nothing — it is written into X once the person's turn settles it, by taking it or by
+    entrusting the choice. A write follows where X lives: an artifact is written where it lies; a
+    result that lives in the conversation — an answer, an analysis — is adapted by your stating
+    the revised result in your own turn. What this run may write is what
     the work in front of the person covers and they hold authority over, where the effect can be
     undone: their own resolution turn authorizes a write to anything they hold, an artifact
     another session of theirs produced included; another person's artifact, or a scope they do
@@ -347,10 +348,9 @@ def Write (P : Type) :=
     overwrite with no way back, a deploy, a send outside — needs their authorization for that
     effect. A write outside that is not carried out, even where evidence fixes its direction: it
     goes into `reach` with what it needs and is handed back as the person's; once their turn
-    authorizes it, it is carried out — unless this pass's observation found something still theirs
-    to judge that the effect rests on; then it stays held, and that is shown with it first. A
-    discard outside what this run may write is never held: its write is your turn recording that X
-    is no longer relied on. Returns what the writes and those readings returned. -/
+    authorizes it, it is carried out as the invariant on what cannot be undone allows. A discard
+    outside what this run may write is never held: its write is your turn recording that X is no
+    longer relied on. Returns what the writes and those readings returned. -/
 axiom perform : Context P → List (Write P)
 
 def pass (c : Context P) : Context P :=
@@ -377,10 +377,9 @@ def pass (c : Context P) : Context P :=
     on unchanged ground is said to be a correction. The sheet asks nothing: it says how an answer
     would be taken — their own words read whole, "as proposed" taking each handling you marked —
     and that none is owed; what is handed back comes together, or one at a time where the person
-    asks for it. What the utterance asked outside this run is answered here; a step that rests on
-    X and cannot be undone waits while this pass leaves something handed back, unrepaired
-    or held, and those places are shown before it. Each sheet is CONVERGENCE's convergence
-    evidence. -/
+    asks for it. What the utterance asked outside this run is answered here; a step it asked for
+    that cannot be undone goes by the invariant on what cannot be undone, and the places that hold
+    it are shown before it. Each sheet is CONVERGENCE's convergence evidence. -/
 def settle (respond : Context P → Response P) (c : Context P) : ContextualizedExecution P :=
   let t := c ++ [(respond c).val]
   ⟨t, target c, reach c, dissent t⟩
