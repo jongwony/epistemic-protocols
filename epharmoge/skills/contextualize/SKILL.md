@@ -46,7 +46,7 @@ requires: mismatch_detected(X)   -- the AI-opened path only (Layer 2); an invoca
 deficit:  ApplicationDecontextualized
 preserves: every turn of the context -- the context only grows (pass_extends); a write changes only what this run may write (perform)
 invariant: Fit, not correctness -- a return says what was recovered, corrected and read again; it gives no verdict on X's correctness
-invariant: the person holds what the context does not settle; a handling goes ahead unasked only where what settles it chooses nothing that is the person's (SettledSupported)
+invariant: the person holds what the context does not settle; a handling goes ahead unasked only on what the context already settles, choosing nothing that is the person's (SettledSupported), or inside a grant of theirs
 invariant: transformative revalidation (NON-MONOTONE) -- a write changes what the reading after it finds, so a pass can find more than the one before it; every pass judges the whole X against the whole context
 invariant: Focus never records -- the sheet, its order, and whether an utterance bears on the run are re-read every turn; only the person's turn, a grant of theirs, or evidence that fixes it moves a handling onto the record
 -/
@@ -188,19 +188,19 @@ inductive How | set | adopted | granted
 
 /-- **Your judgment**: the cited turn of the person resolves `m`, as it now stands, this way — read
     against the context that now stands, the order of its turns included, and not tied to their
-    latest turn; the `Resolution` reads as its constructor says. `set`: their own words. A turn
-    of theirs from before `m` was shown — an instruction X did not follow, a decision X does not
-    carry — resolves it only by the test `SettledSupported` states. `adopted`: they took an action
-    you put on the sheet, and only where that action was visible as yours, with its consequence
-    and your contrary grounds where there were any, before that turn; "as proposed" takes the
-    handling you marked as the one you would take, never an option's position. `granted`: the
-    cited turn entrusts the choice to you, and only inside what it covers; the resolution is then
-    your choice under it, recorded as yours. A question, a request to look, a deferral, or a bare
-    mention settles nothing. Their answer is read whole: one turn may resolve several mismatches,
-    or settle a class of them by a criterion; where it asks for dispositions of one result that
-    conflict — a discard beside an adaptation of the same result — it resolves neither: only a
-    turn of theirs after the combined consequence has been shown resolves them, and the earlier
-    conflicting turn never takes effect on its own. -/
+    latest turn; the `Resolution` reads as its constructor says. `set`: their own words. Where
+    those words came before `m` was shown — an instruction X did not follow, a decision X does not
+    carry — they resolve it only by the test `SettledSupported` states. `adopted`: they took an
+    action you put on the sheet, and only where that action was visible as yours, with its
+    consequence and your contrary grounds where there were any, before that turn; "as proposed"
+    takes the handling you marked as the one you would take, never an option's position.
+    `granted`: the cited turn entrusts the choice to you, and only inside what it covers; the
+    resolution is then your choice under it, recorded as yours. A question, a request to look, a
+    deferral, or a bare mention settles nothing. Their answer is read whole: one turn may resolve
+    several mismatches, or settle a class of them by a criterion; where it asks for dispositions
+    of one result that conflict — a discard beside an adaptation of the same result — it resolves
+    neither: only a turn of theirs after the combined consequence has been shown resolves them,
+    and the earlier conflicting turn never takes effect on its own. -/
 axiom ResolutionSupported : {c : Context P} → Mismatch c → Context P → Turn P → Resolution × How → Prop
 
 /-- A mismatch is resolved on the person's record only by the person's turn, whatever form that
@@ -220,19 +220,21 @@ inductive Settled
 
 /-- **Your judgment**: the cited evidence, read against X and the whole context as they now
     stand, admits this reading of `m` alone and fixes all of it; the `Resolution` reads as its
-    constructor says. This is the one test for handling `m` without asking, wherever its ground
-    comes from: what settles it still binds as the context now stands — a later turn may have
-    changed it — and fixes the direction of the change, where in X it goes, and how far it
-    reaches, with one reading, selecting no judgment that is the person's. What the context had
-    already settled and X applied wrongly passes it; so does an omission, where an instruction, a
-    decision or a rule that still binds was not followed. Where it is open whether a recovered
-    thing still applies, or where in X it belongs, nothing is settled and it is handed back.
-    Whether to leave a mismatch as it is, to stop using X, or whose it is, is the person's:
-    evidence settles those only where something the person already constituted — a decision they
-    recorded — settles it, and evidence of yours never settles a handling against a decision they
-    recorded. Which grounds do this is your reading each time. Where the evidence admits more
-    than one reading, it settles nothing; where several sources fix it together, the sheet shows
-    them together. A person's turn that disputes it leaves it unsettled. -/
+    constructor says. This is the test for handling `m` without asking on what the context already
+    settles — this evidence, or the person's earlier words as `ResolutionSupported` reads them (a
+    choice they entrusted goes by their grant instead): what settles it still binds as the context
+    now stands — a later turn may have changed it — and fixes the direction of the change, where
+    in X it goes, and how far it reaches, with one reading, selecting no judgment that is the
+    person's. What the context had already settled and X applied wrongly passes it; so does an
+    omission, where an instruction, a decision or a rule that still binds was not followed. Where
+    it is open whether a recovered thing still applies, or where in X it belongs, this test
+    settles nothing. Whether to leave a mismatch as it is, to stop using X, or whose
+    it is, is the person's: evidence settles those only where something the person already
+    constituted — a decision they recorded — settles it, and evidence of yours never settles a
+    handling against a decision they recorded. Which grounds do this is your reading each time.
+    Where the evidence admits more than one reading, it settles nothing; where several sources fix
+    it together, the sheet shows them together. A person's turn that disputes it leaves it
+    unsettled. -/
 axiom SettledSupported : {c : Context P} → Mismatch c → Context P → Turn P → Settled → Prop
 
 /-- Evidence stands on what was observed or recorded, never on the person's say-so, which is a
