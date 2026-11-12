@@ -20,65 +20,39 @@ variable {P : Type}
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 
-/-- Silence settles nothing: with no utterance, the last outcome stands. -/
-theorem silence (respond session : Context P → Response P) (c : Context P) (o : Outcome P) :
-    contextualize respond session c o [] = o := by
+/-- Silence settles nothing: with no utterance, the last return stands. -/
+theorem silence (respond session : Context P → Response P) (c : Context P)
+    (r : ContextualizedExecution P) : contextualize respond session c r [] = r := by
   simp [contextualize]
 
 /-- An utterance that does not bear on this run joins the context with the session's answer to
-    it; no pass runs, and the last outcome stands. -/
+    it; no pass runs, and the last return stands. -/
 theorem other_work_passes_nothing (respond session : Context P → Response P) (c : Context P)
-    (o : Outcome P) (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
-    contextualize respond session c o (u :: us) =
-      contextualize respond session (fuse c u ++ [(session (fuse c u)).val]) o us := by
+    (r : ContextualizedExecution P) (u : Utterance P) (us : List (Utterance P))
+    (h : ¬ Reaches (fuse c u)) :
+    contextualize respond session c r (u :: us) =
+      contextualize respond session (fuse c u ++ [(session (fuse c u)).val]) r us := by
   simp [contextualize, h]
 
-/-- An utterance that bears on the run opens a pass, completed or not. -/
+/-- An utterance that bears on the run opens a pass, and that pass returns its sheet. -/
 theorem reaching_passes_again (respond session : Context P → Response P) (c : Context P)
-    (o : Outcome P) (u : Utterance P) (us : List (Utterance P)) (h : Reaches (fuse c u)) :
-    contextualize respond session c o (u :: us) =
+    (r : ContextualizedExecution P) (u : Utterance P) (us : List (Utterance P))
+    (h : Reaches (fuse c u)) :
+    contextualize respond session c r (u :: us) =
       contextualize respond session (settle respond (pass (fuse c u))).context
         (settle respond (pass (fuse c u))) us := by
   simp [contextualize, h]
 
-/-- Completion needs nothing open. -/
-theorem completed_nothing_open (respond : Context P → Response P) (c : Context P)
-    (v : ApplicabilityVerdict P) (h : settle respond c = .completed v) : NothingOpen c := by
-  unfold settle at h
-  by_cases hc : NothingOpen c
-  · exact hc
-  · simp [hc] at h
+/-- A return is the pass's context followed by the sheet. Nothing about how any mismatch stands
+    conditions it. -/
+theorem settle_returns (respond : Context P → Response P) (c : Context P) :
+    (settle respond c).context = c ++ [(respond c).val] := rfl
 
-/-- A settled standing never rests on a resolution that asks for a write. -/
-theorem settled_asks_no_write (c : Context P) (m : Mismatch c) (r : Resolution) (how : How)
-    (hs : standing c m = .resolved r how ∨ standing c m = .relayed r) : r.asksWrite = false := by
-  unfold standing at hs
-  cases hr : resolution c m with
-  | filled a src ok sup =>
-    obtain ⟨r₀, h₀⟩ := a
-    simp only [hr, filledValue] at hs
-    by_cases hw : r₀.asksWrite <;> simp [hw] at hs
-    obtain ⟨rfl, -⟩ := hs
-    simpa using hw
-  | open_ _ =>
-    simp only [hr, filledValue] at hs
-    cases he : byEvidence c m with
-    | filled a src ok sup =>
-      cases a with
-      | withdraw => simp [he] at hs
-      | resolves r₀ =>
-        simp only [he] at hs
-        by_cases hw : r₀.asksWrite <;> simp [hw] at hs
-        subst hs
-        simpa using hw
-    | open_ _ => simp [he] at hs
-
-/-- The person's resolution comes first, whatever evidence read: one that asks no write stands
-    resolved. -/
+/-- The person's resolution comes first, whatever evidence read. -/
 theorem person_first (c : Context P) (m : Mismatch c) (r : Resolution) (how : How)
-    (h : filledValue (resolution c m) = some (r, how)) (hw : r.asksWrite = false) :
+    (h : filledValue (resolution c m) = some (r, how)) :
     standing c m = .resolved r how := by
-  simp [standing, h, hw]
+  simp [standing, h]
 
 /-- A resolution on the person's record is the filled occurrence of their own coordinate: the turn
     it cites was sent by the person and supports that resolution. -/
@@ -92,12 +66,11 @@ theorem resolved_by_person (c : Context P) (m : Mismatch c) (r : Resolution) (ho
   | filled a src ok sup =>
     obtain ⟨r₀, h₀⟩ := a
     simp only [hr, filledValue] at h
-    by_cases hw : r₀.asksWrite <;> simp [hw] at h
-    obtain ⟨rfl, rfl⟩ := h
+    obtain ⟨rfl, rfl⟩ := Standing.resolved.inj h
     exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
   | open_ _ =>
     simp only [hr, filledValue] at h
-    split at h <;> (try split at h) <;> cases h
+    split at h <;> cases h
 
 /-- A relayed resolution is the filled occurrence of the evidence coordinate: the turn it cites
     was not sent by the person and supports that resolution. -/
@@ -110,7 +83,7 @@ theorem relayed_not_person (c : Context P) (m : Mismatch c) (r : Resolution)
   cases hr : resolution c m with
   | filled a src ok _ =>
     simp only [hr, filledValue] at h
-    split at h <;> cases h
+    cases h
   | open_ _ =>
     simp only [hr, filledValue] at h
     cases he : byEvidence c m with
@@ -119,8 +92,7 @@ theorem relayed_not_person (c : Context P) (m : Mismatch c) (r : Resolution)
       | withdraw => simp [he] at h
       | resolves r₀ =>
         simp only [he] at h
-        by_cases hw : r₀.asksWrite <;> simp [hw] at h
-        subst h
+        obtain rfl := Standing.relayed.inj h
         exact ⟨src, ok, sup, rfl, by rw [src.ok]; exact ok⟩
     | open_ _ =>
       simp [he] at h
@@ -128,52 +100,6 @@ theorem relayed_not_person (c : Context P) (m : Mismatch c) (r : Resolution)
 /-- Evidence never stands on the person's say-so. -/
 theorem evidence_not_person {c : Context P} {m : Mismatch c} {s : Cite c}
     (ok : (evidenceCoord m).admits s.src) : s.src.val ≠ .person := ok
-
-private theorem evidence_origin (g : Grounding) (h : g.val ≠ .person) :
-    g.val = .external ∨ g.val = .peer := by
-  obtain ⟨o, ha, hi, hu⟩ := g
-  cases o <;> first | exact absurd rfl ha | exact absurd rfl hi | exact absurd rfl hu | simp_all
-
-/-- What closes each mismatch at completion, and its source. Where `settle` completes on `c`, every
-    mismatch found on `c` is either resolved on a turn the person sent, which supports that
-    resolution, or settled by evidence — its resolution relayed, or your own flag withdrawn —
-    citing a turn the environment returned or a peer reported, which supports that settling. -/
-theorem completed_closing_source (respond : Context P → Response P) (c : Context P)
-    (v : ApplicabilityVerdict P) (h : settle respond c = .completed v) :
-    ∀ m ∈ mismatches c,
-      (∃ (r : Resolution) (how : How) (s : Cite c), standing c m = .resolved r how ∧
-        s.src.val = .person ∧ ResolutionSupported m c (c[s.idx]'s.lt) (r, how)) ∨
-      (∃ (k : Settled) (s : Cite c),
-        (standing c m = .withdrawn ∧ k = .withdraw ∨
-          ∃ r, standing c m = .relayed r ∧ k = .resolves r) ∧
-        (s.src.val = .external ∨ s.src.val = .peer) ∧
-        SettledSupported m c (c[s.idx]'s.lt) k) := by
-  intro m hm
-  have hopen := completed_nothing_open respond c v h m hm
-  cases hr : resolution c m with
-  | filled a src ok sup =>
-    obtain ⟨r, how⟩ := a
-    have hst : standing c m = if r.asksWrite then .open_ else .resolved r how := by
-      simp [standing, hr, filledValue]
-    by_cases hw : r.asksWrite
-    · simp [hw] at hst; exact absurd hst hopen
-    · simp [hw] at hst
-      exact .inl ⟨r, how, src, hst, ok, sup⟩
-  | open_ _ =>
-    cases he : byEvidence c m with
-    | open_ _ =>
-      exact absurd (by simp [standing, hr, he, filledValue]) hopen
-    | filled k src ok sup =>
-      refine .inr ⟨k, src, ?_, evidence_origin src.src ok, sup⟩
-      cases k with
-      | withdraw => exact .inl ⟨by simp [standing, hr, he, filledValue], rfl⟩
-      | resolves r =>
-        have hst : standing c m = if r.asksWrite then .open_ else .relayed r := by
-          simp [standing, hr, he, filledValue]
-        by_cases hw : r.asksWrite
-        · simp [hw] at hst; exact absurd hst hopen
-        · simp [hw] at hst
-          exact .inr ⟨r, hst, rfl⟩
 
 private theorem returned_not_person {Q : Turn P → Prop} (h : ∀ e, Q e → e.origin ≠ .person)
     (xs : List {e : Turn P // Q e}) : ∀ e ∈ xs.map (·.val), e.origin ≠ .person := by
