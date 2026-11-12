@@ -278,15 +278,16 @@ def standing (c : Context P) (m : Mismatch c) : Standing :=
     and what it found fits; each place it could not reach, each condition at a reached place it
     could not verify, and each write it did not carry out or that did not repair what it aimed
     at, with what each needs — a change outside what this run may write, a permission, another's
-    authority — named so the person can point at one you missed. -/
+    authority, the person's judgment on something the effect rests on — named so the person can
+    point at one you missed. -/
 axiom reach : Context P → String
 
 /-- **Your judgment**: the latest utterance, read whole against the context as it now stands,
     bears on this run — it resolves, takes a proposal, corrects, disputes, grants, changes what X
     is for, names something that does not fit, points at a place to look, asks about the sheet,
-    or changes X or the evidence — even where it looks like other work. An utterance that bears
-    on none of it leaves the run as it stands: the session answers it, that answer stays in the
-    context, no pass runs, and the last return stands. -/
+    asks for a step that rests on X, or changes X or the evidence — even where it looks like other
+    work. An utterance that bears on none of it leaves the run as it stands: the session answers
+    it, that answer stays in the context, no pass runs, and the last return stands. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your record**: contrary grounds you showed beside your proposals and before the person's
@@ -346,9 +347,10 @@ def Write (P : Type) :=
     overwrite with no way back, a deploy, a send outside — needs their authorization for that
     effect. A write outside that is not carried out, even where evidence fixes its direction: it
     goes into `reach` with what it needs and is handed back as the person's; once their turn
-    authorizes it, it is carried out. A discard there is the exception: its write is your turn
-    recording that X is no longer relied on. Returns what the writes and those readings
-    returned. -/
+    authorizes it, it is carried out — unless this pass's observation found something still theirs
+    to judge that the effect rests on; then it stays held, and that is shown with it first. A
+    discard outside what this run may write is never held: its write is your turn recording that X
+    is no longer relied on. Returns what the writes and those readings returned. -/
 axiom perform : Context P → List (Write P)
 
 def pass (c : Context P) : Context P :=
@@ -376,7 +378,7 @@ def pass (c : Context P) : Context P :=
     would be taken — their own words read whole, "as proposed" taking each handling you marked —
     and that none is owed; what is handed back comes together, or one at a time where the person
     asks for it. What the utterance asked outside this run is answered here; a step that rests on
-    X and cannot be undone waits while the latest sheet leaves something handed back, unrepaired
+    X and cannot be undone waits while this pass leaves something handed back, unrepaired
     or held, and those places are shown before it. Each sheet is CONVERGENCE's convergence
     evidence. -/
 def settle (respond : Context P → Response P) (c : Context P) : ContextualizedExecution P :=
@@ -405,14 +407,14 @@ shown, whether or not the person decided anything and whether or not something i
 A return claims what was recovered, corrected and read again, for the mismatches found within
 the reach. It makes no claim that X is correct, and it does not say X fits while something is
 handed back, unrepaired or held. A replacement this run wrote is read back and judged like the
-result it replaced. A mismatch left as it is carries the reason given and no claim that
-it does or does not stand. What is handed back stays the person's: no answer is owed, and a
-later turn of theirs that bears on it is carried out on the next pass. Convergence evidence: one
-line per mismatch found — what fell away or did not fit, where, and how it stands at the return,
-as `respond` shows it; a grant with what it covered — beside the writes made with what each
-changed in X and what settled it, any that did not repair what they aimed at, the lines that
-left and why, what was checked and fits, what was not reached with what it needs, the dissent
-attached to the return, and what the return does not claim. Demonstrated, not asserted.
+result it replaced. A mismatch left as it is carries the reason where one was given, and no
+claim that it does or does not stand. What is handed back stays the person's: no answer is owed,
+and a later turn of theirs that bears on it is carried out on the next pass. Convergence
+evidence: one line per mismatch found — what fell away or did not fit, where, and how it stands
+at the return, as `respond` shows it; a grant with what it covered — beside the writes made with
+what each changed in X and what settled it, any that did not repair what they aimed at, the
+lines that left and why, what was checked and fits, what was not reached with what it needs, the
+dissent attached to the return, and what the return does not claim. Demonstrated, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -449,7 +451,7 @@ def grounding : Op → Annot × String
   | .surface   => (.interaction .extension, "the sheet, as `respond` composes it")
   | .adapt     => (.transform, "artifact write, or the revised result stated in your own turn where the result lives in the conversation: an adaptation a settled handling asks, within what this run may write; what it returns enters the context and is read back in the same relay")
   | .discard   => (.transform, "within what this run may write, an artifact write that withdraws the result and puts the replacement in its place, or removes it when nothing takes its place; outside it, your turn recording that the result is no longer relied on")
-  | .readTurn  => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — whether it bears on the run, and what it does there: resolves, takes a proposal, corrects, disputes, grants, changes what the result is for, names something that does not fit, points at a place to look, asks about the sheet")
+  | .readTurn  => (.sense, "Internal analysis: the new turn, and every earlier turn of the person's it bears on, read whole against the fused context as it now stands — whether it bears on the run, and what it does there, as `Reaches` states")
   | .converge  => (.interaction .extension, "the convergence evidence CONVERGENCE names, which each sheet carries")
   | .seam      => (.interaction .extension, "after a return, proceed to the next move the person declared, citing that turn")
 
