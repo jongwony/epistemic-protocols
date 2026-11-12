@@ -49,8 +49,7 @@ theorem completed_nothing_open (respond : Context P → Response P) (c : Context
   · exact hc
   · simp [hc] at h
 
-/-- A settled standing never rests on a resolution that asks for a write: such a mismatch stays
-    open until its write repairs it and takes it out of what is found. -/
+/-- A settled standing never rests on a resolution that asks for a write. -/
 theorem settled_asks_no_write (c : Context P) (m : Mismatch c) (r : Resolution) (how : How)
     (hs : standing c m = .resolved r how ∨ standing c m = .relayed r) : r.asksWrite = false := by
   unfold standing at hs
@@ -81,22 +80,32 @@ theorem person_first (c : Context P) (m : Mismatch c) (r : Resolution) (how : Ho
     standing c m = .resolved r how := by
   simp [standing, h, hw]
 
-/-- A resolution on the person's record cites a turn the person sent. -/
+/-- A resolution on the person's record is the filled occurrence of their own coordinate: the turn
+    it cites was sent by the person and supports that resolution. -/
 theorem resolved_by_person (c : Context P) (m : Mismatch c) (r : Resolution) (how : How)
     (h : standing c m = .resolved r how) :
-    ∃ s : Cite c, s.src.val = .person ∧ (c[s.idx]'s.lt).origin = .person := by
+    ∃ (s : Cite c) (ok : (resolutionCoord m).admits s.src)
+      (sup : ResolutionSupported m c (c[s.idx]'s.lt) (r, how)),
+      resolution c m = .filled (r, how) s ok sup ∧ (c[s.idx]'s.lt).origin = .person := by
   unfold standing at h
   cases hr : resolution c m with
-  | filled a src ok _ =>
-    exact ⟨src, ok, src.ok.trans ok⟩
+  | filled a src ok sup =>
+    obtain ⟨r₀, h₀⟩ := a
+    simp only [hr, filledValue] at h
+    by_cases hw : r₀.asksWrite <;> simp [hw] at h
+    obtain ⟨rfl, rfl⟩ := h
+    exact ⟨src, ok, sup, rfl, src.ok.trans ok⟩
   | open_ _ =>
     simp only [hr, filledValue] at h
     split at h <;> (try split at h) <;> cases h
 
-/-- A relayed resolution cites evidence the person did not send. -/
+/-- A relayed resolution is the filled occurrence of the evidence coordinate: the turn it cites
+    was not sent by the person and supports that resolution. -/
 theorem relayed_not_person (c : Context P) (m : Mismatch c) (r : Resolution)
     (h : standing c m = .relayed r) :
-    ∃ s : Cite c, s.src.val ≠ .person ∧ (c[s.idx]'s.lt).origin ≠ .person := by
+    ∃ (s : Cite c) (ok : (evidenceCoord m).admits s.src)
+      (sup : SettledSupported m c (c[s.idx]'s.lt) (.resolves r)),
+      byEvidence c m = .filled (.resolves r) s ok sup ∧ (c[s.idx]'s.lt).origin ≠ .person := by
   unfold standing at h
   cases hr : resolution c m with
   | filled a src ok _ =>
@@ -105,8 +114,14 @@ theorem relayed_not_person (c : Context P) (m : Mismatch c) (r : Resolution)
   | open_ _ =>
     simp only [hr, filledValue] at h
     cases he : byEvidence c m with
-    | filled a src ok _ =>
-      exact ⟨src, ok, by rw [src.ok]; exact ok⟩
+    | filled a src ok sup =>
+      cases a with
+      | withdraw => simp [he] at h
+      | resolves r₀ =>
+        simp only [he] at h
+        by_cases hw : r₀.asksWrite <;> simp [hw] at h
+        subst h
+        exact ⟨src, ok, sup, rfl, by rw [src.ok]; exact ok⟩
     | open_ _ =>
       simp [he] at h
 
@@ -119,13 +134,10 @@ private theorem evidence_origin (g : Grounding) (h : g.val ≠ .person) :
   obtain ⟨o, ha, hi, hu⟩ := g
   cases o <;> first | exact absurd rfl ha | exact absurd rfl hi | exact absurd rfl hu | simp_all
 
-/-- What closes each mismatch at completion, and its source. A completed pass leaves every
-    mismatch it found either resolved on the person's turn, which supports that resolution, or
-    settled by evidence — its resolution relayed, or your own flag withdrawn — citing a turn the
-    environment returned or a peer reported, never the person's say-so. A pass that found no
-    mismatch completes with no coordinate to close, and a pass adds no person turn
-    (`pass_adds_no_person_turn`); where a resolution is the person's, its source is their turn,
-    whether or not that turn came in this run. -/
+/-- What closes each mismatch at completion, and its source. Where `settle` completes on `c`, every
+    mismatch found on `c` is either resolved on a turn the person sent, which supports that
+    resolution, or settled by evidence — its resolution relayed, or your own flag withdrawn —
+    citing a turn the environment returned or a peer reported, which supports that settling. -/
 theorem completed_closing_source (respond : Context P → Response P) (c : Context P)
     (v : ApplicabilityVerdict P) (h : settle respond c = .completed v) :
     ∀ m ∈ mismatches c,
@@ -169,9 +181,8 @@ private theorem returned_not_person {Q : Turn P → Prop} (h : ∀ e, Q e → e.
   obtain ⟨x, -, rfl⟩ := List.mem_map.mp he
   exact h x.val x.property
 
-/-- No turn a pass adds is the person's: observation returns what the environment or a peer
-    reported, and a write returns your own turn or what an artifact write returned, so the relay
-    never stands in for the person's coordinate. -/
+/-- No turn a pass adds was sent by the person: observation returns what the environment or a peer
+    reported, and a write returns your own turn or what an artifact write returned. -/
 theorem pass_adds_no_person_turn (c : Context P) :
     ∃ t, pass c = c ++ t ∧ ∀ e ∈ t, e.origin ≠ .person := by
   let c₁ := c ++ (observe c).map (·.val)
@@ -194,6 +205,9 @@ theorem pass_extends (c : Context P) : ∃ t, pass c = c ++ t :=
   let ⟨t, ht, _⟩ := pass_adds_no_person_turn c
   ⟨t, ht⟩
 
+/-- The turn a mismatch is held against was not sent as the assistant's own turn. This reads who
+    sent the turn, not who wrote what it carries: a tool's return of your own earlier write is an
+    outside turn here. -/
 theorem against_not_assistant {c : Context P} (m : Mismatch c) :
     (c[m.against.idx]'m.against.lt).origin ≠ .assistant :=
   cited_not_assistant m.against
