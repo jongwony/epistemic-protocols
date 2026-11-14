@@ -28,7 +28,8 @@ theorem silence (c : Context P) (o : Outcome P) : bound respond session c o [] =
   simp [bound]
 
 /-- The run opens on the invoking context with what observation returned and your first turn
-    appended to it; how it stands there is `statusAtStart`, read before that turn. -/
+    appended to it; how it stands there is `statusAtStart` of those two contexts — the observed
+    context, and that context with the turn. -/
 theorem start_reads_first (c : Context P) (us : List (Utterance P)) :
     start respond session c us =
       bound respond session (observed c ++ [(respond (observed c)).val])
@@ -49,8 +50,8 @@ theorem start_stands_only_on_nothing_awaiting (c shown : Context P) (b : Defined
     exact ⟨hc.1, hc.2, rfl⟩
   · cases h
 
-/-- An utterance that does not bear on the boundary adds no round and leaves how the run stands as
-    it stood; a run that holds holds the context as it now stands. -/
+/-- An utterance that does not bear on the boundary is answered through `session`, and how the run
+    stood is carried to the context with that answer in it. -/
 theorem unrelated_keeps_the_run (c : Context P) (o : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
     bound respond session c o (u :: us) =
@@ -78,7 +79,7 @@ theorem bearing_utterance_rounds (c : Context P) (o : Outcome P) (u : Utterance 
 
 /-- The boundary stands only where no turn of the person's is owed, and then on one of two grounds:
     the person's acceptance, or, without it, no item awaiting their disposition; it is read at
-    `c`, with its limits and dissent read with the turn that shows it. -/
+    `c`, with its limits and dissent read at the second context supplied. -/
 theorem defined_grounds (c shown : Context P)
     (b : DefinedBoundary P) (h : status c shown = .defined b) :
     owed c = false ∧
@@ -109,9 +110,9 @@ theorem observed_adds_evidence (c : Context P) :
   obtain ⟨x, _, rfl⟩ := he
   exact x.property
 
-/-- Where `status`, read on a context with what observation returned, sets the boundary, the
-    context the boundary closes is that context followed only by what observation returned:
-    nothing of `shown` enters it. -/
+/-- Where `status`, read on `c` with what observation returned, sets the boundary, the context the
+    boundary closes is `c` followed only by what observation returned: nothing of `shown` enters
+    it. -/
 theorem defined_before_your_turn (c shown : Context P)
     (b : DefinedBoundary P) (h : status (observed c) shown = .defined b) :
     ∃ ev : List (Turn P), b.snapshot.context = c ++ ev ∧
@@ -128,8 +129,8 @@ theorem defined_at_utterance (c : Context P) (u : Utterance P) (shown : Context 
       ∀ e ∈ ev, e.origin = .external ∨ e.origin = .peer :=
   defined_before_your_turn (fuse c u) shown b h
 
-/-- A boundary that a bearing utterance sets is read at that utterance: the context it closes is
-    the person's turn followed only by what observation returned. -/
+/-- Where `bound`, run over the single bearing utterance `u`, sets the boundary, the context it
+    closes is `c`, then the person's turn, then only what observation returned. -/
 theorem defined_ends_in_utterance (c : Context P) (o : Outcome P) (u : Utterance P)
     (hr : Reaches (fuse c u))
     (b : DefinedBoundary P) (h : bound respond session c o [u] = .defined b) :
@@ -138,13 +139,12 @@ theorem defined_ends_in_utterance (c : Context P) (o : Outcome P) (u : Utterance
   rw [bearing_utterance_rounds respond session c o u [] hr, silence] at h
   exact defined_at_utterance c u _ b h
 
-/-- Only a person's turn accepts the boundary: a filled acceptance cites a turn the person
-    sent. -/
+/-- Where the acceptance is filled, the turn it cites is one the person sent. -/
 theorem accepted_only_by_person (c : Context P) :
     ∀ (u : Unit) (s : Cite c) (al : (acceptanceCoord (P := P)).admits s.src)
       (su : (acceptanceCoord (P := P)).supports c (c[s.idx]'s.lt) u),
-      acceptance c = .filled u s al su → s.src.val = .person :=
-  fun _ _ al _ _ => al
+      acceptance c = .filled u s al su → (c[s.idx]'s.lt).origin = .person :=
+  fun _ s al _ _ => s.ok.trans al
 
 /-- Where no turn of the person's is owed, an acceptance sets the boundary whatever is still
     open: the boundary is `closeAt` of that context, whose residual carries the open part
@@ -321,14 +321,14 @@ theorem prior_disposition_not_awaiting {c : Context P} (e : BoundaryEntry c)
   | filled a s al su =>
     cases hd : e.disposition <;> simp [awaitsEntry, governing, hd, hp]
 
-/-- A person's turn in this context never stands as an earlier decision fixing who settles an
-    item: a filled earlier-decision occurrence of an entry cites a turn the person did not send. -/
+/-- Where an entry's earlier-decision occurrence is filled, the turn it cites is one the person did
+    not send. -/
 theorem prior_disposition_not_the_persons {c : Context P} (e : BoundaryEntry c) :
     ∀ (a : Arrangement) (s : Cite c)
       (al : (priorDispositionOf (P := P) e.domain).admits s.src)
       (su : (priorDispositionOf (P := P) e.domain).supports c (c[s.idx]'s.lt) a),
-      e.priorDisposition = .filled a s al su → s.src.val ≠ .person :=
-  fun _ _ al _ _ => al
+      e.priorDisposition = .filled a s al su → (c[s.idx]'s.lt).origin ≠ .person :=
+  fun _ s al _ _ h => al (s.ok.symm.trans h)
 
 /-- An earlier decision fixing who settles a decision makes no disposition of this run: the record
     reads only the person's disposition. -/
