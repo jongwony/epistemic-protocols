@@ -183,7 +183,7 @@ inductive Resolution
   | elsewhere (owner : String)
 
 /-- How a resolution the person's turn carries came to stand: in their own words; by taking an
-    action you put on the sheet; or by your choice inside a grant of theirs. -/
+    action you proposed; or by your choice inside a grant of theirs. -/
 inductive How | set | adopted | granted
 
 /-- **Your judgment**: the cited turn of the person resolves `m`, as it now stands, this way — read
@@ -191,7 +191,7 @@ inductive How | set | adopted | granted
     latest turn; the `Resolution` reads as its constructor says. `set`: their own words. Where
     those words came before `m` was shown — an instruction X did not follow, a decision X does not
     carry — they resolve it only by the test `SettledSupported` states. `adopted`: they took an
-    action you put on the sheet, and only where that action was visible as yours, with its
+    action you proposed, and only where that action was visible as yours, with its
     consequence and your contrary grounds where there were any, before that turn; "as proposed"
     takes the handling you marked as the one you would take, never an option's position.
     `granted`: the cited turn entrusts the choice to you, and only inside what it covers; the
