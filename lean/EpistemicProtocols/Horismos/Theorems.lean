@@ -66,9 +66,9 @@ theorem carry_keeps_status (o : Outcome P) (c : Context P) :
       (∀ c', o = .holding c' → o.carry c = .holding c) := by
   cases o <;> simp [Outcome.carry]
 
-/-- An utterance that bears on the boundary is read where it is said, with what observation
-    returned, and then answered by your turn; how the run stood before is replaced by `status`
-    read there, a run that holds holding the context with that turn in it. -/
+/-- A step over an utterance that bears on the boundary unfolds to observation, your turn, and
+    `status` of those two contexts — the observed context, and that context with the turn — in
+    place of how the run stood before. -/
 theorem bearing_utterance_rounds (c : Context P) (o : Outcome P) (u : Utterance P)
     (us : List (Utterance P)) (hr : Reaches (fuse c u)) :
     bound respond session c o (u :: us) =
@@ -111,8 +111,7 @@ theorem observed_adds_evidence (c : Context P) :
   exact x.property
 
 /-- Where `status`, read on `c` with what observation returned, sets the boundary, the context the
-    boundary closes is `c` followed only by what observation returned: nothing of `shown` enters
-    it. -/
+    boundary closes is `c` followed only by what observation returned. -/
 theorem defined_before_your_turn (c shown : Context P)
     (b : DefinedBoundary P) (h : status (observed c) shown = .defined b) :
     ∃ ev : List (Turn P), b.snapshot.context = c ++ ev ∧
@@ -139,12 +138,14 @@ theorem defined_ends_in_utterance (c : Context P) (o : Outcome P) (u : Utterance
   rw [bearing_utterance_rounds respond session c o u [] hr, silence] at h
   exact defined_at_utterance c u _ b h
 
-/-- Where the acceptance is filled, the turn it cites is one the person sent. -/
-theorem accepted_only_by_person (c : Context P) :
-    ∀ (u : Unit) (s : Cite c) (al : (acceptanceCoord (P := P)).admits s.src)
+/-- Where the acceptance is filled, it is a filled occurrence whose cited turn the person sent. -/
+theorem accepted_only_by_person (c : Context P) (h : isFilled (acceptance c) = true) :
+    ∃ (u : Unit) (s : Cite c) (al : (acceptanceCoord (P := P)).admits s.src)
       (su : (acceptanceCoord (P := P)).supports c (c[s.idx]'s.lt) u),
-      acceptance c = .filled u s al su → (c[s.idx]'s.lt).origin = .person :=
-  fun _ s al _ _ => s.ok.trans al
+      acceptance c = .filled u s al su ∧ (c[s.idx]'s.lt).origin = .person := by
+  cases ha : acceptance c with
+  | open_ _ => simp [ha, isFilled] at h
+  | filled u s al su => exact ⟨u, s, al, su, rfl, s.ok.trans al⟩
 
 /-- Where no turn of the person's is owed, an acceptance sets the boundary whatever is still
     open: the boundary is `closeAt` of that context, whose residual carries the open part
@@ -187,9 +188,10 @@ theorem defined_by_acceptance_or_nothing_awaiting (c : Context P) (o : Outcome P
       obtain ⟨h1, h2, h3⟩ := defined_grounds _ _ b' hb'
       exact ⟨_, _, h1, h2, h3⟩
 
-/-- Every disposition on the record cites a person's turn. -/
-theorem recorded_by_person (c : Context P) (r : Recorded c) : r.src.src.val = .person :=
-  r.byPerson
+/-- Every recorded disposition cites a turn the person sent. -/
+theorem recorded_by_person (c : Context P) (r : Recorded c) :
+    (c[r.src.idx]'r.src.lt).origin = .person :=
+  r.src.ok.trans r.byPerson
 
 /-- Where the person disposed a decision in this run, that disposition governs it — their current
     words — whatever an earlier decision fixed. -/
@@ -219,15 +221,16 @@ theorem granted_choice_stands_iff {c : Context P} (e : BoundaryEntry c) (v : Str
       cases he
       exact h
 
-/-- Held content that stands — the person's own value, or one they took — stands on a person's
-    turn; your choice inside a grant is its own form (`granted_choice_stands_iff`). -/
+/-- Held content that stands — the person's own value, or one they took — cites a turn the person
+    sent; your choice inside a grant is its own form (`granted_choice_stands_iff`). -/
 theorem held_content_cites_person {c : Context P} (e : BoundaryEntry c) (v : String)
     (p : Proposer) (st : Standing)
     (src : Cite c) (allowed : (contentOf (P := P) e.domain).admits src.src)
     (supported : (contentOf (P := P) e.domain).supports c (c[src.idx]'src.lt) (.held v p st))
     (hc : e.content = .filled (.held v p st) src allowed supported)
-    (hs : stands e = true) : src.src.val = .person := by
-  simpa [stands, hc] using hs
+    (hs : stands e = true) : (c[src.idx]'src.lt).origin = .person := by
+  have hp : src.src.val = .person := by simpa [stands, hc] using hs
+  exact src.ok.trans hp
 
 /-- Your choice inside a grant that an earlier decision fixing who settles the item states stands,
     citing that decision's record, where no disposition of this run governs the item and the
@@ -321,14 +324,17 @@ theorem prior_disposition_not_awaiting {c : Context P} (e : BoundaryEntry c)
   | filled a s al su =>
     cases hd : e.disposition <;> simp [awaitsEntry, governing, hd, hp]
 
-/-- Where an entry's earlier-decision occurrence is filled, the turn it cites is one the person did
-    not send. -/
-theorem prior_disposition_not_the_persons {c : Context P} (e : BoundaryEntry c) :
-    ∀ (a : Arrangement) (s : Cite c)
+/-- Where an entry's earlier-decision occurrence is filled, it is a filled occurrence whose cited
+    turn the person did not send. -/
+theorem prior_disposition_not_the_persons {c : Context P} (e : BoundaryEntry c)
+    (h : isFilled e.priorDisposition = true) :
+    ∃ (a : Arrangement) (s : Cite c)
       (al : (priorDispositionOf (P := P) e.domain).admits s.src)
       (su : (priorDispositionOf (P := P) e.domain).supports c (c[s.idx]'s.lt) a),
-      e.priorDisposition = .filled a s al su → (c[s.idx]'s.lt).origin ≠ .person :=
-  fun _ s al _ _ h => al (s.ok.symm.trans h)
+      e.priorDisposition = .filled a s al su ∧ (c[s.idx]'s.lt).origin ≠ .person := by
+  cases hp : e.priorDisposition with
+  | open_ _ => simp [hp, isFilled] at h
+  | filled a s al su => exact ⟨a, s, al, su, rfl, fun ho => al (s.ok.symm.trans ho)⟩
 
 /-- An earlier decision fixing who settles a decision makes no disposition of this run: the record
     reads only the person's disposition. -/
