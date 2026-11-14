@@ -14,7 +14,7 @@ Context never reaches its target whole (`ApplicationDecontextualized`). While yo
 
 ### The Solution
 
-**Recover, correct, hand back**: The AI recovers what was meant to reach the result — your words, decisions and purposes, the rules the result answers to — and follows the result to every place it lands, observing without changing anything and naming what it could not reach. Then it tells two things apart. Where the context already settles what is right and the result departs from it, the AI fixes the result and reads it again without asking, and tells you what settled it. Where something fell out of view and what it means now is yours to judge, the AI lays it out again — where you said it, what its absence means for you — with concrete actions and the one it would take. Each pass returns one sheet and the run's share ends there: no answer is owed, and no closing "done" is asked. If you answer, in your own words or with "as proposed", the next pass carries it out. Transforms decontextualized execution into contextualized execution.
+**Recover, correct, hand back**: The AI recovers what was meant to reach the result — your words, decisions and purposes, the rules the result answers to — and follows the result to every place it lands, observing without changing anything and naming what it could not reach. Then it tells two things apart. Where the context already settles what is right and the result departs from it, the AI fixes the result and reads it again without asking, and tells you what settled it. Where something fell out of view and what it means now is yours to judge, the AI lays it out again — where you said it, what its absence means for you — with concrete actions and the one it would take. Each pass returns one sheet: no answer is owed, and no closing "done" is asked. If you answer, in your own words or with "as proposed", the next pass carries it out. Transforms decontextualized execution into contextualized execution.
 
 ### Difference from Other Protocols
 
@@ -42,7 +42,7 @@ Same axis (context fitness), opposite timing, different object — before a resu
 ```
 Pass    → Recover what was meant to reach the result, observe everywhere it lands, carry out what is settled and read each change back (silent)
 Sheet   → What was corrected and what settled it; what is yours, with concrete actions and the one the AI would take; what fits; what was not reached
-Return  → The run's share ends with the sheet — no answer owed, no "done" asked
+Return  → One sheet per pass — no answer owed, no "done" asked
 Answer  → If you give one, the next pass carries it out and returns a new sheet
 ```
 

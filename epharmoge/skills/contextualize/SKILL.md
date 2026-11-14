@@ -9,7 +9,7 @@ Recover what was said and settled along the way that did not reach a result, cor
 
 ## Definition
 
-**Epharmoge** (ἐφαρμογή): A dialogical act of fitting a result back to the context that was meant to reach it. Context never reaches its target whole: while the person's focus moves between things, the context grows long, or work changes hands, part of what was said and settled falls away from the result. The result is any work product: this session's output, an analysis, a decision, a document, or an artifact another session or person produced. The AI recovers what was meant to reach the result, follows the result to where it lands, and tells two things apart. Where the context already settles what is right and the result departs from it, the AI corrects the result within what this run may write and reads it again, without asking. Where something fell out of view and what it means for the result now is the person's to judge, the AI lays it out again — where it was said, and what its absence means in the person's own situation — beside the handling it would take, and hands it back. The beneficiary is the person: they see again what they could not have recalled. Each pass returns one sheet and the run's share ends there, with no answer owed and no closing turn asked; a later turn of theirs that bears on it opens another pass. What ends is this run's share, not the question of fit: a return establishes what was recovered, corrected and read again within what was reached — not that the result is correct, and not that it fits while something is still theirs to judge.
+**Epharmoge** (ἐφαρμογή): A dialogical act of fitting a result back to the context that was meant to reach it. Context never reaches its target whole: while the person's focus moves between things, the context grows long, or work changes hands, part of what was said and settled falls away from the result. The result is any work product: this session's output, an analysis, a decision, a document, or an artifact another session or person produced. The AI recovers what was meant to reach the result, follows the result to where it lands, and tells two things apart. Where the context already settles what is right and the result departs from it, the AI corrects the result within what this run may write and reads it again, without asking. Where something fell out of view and what it means for the result now is the person's to judge, the AI lays it out again — where it was said, and what its absence means in the person's own situation — beside the handling it would take, and hands it back. The beneficiary is the person: they see again what they could not have recalled. Each pass returns one sheet, with no answer owed and no closing turn asked. A return establishes what was recovered, corrected and read again within what was reached; it establishes neither correctness nor fit while something remains the person's to judge.
 
 ```lean
 /-!
@@ -24,22 +24,22 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 Epharmoge(X) → start(c) → contextualize(c, utterances), where c is the fused session context and
 X, the result under review, is whatever the invocation names — this session's output or an
 artifact from elsewhere:
-  pass(c): observe; perform — the relay, which reads its own writes back until nothing more
-           is settled
+  pass(c): observe; perform — the relay, which reads its own writes back until it finds no
+           further repair this run may write
   return: the sheet — what was corrected, what is handed back as the person's, what was not
-          reached; the run's share ends here, with no answer owed
+          reached; no answer owed
   next utterance u: c' := fuse(c, u), read whole →
     [u does not bear on this run]   the session answers it; the last return stands
     [otherwise]                     pass(c') → the sheet again
-  no utterance: the last return stands; a later utterance that bears on the run opens it again
+  no utterance: the last return stands
 -/
 
 /-! ── MORPHISM ──
 (X, context)
   → observe(reach)             -- what was meant to reach X and every place X lands, without changing existing state; what could not be reached, named
   → judge(result, context)     -- where what the context holds for X did not reach it, or reached it wrongly, as both now stand; afresh on every pass
-  → perform(settled)           -- the relay: every settled handling within what this run may write, each write read back, and what that reading newly settles
-  → surface(sheet)             -- what was corrected and what settled it, what is handed back as the person's with the handling the AI would take, what fits, what was not reached; the run's share ends here
+  → perform(settled)           -- the relay: every settled handling within what this run may write, each write read back, and what that reading newly settles, until no further repair is found
+  → surface(sheet)             -- what was corrected and what settled it, what is handed back as the person's with the handling the AI would take, what fits, what was not reached
   → fuse(person's turn)        -- where one comes: their words, a proposal they took, a grant of theirs — carried out on the next pass
   → ContextualizedExecution
 requires: mismatch_detected(X)   -- the AI-opened path only (Layer 2); an invocation declares the deficit and enters without it
@@ -47,7 +47,6 @@ deficit:  ApplicationDecontextualized
 preserves: every turn of the context -- the context only grows (pass_extends); a write changes only what this run may write (perform)
 invariant: Fit, not correctness -- a return says what was recovered, corrected and read again; it gives no verdict on X's correctness
 invariant: the person holds what the context does not settle; a handling goes ahead unasked only on what the context already settles, choosing nothing that is the person's (SettledSupported), or inside a grant of theirs
-invariant: what cannot be undone waits -- an effect of this run, or a step the person asked for that rests on X, does not go out while this pass leaves something it rests on handed back, unrepaired or held; those places are shown first, and it goes only on the person's word given with them in view
 invariant: transformative revalidation (NON-MONOTONE) -- a write changes what the reading after it finds, so a pass can find more than the one before it; every pass judges the whole X against the whole context
 invariant: Focus never records -- the sheet, its order, and whether an utterance bears on the run are re-read every turn; only the person's turn, a grant of theirs, or evidence that fixes it moves a handling onto the record
 -/
@@ -279,16 +278,15 @@ def standing (c : Context P) (m : Mismatch c) : Standing :=
     and what it found fits; each place it could not reach, each condition at a reached place it
     could not verify, and each write it did not carry out or that did not repair what it aimed
     at, with what each needs — a change outside what this run may write, a permission, another's
-    authority, the person's judgment on something the effect rests on — named so the person can
-    point at one you missed. -/
+    authority — named so the person can point at one you missed. -/
 axiom reach : Context P → String
 
 /-- **Your judgment**: the latest utterance, read whole against the context as it now stands,
     bears on this run — it resolves, takes a proposal, corrects, disputes, grants, changes what X
     is for, names something that does not fit, points at a place to look, asks about the sheet,
-    asks for a step that rests on X, or changes X or the evidence — even where it looks like other
-    work. An utterance that bears on none of it leaves the run as it stands: the session answers
-    it, that answer stays in the context, no pass runs, and the last return stands. -/
+    or changes X or the evidence — even where it looks like other work. An utterance that bears
+    on none of it leaves the run as it stands: the session answers it, that answer stays in the
+    context, no pass runs, and the last return stands. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your record**: contrary grounds you showed beside your proposals and before the person's
@@ -319,8 +317,8 @@ structure ContextualizedExecution (P : Type) where
 /-! ── PHASE TRANSITIONS ──
 A pass is silent and orthogonal to the person's coordinate: observe the reach, then `perform` the
 relay, which reads its own writes back; every return enters the context, and how each mismatch
-stands is then read from it. `respond` presents the sheet, and the run's share ends with it.
-`session` answers an utterance that does not bear on this run.
+stands is then read from it. `respond` presents the sheet. `session` answers an utterance that
+does not bear on this run.
 -/
 
 /-- A turn the relay returns: your own, stating a revised result or recording a discard, or what
@@ -332,25 +330,23 @@ def Write (P : Type) :=
 /-- **Your action**, the relay: carry out every adaptation and every discard a settled handling
     asks — the person's, one under their grant, one evidence relays — that the context does not
     yet show carried out, the person's whole answer read and its combined consequence weighed
-    first. Where nothing settled is left to carry out, it writes nothing and the first observation
-    stands. Each write is read back as it lands, and after the last one X and every place X lands
-    are read again, as `observe` reads; what any of those readings newly settles is carried out
-    in the same relay, which ends on a reading that settles nothing further that this run may
-    write. Only a settled handling is carried out: marking a handling as the one you would take
-    settles nothing — it is written into X once the person's turn settles it, by taking it or by
-    entrusting the choice. A write follows where X lives: an artifact is written where it lies; a
-    result that lives in the conversation — an answer, an analysis — is adapted by your stating
-    the revised result in your own turn. What this run may write is what
-    the work in front of the person covers and they hold authority over, where the effect can be
-    undone: their own resolution turn authorizes a write to anything they hold, an artifact
-    another session of theirs produced included; another person's artifact, or a scope they do
-    not hold, needs that person or a permission; an effect that cannot be undone — a removal or
-    overwrite with no way back, a deploy, a send outside — needs their authorization for that
-    effect. A write outside that is not carried out, even where evidence fixes its direction: it
-    goes into `reach` with what it needs and is handed back as the person's; once their turn
-    authorizes it, it is carried out as the invariant on what cannot be undone allows. A discard
-    outside what this run may write is never held: its write is your turn recording that X is no
-    longer relied on. Returns what the writes and those readings returned. -/
+    first. Read each write back as `observe` reads, carrying out the further repairs those
+    readings settle within what this run may write until, on the context this execution has
+    reached, no further such repair is found. Only a settled handling is carried out: marking a
+    handling as the one you would take settles nothing — it is written into X once the person's
+    turn settles it, by taking it or by entrusting the choice. A write follows where X lives: an
+    artifact is written where it lies; a result that lives in the conversation — an answer, an
+    analysis — is adapted by your stating the revised result in your own turn. What this run may
+    write is what the work in front of the person covers and they hold authority over, where the
+    effect can be undone: their own resolution turn authorizes a write to X and to what its
+    settled correction covers, an artifact another session of theirs produced included; another
+    person's artifact, or a scope they do not hold, needs that person or a permission; an effect
+    on X that cannot be undone — a removal or overwrite with no way back — needs their
+    authorization for that effect. A write outside that is not carried out, even where evidence
+    fixes its direction: it goes into `reach` with what it needs and is handed back as the
+    person's. A discard outside what this run may write is never held: its write is your turn
+    recording that X is no longer relied on. Returns what the writes and those readings
+    returned. -/
 axiom perform : Context P → List (Write P)
 
 def pass (c : Context P) : Context P :=
@@ -377,9 +373,8 @@ def pass (c : Context P) : Context P :=
     on unchanged ground is said to be a correction. The sheet asks nothing: it says how an answer
     would be taken — their own words read whole, "as proposed" taking each handling you marked —
     and that none is owed; what is handed back comes together, or one at a time where the person
-    asks for it. What the utterance asked outside this run is answered here; a step it asked for
-    that cannot be undone goes by the invariant on what cannot be undone, and the places that hold
-    it are shown before it. Each sheet is CONVERGENCE's convergence evidence. -/
+    asks for it. What the utterance asked outside this run is answered here. Each sheet is
+    CONVERGENCE's convergence evidence. -/
 def settle (respond : Context P → Response P) (c : Context P) : ContextualizedExecution P :=
   let t := c ++ [(respond c).val]
   ⟨t, target c, reach c, dissent t⟩
@@ -514,7 +509,7 @@ Where a place reads as another owner's, the options name the concrete split, for
 - **Reach named**: As `observe` and `reach` state.
 - **Relay runs as Extension**: As `perform` and `SettledSupported` state — what is settled is carried out within what this run may write; what the person holds is handed back.
 - **The person resolves**: As `ResolutionSupported`, `SettledSupported`, and `respond` state — including the quoted disclosure of a turn read as a resolution.
-- **A return ends the run's share**: As `settle` and CONVERGENCE state — no answer owed, no closing turn.
+- **No answer owed**: As `settle` and CONVERGENCE state — and no closing turn asked.
 - **How much it matters**: As `respond` states — by demonstrable behavioral consequence, never structural extent alone.
 - **After the return**: The AI never rewrites or vetoes a resolution the person settled.
 - **Form feedback**: Derive each round's density from the current request and carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
