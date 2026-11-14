@@ -498,7 +498,7 @@ Not reached: whether the webhook token is valid in production — reaching it ne
 No answer is owed. "As proposed" takes 2a; your own words are fine too.
 ```
 
-Where a place reads as another owner's, the options name the concrete split, for example "install mail in this image as part of this work" beside "leave it to whoever owns the image". Wherever you read one of the user's earlier turns as settling a place, say which turn and what you took from it, quoting their words — for example: "Your 'put it in #daily-report' — taken as: post it there." This disclosure stands in place of asking.
+Where a place reads as another owner's, the options name the concrete split, for example "install mail in this image as part of this work" beside "leave it to whoever owns the image". The disclosure of an earlier turn of the user's read as settling a place — "Your 'put it in #daily-report' — taken as: post it there." — stands in place of asking.
 
 ## Rules
 
