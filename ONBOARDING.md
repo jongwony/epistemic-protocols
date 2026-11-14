@@ -43,7 +43,7 @@ Contributors are expected to dogfood the protocols they edit — §Protocols to 
 - [ ] `/euporia:elicit` — elicit the important design dimensions together before locking in a direction
 - [ ] `/horismos:bound` — define epistemic boundaries for multi-domain refactors
 - [ ] `/analogia:ground` — audit what a mapping being relied on licenses about a case, reading reachable accounts as evidence
-- [ ] `/epharmoge:contextualize` — applicability check of a result against everywhere it lands and the intents it was meant to carry
+- [ ] `/epharmoge:contextualize` — recovers what was said or settled and did not reach a result, corrects what was wrongly applied, and hands back what is yours to judge
 - [ ] `/merismos:apportion` — cuts an autonomous goal into coarse units at cited seams before the run begins, judges each unit's fit against one execution horizon, and closes each unit — on a derived completion condition, on a recorded acceptance where none compiles, or on a recorded reservation where a judgment rather than a check settles it
 
 ## Contribution Workflow
