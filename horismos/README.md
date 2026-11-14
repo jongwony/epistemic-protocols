@@ -4,7 +4,7 @@ See the decisions a task rests on — what each costs if wrong, what settled it,
 
 > [한국어](./README_ko.md)
 
-A request to delegate can precede both a fixed goal and knowledge of the decisions involved. `/bound` starts by drafting the relevant whole structure from the available context. It shows why a decision matters, what it depends on, which parts already have a source-defined answer, and which are tentative or unknown.
+A request to delegate can precede both a fixed goal and knowledge of the decisions involved. `/bound` starts by drafting the relevant whole structure from the available context. It shows why a decision matters, what it depends on, which parts already have a source-defined answer, and which are tentative or unknown, with the judgments still the user's own given prominence.
 
 ```mermaid
 flowchart LR
