@@ -72,15 +72,21 @@ theorem defined_ends_in_utterance (c : Context P) (b : DefinedBoundary P) (u : U
   rw [bearing_utterance_rounds respond session c b u [] hr, silence]
   exact observed_adds_evidence (fuse c u)
 
-/-- Every result a run yields from its first return is `closeAt` of some context, with the map,
-    record, and residual `readout` gives there: no utterance, and no silence, produces another
-    kind of result. -/
+/-- Every result a run yields from its first return is `closeAt` of a context with what observation
+    returned joined to it, shown with your turn read there, with the map, record, and residual
+    `readout` gives at that context: no utterance, and no silence, produces another kind of
+    result. -/
 theorem start_yields_a_readout (c : Context P) (us : List (Utterance P)) :
-    ∃ c₀ s₀, start respond session c us = closeAt c₀ s₀ (readout c₀) := by
+    ∃ pre, start respond session c us =
+      closeAt (observed pre) (observed pre ++ [(respond (observed pre)).val])
+        (readout (observed pre)) := by
   suffices h : ∀ (c : Context P) (b : DefinedBoundary P) (us : List (Utterance P)),
-      (∃ c₀ s₀, b = closeAt c₀ s₀ (readout c₀)) →
-      ∃ c₀ s₀, bound respond session c b us = closeAt c₀ s₀ (readout c₀) from
-    h _ _ us ⟨_, _, rfl⟩
+      (∃ pre, b = closeAt (observed pre) (observed pre ++ [(respond (observed pre)).val])
+        (readout (observed pre))) →
+      ∃ pre, bound respond session c b us =
+        closeAt (observed pre) (observed pre ++ [(respond (observed pre)).val])
+          (readout (observed pre)) from
+    h _ _ us ⟨c, rfl⟩
   intro c b us hb
   induction us generalizing c b with
   | nil => simpa [bound] using hb
@@ -88,7 +94,7 @@ theorem start_yields_a_readout (c : Context P) (us : List (Utterance P)) :
     simp only [bound]
     split
     · exact ih _ _ hb
-    · exact ih _ _ ⟨_, _, rfl⟩
+    · exact ih _ _ ⟨_, rfl⟩
 
 /-- Every recorded disposition cites a turn the person sent. -/
 theorem recorded_by_person (c : Context P) (r : Recorded c) :

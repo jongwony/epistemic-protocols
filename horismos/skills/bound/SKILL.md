@@ -10,8 +10,7 @@ Define epistemic boundaries through a recognizable whole map and progressive exa
 ## Definition
 
 - **Horismos** (ὁρισμός) takes a task whose boundary is undefined, including one whose decision structure or sufficient depth of examination is not yet recognizable, and returns a source-grounded map of it: what the work treats as settled, and what is still open, each open item filled in.
-- Before asking the user what to settle or entrust, construct the relevant whole provisional map of what the task rests on. A settled goal and a user-supplied inventory are not prerequisites. Bound this whole to the current context and show what remains unknown.
-- Let the user open any axis, see the concrete content and consequences needed to judge it, correct the map, and entrust at the depth they find sufficient. The map remains the object of judgment; opening an axis does not require visiting every other one.
+- Let the user open any axis, correct the map, and entrust at the depth they find sufficient. The map remains the object of judgment; opening an axis does not require visiting every other one.
 - Keep the boundary question distinct from its settlement disposition and from the content of the decision.
 
 ```lean
@@ -489,31 +488,29 @@ end Horismos
 ## Mode Activation
 
 - `/bound` remains directly invocable.
-- When a decision boundary or the structure needed to judge it is undefined, invoke the protocol with the available task context. Keep goal, success criteria, and scope open where the user has left them open.
+- When a decision boundary or the structure needed to judge it is undefined, invoke the protocol with the available task context.
 - During AI-guided activation, apply current safety boundaries, capability limits, and explicit instructions. Skip activation when source-defined direction already settles the requested boundary, when the user expressly requests proceeding without this interaction, or when the same unresolved finding was dismissed and its ground has not changed.
 
 ## Protocol
 
-- At the first round, show the relevant whole draft before asking the user to choose its applicable parts or examination depth. Give every included item its decision-relevant reason, what getting it wrong would cost, and its conditional connections. State the scope of discovery and what is unknown.
-- In every round, make existing user decisions, choices made inside a grant, unaccepted proposals, facts relayed from earlier decisions, and unresolved items recognizable through their source and setting status. Show every proposal that would entrust an irreversible later act to AI with its reach, place your contrary grounds, where you hold any, beside what they bear on, and keep the way to take your proposals recognizable, in the user's language.
-- When the user opens an axis, show the concrete content, assumptions, alternatives, and dependent consequences needed for that axis. Keep the whole overview in view and offer deeper examination or correction where it matters. Decision-rights detail and proposed-content detail can differ by axis; derive the depth from the response rather than a fixed menu of levels.
-- At an opened settlement question, materialize UserSupplies, AIPropose, and AIAutonomous in the user's idiom: the user supplies the decision, AI proposes for the user's selection, or AI chooses within stated limits.
-- When the user corrects an assumption, the scope, or the question the boundary answers, the next round reads the corrected context: revise affected content and obligations, show their changed implications, and preserve independent commitments. Keep excluded or conditional parts legible in the map where they matter to later reliance; the residual lists what is still open.
-- When one turn takes the shown proposals its words cover, present the whole they constitute and its remaining questions without asking for a second approval of the same arrangement.
+- In every round, keep the way to take your proposals recognizable in the user's language, as the `round` grounding entry names it.
+- When the user opens an axis, show the concrete content, assumptions, alternatives, and dependent consequences needed for that axis, and offer deeper examination or correction where it matters. Decision-rights detail and proposed-content detail can differ by axis; derive the depth from the response rather than a fixed menu of levels.
+- When the user opens who settles an item, materialize the `BoundaryClassification` forms in the user's idiom.
+- When the user corrects an assumption, the scope, or the question the boundary answers, keep excluded or conditional parts legible in the map where they matter to later reliance.
 - When composing a round whose terminology, quotation, neighboring material, or phase order needs attention, read `references/round-composition.md` before presenting it.
 
 ## Rules
 
-- **Recognition over Recall**: Present structured options with anticipatable post-selection states.
-- **Round composition**: Keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the question.
+- **Recognition over Recall**: As `readout` and `round` state — each item still open shown with your filling and what decides it, and the way to take your proposals kept recognizable.
+- **Round composition**: Keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the way to take your proposals.
 - **Observation before showing**: Observe what the map needs, as `observe` states, before showing it.
-- **Whole before selection**: Construct and present the relevant provisional whole before asking what to settle, inspect, or entrust; the user's existing goal and map can remain incomplete.
-- **Progressive examination**: Let the user's response open, deepen, replace, or close axes of that whole. Serve requested examination in the next turn.
+- **Whole before selection**: As `readout` and `round` state — the relevant whole map every round, read from a `TaskScope` whose goal and structure may remain open.
+- **Progressive examination**: Let the user's response open, deepen, replace, or close axes of that whole.
 - **Dynamic rendering**: Keep boundary questions and examination dimensions runtime-grounded, with a path to extend or replace the framing.
-- **Source-bound settlement**: A disposition is made, and a proposal adopted, only as the MORPHISM invariant and `DispositionSupported` state.
+- **Source-bound settlement**: A disposition is made, and a proposal adopted, only as the MORPHISM invariant `proposal-and-settlement-separation` and `DispositionSupported` state.
 - **Entrustment reach**: How far an entrustment reaches is as `DispositionSupported` states.
 - **Dependency revision**: Reconcile changed ground and transitive dependents before the next return, retaining supported decisions and recording unresolved consequences.
-- **Prior-map provenance**: Read an earlier boundary through the turns it cites. Its citation still points at the same source; whether that source still supports the settlement is judged against the context that now stands, and an unreachable or unsupported setting is advisory. An earlier decision relayed from a record is read as `ContentSupported` and `PriorDispositionSupported` state.
+- **Prior-map provenance**: Read an earlier boundary through the turns it cites, as `Cite.lift` states; an unreachable or unsupported setting is advisory. An earlier decision relayed from a record is read as `ContentSupported` and `PriorDispositionSupported` state.
 - **After the return**: `dissent` states how your contrary grounds attach and that you never rewrite or veto one.
-- **Ambiguous response routing**: Read mixed responses whole; when materially different futures remain viable, continue and present those readings and their consequences. Commit nothing from an unresolved reading.
+- **Ambiguous response routing**: Where a response leaves materially different futures viable, present the readings that lead to them and their consequences; how a response is read, and that an unresolved reading commits nothing, are as `readAnswer` states.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
