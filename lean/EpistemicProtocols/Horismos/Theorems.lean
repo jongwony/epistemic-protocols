@@ -63,23 +63,6 @@ theorem observed_adds_evidence (c : Context P) :
   obtain ⟨x, _, rfl⟩ := he
   exact x.property
 
-/-- A return read on `c` with what observation returned closes a context that is `c` followed only
-    by turns of external or peer origin. -/
-theorem defined_before_your_turn (c shown : Context P) :
-    ∃ ev : List (Turn P),
-      (closeAt (observed c) shown (readout (observed c))).snapshot.context = c ++ ev ∧
-      ∀ e ∈ ev, e.origin = .external ∨ e.origin = .peer :=
-  observed_adds_evidence c
-
-/-- A return read at a person's utterance with what observation returned closes a context that ends
-    in that utterance followed only by turns of external or peer origin. -/
-theorem defined_at_utterance (c : Context P) (u : Utterance P) (shown : Context P) :
-    ∃ ev : List (Turn P),
-      (closeAt (observed (fuse c u)) shown (readout (observed (fuse c u)))).snapshot.context =
-        c ++ [u.val] ++ ev ∧
-      ∀ e ∈ ev, e.origin = .external ∨ e.origin = .peer :=
-  defined_before_your_turn (fuse c u) shown
-
 /-- Where `bound` runs over the single bearing utterance `u`, the return's context is `c`, then the
     person's turn, then only turns of external or peer origin. -/
 theorem defined_ends_in_utterance (c : Context P) (b : DefinedBoundary P) (u : Utterance P)
@@ -87,7 +70,7 @@ theorem defined_ends_in_utterance (c : Context P) (b : DefinedBoundary P) (u : U
     ∃ ev : List (Turn P), (bound respond session c b [u]).snapshot.context = c ++ [u.val] ++ ev ∧
       ∀ e ∈ ev, e.origin = .external ∨ e.origin = .peer := by
   rw [bearing_utterance_rounds respond session c b u [] hr, silence]
-  exact defined_before_your_turn (fuse c u) _
+  exact observed_adds_evidence (fuse c u)
 
 /-- Every result a run yields from its first return is `closeAt` of some context, with the map,
     record, and residual `readout` gives there: no utterance, and no silence, produces another
