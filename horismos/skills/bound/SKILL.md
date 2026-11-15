@@ -13,7 +13,7 @@ Define epistemic boundaries through a recognizable whole map and progressive exa
 - Before asking the user what to settle or entrust, construct the relevant whole provisional map of what the task rests on. A settled goal and a user-supplied inventory are not prerequisites. Bound this whole to the current context and show what remains unknown.
 - Let the user open any axis, see the concrete content and consequences needed to judge it, correct the map, and entrust at the depth they find sufficient. The map remains the object of judgment; opening an axis does not require visiting every other one.
 - Keep the boundary question distinct from its settlement disposition and from the content of the decision.
-- The boundary stands in one of two ways — the user accepts it as it stands, at that depth, or no item on the map awaits the user's disposition and it stands as shown — and only where no turn of the user's is still owed; until then the run holds. Once it stands, the user's later words reopen it where they bear on it.
+- The boundary stands in one of two ways — the user accepts it as it stands, at that depth, or no item on the map awaits the user's disposition and it stands as shown — and only where no turn of the user's is still owed; until it stands, the run holds. Once it stands, the user's later words reopen it where they bear on it.
 
 ```lean
 /-!
@@ -125,7 +125,7 @@ abbrev TaskScope (P : Type) := Context P
 /-- Stable identity for a map entry — a decision, obligation, premise, or unresolved question whose
     settlement or arrangement the task rests on, whether already fixed or still open;
     runtime-grounded, not a fixed taxonomy. Who settles an entry is read as that entry's
-    disposition; it is a separate entry only where the source makes that allocation itself the
+    arrangement; it is a separate entry only where the source makes that allocation itself the
     subject. -/
 abbrev Domain := String
 
@@ -543,7 +543,7 @@ inductive Op | observe | readout | round | readAnswer | converge | seam
 def grounding : Op → Annot × String
   | .observe      => (.observe, "record read, artifact read, artifact search, external fetch, environment run: observation as `observe` states")
   | .readout      => (.sense, "Internal analysis: derive the whole map and the opened detail from the context as observation left it, at every round; read each disposition and content by the turn that set it, and an earlier decision fixing who settles one as a cited fact")
-  | .round        => (.interaction .extension, "the whole map, with what is still the person's to judge given prominence, a value they kept or asked candidates for and have not given included, in the order their answers most affect the task, interdependent judgments together with their combined consequence; the person's own lines as theirs, your additions marked as proposals, each decision with its evidence, what depends on it and what getting it wrong costs; your arrangement for one, where you have one, with why; what already stands and what is entrusted kept recognizable apart from those judgments, each with the source that supports that reading; any entrustment's reach, proposed or made, with every later act that cannot be undone in view; what the map did not look at — every source observation did not reach, by name; the choices still open beside the round's question, your contrary grounds, where you hold any, before the answer, and the way to accept the boundary as it stands kept recognizable in the person's language; labels defined where they are used")
+  | .round        => (.interaction .extension, "the whole map, with what is still the person's to judge given prominence — a decision they kept or asked proposals for whose value is still open included — in the order their answers most affect the task, interdependent judgments together with their combined consequence; the person's own lines as theirs, your additions marked as proposals, each decision with its evidence, what depends on it and what getting it wrong costs; what already stands and what is entrusted kept recognizable apart from those judgments, each with the source that supports that reading; any entrustment's reach, proposed or made, with every later act that cannot be undone in view; what the map did not look at — every source observation did not reach, by name; the choices still open beside the round's question, your contrary grounds, where you hold any, before the answer, and the way to accept the boundary as it stands kept recognizable in the person's language; labels defined where they are used")
   | .readAnswer   => (.sense, "Internal analysis: whether the latest utterance bears on the boundary, and what it does there — dispositions, corrections, an opening, an acceptance — read whole against the fused context, whatever form it takes, as `Reaches`, `DispositionSupported`, `ContentSupported`, `AcceptanceSupported` and `owed` state; a reading not yet settled — by this reply or a later one — makes the person's turn owed: the run holds and a round serves it")
   | .converge     => (.interaction .extension, "DefinedBoundary as it stands — its map, its record with who put each disposition forward and how it stood, cited facts, the residual — declared empty where nothing is open — with why each open item bears and who settles it, and its limits — every source observation did not reach, by name — every later act that cannot be undone that an entrustment on it reaches, in view, and the dissent attached to it — a contrary ground the person has not closed over is never first shown here, it makes their turn owed; with the way to reopen it; where it answers a request to see something, the requested content beside the boundary as it stands, pointing to what was already shown where nothing changed; where nothing awaited the person, say so")
   | .seam         => (.interaction .extension, "where the boundary newly stands or what stands has changed, proceed to the next move the person declared, citing that turn")
@@ -570,13 +570,12 @@ end Horismos
 
 ## Protocol
 
-The formal block defines execution; this section carries what rendering a round needs beyond it.
-
 - When the goal is open, distinguish the work that can investigate it, the judgment that would select it, and obligations conditional on that selection. Propose a way to handle those questions without supplying an unchosen goal.
+- In every round, make existing user decisions, choices made inside a grant, unaccepted proposals, facts relayed from earlier decisions, and unresolved items recognizable through their source and setting status.
 - When the user opens an axis, show the concrete content, assumptions, alternatives, and dependent consequences needed for that axis. Keep the whole overview in view and offer deeper examination or correction where it matters. Decision-rights detail and proposed-content detail can differ by axis; derive the depth from the response rather than a fixed menu of levels.
 - At an opened settlement question, materialize UserSupplies, AIPropose, and AIAutonomous in the user's idiom: the user supplies the decision, AI proposes for the user's selection, or AI chooses within stated limits. A displayed default is one of these proposals and binds only through its actual acceptance.
-- When the user corrects an assumption, the scope, or the question the boundary answers, show the changed implications of what the next round revises, and keep excluded or conditional parts legible in the map where they matter to later reliance.
-- Where the boundary stands on the user's acceptance, present the constituted whole and its remaining questions without asking for a second approval of the same arrangement.
+- When the user corrects an assumption, the scope, or the question the boundary answers, the next round reads the corrected context: revise affected content and obligations, show their changed implications, and preserve independent commitments. Keep excluded or conditional parts legible in the map where they matter to later reliance; the residual lists what is still open.
+- Where the boundary stands, the turn that shows it says that it stands. On the user's acceptance, present the constituted whole and its remaining questions without asking for a second approval of the same arrangement.
 - When composing a round whose terminology, quotation, neighboring material, or phase order needs attention, read `references/round-composition.md` before presenting it.
 
 ## Rules

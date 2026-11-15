@@ -111,7 +111,7 @@ theorem observed_adds_evidence (c : Context P) :
   exact x.property
 
 /-- Where `status`, read on `c` with what observation returned, sets the boundary, the context the
-    boundary closes is `c` followed only by what observation returned. -/
+    boundary closes is `c` followed only by turns of external or peer origin. -/
 theorem defined_before_your_turn (c shown : Context P)
     (b : DefinedBoundary P) (h : status (observed c) shown = .defined b) :
     ∃ ev : List (Turn P), b.snapshot.context = c ++ ev ∧
@@ -120,8 +120,8 @@ theorem defined_before_your_turn (c shown : Context P)
   exact observed_adds_evidence c
 
 /-- Where the boundary stands as `status` reads it at a person's utterance with what observation
-    returned, the context it closes ends in that utterance followed only by what observation
-    returned. -/
+    returned, the context it closes ends in that utterance followed only by turns of external or
+    peer origin. -/
 theorem defined_at_utterance (c : Context P) (u : Utterance P) (shown : Context P)
     (b : DefinedBoundary P) (h : status (observed (fuse c u)) shown = .defined b) :
     ∃ ev : List (Turn P), b.snapshot.context = c ++ [u.val] ++ ev ∧
@@ -129,7 +129,7 @@ theorem defined_at_utterance (c : Context P) (u : Utterance P) (shown : Context 
   defined_before_your_turn (fuse c u) shown b h
 
 /-- Where `bound`, run over the single bearing utterance `u`, sets the boundary, the context it
-    closes is `c`, then the person's turn, then only what observation returned. -/
+    closes is `c`, then the person's turn, then only turns of external or peer origin. -/
 theorem defined_ends_in_utterance (c : Context P) (o : Outcome P) (u : Utterance P)
     (hr : Reaches (fuse c u))
     (b : DefinedBoundary P) (h : bound respond session c o [u] = .defined b) :
@@ -263,11 +263,11 @@ theorem override_blocks_prior_grant {c : Context P} (e : BoundaryEntry c) (v : S
   simp [stands, hc, hd, governing, hf]
 
 /-- Where nothing awaits the person, every item on the map has one of four sources: their
-    disposition in this run, cited from a turn they sent; an earlier decision of theirs fixing who
-    settles it, cited from a record that is not their turn in this context; a fact, on a turn of any
-    grounding origin; or a value they hold, on a turn they sent. This classifies what governs or
-    fills each item; whether a choice inside a grant stands under the governing arrangement is a
-    separate guarantee (`granted_choice_stands_iff`). -/
+    disposition in this run, on a citation whose recorded origin is the person; an earlier decision
+    of theirs fixing who settles it, on a citation whose recorded origin is not the person; a fact,
+    on a citation of any grounding origin; or a value they hold, on a citation whose recorded origin
+    is the person. This classifies what governs or fills each item; whether a choice inside a grant
+    stands under the governing arrangement is a separate guarantee (`granted_choice_stands_iff`). -/
 theorem nothing_awaiting_sources {c : Context P} (r : BoundaryEssence c) (h : awaits r = false) :
     ∀ e ∈ r.map,
       (∃ d s al su, e.disposition = .filled d s al su ∧ s.src.val = .person) ∨
