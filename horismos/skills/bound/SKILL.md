@@ -11,7 +11,6 @@ Define epistemic boundaries through a recognizable whole map and progressive exa
 
 - **Horismos** (ὁρισμός) takes a task whose boundary is undefined, including one whose decision structure or sufficient depth of examination is not yet recognizable, and returns a source-grounded map of it: what the work treats as settled, and what is still open, each open item filled in.
 - Let the user open any axis, correct the map, and entrust at the depth they find sufficient. The map remains the object of judgment; opening an axis does not require visiting every other one.
-- Keep the boundary question distinct from its settlement disposition and from the content of the decision.
 
 ```lean
 /-!
@@ -489,7 +488,7 @@ end Horismos
 
 - `/bound` remains directly invocable.
 - When a decision boundary or the structure needed to judge it is undefined, invoke the protocol with the available task context.
-- During AI-guided activation, apply current safety boundaries, capability limits, and explicit instructions. Skip activation when source-defined direction already settles the requested boundary, when the user expressly requests proceeding without this interaction, or when the same unresolved finding was dismissed and its ground has not changed.
+- Skip AI-guided activation when source-defined direction already settles the requested boundary, when the user expressly requests proceeding without this interaction, or when the same unresolved finding was dismissed and its ground has not changed.
 
 ## Protocol
 
