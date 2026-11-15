@@ -1,31 +1,26 @@
 # Horismos — /bound (ὁρισμός)
 
-See the decisions a task rests on — what each costs if wrong, what settled it, what stays open and who settles it.
+See what a task treats as settled — on what ground and by whose judgment — with every open item filled in as the AI's choice or its marked proposal.
 
 > [한국어](./README_ko.md)
 
-A request to delegate can precede both a fixed goal and knowledge of the decisions involved. `/bound` starts by drafting the relevant whole structure from the available context. It shows why a decision matters, what it depends on, which parts already have a source-defined answer, and which are tentative or unknown.
+A request to delegate can precede both a fixed goal and knowledge of the decisions involved. `/bound` starts by drafting the relevant whole structure from the available context. It shows why a decision matters, what it depends on, which parts already have a source-defined answer and whose judgment settled them, and it fills in every part still open: with the AI's own choice where the user entrusted it, and otherwise with the AI's proposal, marked as such — also where its ground is thin, which the map then says.
 
 ```mermaid
 flowchart LR
-    A[Open task and delegation intent] --> B[Provisional whole map]
-    B -->|Nothing waits for the user, no turn owed| G[Boundary stands as shown]
-    B -->|Something waits, or a turn is owed| C{User's reply}
-    C -->|Opens or corrects an axis| D[Concrete content and consequences]
-    D --> E[Update affected decisions]
-    E --> B
-    C -->|Accepts it as it stands, no turn owed| F[Boundary stands, what still waits in residual]
-    C -->|Unclear, or an AI objection not yet closed over| H[Round that serves it]
-    H --> B
-    F -->|Later words| C
-    G -->|Later words| C
+    A[Open task] --> B[Whole map: what is settled, with its ground and whose judgment; every open item filled in]
+    B --> C{User's next words}
+    C -->|Take proposals, correct, open an axis, ask again| D[Map drawn again from what the conversation now holds]
+    D --> C
+    C -->|Other work, or nothing| E[The last map stays as it was; nothing is taken]
+    E -->|Later words| C
 ```
 
-The user can open any axis, inspect its proposed content, and change the framing before entrusting it. Different axes can receive different depths of examination. Opening one does not adopt its proposal or require reviewing every other one. The boundary stands in one of two ways: the user accepts it as it stands, in whatever words, and it is set from what the conversation now holds; or no item on the map is waiting for the user, and it stands as shown, with what the map did not look at. Either way it stands only where no turn of the user's is still owed: an unclear answer or an AI objection they have not closed over, for instance, gets a round that serves it first; asking to see something just shows it, and a boundary that stands keeps standing. Any other answer that bears on it continues it. Each round gathers what the boundary itself needs — collecting material and evidence, or running what that takes in a scratch space; the work the boundary is for is left to what follows it — and comes back with an account of how the user's words were read, what was judged on what basis, and how far it went; anything that cannot be undone waits for the authorization it needs. Words saying the user is done are read like any other answer, and the AI says how it took them and where the run stands. The user's next words reopen a boundary that stands where they bear on it. Turning to other work closes nothing. An AI proposal becomes part of the boundary only when it was shown as the AI's, with its evidence and the AI's objections, if it had any, before the user took it.
+The user can open any axis, inspect its proposed content, and change the framing. Different axes can receive different depths of examination. Opening one does not adopt its proposal or require reviewing every other one. Each round returns the map and waits for nothing: the user can keep what is settled, take any of the AI's proposals in their own words, or ask again about any item, and the next round draws the map again from what the conversation now holds. Each round gathers what the map itself needs — collecting material and evidence, or running what that takes in a scratch space; checking a proposal further, and the work the map is for, are left to what follows — and comes back with an account of how the user's words were read, what was judged on what basis, and how far it went; anything that cannot be undone waits for the authorization it needs. Words saying the user is done are read like any other answer. Turning to other work closes nothing. The user's words are read as taking an AI proposal only where that proposal was shown as the AI's, with its evidence and the AI's objections, if it had any, before those words.
 
-For example, a project map might show that the audience is already chosen, the data handling approach needs comparison, and the rollout date is still open. The user can inspect data handling, rule out external transmission, entrust the comparison work, and retain the final choice. The map then updates the affected options and keeps the rollout date unresolved. A boundary that stands — whether the user accepted it or nothing was waiting for them — stands at the depth it was examined; it does not silently resolve every open project question.
+For example, a project map might show that the audience is already chosen (the user said so), that the data handling approach is the AI's proposal on thin ground (the vendor's terms were not reachable), and that the rollout date is also the AI's proposal. The user can keep the audience, rule out external transmission, entrust comparing the approaches that remain, and ask again about the date. The map then redraws the affected items. A map shows the boundary at the depth it was examined; it does not silently resolve every open project question.
 
-The result is `BoundaryUndefined → DefinedBoundary`: the current map with each decision's disposition — who put it forward and how it stood — the questions still open, each with why it matters and who settles it — by this run's word or an earlier decision — what the map did not look at, the AI's recorded objections, and pointers to the records that settled it. Proposal work leaves selection with its holder; entrusted discretion permits choice within the actual grant.
+The result is `BoundaryUndefined → DefinedBoundary`: the current map with each decision's disposition — who put it forward and how it stood — every item still open with the AI's filling, why it matters and who settles it — by this run's word or an earlier decision — what the map did not look at, the AI's recorded objections, and pointers to the records that settled it. Proposal work leaves selection with its holder; entrusted discretion permits choice within the actual grant.
 
 ## Install and use
 
@@ -40,7 +35,7 @@ claude plugin install horismos@epistemic-protocols
 
 ## Contract and verification
 
-- [SKILL.md](skills/bound/SKILL.md) defines provisional discovery, progressive examination, source-bound settlement, and closing on the user's acceptance or on a map with nothing left for the user to dispose — as a Lean 4 block that elaborates.
+- [SKILL.md](skills/bound/SKILL.md) defines provisional discovery, progressive examination, source-bound settlement, and a map returned every round with every open item filled in and no answer owed — as a Lean 4 block that elaborates.
 - [Round composition](skills/bound/references/round-composition.md) supplies occasion-specific presentation rules.
 - [Repository verification](../AGENTS.md#verification) gives the contributor workflow. For this plugin's Lean contract, static, and packaging checks, run these from the repository root, sequentially:
 

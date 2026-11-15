@@ -43,7 +43,7 @@
     {
       "name": "horismos",
       "source": "./horismos",
-      "description": "See the decisions a task rests on — what each costs if wrong, what settled it, what stays open and who settles it — /bound (ὁρισμός: a bounding)"
+      "description": "See what a task treats as settled — on what ground, by whose judgment — with every open item filled in as the AI's choice or marked proposal — /bound (ὁρισμός: a bounding)"
     },
     {
       "name": "epistemic-cooperative",
