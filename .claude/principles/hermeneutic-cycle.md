@@ -10,7 +10,7 @@ The hermeneutic cycle pattern is already structurally encoded in formal blocks �
 |---|---|---|
 | `preserves:` (MORPHISM) | Vorverständnis (pre-understanding) | Fixed reference point across the circle. Input is read-only; only understanding (output) evolves |
 | `invariant:` (MORPHISM) | Produktives Vorurteil (productive prejudice) | Directional constraint on the circle. "X over Y" pattern prevents degenerative interpretation |
-| `LOOP` | Hermeneutischer Zirkel (hermeneutic circle) | Part-whole reinterpretation via backward flow. Present in every protocol |
+| `LOOP` | Hermeneutischer Zirkel (hermeneutic circle) | Part-whole reinterpretation via backward flow |
 | `CONVERGENCE` | Horizontverschmelzung (horizon fusion condition) | Convergence condition for achieved understanding. Productive termination of the circle |
 | `Qs` gate | Horizon Fusion Point | Constitutive gate — user contributes new meaning, fusing horizons |
 | `Qc` gate | Horizon Navigation | Classificatory gate — path selection within existing understanding space |
@@ -21,7 +21,7 @@ Gate-runtime semantics for Qc/Qs (and the `Basis:` interpretive transparency ann
 
 Each surface operationalizes the same structural pattern at a different scale. Cross-references point to where the cycle is invoked in the codebase; this file is the single home for the *concept*, not its runtime invocation.
 
-**Primary circle (intra-protocol)** — Each protocol's `LOOP` section encodes backward flow where partial resolution triggers whole re-interpretation, conditioned by `preserves:` (the text being interpreted remains fixed; only the interpretation evolves).
+**Primary circle (intra-protocol)** — A protocol's `LOOP` section, where its contract carries one, encodes backward flow where partial resolution triggers whole re-interpretation, conditioned by `preserves:` (the text being interpreted remains fixed; only the interpretation evolves).
 
 **Secondary pattern (inter-protocol)** — A complementary pair forms a Pre/Post cycle on the context fitness axis — Aitesis↔Epharmoge (context). This cycle operates heuristically via Output Style nudge, driven by observed session conditions rather than a static structural registry. See Inter-Protocol Guidance in `.claude/principles/architectural-principles.md`.
 
