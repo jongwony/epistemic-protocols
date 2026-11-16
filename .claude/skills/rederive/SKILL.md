@@ -42,7 +42,7 @@ Rederive(protocol) → start(c) → run(solution, c, arrivals), where c is the f
       solution:  recorded; the current contract is read against the solution
                  [nothing to change] the diagnosis is recorded; the run ends   [else] → sketch gate
       sketch:    recorded; the fork edits; the edit is rehearsed → the rehearsal gate
-      rehearsal: [the revision that stands was rehearsed]  recorded → the hand-off; the run ends
+      rehearsal: [no edit came after the last rehearsal]   recorded → the hand-off; the run ends
                  [an edit came after the last rehearsal]   rehearsed again; this gate again
   no further arrival: the run holds at the gate that stands; nothing is taken and nothing ends
 -/
@@ -160,10 +160,11 @@ axiom reading : (c : Context P) → Occ (readingCoord (P := P)) c
 /-- **Your work** before a gate is shown — the operations `before` lists for it, each as
     `grounding` describes it — each read and each delegated result returning as an evidence turn.
     A finding that applies a taken part is fixed inside this work; a fix to the edited contract
-    goes back through the fork, and is rehearsed again where `Edits` reads it as an edit. On a
-    return to a gate, only what the latest turn or finding moved is done again, from the earliest
-    work that part depends on; parts whose ground did not move stand, and work already carried
-    provisionally is not done twice. -/
+    goes back through the fork, and is rehearsed again only where `Edits` reads it as an edit;
+    what the `rehearse` entry of `grounding` asks before wording answers a mismatch of uptake is
+    owed either way. On a return to a gate, only what the latest turn or finding moved is done
+    again, from the earliest work that part depends on; parts whose ground did not move stand, and
+    work already carried provisionally is not done twice. -/
 axiom prepared : Gate → Context P → List (Evidence P)
 
 /-- **Your record** on the protocol chart of what the latest turn settled or ended: a decide for
@@ -190,11 +191,11 @@ axiom contractRead : Context P → List (Evidence P)
 axiom NothingToChange : Context P → Prop
 
 /-- **Your reading**: this turn reports a change to the Lean code of the contract under
-    re-derivation — what its block declares and Lean elaborates, string literals included — by the
-    fork, by a fix, or by anyone else on its branch. A change to the block's comments, to the
-    `SKILL.md` around the block, to what that loads when it runs, or to a surface that only
-    describes the contract is none; where this block says a revision was rehearsed, the revision
-    is that Lean code. -/
+    re-derivation — the text of its block outside comments, string literals being code — by the
+    fork, by a fix, or by anyone else on its branch, read from the change itself and not from how
+    the turn describes it. Any other change to the contract — its block's comments, doc comments
+    among them, the rest of its `SKILL.md`, what that loads when it runs — is none, and neither
+    is a change to a surface that only describes the contract. -/
 axiom Edits : Turn P → Prop
 
 /-- **Your reading**: this turn is the record of a rehearsal of the contract as it then stood. -/
@@ -207,10 +208,10 @@ axiom Rehearses : Turn P → Prop
     situations it meets. Until this holds the rehearsal takes another case. -/
 axiom Sufficient : Context P → Prop
 
-/-- The revision that stands was rehearsed: the context holds the record of a rehearsal judged
+/-- The Lean code that stands was rehearsed: the context holds the record of a rehearsal judged
     sufficient, with no edit after it. Before a taking at the rehearsal gate is acted on, whatever
-    changed in that contract since the rehearsal's record has joined the context as a turn, so
-    that this reads the revision that would be handed off. -/
+    changed in that contract since the rehearsal's record, an edit or not, has joined the context
+    as a turn, so that this is read on what would be handed off. -/
 def Rehearsed (c : Context P) : Prop :=
   ∃ i, ∃ h : i < c.length, Rehearses (c[i]'h) ∧ Sufficient (c.take (i + 1)) ∧
     ∀ j, ∀ hj : j < c.length, i < j → ¬ Edits (c[j]'hj)
@@ -218,8 +219,8 @@ def Rehearsed (c : Context P) : Prop :=
 /-- **Your record** of the rehearsal, a narrative case by case: at each choice point of the edited
     contract's procedure, what was chosen, what came of it, and whether the run went on or was
     blocked there and by what. A constructed case is marked as constructed. What only the person's
-    turn closes is named as not reached, with what reaching it needs. A change after the rehearsal
-    that `Edits` does not count is named as not rehearsed. -/
+    turn closes, and each change to the contract that `Edits` does not count and that came after
+    the cases were run, is named as not reached, with what reaching it needs. -/
 axiom narrative : Context P → List String
 
 /-- **Your work** past a gate that holds unanswered: under a grant to proceed, as far as its words
@@ -347,7 +348,7 @@ def start (respond : Gate → Context P → Response P) (session : Context P →
   run respond session next.1 next.2 as
 
 /-! ── CONVERGENCE ──
-handed off: the contributor's turn took the rehearsal result on a revision rehearsed since its last
+handed off: the contributor's turn took the rehearsal result on Lean code rehearsed since its last
 edit. no change: the diagnosis is recorded and relayed; nothing is edited. A run that only carried
 work past unanswered gates has converged on neither: it holds, and says which gates stand
 provisional.
