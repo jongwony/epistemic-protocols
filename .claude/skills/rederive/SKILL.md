@@ -160,10 +160,9 @@ axiom reading : (c : Context P) → Occ (readingCoord (P := P)) c
 /-- **Your work** before a gate is shown — the operations `before` lists for it, each as
     `grounding` describes it — each read and each delegated result returning as an evidence turn.
     A finding that applies a taken part is fixed inside this work; a fix to the edited contract
-    goes back through the fork, and one `Edits` counts is rehearsed again. On a return to a gate,
-    only what the latest turn or finding moved is done again, from the earliest work that part
-    depends on; parts whose ground did not move stand, and work already carried provisionally is
-    not done twice. -/
+    goes back through the fork and is rehearsed again. On a return to a gate, only what the latest
+    turn or finding moved is done again, from the earliest work that part depends on; parts whose
+    ground did not move stand, and work already carried provisionally is not done twice. -/
 axiom prepared : Gate → Context P → List (Evidence P)
 
 /-- **Your record** on the protocol chart of what the latest turn settled or ended: a decide for
@@ -191,10 +190,7 @@ axiom NothingToChange : Context P → Prop
 
 /-- **Your reading**: this turn reports a change to the contract under re-derivation — its
     `SKILL.md` or what that loads when it runs — by the fork, by a fix, or by anyone else on its
-    branch. A change to a surface that only describes the contract is none. Neither is one that
-    only removes text outside its block, or leaves a pointer to its carrier in its place, where
-    each obligation the text stated stays carried by a line that was already there: text repeating
-    the block or the harness, or narrating away from the taken solution. -/
+    branch. A change to a surface that only describes the contract is none. -/
 axiom Edits : Turn P → Prop
 
 /-- **Your reading**: this turn is the record of a rehearsal of the contract as it then stood. -/
@@ -204,7 +200,12 @@ axiom Rehearses : Turn P → Prop
     procedure is accounted for — rehearsed by a named case, or blocked, with what blocked it: the
     contract's own Constitution waiting on the person, or the harness refusing; any other cause is
     said in its own words — and the cases together let the contributor judge the contract in the
-    situations it meets. Until this holds the rehearsal takes another case. -/
+    situations it meets. Until this holds the rehearsal takes another case. After an edit, a case
+    rehearsed before it still accounts for its path where the edit changed nothing that case
+    turned on; where that accounts for every path, the rehearsal after the edit takes no new case:
+    its record is the reading of the edit against those cases — the edit named and, for each
+    obligation the text it changed or removed stated, the line that carries it, as the `sketch`
+    entry of `grounding` disposes one held elsewhere — and `narrative` carries it. -/
 axiom Sufficient : Context P → Prop
 
 /-- The revision that stands was rehearsed: the context holds the record of a rehearsal judged
@@ -218,8 +219,7 @@ def Rehearsed (c : Context P) : Prop :=
 /-- **Your record** of the rehearsal, a narrative case by case: at each choice point of the edited
     contract's procedure, what was chosen, what came of it, and whether the run went on or was
     blocked there and by what. A constructed case is marked as constructed. What only the person's
-    turn closes, and each removal after the rehearsal that `Edits` does not count, is named as not
-    reached, with what reaching it needs. -/
+    turn closes is named as not reached, with what reaching it needs. -/
 axiom narrative : Context P → List String
 
 /-- **Your work** past a gate that holds unanswered: under a grant to proceed, as far as its words
