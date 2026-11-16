@@ -19,26 +19,35 @@ variable {P : Type}
 
 instance {A : Type} {q : Coord P A} {c : Context P} : Nonempty (Occ q c) := ⟨.open_ none⟩
 
+/-- With no utterance, the run holds at the context it stands on. -/
 theorem silence (respond session : Context P → Response P) (c : Context P) :
     elicit respond session c [] = .holding c := by
   simp [elicit]
 
+/-- The run opens on its first surface: `start` is `elicit` on the context with that surface
+    appended. -/
 theorem start_surfaces_first (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) :
     start respond session c us = elicit respond session (c ++ [(respond c).val]) us := rfl
 
+/-- An utterance that does not bear on the run joins the context with the session's answer to it;
+    no surface of the run is drawn, and the recursion goes on. -/
 theorem unrelated_adds_no_gate (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
     elicit respond session c (u :: us) =
       elicit respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
   simp [elicit, h]
 
+/-- A bearing utterance at which the resolution reads as filled closes the run on the endpoint of
+    the fused context. -/
 theorem resolution_closes (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (hr : isFilled (resolution (fuse c u)) = true) :
     elicit respond session c (u :: us) = .resolved (endpoint (fuse c u)) := by
   simp [elicit, hre, hr]
 
+/-- A bearing utterance at which the resolution reads as open is answered with the next surface,
+    and the recursion goes on. -/
 theorem unresolved_surfaces_again (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (hr : isFilled (resolution (fuse c u)) = false) :
@@ -46,6 +55,8 @@ theorem unresolved_surfaces_again (respond session : Context P → Response P) (
       elicit respond session (fuse c u ++ [(respond (fuse c u)).val]) us := by
   simp [elicit, hre, hr]
 
+/-- One step of a run either goes on from some context, or the resolution read as filled at the
+    fused context and the run's outcome is the endpoint of that context. -/
 theorem each_step_continues_or_closes (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
     (h : elicit respond session c (u :: us) = o) :
@@ -58,6 +69,8 @@ theorem each_step_continues_or_closes (respond session : Context P → Response 
     · exact .inr ⟨by assumption, h.symm⟩
     · exact .inl ⟨_, h⟩
 
+/-- A run that ended resolved ended on the endpoint of a context at which the resolution read as
+    filled. -/
 theorem resolved_by_person_resolution (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : ResolvedEndpoint P)
     (h : elicit respond session c us = .resolved r) :
@@ -70,6 +83,7 @@ theorem resolved_by_person_resolution (respond session : Context P → Response 
     · cases h'
       exact ⟨_, hr, rfl⟩
 
+/-- A run that ended resolved ended on a context whose last turn is a person's utterance. -/
 theorem endpoint_ends_in_utterance (respond session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) (r : ResolvedEndpoint P)
     (h : elicit respond session c us = .resolved r) :
@@ -82,6 +96,21 @@ theorem endpoint_ends_in_utterance (respond session : Context P → Response P) 
     · cases h'
       exact ⟨c, u, rfl⟩
 
+/-- A run that ended resolved ended on the filled occurrence of the person's resolution: at the
+    context its endpoint was read at, `resolution` is filled, and the turn it cites was sent by the
+    person. -/
+theorem resolved_by_person (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : ResolvedEndpoint P)
+    (h : elicit respond session c us = .resolved r) :
+    ∃ (c₀ : Context P) (s : Cite c₀) (ok : (resolutionCoord (P := P)).admits s.src)
+      (sup : ResolutionSupported c₀ (c₀[s.idx]'s.lt) ()),
+      resolution c₀ = .filled () s ok sup ∧ (c₀[s.idx]'s.lt).origin = .person ∧
+        r = endpoint c₀ := by
+  obtain ⟨c₀, hf, hr⟩ := resolved_by_person_resolution respond session c us r h
+  cases ho : resolution c₀ with
+  | open_ _ => simp [ho, isFilled] at hf
+  | filled a s ok sup => exact ⟨c₀, s, ok, sup, ho, s.ok.trans ok, hr⟩
+
 private theorem mem_recordOf {c : Context P} {x : Entry} {o : Occ (standingCoord (P := P) x) c}
     {r : Recorded c} (h : r ∈ recordOf x o) : r.coord = x ∧ isFilled o = true := by
   cases o with
@@ -91,11 +120,25 @@ private theorem mem_recordOf {c : Context P} {x : Entry} {o : Occ (standingCoord
     subst h
     exact ⟨rfl, rfl⟩
 
-theorem recorded_by_person (c : Context P) :
-    ∀ r ∈ record c, r.src.src.val = .person ∧
-      StandingSupported r.coord c (c[r.src.idx]'r.src.lt) r.det :=
-  fun r _ => ⟨r.byPerson, r.supported⟩
+/-- A recorded value is the filled occurrence of its own coordinate: `operative` reads that
+    coordinate as filled with the recorded determination on the recorded citation, and the turn it
+    cites was sent by the person. -/
+theorem recorded_by_person (c : Context P) (r : Recorded c) (h : r ∈ record c) :
+    ∃ (ok : (standingCoord (P := P) r.coord).admits r.src.src)
+      (sup : StandingSupported r.coord c (c[r.src.idx]'r.src.lt) r.det),
+      operative c r.coord = .filled r.det r.src ok sup ∧
+        (c[r.src.idx]'r.src.lt).origin = .person := by
+  simp only [record, List.mem_flatMap] at h
+  obtain ⟨x, -, hr⟩ := h
+  cases ho : operative c x with
+  | open_ _ => simp [ho, recordOf] at hr
+  | filled d s allowed supported =>
+    simp only [ho, recordOf, List.mem_singleton] at hr
+    subst hr
+    exact ⟨allowed, supported, ho, s.ok.trans allowed⟩
 
+/-- Turns appended after a context, none of them a person's, are the source of no recorded value:
+    every citation of the record points into the earlier context. -/
 theorem suffix_without_person_is_no_source (c e : Context P) (he : ∀ t ∈ e, t.origin ≠ .person) :
     ∀ r ∈ record (c ++ e), r.src.idx < c.length := by
   intro r _
@@ -104,6 +147,7 @@ theorem suffix_without_person_is_no_source (c e : Context P) (he : ∀ t ∈ e, 
   rw [r.byPerson, List.getElem_append_right hle] at hok
   exact he _ (List.getElem_mem _) hok
 
+/-- A recorded value sits on a coordinate of the live inventory whose occurrence reads as filled. -/
 theorem recorded_is_filled (c : Context P) (r : Recorded c) (h : r ∈ record c) :
     r.coord ∈ coordinates c ∧ isFilled (operative c r.coord) = true := by
   simp only [record, List.mem_flatMap] at h
@@ -112,6 +156,7 @@ theorem recorded_is_filled (c : Context P) (r : Recorded c) (h : r ∈ record c)
   subst hc
   exact ⟨hx, hf⟩
 
+/-- A coordinate whose occurrence reads as open has no entry in the record. -/
 theorem open_not_recorded (c : Context P) (x : Entry) (ho : isFilled (operative c x) = false)
     (r : Recorded c) (h : r ∈ record c) : r.coord ≠ x := by
   intro hx
@@ -119,14 +164,9 @@ theorem open_not_recorded (c : Context P) (x : Entry) (ho : isFilled (operative 
   rw [hx, ho] at this
   cases this
 
+/-- A coordinate of the live inventory whose occurrence reads as open is in the residual. -/
 theorem open_in_residual (c : Context P) (x : Entry) (hx : x ∈ coordinates c)
     (ho : isFilled (operative c x) = false) : x ∈ residual c := by
   simp [residual, hx, ho]
-
-theorem stands_only_by_person {c : Context P} {x : Entry} {s : Cite c}
-    (ok : (standingCoord (P := P) x).admits s.src) : s.src.val = .person := ok
-
-theorem resolved_by_person {c : Context P} {s : Cite c}
-    (ok : (resolutionCoord (P := P)).admits s.src) : s.src.val = .person := ok
 
 end Euporia
