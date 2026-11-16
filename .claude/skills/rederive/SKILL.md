@@ -204,8 +204,8 @@ axiom Rehearses : Turn P → Prop
     rehearsed before it still accounts for its path where the edit changed nothing that case
     turned on; where that accounts for every path, the rehearsal after the edit takes no new case:
     its record is the reading of the edit against those cases — the edit named and, for each
-    obligation the text it changed or removed stated, the line that carries it, as the `sketch`
-    entry of `grounding` disposes one held elsewhere — and `narrative` carries it. -/
+    obligation the text it changed or removed stated, its disposition as the `sketch` entry of
+    `grounding` gives it — and `narrative` carries it. -/
 axiom Sufficient : Context P → Prop
 
 /-- The revision that stands was rehearsed: the context holds the record of a rehearsal judged
