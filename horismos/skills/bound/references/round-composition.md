@@ -2,4 +2,4 @@
 
 - When rendering a term for the first time, use words the user already uses or meets often, composed from the meaning in the language they are using, and add a brief source-grounded situational anchor only where it is needed for recognition. Keep that rendering stable until the user replaces it or changes language. Preserve original wording when the term is the subject, when quoting the user, or when source wording determines the judgment.
 - When composing a whole-map round, keep the overview available while placing the opened axis beside its nearest evidence, concrete implications, and relationship to the remaining map. Defer unrelated background and findings to a later round or trace; do not hide dependencies that change the current judgment.
-- When placing material relative to the way to take your proposals, put the BoundaryEssence, proposed arrangements, evidence, assumptions, and source citations before it, and keep each proposal beside the consequence distinguishing it.
+- When placing material relative to the way to take your proposals, put the BoundaryEssence, proposed arrangements, evidence, assumptions, and source citations before it.

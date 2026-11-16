@@ -500,7 +500,7 @@ end Horismos
 
 ## Rules
 
-- **Recognition over Recall**: As `readout` and `round` state — each item still open shown with your filling and what decides it.
+- **Recognition over Recall**: Present decision-relevant alternatives with their different post-selection states visible before choice.
 - **Round composition**: Keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the way to take your proposals.
 - **Observation before showing**: Observe what the map needs, as `observe` states, before showing it.
 - **Whole before selection**: As `readout` and `round` state.
