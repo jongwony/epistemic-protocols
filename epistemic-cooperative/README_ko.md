@@ -46,7 +46,7 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 주요 특징:
 - **학습보다 가치 증명 먼저**: quick path는 3분 이내에 가치를 체감 — 카탈로그 불필요
 - **Onboarding Pool**: `/elicit`, `/inquire` — Quick 추천 + Targeted 폴백 통합
-- 실제 프로토콜 시험 실행 (프로토콜당 2-3 교환)
+- 실제 프로토콜 시험 실행 (프로토콜당 2-3 교환. 라운드마다 결과를 돌려주는 프로토콜은 첫 반환에서 체험이 끝난다)
 - Targeted path는 전체 학습 경험 유지 (시나리오, 퀴즈, 가이드)
 
 ### /reduced-space-test — Scoped Empirical Validation
