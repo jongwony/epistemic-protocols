@@ -51,8 +51,8 @@ theorem bearing_returns_again (respond session : Context P → Response P) (c : 
         (endpoint (fuse c u) (fuse c u ++ [(respond (fuse c u)).val])) us := by
   simp [elicit, h]
 
-/-- A return carries the context it was read at, the record and the residual as read there, and
-    the dissent read at the context with the turn that shows it. -/
+/-- The endpoint built from `c` and `shown` carries `c` as its context, the record and the residual
+    as read at `c`, and the dissent read at the second context supplied. -/
 theorem endpoint_carries (c shown : Context P) :
     (endpoint c shown).context = c ∧ (endpoint c shown).record = record c ∧
       (endpoint c shown).residual = residual c ∧ (endpoint c shown).dissent = dissent shown :=
