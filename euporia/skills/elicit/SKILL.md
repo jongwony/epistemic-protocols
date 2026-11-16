@@ -335,7 +335,7 @@ Euporia surfaces the decision coordinates an intent turns on without adjudicatin
 
 ## Mode Activation
 
-`/elicit` remains directly invocable: the invocation declares the deficit the Definition's `aporia` names, and the first surface shows the intent as understood with its sources — the user may say at once that it is aligned enough. On the AI-guided path the first surface is a proposal the user confirms or declines; until the user confirms, the run has not started, and a decline leaves it unstarted. Skip AI-guided activation when the user explicitly asks to proceed without surfacing, or when a run on the same utterance already returned in this session, or the user declined a run on it.
+`/elicit` remains directly invocable: the invocation declares the deficit the Definition's `aporia` names, and the first surface shows the intent as understood with its sources — the user may say at once that it is aligned enough. On the AI-guided path the first surface is a proposal the user confirms or declines; until the user confirms, the run has not started, and a decline leaves it unstarted. Skip AI-guided activation when the user explicitly asks to proceed without surfacing, or when a run on the same utterance already returned in this session, or the user declined or ended a run on it.
 
 ## Protocol
 
