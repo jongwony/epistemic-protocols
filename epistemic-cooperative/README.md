@@ -46,7 +46,7 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 Key features:
 - **Value before learning**: quick path proves value in under 3 minutes — no catalog required
 - **Onboarding Pool**: `/elicit`, `/inquire` — unified for Quick and Targeted fallback
-- Real protocol trial execution (2-3 exchanges per protocol)
+- Real protocol trial execution (2-3 exchanges per protocol; a protocol whose rounds each return ends its trial at the first return)
 - Targeted path preserves full learning experience (scenarios, quizzes, guide)
 
 ### /reduced-space-test — Scoped Empirical Validation
