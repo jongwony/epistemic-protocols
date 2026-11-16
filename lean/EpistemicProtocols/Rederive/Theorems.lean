@@ -209,8 +209,8 @@ theorem taking_rehearsed_hands_off (respond : Gate → Context P → Response P)
         narrative (arrive (carry respond g c).2 a)⟩ := by
   simp [run, h, hg, hr]
 
-/-- Taking the rehearsal result where `Rehearsed` does not hold hands nothing off: the contract is
-    rehearsed again and a gate is shown again. -/
+/-- Taking the rehearsal result where `Rehearsed` does not hold hands nothing off: the work before
+    the rehearsal gate runs again and a gate is shown again. -/
 theorem taking_unrehearsed_rehearses_again (respond : Gate → Context P → Response P)
     (session : Context P → Response P) (g : Gate) (c : Context P) (a : Arrival P)
     (as : List (Arrival P)) (n : Nat) (hg : (carry respond g c).1 = .rehearsal)
