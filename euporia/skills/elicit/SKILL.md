@@ -37,7 +37,6 @@ IntentSeed
   → surface              -- the read-back and the open coordinates, with sources and contrary grounds (focus)
   → fuse(answer)         -- the answer joins the context whole
   → stand                -- a person's turn makes a value stand in the intent, under the record rule (`StandingSupported`)
-  → return ↺             -- every round returns the intent as it stands; none owes an answer
   → ResolvedEndpoint
 requires: aporia(I)
 deficit:  AbstractAporia                      -- activation precondition (Layer 1/2)
@@ -218,7 +217,7 @@ def residual (c : Context P) : List Entry :=
     it. -/
 axiom Reaches : Context P → Prop
 
-/-- **Your record**: the contrary grounds you presented before the person's turn and still hold —
+/-- **Your record**: the contrary grounds you presented and still hold —
     a value you doubt, a premise that may not hold, a sibling deficit you read — attached to the
     return; empty when there were none. -/
 axiom dissent : Context P → List String
@@ -250,7 +249,7 @@ Priority: explicit_arg > recent_intent_seed > surfaced_aporia
 -/
 
 /-! ── MODE STATE ──
-Λ is the fused context and nothing else; every reading above is taken from it. The recursion also
+Λ is the fused context; every reading above is taken from it. The recursion also
 carries the last return, which PHASE TRANSITIONS threads beside it.
 -/
 
