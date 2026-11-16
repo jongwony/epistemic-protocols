@@ -177,9 +177,9 @@ private theorem handedOff_cases (respond : Gate → Context P → Response P)
           exact ⟨_, _, rfl, hreh, hl⟩
         · exact ih _ _ _ hr
 
-/-- A hand-off is reached only on a revision that was rehearsed: at the turn that licensed it, the
-    context held the record of a rehearsal judged sufficient with no edit after it, through every
-    return path and whatever was carried provisionally before. -/
+/-- A hand-off is reached only where `Rehearsed` held: at the turn that licensed it, the context
+    held the record of a rehearsal judged sufficient with no turn `Edits` reads as an edit after
+    it, through every return path and whatever was carried provisionally before. -/
 theorem handed_off_after_rehearsal (respond : Gate → Context P → Response P)
     (session : Context P → Response P) (g : Gate) (c : Context P) (as : List (Arrival P))
     (h : HandOff P) (hr : run respond session g c as = .handedOff h) :
@@ -198,7 +198,7 @@ theorem handed_off_by_taking (respond : Gate → Context P → Response P)
   obtain ⟨c₀, a, h1, _, h3⟩ := handedOff_cases respond session as g c h hr
   exact ⟨c₀, a, h1, h3⟩
 
-/-- Taking the rehearsal result on a rehearsed revision hands off, on that turn. -/
+/-- Taking the rehearsal result where `Rehearsed` holds hands off, on that turn. -/
 theorem taking_rehearsed_hands_off (respond : Gate → Context P → Response P)
     (session : Context P → Response P) (g : Gate) (c : Context P) (a : Arrival P)
     (as : List (Arrival P)) (n : Nat) (hg : (carry respond g c).1 = .rehearsal)
@@ -209,8 +209,8 @@ theorem taking_rehearsed_hands_off (respond : Gate → Context P → Response P)
         narrative (arrive (carry respond g c).2 a)⟩ := by
   simp [run, h, hg, hr]
 
-/-- Taking the rehearsal result on a revision edited since its last sufficient rehearsal hands
-    nothing off: the revision is rehearsed again and a gate is shown again. -/
+/-- Taking the rehearsal result where `Rehearsed` does not hold hands nothing off: the work before
+    the rehearsal gate runs again and a gate is shown again. -/
 theorem taking_unrehearsed_rehearses_again (respond : Gate → Context P → Response P)
     (session : Context P → Response P) (g : Gate) (c : Context P) (a : Arrival P)
     (as : List (Arrival P)) (n : Nat) (hg : (carry respond g c).1 = .rehearsal)
@@ -222,8 +222,8 @@ theorem taking_unrehearsed_rehearses_again (respond : Gate → Context P → Res
         (shown respond .rehearsal (pass .rehearsal (arrive (carry respond g c).2 a))).2 as := by
   simp [run, h, hg, hr]
 
-/-- An edit unrehearses: once a turn that reports an edit, and is not itself a rehearsal record,
-    joins the context, the revision that stands is not rehearsed until a later rehearsal. -/
+/-- An edit unrehearses: once a turn `Edits` reads as an edit, and that is not itself a rehearsal
+    record, joins the context, `Rehearsed` does not hold of that context. -/
 theorem edit_unrehearses (c : Context P) (t : Turn P) (he : Edits t) (hn : ¬ Rehearses t) :
     ¬ Rehearsed (c ++ [t]) := by
   rintro ⟨i, hi, hreh, _, hno⟩
