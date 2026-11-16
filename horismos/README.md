@@ -4,7 +4,7 @@ See what a task treats as settled — on what ground and by whose judgment — w
 
 > [한국어](./README_ko.md)
 
-A request to delegate can precede both a fixed goal and knowledge of the decisions involved. `/bound` starts by drafting the relevant whole structure from the available context. It shows why a decision matters, what it depends on, which parts already have a source-defined answer and whose judgment settled them, and it fills in every part still open: with the AI's own choice where the user entrusted it, and otherwise with the AI's proposal, marked as such — also where its ground is thin, which the map then says.
+A request to delegate can precede both a fixed goal and knowledge of the decisions involved. `/bound` starts by drafting the relevant whole structure from the available context. It shows why a decision matters, what it depends on, which parts already have a source-defined answer and whose judgment settled them, and it fills in every part still open: with the AI's own choice where the user entrusted it, and otherwise with the AI's proposal, marked as such — also where its ground is thin, which the map then says. Beside a filling, the map shows the alternatives that bear on that decision, with what follows from each.
 
 ```mermaid
 flowchart LR

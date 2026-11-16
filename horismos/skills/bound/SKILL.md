@@ -493,7 +493,7 @@ end Horismos
 ## Protocol
 
 - In every round, keep the way to take your proposals recognizable in the user's language, as the `round` grounding entry names it.
-- When the user opens an axis, show the concrete content, assumptions, alternatives, and dependent consequences needed for that axis, and offer deeper examination or correction where it matters. Decision-rights detail and proposed-content detail can differ by axis; derive the depth from the response rather than a fixed menu of levels.
+- When the user opens an axis, show the concrete content, assumptions, and dependent consequences needed for that axis, and offer deeper examination or correction where it matters. Decision-rights detail and proposed-content detail can differ by axis; derive the depth from the response rather than a fixed menu of levels.
 - When the user opens who settles an item, materialize the `BoundaryClassification` forms in the user's idiom.
 - Keep excluded or conditional parts legible in the map where they matter to later reliance.
 - When composing a round whose terminology, quotation, neighboring material, or phase order needs attention, read `references/round-composition.md` before presenting it.
