@@ -37,8 +37,8 @@ judgment boundary, state transition, termination path, grounding, or invariant t
 and the remaining carriers do not represent. Keep and repair only those clauses whose obligations
 the re-derived path actually reaches. Content recoverable without loss from the written morphism
 and remaining carriers is redundant; remove it rather than synchronizing another copy. Where the
-removal changes the contract's Lean code — a declaration, not a comment — treat it as the ablation
-in `premise/instruction-authoring.md` §Subtraction at Revision Time: exercise the obligations in a
+removal changes the contract's formal block outside its comments, treat it as the ablation in
+`premise/instruction-authoring.md` §Subtraction at Revision Time: exercise the obligations in a
 bounded, recoverable trial and restore only what failed.
 
 **The carriers are already here.** Before an entry is added, ask which existing carrier holds
