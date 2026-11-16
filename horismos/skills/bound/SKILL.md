@@ -495,7 +495,7 @@ end Horismos
 - In every round, keep the way to take your proposals recognizable in the user's language, as the `round` grounding entry names it.
 - When the user opens an axis, show the concrete content, assumptions, alternatives, and dependent consequences needed for that axis, and offer deeper examination or correction where it matters. Decision-rights detail and proposed-content detail can differ by axis; derive the depth from the response rather than a fixed menu of levels.
 - When the user opens who settles an item, materialize the `BoundaryClassification` forms in the user's idiom.
-- When the user corrects an assumption, the scope, or the question the boundary answers, keep excluded or conditional parts legible in the map where they matter to later reliance.
+- Keep excluded or conditional parts legible in the map where they matter to later reliance.
 - When composing a round whose terminology, quotation, neighboring material, or phase order needs attention, read `references/round-composition.md` before presenting it.
 
 ## Rules
@@ -503,13 +503,13 @@ end Horismos
 - **Recognition over Recall**: As `readout` and `round` state — each item still open shown with your filling and what decides it.
 - **Round composition**: Keep each judgment beside its nearest evidence and next-move implication, and place analytical context before the way to take your proposals.
 - **Observation before showing**: Observe what the map needs, as `observe` states, before showing it.
-- **Whole before selection**: As `readout` and `round` state — the relevant whole map every round, read from a `TaskScope` whose goal and structure may remain open.
+- **Whole before selection**: As `readout` and `round` state.
 - **Progressive examination**: Let the user's response open, deepen, replace, or close axes of that whole.
 - **Dynamic rendering**: Keep boundary questions and examination dimensions runtime-grounded, with a path to extend or replace the framing.
 - **Source-bound settlement**: A disposition is made, and a proposal adopted, only as the MORPHISM invariant `proposal-and-settlement-separation` and `DispositionSupported` state.
 - **Entrustment reach**: How far an entrustment reaches is as `DispositionSupported` states.
 - **Dependency revision**: Reconcile changed ground and transitive dependents before the next return, retaining supported decisions and recording unresolved consequences.
 - **Prior-map provenance**: Read an earlier boundary through the turns it cites, as `Cite.lift` states; an unreachable or unsupported setting is advisory. An earlier decision relayed from a record is read as `ContentSupported` and `PriorDispositionSupported` state.
-- **After the return**: `dissent` states how your contrary grounds attach and that you never rewrite or veto one.
+- **After the return**: `dissent` states how your contrary grounds attach.
 - **Ambiguous response routing**: Where a response leaves materially different futures viable, present the readings that lead to them and their consequences; how a response is read, and that an unresolved reading commits nothing, are as `readAnswer` states.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change the form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
