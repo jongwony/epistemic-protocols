@@ -1,6 +1,6 @@
 # Co-Change Patterns
 
-Protocol modifications require synchronized edits across multiple files. Any protocol change requires `plugin.json` version bump + a static-check run (`node scripts/static-checks/static-checks.js .`).
+Protocol modifications require synchronized edits across multiple files.
 
 This table names co-change targets and the conditions that trigger them. Which of these couplings a static check actually guards is read from the verifier's layer files (`static-checks.js` names them) — a row here says what moves together, not that anything stops you from moving only part of it. [verification.md](verification.md) carries why the non-obvious checks exist and what to do when one fires.
 
@@ -10,7 +10,7 @@ This table names co-change targets and the conditions that trigger them. Which o
 | New tool usage | SKILL.md (PHASE TRANSITIONS + TOOL GROUNDING: an `Op` constructor and its `grounding` arm; a `dispatch` operation also named by the declaration that decides when it hands off) |
 | New loop option | SKILL.md (LOOP + terminal phase prose + Rules) |
 | Delegation change | SKILL.md (isolation section), CLAUDE.md (delegation constraint) |
-| Any protocol change | `plugin.json` version bump, then the static checks |
+| Any protocol change | `plugin.json` version bump, then the static checks (`node scripts/static-checks/static-checks.js .`) |
 | Dependent protocol interface wording in utility skills | Utility plugin `plugin.json` minor bump when onboard/reporting text now assumes a changed runtime interface in another protocol |
 | New plugin added | `marketplace.json` (plugins array), plugin directory with `plugin.json`, `.agents/plugins/marketplace.json` (Codex marketplace — consumed by `scripts/install-codex.sh`), `<plugin>/.codex-plugin/plugin.json` (Codex manifest mirror), `scripts/package.js` `CODEX_SUBMIT_PLUGINS` (explicit submission set + its length guard — decide inclusion or record the staging) |
 | New skill added to existing plugin | `SKILL.md`; `<plugin>/.claude-plugin/plugin.json` (version bump; description only when the plugin's routing cue changes); `<plugin>/.codex-plugin/plugin.json` (matching version in the same commit; `description`, `interface.shortDescription`, `interface.longDescription` only when the Codex routing cue changes); `marketplace.json` description only when the marketplace routing cue changes; `<plugin>/README.md` **and** `README_ko.md` skill table when the skill belongs on the plugin's public skill list — hand-maintained, no static guard, and the two language mirrors move together; the root `README.md` **and** `README_ko.md` utility inventories when the skill belongs on the repo's public utility list — same hand-maintained, no-static-guard, two-mirrors-together shape as the plugin tables, and neither table declares itself a subset, so an omission reads as the skill not existing; the new `SKILL.md` description under the "SKILL.md frontmatter description change" row's limits; `scripts/package.test.js` (expected release-ZIP list); `package.js` (`FIRST_RELEASE_HIGHLIGHTS` Utility Skills selection only when the new skill should appear in the curated fallback used when scoped changelog groups are unavailable; `PLUGINS` is derived from `discoverPlugins()`, no manual edit) |
