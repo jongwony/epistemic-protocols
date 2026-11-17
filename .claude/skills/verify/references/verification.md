@@ -49,7 +49,7 @@ Use these during protocol edits and reviews. Do not promote them to static failu
 - Canonical resolution names stay protocol-native; they should implement `DeficitResolved<D, R>` rather than be renamed to it.
 - Resolution definitions expose a completion trace: the terminal type should make the path from deficit through phase operations to resolution inspectable.
 - Residual unknowns are declared with disposition. Empty residuals must be explicitly declared; silent absence is not enough.
-- `ConstitutionSurface<T>` is a typed pre-gate surface before `Qc` or `Qs`, not a replacement for `Constitution`, `Extension`, `Qc`, or `Qs`.
+- `ConstitutionSurface<T>` (archived with the Qc/Qs gate shapes as #1129) is a typed pre-gate surface before `Qc` or `Qs`, not a replacement for `Constitution`, `Extension`, `Qc`, or `Qs`.
 - Pressure maps must be protocol-native and decision-relevant. Discovery pressure is limited to bounded residual unknowns that could materially change the next user judgment.
 - These checks compile invariants only: do not freeze horizon content, philosophical lens choice, or broad exploratory context into runtime/static requirements.
 
