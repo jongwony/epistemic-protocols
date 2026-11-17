@@ -2,7 +2,6 @@
 
 - When revisiting a guard, read `premise/instruction-authoring.md` §Actionable Revision Criterion and §Deletion by Default, Retention on Evidence. Apply the trial's evidence only within the readers and conditions exercised.
 - When a model changes, treat the change as a reason to re-evaluate relevant guards rather than as evidence of a predetermined trajectory.
-- When this criterion changes, search protocol `SKILL.md` Rules with `rg 'revisitable as|revision triggers' */skills/*/SKILL.md` and align any compiled restatements. A search with no matches establishes no current compiled consumer.
 
 ## Literature Application Discipline
 
