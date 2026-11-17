@@ -167,10 +167,10 @@ test("resolveSkillProtocol honours the plugin namespace", () => {
   assert.equal(resolveSkillProtocol("nosuchskill"), null);
   // An unbound utility command admits only the bare form: a namespaced call of
   // that name belongs to another plugin, on both paths.
-  assert.equal(resolveSkillProtocol("verify"), "verify");
-  assert.equal(resolveSkillProtocol("anything:verify"), null);
-  assert.equal(invokes("<command-name>/verify", "/verify", null), true);
-  assert.equal(invokes("<command-name>/anything:verify", "/verify", null), false);
+  assert.equal(resolveSkillProtocol("clarify"), "clarify");
+  assert.equal(resolveSkillProtocol("anything:clarify"), null);
+  assert.equal(invokes("<command-name>/clarify", "/clarify", null), true);
+  assert.equal(invokes("<command-name>/anything:clarify", "/clarify", null), false);
   assert.equal(invokes("<command-name>/unrelated:apportion", "/apportion", "merismos"), false);
 });
 

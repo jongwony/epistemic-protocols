@@ -787,7 +787,7 @@ function checkOnboardSync(ctx) {
 // the claude manifest leaves the codex manifest silently drifted — the
 // recurring "version bump missed codex-plugin" pattern. No other check parses
 // the codex manifest, so this check is its only parse/version guard. Fail-level on purpose: the
-// forcing function must block at the same /verify gate the claude bump passes
+// forcing function must block at the same static-check gate the claude bump passes
 // through, not surface after the fact in a separate remediation PR.
 function checkCodexManifestSync(ctx) {
   const { projectRoot, results, records } = ctx;
@@ -859,7 +859,7 @@ function checkCodexManifestSync(ctx) {
 // checklist categories — an edit to one surface silently drifts from the other
 // (a packaged agent paired with the skill contract it enforces, Issue #532). The
 // agent file's own Maintenance Note states the sync obligation; this check makes
-// it a forcing function at the /verify gate.
+// it a forcing function at the static-check gate.
 //
 // Design (generic, not pinned to any one plugin):
 //  - Opt-in by STRUCTURAL ANCHOR: an agent is contract-bearing iff its body

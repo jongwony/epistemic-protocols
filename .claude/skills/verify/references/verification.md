@@ -2,7 +2,7 @@
 
 ## Static Checks
 
-Run `/verify` before commits. Static checks via:
+Run the static checks before commits:
 
 ```bash
 node .claude/skills/verify/scripts/static-checks.js .
