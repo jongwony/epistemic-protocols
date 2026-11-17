@@ -7,8 +7,6 @@ Checklists for LLM-based expert review via Task subagents.
 ### Prompt Template
 
 ```
-You are a **Type Theory and Category Theory Expert**.
-
 Analyze the protocol definitions for mathematical soundness.
 
 **Files to examine**: the protocols changed in the current diff (fall back to a representative sample when the diff is not protocol-scoped), Definition section of each
@@ -52,8 +50,6 @@ Analyze the protocol definitions for mathematical soundness.
 ### Prompt Template
 
 ```
-You are an **Instruction Design Expert**.
-
 Analyze the protocol instructions for consistency and completeness.
 
 **Files to examine**: the protocols changed in the current diff (fall back to a representative sample when the diff is not protocol-scoped), Mode Activation and Priority sections of each, plus `premise/gate-design.md` (convergence persistence and priority override) and `premise/interaction-factorization.md`
@@ -101,8 +97,6 @@ Analyze the protocol instructions for consistency and completeness.
 ### Prompt Template
 
 ```
-You are a **Claude Code Ecosystem Expert**.
-
 Validate protocol designs against Claude Code interaction patterns and epistemic principles.
 
 **Files to examine**: the protocols changed in the current diff (fall back to a representative sample when the diff is not protocol-scoped), Mode Activation and Rules sections of each, plus CLAUDE.md (Northstar) and `premise/recognition-and-authority.md`
