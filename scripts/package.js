@@ -95,12 +95,7 @@ Every protocol carries a type signature \`(Deficit, Initiator, Action, Target) �
 
 ### Formal Verification
 
-Static checks validate protocol integrity before every commit. Run \`node .claude/skills/verify/scripts/static-checks.js .\`; the script itself is the current check inventory.
-
-### Utility Skills
-
-- \`/onboard\` — quest-based protocol learning (quick recommendation + targeted scenarios)
-- \`/probe\` — recognize what is stuck from grounded candidates for it (a shown candidate, your own words, or none shown)`;
+Static checks validate protocol integrity before every commit. Run \`node .claude/skills/verify/scripts/static-checks.js .\`; the script itself is the current check inventory.`;
 
 // The packaged ZIP ships each SKILL.md description as written; buildSkillArtifact
 // rejects one longer than this, and the fix is a shorter SKILL.md description.
@@ -128,7 +123,7 @@ const CODEX_SUBMIT_PLUGINS = Object.freeze([
   { dir: 'hypotyposis', skill: 'sketch' },
   { dir: 'merismos', skill: 'apportion' },
 ]);
-const CODEX_SUBMIT_EXCLUDED = new Set(['anamnesis', 'epistemic-cooperative']);
+const CODEX_SUBMIT_EXCLUDED = new Set(['anamnesis']);
 const CODEX_SUPPORT_DIRS = Object.freeze(['references', 'scripts', 'assets']);
 // Inline-code prefixes that are closure obligations in every profile, whatever the ZIP holds.
 const ARCHIVE_INLINE_PREFIXES = Object.freeze([...CODEX_SUPPORT_DIRS, 'agents']);

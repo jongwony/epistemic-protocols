@@ -31,17 +31,15 @@ Use the protocols to catch a wrong direction while planning, before it shapes la
 
 ### Claude Code
 
-Install every protocol, together with the [`route`](#route) and [`epistemic-cooperative`](#epistemic-cooperative) plugins:
+Install every protocol, together with the [`route`](#route) plugin:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
 ```
 
-`route` lets the agent invoke a suitable protocol from the conversation context, and find relevant collaboration principles when needed, so you do not have to know which protocol fits. It is still experimental: its wording and hook set can change between releases. `epistemic-cooperative` adds guided learning (`/onboard`), recognizing what is stuck from grounded candidates (`/probe`), and contributor tools. To leave either one out, run `claude plugin disable <name>@epistemic-protocols` after installing; without `route`, every protocol stays installed and callable by its own command.
+`route` lets the agent invoke a suitable protocol from the conversation context, and find relevant collaboration principles when needed, so you do not have to know which protocol fits. It is still experimental: its wording and hook set can change between releases. To leave it out, run `claude plugin disable route@epistemic-protocols` after installing; without `route`, every protocol stays installed and callable by its own command.
 
 You can also invoke a protocol yourself at the decision point you are at — for example `/inquire` before handing work to the AI, or `/bound` when you cannot yet see what a task needs you to decide.
-
-`/onboard` gives a quick recommendation from your recent sessions and can continue into guided learning with scenarios, trials, and quizzes.
 
 ### Codex
 
@@ -57,7 +55,7 @@ For local development from a checkout:
 codex plugin marketplace add /path/to/epistemic-protocols
 ```
 
-The Codex marketplace keeps the same plugin boundaries as Claude Code: each protocol is its own plugin, and `epistemic-cooperative` carries the utility skills. The marketplace lives at [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json); each plugin keeps its Codex manifest beside its Claude manifest at `<plugin>/.codex-plugin/plugin.json`.
+The Codex marketplace keeps the same plugin boundaries as Claude Code: each protocol is its own plugin. The marketplace lives at [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json); each plugin keeps its Codex manifest beside its Claude manifest at `<plugin>/.codex-plugin/plugin.json`.
 
 A protocol's checkpoint presents its decisions and what each answer changes; it does not by itself suspend execution, so on a non-interactive run such as `codex exec` the decisions can arrive after the work has started.
 
@@ -90,22 +88,6 @@ The protocols are not a fixed sequence or grouping: reach for the one whose defi
 ## Utilities
 
 For utility plugin installation in Claude Code, see [Quick Start](#claude-code).
-
-### [Epistemic Cooperative](./epistemic-cooperative)
-
-Skills that act at their own decision points — around the protocols, on the work itself, and on the prose that steers the agent.
-
-| Command | When to use |
-|---------|-------------|
-| **Finding the protocol** | |
-| `/onboard` | You want to find which protocols fit your work, or practise using them — whether new here or back after new protocols arrived or your workflow changed — get a recommendation from your recent sessions, or learn by scenario, trial, and quiz |
-| `/probe` | Something feels off and you cannot name what is stuck — you can then say what it is: a shown candidate, your own words, or none shown, having seen what each rests on and what rules it out |
-| **Shaping the work** | |
-| `/reduced-space-test` | A claim about behavior, performance, transfer, or value that reasoning alone cannot settle, where evidence from a stand-in for the real setting would — test it in a bounded space and carry the untested remainder forward explicitly |
-| `/gate-check` | Options for a reversible decision are about to be put to you and may not be genuinely different choices, or an answer to an earlier set settled nothing — an independent advisor checks whether the options form a real choice, and the grounds it cites are verified before the set reaches you |
-| **Auditing instruction prose** | |
-| `/white-bear` | Prose that names something the agent should not reach for — a forbidden act, a retired path, a rejected alternative — find the mentions that keep that wrong target in view without earning their place |
-| `/zero-shot` | Prose that anchors on examples where a principle would generalize — find and name those spots |
 
 ### [Route](./route)
 

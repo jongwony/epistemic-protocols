@@ -55,7 +55,7 @@ const CANONICAL_PROTOCOL_SET = [
 // with a ```lean fence enters the path by being listed here. Listing a skill
 // changes nothing else — it stays a utility to every other consumer of this
 // module.
-const LEAN_CONTRACT_UTILITIES = Object.freeze(['epistemic-cooperative/skills/probe']);
+const LEAN_CONTRACT_UTILITIES = Object.freeze([]);
 
 // Contributor skills whose contract is a Lean block, as skill directories
 // relative to the project root (`.claude/skills/<skill>`). A contributor skill
@@ -65,7 +65,7 @@ const LEAN_CONTRACT_UTILITIES = Object.freeze(['epistemic-cooperative/skills/pro
 // list and enrolls each entry under the rules a canonical protocol's block
 // meets: a `.claude/skills/*/SKILL.md` with a ```lean fence enters the path by
 // being listed here.
-const LEAN_CONTRACT_CONTRIBUTOR_SKILLS = Object.freeze(['.claude/skills/rederive']);
+const LEAN_CONTRACT_CONTRIBUTOR_SKILLS = Object.freeze(['.claude/skills/probe', '.claude/skills/rederive']);
 
 // Per-call memoization cache. discoverPlugins() instantiates a fresh cache
 // so callers within a single process pay one read per plugin.json regardless

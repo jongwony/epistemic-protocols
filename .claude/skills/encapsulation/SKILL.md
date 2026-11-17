@@ -6,7 +6,7 @@ allowed-tools: Read, Grep, Glob
 
 # Encapsulation Audit
 
-The project-local instance of the **semantic-audit engine** (`references/audit-engine.md`). The shared mechanism — read-only Claude-judge review, the scope shape, severity calibration, self-application stance, and on-demand slash invocation — is defined in that engine document; read it for the parts this skill holds in common with its published siblings. Below is this instance's principle parameter and the one place its output schema extends the engine's base.
+An instance of the **semantic-audit engine** (`references/audit-engine.md`). The shared mechanism — read-only Claude-judge review, the scope shape, severity calibration, self-application stance, and on-demand slash invocation — is defined in that engine document; read it for the parts this skill holds in common with its siblings `white-bear` and `zero-shot`. Below is this instance's principle parameter and the one place its output schema extends the engine's base.
 
 This instance audits LLM-facing prose for Plugin Encapsulation: the runtime contract surface (`SKILL.md` plus plugin description metadata) must be self-contained and intelligible without contributor documentation. Project-local — its principle is coupled to this repo's deterministic encapsulation check and contributor model, and so (unlike `white-bear` and `zero-shot`) it is not decouplable into a portable skill. Read-only: it emits structured findings and writes no fixes.
 
@@ -92,8 +92,8 @@ This SKILL.md sits in `.claude/skills/`, which is project-local contributor tool
 |---------|-----------|---------------------|
 | `verify` `artifact-self-containment` | Deterministic literal pattern matching against BANNED tokens | Banned reference tokens leaking into the runtime surface |
 | `encapsulation` | Claude-judge semantic review of runtime-surface prose | Contributor-knowledge assumption; BANNED-bypass rephrasing |
-| `white-bear` | Sibling semantic audit (published, portable) | Unnecessary competing-target mention drift |
-| `zero-shot` | Sibling semantic audit (published, portable) | Few-shot anchoring drift |
+| `white-bear` | Sibling semantic audit (project-local) | Unnecessary competing-target mention drift |
+| `zero-shot` | Sibling semantic audit (project-local) | Few-shot anchoring drift |
 
 The verify check and this audit are complementary on the encapsulation axis: deterministic pattern matching catches token leaks; semantic review catches meaning leaks that survive token absence.
 

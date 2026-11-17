@@ -46,11 +46,6 @@
       "description": "See what a task treats as settled — on what ground, by whose judgment — with every open item filled in as the AI's choice or marked proposal — /bound (ὁρισμός: a bounding)"
     },
     {
-      "name": "epistemic-cooperative",
-      "source": "./epistemic-cooperative",
-      "description": "Utility skills layered on top of the core protocols; each utility skill's own SKILL.md carries its contract."
-    },
-    {
       "name": "anamnesis",
       "source": "./anamnesis",
       "description": "Recognize the past you reached for — a session, line of work, topic, or concept — in a story on records you can reopen: it took place, not that it still holds — /recollect (ἀνάμνησις: a recollecting)"

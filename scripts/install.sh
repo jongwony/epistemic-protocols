@@ -1,6 +1,6 @@
 #!/bin/bash
 # Install every plugin in the epistemic-protocols marketplace for Claude Code:
-# the core protocols, route, and epistemic-cooperative. SKIP_PLUGINS below is
+# the core protocols and route. SKIP_PLUGINS below is
 # where a plugin would be left out of the default install.
 # Idempotent: a re-run adds new plugins and brings installed ones to the
 # marketplace's current version.
@@ -20,9 +20,7 @@ MANIFEST_URL="https://raw.githubusercontent.com/$REPO/main/.claude-plugin/market
 # Nothing is left out:
 #   route — its session-start purpose and protocol table let the agent
 #           reach a protocol without the user naming one.
-#   epistemic-cooperative — /onboard lets a new user try the protocols in a
-#           guided run, alongside /probe and review and audit tooling.
-# Leave either out after install with: claude plugin disable <name>@epistemic-protocols
+# Leave it out after install with: claude plugin disable route@epistemic-protocols
 SKIP_PLUGINS=""
 
 command -v claude >/dev/null 2>&1 || { echo "Error: claude CLI not found. Install Claude Code first." >&2; exit 1; }
@@ -70,4 +68,3 @@ for p in $opted_out; do
   echo "Not installed (opt-in): $p — add it with: claude plugin install $p@$MARKETPLACE"
 done
 echo "Get started by invoking a protocol, e.g. /inquire before you hand work to the AI."
-echo "For a guided start, run /onboard."

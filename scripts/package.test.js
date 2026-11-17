@@ -810,7 +810,7 @@ describe('codex-submit artifact profile', () => {
       CODEX_SUBMIT_PLUGINS
     );
     assert.ok(!first.results.some(result =>
-      ['anamnesis', 'epistemic-cooperative', 'bundle'].includes(result.plugin)
+      ['anamnesis', 'bundle'].includes(result.plugin)
     ));
     assert.ok(!first.results.some(result => /bundle|release-notes/.test(result.filename)));
     for (const artifact of first.results) {
@@ -893,10 +893,10 @@ describe('unified release artifact contract', () => {
     }
   });
 
-  it('retains utility sidecars in the release superset', () => {
+  it('retains the sidecars of a plugin the Codex submission excludes in the release superset', () => {
     const entriesFor = (dir, skill) => collectReleaseFiles({ dir, skill }).map(file => file.zipPath);
-    assert.ok(entriesFor('epistemic-cooperative', 'onboard')
-      .includes('onboard/references/scenarios.md'));
+    assert.ok(entriesFor('anamnesis', 'recollect')
+      .includes('recollect/references/claude.md'));
   });
 
   it('rebuilds every release ZIP and bundle deterministically with canonical SKILL.md casing', () => {
@@ -1126,20 +1126,14 @@ describe('package.js CLI', () => {
         'contextualize.zip',
         'elicit.zip',
         'epistemic-protocols-bundle.zip',
-        'gate-check.zip',
         'grasp.zip',
         'ground.zip',
         'ideate.zip',
         'induce.zip',
         'inquire.zip',
-        'onboard.zip',
         'preview.zip',
-        'probe.zip',
         'recollect.zip',
-        'reduced-space-test.zip',
         'sketch.zip',
-        'white-bear.zip',
-        'zero-shot.zip',
       ].sort(),
     );
     // Lower-bound invariant: baseline reflects the current plugin set at
@@ -1190,7 +1184,7 @@ describe('plugin directory registration', () => {
   // the removal direction (a registered name whose directory is gone) and is
   // blind to the addition direction. This guard reads the filesystem inventory
   // instead of the registry, so neither direction can hide behind the filter.
-  const KNOWN_UTILITY_DIRS = ['epistemic-cooperative', 'route'];
+  const KNOWN_UTILITY_DIRS = ['route'];
 
   it('every plugin directory on disk is registered as a protocol or a utility', () => {
     // Every directory with a plugin manifest, read off the disk rather than

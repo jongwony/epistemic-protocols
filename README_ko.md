@@ -31,17 +31,15 @@ AI 협업이 방향을 잘못 잡으면, 전부 다시 합니다. 이 프로토�
 
 ### Claude Code
 
-모든 프로토콜을 [`route`](#route), [`epistemic-cooperative`](#epistemic-cooperative) 플러그인과 함께 설치합니다:
+모든 프로토콜을 [`route`](#route) 플러그인과 함께 설치합니다:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
 ```
 
-`route`는 에이전트가 대화 맥락에 맞는 프로토콜을 호출하고 필요한 시점에 관련 협업 원칙을 찾도록 돕습니다. 그래서 어떤 프로토콜이 맞는지 몰라도 됩니다. 아직 실험 단계라 문구와 훅 구성이 릴리스마다 바뀔 수 있습니다. `epistemic-cooperative`는 가이드 학습(`/onboard`), 근거를 인용한 후보로 무엇이 막혀 있는지 알아보기(`/probe`), 컨트리뷰터 도구를 제공합니다. 둘 중 하나를 빼고 싶다면 설치 뒤 `claude plugin disable <name>@epistemic-protocols`를 실행하세요. `route`가 없어도 모든 프로토콜은 설치된 채로 각자의 명령으로 호출할 수 있습니다.
+`route`는 에이전트가 대화 맥락에 맞는 프로토콜을 호출하고 필요한 시점에 관련 협업 원칙을 찾도록 돕습니다. 그래서 어떤 프로토콜이 맞는지 몰라도 됩니다. 아직 실험 단계라 문구와 훅 구성이 릴리스마다 바뀔 수 있습니다. 빼고 싶다면 설치 뒤 `claude plugin disable route@epistemic-protocols`를 실행하세요. `route`가 없어도 모든 프로토콜은 설치된 채로 각자의 명령으로 호출할 수 있습니다.
 
 지금 서 있는 결정 지점에서 프로토콜을 직접 호출할 수도 있습니다 — 예를 들어 AI에게 작업을 넘기기 전에 `/inquire`, 작업에서 무엇을 결정해야 할지 아직 보이지 않을 때 `/bound`.
-
-`/onboard`가 최근 세션 기반으로 빠른 추천을 주고, 원하면 시나리오·실행·퀴즈를 통한 가이드 학습으로 이어갑니다.
 
 ### Codex
 
@@ -57,7 +55,7 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 codex plugin marketplace add /path/to/epistemic-protocols
 ```
 
-Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니다: 각 프로토콜은 독립 플러그인이고, `epistemic-cooperative`가 유틸리티 스킬을 담습니다. marketplace는 [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json)에 있고, 각 플러그인은 Claude manifest 옆에 Codex manifest를 `<plugin>/.codex-plugin/plugin.json`으로 둡니다.
+Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니다: 각 프로토콜은 독립 플러그인입니다. marketplace는 [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json)에 있고, 각 플러그인은 Claude manifest 옆에 Codex manifest를 `<plugin>/.codex-plugin/plugin.json`으로 둡니다.
 
 프로토콜의 체크포인트는 결정과 각 답이 바꾸는 것을 제시할 뿐 실행을 스스로 멈추지는 않습니다. 그래서 `codex exec` 같은 비대화형 실행에서는 결정이 작업이 시작된 뒤에 도착할 수 있습니다.
 
@@ -90,22 +88,6 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 ## 유틸리티
 
 Claude Code용 유틸리티 플러그인 설치 방법은 [빠른 시작](#claude-code)을 참고하세요.
-
-### [Epistemic Cooperative](./epistemic-cooperative)
-
-각자의 결정 지점에서 작동하는 스킬들 — 프로토콜 주변에서, 작업 자체에서, 그리고 에이전트를 움직이는 산문 위에서.
-
-| 명령어 | 사용 시점 |
-|--------|----------|
-| **프로토콜 찾기** | |
-| `/onboard` | 내 작업에 맞는 프로토콜을 찾거나 써 보며 익히고 싶을 때 — 처음 왔든, 새 프로토콜이 생겼거나 작업 방식이 바뀌어 다시 보든 — 최근 세션에서 추천을 받거나, 시나리오·실행·퀴즈로 학습 |
-| `/probe` | 뭔가 어긋났는데 무엇이 막혀 있는지 이름 붙일 수 없을 때 — 각 후보가 무엇에 기대고 무엇이 그것을 배제하는지 본 뒤, 무엇이 막혀 있는지 말할 수 있다: 보인 후보 하나, 당신의 말, 또는 보인 것 가운데 없음 |
-| **작업 빚기** | |
-| `/reduced-space-test` | 동작·성능·전이·가치에 관한 주장을 추론만으로는 판단할 수 없고, 실제 환경을 대신하는 공간의 증거가 필요할 때 — 범위를 정한 공간 안에서 검증하고 검증 안 된 나머지를 명시적으로 이월 |
-| `/gate-check` | 되돌릴 수 있는 결정의 선택지가 당신에게 제시되기 직전인데 정말 서로 다른 선택인지 분명하지 않을 때, 또는 앞선 선택지에 한 답이 아무것도 정하지 못했을 때 — 독립된 조언자가 선택지가 정말 고를 만한 선택인지 판정하고, 그 근거를 먼저 검증한 뒤에 당신에게 옵니다 |
-| **지시문 산문 감사** | |
-| `/white-bear` | 에이전트가 손대지 말아야 할 것(금지된 행동, 폐기된 경로, 배제한 대안)을 언급하는 산문 — 제 몫을 하지 않으면서 잘못된 대상을 계속 시야에 두는 언급을 찾기 |
-| `/zero-shot` | 원칙이면 일반화될 자리에 예시로 앵커링한 산문 — 그 자리를 찾아 명명 |
 
 ### [Route](./route)
 
