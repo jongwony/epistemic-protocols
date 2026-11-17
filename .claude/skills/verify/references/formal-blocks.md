@@ -1,6 +1,6 @@
 # Formal Block Anatomy
 
-The anatomy of a protocol's `Definition` block and the conventions for editing one. The blocks themselves are runtime-normative contract (`AGENTS.md` §Runtime Contract); this reference describes them for whoever edits a block, and the `lean-definition` check in [verification.md](verification.md) enforces the Lean form.
+The anatomy of a protocol's `Definition` block and the conventions for editing one. The blocks themselves are runtime-normative contract (`AGENTS.md` §Runtime Contract); this reference describes them for whoever edits a block. [verification.md](verification.md) carries why the `lean-definition` check exists.
 
 ## SKILL.md Formal Block Anatomy
 
