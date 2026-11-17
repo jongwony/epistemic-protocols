@@ -5,7 +5,7 @@
 # Activated automatically via `npm install` (husky prepare script).
 set -euo pipefail
 
-re='^[^./][^/]*/skills/.+/SKILL\.md$|^.+/skills/.+/references/|^.+/\.claude-plugin/plugin\.json$|^\.claude/skills/verify/|^scripts/package(\.test)?\.js$|^scripts/load-protocols\.js$|^\.husky/pre-commit$'
+re='^[^./][^/]*/skills/.+/SKILL\.md$|^.+/skills/.+/references/|^.+/\.claude-plugin/plugin\.json$|^scripts/static-checks/|^scripts/package(\.test)?\.js$|^scripts/load-protocols\.js$|^\.husky/pre-commit$'
 
 staged=$(git diff --cached --name-only --diff-filter=ACMR)
 if [ -z "$staged" ] || ! printf '%s\n' "$staged" | grep -qE "$re"; then
@@ -16,6 +16,6 @@ cd "$(git rev-parse --show-toplevel)"
 echo "→ runtime-contract: tests"
 node --test scripts/package.test.js
 echo "→ runtime-contract: static checks"
-node .claude/skills/verify/scripts/static-checks.js .
+node scripts/static-checks/static-checks.js .
 echo "→ runtime-contract: packaging dry-run"
 node scripts/package.js --dry-run

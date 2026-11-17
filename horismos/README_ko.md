@@ -40,9 +40,9 @@ claude plugin install horismos@epistemic-protocols
 - [저장소 검증 지침](../AGENTS.md#verification)에 기여자용 작업 흐름이 있습니다. 이 플러그인의 Lean 계약 검사, 정적 검사, 패키징 검증은 저장소 루트에서 다음 명령을 순서대로 실행합니다.
 
 ```bash
-node .claude/skills/verify/scripts/lean-contract.js check .
-node .claude/skills/verify/scripts/static-checks.js .
-node --test .claude/skills/verify/scripts/static-checks.test.mjs
+node scripts/static-checks/lean-contract.js check .
+node scripts/static-checks/static-checks.js .
+node --test scripts/static-checks/static-checks.test.mjs
 node --test scripts/package.test.js
 ```
 

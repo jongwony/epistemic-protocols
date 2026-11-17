@@ -19,8 +19,8 @@
  * One driver runs the whole path, locally, in the static checks, and in CI:
  *   generate → `lake build --wfail` → `lake lint` (prints `AUDIT {json}`).
  *
- * Run: node .claude/skills/verify/scripts/lean-contract.js generate [root]
- *      node .claude/skills/verify/scripts/lean-contract.js check [root]
+ * Run: node scripts/static-checks/lean-contract.js generate [root]
+ *      node scripts/static-checks/lean-contract.js check [root]
  */
 
 const fs = require('fs');

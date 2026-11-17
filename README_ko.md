@@ -101,7 +101,7 @@ Claude Code용 유틸리티 플러그인 설치 방법은 [빠른 시작](#claud
 
 - **Lean 증명** — 프로토콜의 계약은 `SKILL.md` 안에 Lean 모델로도 적혀 있습니다. Lean은 그 모델에 대해 적힌 성질이 모델이 선언한 가정 아래에서 성립하는지 확인합니다. 모델이 열어 둔 판단은 그 가정에 속하며, 증명되는 대상이 아닙니다. 프로토콜의 [`lean/EpistemicProtocols/<Protocol>/Theorems.lean`](./lean/EpistemicProtocols)에 그 모델에 대해 적고 증명한 성질이 있습니다.
 - **런타임 증거** — 컨트리뷰터 스킬 [`/realize`](./.claude/skills/realize/SKILL.md)는 프로토콜을 실제 세션에서 실행해, 선언된 단계가 실제로 일어나는지에 대한 증거를 자동 검사와 대화 기록 검토로 모읍니다.
-- **정적 검사** — [`static-checks.js`](./.claude/skills/verify/scripts/static-checks.js)는 파일의 구조를 확인합니다: 필요한 섹션, 이름과 참조의 일관성, 버전 일치.
+- **정적 검사** — [`static-checks.js`](./scripts/static-checks/static-checks.js)는 파일의 구조를 확인합니다: 필요한 섹션, 이름과 참조의 일관성, 버전 일치.
 
 이 가운데 어느 것도 프로토콜을 쓴 뒤에 일어나는 일, 예를 들어 재작업이 줄었는지는 재지 않으며, 일부러 그렇게 둡니다. 프로토콜이 얼마나 도움이 되는지는 사람마다 아직 모르는 것이 무엇인지와, 계속 좋아지는 모델에 따라 달라지기 때문입니다. 실행 한 번이 보여 줄 수 있는 것은 처음부터 적혀 있어서가 아니라 AI가 묻거나 제시해서 대화에 들어온 결정이 무엇인지입니다. 컨트리뷰터 스킬 [`/outcome`](./.claude/skills/outcome/SKILL.md)은 같은 요청을 프로토콜 없이, 그리고 있이 실행해 그 결정들을 나온 구절과 함께 나열합니다.
 

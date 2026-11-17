@@ -4,4 +4,4 @@
 
 **Boundary.** These are contributor surfaces, never runtime dependencies: a packaged `SKILL.md` makes sense without them, and a user of the protocols does not need them.
 
-**Next.** The reference for the task at hand: `intent-record.md` for the record a branch or pull request carries, `mission-bridge.md` before changing how the project describes itself in public, `structural-specs.md` for the anatomy of a protocol's formal blocks.
+**Next.** The reference for the task at hand: `intent-record.md` for the record a branch or pull request carries, `mission-bridge.md` before changing how the project describes itself in public, `structural-specs.md` for the anatomy of a protocol's formal blocks, `co-change.md` for the files a change must move together, `verification.md` for why the non-obvious static checks exist and what to do when one fires.

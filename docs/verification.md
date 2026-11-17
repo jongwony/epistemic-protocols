@@ -5,7 +5,7 @@
 Run the static checks before commits:
 
 ```bash
-node .claude/skills/verify/scripts/static-checks.js .
+node scripts/static-checks/static-checks.js .
 ```
 
 **The scripts are the check inventory.** `static-checks.js` names the layer files it runs, and each layer file's `CHECKS` list is what runs; what each check does, which files it walks, and what it treats as fail versus warn are read from those files themselves. A prose inventory here would be a hand-maintained copy with nothing re-running it: correct on the day it was written, then quietly asserting an earlier reading of a file that has since moved — and a reader who trusts it stops at a contradiction the script never raised.
@@ -30,7 +30,7 @@ When a check fires, the fix is usually one of these:
 |---|---|
 | `codex-manifest-sync` | Bump the Codex manifest to the Claude version in the same commit |
 | `framing-readout-enforcement` | Delete the progress-bar glyph from the protocol `SKILL.md` |
-| `lean-definition` | Restore a shared section — GROUND, or the vocabulary opening TOOL GROUNDING — to its canonical module's text, and change the canonical module when the vocabulary itself changes; annotate `.converge` as an interaction; drop a realization restated at the head of a description; wire a `dispatch` operation into the declaration that decides when it hands off; prove or remove the `sorry`; give an axiom judgment in the block a doc comment saying what is judged, and a `Nonempty` instance for its type in the Theorems module that uses no judgment's value; restate any other `axiom` as a judgment or a parameter; move an in-block proof or a doc-comment statement to `lean/EpistemicProtocols/<Namespace>/Theorems.lean` as a theorem stated and proved together; make a public theorem there say something about the contract, or make it `private`; fix the error the message quotes (`node .claude/skills/verify/scripts/lean-contract.js check .` runs generate, `lake build --wfail`, and `lake lint`; `lake test` runs the audit's own fixtures) |
+| `lean-definition` | Restore a shared section — GROUND, or the vocabulary opening TOOL GROUNDING — to its canonical module's text, and change the canonical module when the vocabulary itself changes; annotate `.converge` as an interaction; drop a realization restated at the head of a description; wire a `dispatch` operation into the declaration that decides when it hands off; prove or remove the `sorry`; give an axiom judgment in the block a doc comment saying what is judged, and a `Nonempty` instance for its type in the Theorems module that uses no judgment's value; restate any other `axiom` as a judgment or a parameter; move an in-block proof or a doc-comment statement to `lean/EpistemicProtocols/<Namespace>/Theorems.lean` as a theorem stated and proved together; make a public theorem there say something about the contract, or make it `private`; fix the error the message quotes (`node scripts/static-checks/lean-contract.js check .` runs generate, `lake build --wfail`, and `lake lint`; `lake test` runs the audit's own fixtures) |
 | `packaged-agent-contract-sync` | Sync the drifted surface — agent or `SKILL.md` — named in the message |
 | `version-staleness` | Bump the named plugin's `.claude-plugin/plugin.json` above its version at the base the message names, and its `.codex-plugin/plugin.json` to match; with no base (a shallow CI checkout), fetch full history |
 | `routing-index-contract` | Restore the Protocol Index routing pointers (`route/README.md`, `SKILL.md`, `README`), or remove the reintroduced inline catalog |

@@ -54,7 +54,7 @@ Two layers governed by different rules:
 1. **Read** `## Rules` section of target SKILL.md
 2. **Classify** each rule by tier (1-6) using the Source column
 3. **Apply** the tier-specific Action
-4. **Verify** via `node .claude/skills/verify/scripts/static-checks.js .` (compression preserves semantics — fail 0 expected)
+4. **Verify** via `node scripts/static-checks/static-checks.js .` (compression preserves semantics — fail 0 expected)
 5. **PR** with classification table + before/after rule count
 
 ### Empirical grounding

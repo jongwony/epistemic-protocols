@@ -531,7 +531,7 @@ function checkCrossRefScan(ctx) {
     // be published.
     //
     // IMPORTANT: path.resolve (not path.join) is load-bearing here. When invoked
-    // as `node .claude/skills/verify/scripts/static-checks.js .`, projectRoot is
+    // as `node scripts/static-checks/static-checks.js .`, projectRoot is
     // the relative string ".". path.join(".", "scripts", "package.js") yields
     // "scripts/package.js", which require() treats as a MODULE IDENTIFIER (not a
     // file path) and resolves against node_modules → Cannot find module. The

@@ -49,7 +49,7 @@ without any static check noticing. Reach for it also when adopting a new model, 
 the question is whether the contract still holds on it.
 
 Do not reach for it to check that a file is well-formed. That is the static checks
-(`node .claude/skills/verify/scripts/static-checks.js .`), which are free and run on every commit.
+(`node scripts/static-checks/static-checks.js .`), which are free and run on every commit.
 
 ## Workflow
 

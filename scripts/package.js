@@ -95,7 +95,7 @@ Every protocol carries a type signature \`(Deficit, Initiator, Action, Target) â
 
 ### Formal Verification
 
-Static checks validate protocol integrity before every commit. Run \`node .claude/skills/verify/scripts/static-checks.js .\`; the script itself is the current check inventory.`;
+Static checks validate protocol integrity before every commit. Run \`node scripts/static-checks/static-checks.js .\`; the script itself is the current check inventory.`;
 
 // The packaged ZIP ships each SKILL.md description as written; buildSkillArtifact
 // rejects one longer than this, and the fix is a shorter SKILL.md description.
