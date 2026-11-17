@@ -4,4 +4,4 @@
 
 **Boundary.** These are contributor surfaces, never runtime dependencies: a packaged `SKILL.md` makes sense without them, and a user of the protocols does not need them.
 
-**Next.** The reference for the task at hand: `intent-record.md` for the record a branch or pull request carries, `mission-bridge.md` before changing how the project describes itself in public. The anatomy of a protocol's formal blocks is `.claude/skills/verify/references/formal-blocks.md`.
+**Next.** `intent-record.md` for the record a branch or pull request carries.

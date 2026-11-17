@@ -36,7 +36,7 @@ Citable registry of conventions whose resolution direction is already constitute
 
 ## Protocol Index
 
-This section indexes the protocol catalog rather than mirroring it: it points to where each protocol fact lives so a running conversation can fetch it on demand. (The rest of this file still explains the repo's machinery and holds the maintainer-facing umbrella statement, per `docs/mission-bridge.md`.)
+This section indexes the protocol catalog rather than mirroring it: it points to where each protocol fact lives so a running conversation can fetch it on demand. (The rest of this file still explains the repo's machinery and holds the maintainer-facing umbrella statement, per the Mission/vision wording change row of `.claude/skills/verify/references/co-change.md`.)
 
 This repository packages epistemic dialogue protocols as plugin skills; each transforms a specific interaction deficit into a resolution object (e.g. **ContextInsufficient → SufficientContext** via `/inquire`).
 

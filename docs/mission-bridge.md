@@ -8,16 +8,6 @@ The maintainer-facing source of truth is the **Northstar** section of [CLAUDE.md
 
 That statement is intentionally broader than the README hook. It is the canonical umbrella for repo-level mission and vision edits within maintainer/contributor documentation. It is not a runtime or user-facing canonical contract.
 
-## Public Contract
-
-Public-facing docs use a distilled version of that umbrella:
-
-- Lead with the easiest entry story: catching wrong directions early, especially at the plan level
-- Make clear that the same checkpoint discipline also covers execution, verification, recall, and comprehension
-- Remain self-sufficient: a reader should not need contributor docs to understand what the project is for
-
-The README remains the source of truth for the Codex-supported distribution surfaces. It is not the canonical source for the full machinery description.
-
 ## Runtime Boundary
 
 Actual protocol users should not need mission/vision wording to use the system correctly.
@@ -38,20 +28,3 @@ If a user would need to read mission/vision docs to understand how to invoke or 
 | `CLAUDE.md` | Contributors and coding agents | Hold the maintainer-facing canonical umbrella statement and explain the repo's machinery |
 
 This is a layered core, not a dual mission. The wording changes by audience; the umbrella stays the same.
-
-## Protocol Coverage
-
-For current protocol coverage, consult the [protocol table in README.md](../README.md#protocols). When editing public wording, preserve the early-correction entry story and make room for execution, verification, recall, and comprehension.
-
-## Editing Rule
-
-When mission or vision wording changes:
-
-1. Update the canonical umbrella statement in `CLAUDE.md`
-2. Update this bridge document's public contract and runtime boundary if needed
-3. Update README and the marketplace description (`.claude-plugin/marketplace.json`) as audience-specific derivations
-4. Verify that no `SKILL.md` or plugin description now depends on mission/vision documents for correct use
-
-A derivation can move first. When a derivation narrows or withdraws a claim the umbrella makes — a README scope statement, a skill's stated measure, a metadata description — revise the umbrella in the same change, or state there why the claim still stands.
-
-If a change makes README depend on CLAUDE to be understandable, the bridge has failed and the public contract needs revision. If a change makes runtime users depend on mission/vision documents, the boundary has failed.
