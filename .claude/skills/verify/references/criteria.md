@@ -10,7 +10,7 @@ No list here says what a particular check enforces. A check's predicate, its inp
 
 A protocol's contract structure — what its Definition block declares and what follows from it — is Lean's to check. The block must elaborate standalone and inside the package, its guarantees are stated and proved in its `Theorems.lean`, and the checked-in audit enforces the declaration policy over the elaborated environment. A verdict here is about what the block says: elaboration shows a declaration is well typed and a match total, not that the declaration carries the obligation the prose around it names. That correspondence is review's.
 
-The bridge that hands the block to Lean is text, and lives in `lean-bridge.js`: extracting the block from Markdown, enrolling every canonical protocol's block as a contract module, keeping each section every block shares identical to its canonical module, the preflight that runs before any build, and reading the build's and the audit's verdicts. The bridge fails closed: a canonical protocol with no block, or with a block Lean never sees, is a failure rather than one fewer thing checked, and with no toolchain reachable the verdict is reported as not obtained, never as passed.
+The bridge that hands the block to Lean is text, and lives in `lean-bridge.js`: extracting the block from Markdown, enrolling the blocks the registry names as contract modules, keeping each section every block shares identical to its canonical module, the preflight that runs before any build, and reading the build's and the audit's verdicts. The bridge fails closed: a block the registry names that is missing, or that Lean never sees, is a failure rather than one fewer thing checked, and with no toolchain reachable the verdict is reported as not obtained, never as passed.
 
 ### Repository artifacts
 
@@ -18,7 +18,7 @@ The bridge that hands the block to Lean is text, and lives in `lean-bridge.js`: 
 
 ### Prose surface
 
-`prose-surface.js` holds lexical obligations on Markdown and on the packaged runtime view: notation, directive verbs, language, retired vocabulary, runtime self-containment, and the literal presence of compiled-copy rules. Each holds only the literal obligation it names. Whether a restatement still agrees with its source, or whether the prose says the right thing, is review's.
+`prose-surface.js` holds lexical obligations on Markdown and on the packaged runtime view. Each holds only the literal obligation it names. Whether a restatement still agrees with its source, or whether the prose says the right thing, is review's.
 
 ### Review and `/realize`
 
