@@ -46,7 +46,7 @@ static-check test takes its own invocation.
 
 Use these during protocol edits and reviews. Do not promote them to static failure until a pilot protocol shows the criterion is stable with low false positives.
 
-- Canonical resolution names stay protocol-native; they should implement `DeficitResolved<D, R>` rather than be renamed to it.
+- Canonical resolution names stay protocol-native; they should implement `DeficitResolved<D, R>` ([formal-blocks.md](formal-blocks.md) §Resolution Meta-Contract) rather than be renamed to it.
 - Resolution definitions expose a completion trace: the terminal type should make the path from deficit through phase operations to resolution inspectable.
 - Residual unknowns are declared with disposition. Empty residuals must be explicitly declared; silent absence is not enough.
 - `ConstitutionSurface<T>` (archived with the Qc/Qs gate shapes as #1129) is a typed pre-gate surface before `Qc` or `Qs`, not a replacement for `Constitution`, `Extension`, `Qc`, or `Qs`.
