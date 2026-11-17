@@ -18,11 +18,11 @@ Contributors are expected to dogfood the protocols they edit — §Protocols to 
 - [ ] **Claude Code** installed with this repo added via `/add-dir`
 - [ ] **`/onboard`** is a project skill at `.claude/skills/onboard/`, available when Claude Code runs in this checkout
 - [ ] Understand that plugin code uses only the **Node.js standard library** — no runtime dependencies
-- [ ] **Lean verification** — For local verification of Definition blocks written in Lean 4, install the toolchain pinned in `lean-toolchain` and make both `lean` and `lake` available. `/verify` checks these blocks and their proofs when the tools are reachable; otherwise it warns that Lean verification was skipped. CI requires these checks to pass. See [Lean Notation](docs/structural-specs.md#lean-notation).
+- [ ] **Lean verification** — For local verification of Definition blocks written in Lean 4, install the toolchain pinned in `lean-toolchain` and make both `lean` and `lake` available. The static checks cover these blocks and their proofs when the tools are reachable; otherwise they warn that Lean verification was skipped. CI requires these checks to pass. See [Lean Notation](docs/structural-specs.md#lean-notation).
 
 ### Repository
 - [ ] Clone `https://github.com/jongwony/epistemic-protocols`
-- [ ] Run `node .claude/skills/verify/scripts/static-checks.js .` to confirm your environment passes
+- [ ] Run `node scripts/static-checks/static-checks.js .` to confirm your environment passes
 - [ ] Run `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs` to confirm the tests pass
 
 ### Core Docs to Read (in order)
@@ -34,11 +34,10 @@ Contributors are expected to dogfood the protocols they edit — §Protocols to 
 - [ ] `.claude/principles/safeguards.md` — Safeguard-tier principles (LESS important as models improve); demoted from `.claude/rules/` (authoring/verify-time, not per-turn) (~5 min)
 - [ ] `.claude/principles/AGENTS.md` — demotion zone overview, index of current principle files
 - [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
-- [ ] `.claude/skills/verify/references/verification.md` — why the non-obvious checks exist and what to do when one fires (the check inventory itself is `static-checks.js`)
-- [ ] `.claude/skills/verify/references/co-change.md` — ripple patterns (protocol change → plugin.json version bump → /verify)
+- [ ] `docs/verification.md` — why the non-obvious checks exist and what to do when one fires (the check inventory itself is `static-checks.js`)
+- [ ] `docs/co-change.md` — ripple patterns (protocol change → plugin.json version bump → static checks)
 
 ### Protocols to Use While Contributing
-- [ ] `/verify` — run before every commit; the checks it runs are defined in `static-checks.js`
 - [ ] `/aitesis:inquire` — when a redesign feels under-specified
 - [ ] `/euporia:elicit` — elicit the important design dimensions together before locking in a direction
 - [ ] `/horismos:bound` — define epistemic boundaries for multi-domain refactors
@@ -50,8 +49,8 @@ Contributors are expected to dogfood the protocols they edit — §Protocols to 
 
 1. **Scope** — read the premise document(s) for the area you're touching (the index in `route/scripts/route-premise.mjs` routes by moment), plus `.claude/rules/editing-conventions.md` for this repo's own bindings; run `/horismos:bound` if multiple domains are in play
 2. **Design** — `/aitesis:inquire` at the point of locking in a direction, so what the decision rests on is checked first — its assumptions and missing facts, not whether every alternative or trade-off was considered, which stays yours to raise
-3. **Edit** — `skills/<protocol>/SKILL.md` is the source of truth; bump version in `.claude-plugin/plugin.json` on any change (see `.claude/skills/verify/references/co-change.md`)
-4. **Verify** — `/verify` must pass all static checks
+3. **Edit** — `skills/<protocol>/SKILL.md` is the source of truth; bump version in `.claude-plugin/plugin.json` on any change (see `docs/co-change.md`)
+4. **Verify** — `node scripts/static-checks/static-checks.js .` must report no `fail`
 5. **Test** — `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`
 6. **Commit** — `type(scope): Korean description` (types: feat / fix / refactor / style; scope = plugin name)
 7. **Ship** — `git push -u origin <branch>` then `gh pr create`; PR body language is Korean
@@ -79,7 +78,7 @@ Two principles to internalize before your first PR:
 1. Clone the repo and open it in Claude Code
 2. Read `CLAUDE.md` end-to-end
 3. Read `premise/README.md`, then `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, and `premise/gate-design.md` (the axiom and gate-design premises live here)
-4. Run `/verify` to confirm your environment
+4. Run `node scripts/static-checks/static-checks.js .` to confirm your environment
 5. Pick a protocol whose `SKILL.md` interests you and read it alongside `docs/structural-specs.md`
 6. Browse recent merged PRs to see the actual pattern of contribution
 

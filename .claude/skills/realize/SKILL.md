@@ -48,8 +48,8 @@ definition, or answer types — the places where a contract can become unrealiza
 without any static check noticing. Reach for it also when adopting a new model, where
 the question is whether the contract still holds on it.
 
-Do not reach for it to check that a file is well-formed. That is `/verify`, it is
-free, and it runs on every commit.
+Do not reach for it to check that a file is well-formed. That is the static checks
+(`node scripts/static-checks/static-checks.js .`), which are free and run on every commit.
 
 ## Workflow
 

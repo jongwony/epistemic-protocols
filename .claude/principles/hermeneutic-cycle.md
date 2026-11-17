@@ -12,10 +12,6 @@ The hermeneutic cycle pattern is already structurally encoded in formal blocks �
 | `invariant:` (MORPHISM) | Produktives Vorurteil (productive prejudice) | Directional constraint on the circle. "X over Y" pattern prevents degenerative interpretation |
 | `LOOP` | Hermeneutischer Zirkel (hermeneutic circle) | Part-whole reinterpretation via backward flow |
 | `CONVERGENCE` | Horizontverschmelzung (horizon fusion condition) | Convergence condition for achieved understanding. Productive termination of the circle |
-| `Qs` gate | Horizon Fusion Point | Constitutive gate — user contributes new meaning, fusing horizons |
-| `Qc` gate | Horizon Navigation | Classificatory gate — path selection within existing understanding space |
-
-Gate-runtime semantics for Qc/Qs (and the `Basis:` interpretive transparency annotation) live in `docs/structural-specs.md`; this file holds the cycle's structural definition and surface catalog.
 
 ## Observed surfaces
 
@@ -23,13 +19,11 @@ Each surface operationalizes the same structural pattern at a different scale. C
 
 **Primary circle (intra-protocol)** — A protocol's `LOOP` section, where its contract carries one, encodes backward flow where partial resolution triggers whole re-interpretation, conditioned by `preserves:` (the text being interpreted remains fixed; only the interpretation evolves).
 
-**Secondary pattern (inter-protocol)** — A complementary pair forms a Pre/Post cycle on the context fitness axis — Aitesis↔Epharmoge (context). This cycle operates heuristically via Output Style nudge, driven by observed session conditions rather than a static structural registry. See Inter-Protocol Guidance in `.claude/principles/architectural-principles.md`.
-
-**Tertiary surface (inter-session)** — Cross-Session Knowledge Composition via Anamnesis's hypomnesis store. Each protocol's Phase 0/1 can leverage accumulated domain knowledge to narrow scan scope and improve detection precision. Operational definition in `.claude/principles/architectural-principles.md` (Cross-Session Knowledge Composition section). Local-inscription mechanism in `anamnesis/skills/recollect/SKILL.md`. Operational detail (spiral mechanism + Aitesis asymmetry + pollution caveat) in `docs/structural-specs.md` § "Cross-Session Tertiary Pattern".
+**Secondary pattern (inter-protocol)** — A complementary pair forms a Pre/Post cycle on the context fitness axis — Aitesis↔Epharmoge (context). See Inter-Protocol Guidance in `.claude/principles/architectural-principles.md`.
 
 **Inter-version surface** — VCS history (commits, PRs, issues) as substrate informing present design. The pattern: surveying past inscriptions to inform present judgment, then inscribing the present decision back into the substrate for future sessions. PR review-loop chains realize the same pattern at the commit/PR level.
 
-**Inter-agent surface (Constitution-as-Horizontverschmelzung)** — Every Phase 2 Constitution gate is a horizon fusion point. The user's horizon merges with the AI's pre-understanding (Vorverständnis), and the gate answer becomes the productive prejudice (Produktives Vorurteil) constraining the next cycle. Formal correspondence: Detection with Authority's Constitution kind (`premise/recognition-and-authority.md`) is the gate-level realization of horizon fusion; the `Qs` gate row in the Pattern over Vocabulary table is its formal mapping.
+**Inter-agent surface (Constitution-as-Horizontverschmelzung)** — Every Constitution gate is a horizon fusion point. The user's horizon merges with the AI's pre-understanding (Vorverständnis), and the gate answer becomes the productive prejudice (Produktives Vorurteil) constraining the next cycle. Formal correspondence: Detection with Authority's Constitution kind (`premise/recognition-and-authority.md`) is the gate-level realization of horizon fusion.
 
 **Gated interaction realization**: Recognition over Recall (`premise/recognition-and-authority.md`) reaches gated interactions, including those whose subject is the reasoning itself — the same move that grounds this surface's horizon-fusion point above. Fusion needs the user's horizon to be able to exceed the presented options, which Context and Utterance as First-Class Ground (same file) supplies.
 
@@ -41,7 +35,7 @@ Each surface operationalizes the same structural pattern at a different scale. C
 
 ## Naming
 
-"Hermeneutic cycle", "hermeneutic circle", and "Hermeneutischer Zirkel" are synonyms. Default to "hermeneutic cycle" in prose; "Hermeneutischer Zirkel" when explicitly mapping to `LOOP` block. "Tertiary hermeneutic circle" is the historic label for the inter-session surface (`.claude/principles/architectural-principles.md §Cross-Session Knowledge Composition`) — new prose prefers "Tertiary surface" or names the scale (Cross-Session Knowledge Composition).
+"Hermeneutic cycle", "hermeneutic circle", and "Hermeneutischer Zirkel" are synonyms. Default to "hermeneutic cycle" in prose; "Hermeneutischer Zirkel" when explicitly mapping to `LOOP` block.
 
 ## Tier
 

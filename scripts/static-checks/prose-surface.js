@@ -215,7 +215,7 @@ function checkEmitLoadDiscipline(ctx) {
 // by decision, not by what a file category could establish about a glyph's
 // meaning: utility skills may legitimately render bars and are out of it, and
 // the scope otherwise mirrors checkEmitLoadDiscipline. Why a guard exists here
-// at all: references/verification.md, framing-readout-enforcement.
+// at all: docs/verification.md, framing-readout-enforcement.
 function checkFramingReadoutEnforcement(ctx) {
   const { projectRoot, results, protocolInputs } = ctx;
   const BAR_GLYPH = /[▓░]/;

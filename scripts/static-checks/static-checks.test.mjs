@@ -19,7 +19,7 @@
  * A missing required input fails under every check that requires it; that
  * group mutates the tree once and reads every layer's verdict.
  *
- * Run: node --test .claude/skills/verify/scripts/static-checks.test.mjs
+ * Run: node --test scripts/static-checks/static-checks.test.mjs
  */
 
 import { describe, it } from 'node:test';
@@ -32,8 +32,8 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const projectRoot = path.resolve(here, '../../../..');
-const checkerRelative = '.claude/skills/verify/scripts/static-checks.js';
+const projectRoot = path.resolve(here, '../..');
+const checkerRelative = 'scripts/static-checks/static-checks.js';
 const require = createRequire(import.meta.url);
 const { LEAN_CONTRACT_UTILITIES, LEAN_CONTRACT_CONTRIBUTOR_SKILLS, protocolFiles } = require(path.join(projectRoot, 'scripts/load-protocols.js'));
 
@@ -394,12 +394,12 @@ describe('lean bridge: lean-definition enrolls the contributor skills LEAN_CONTR
       // `enrollment` returns for this tree, and the standalone command prints
       // each of those lines.
       const registry = require(path.join(root, REGISTRY));
-      const { enrollment } = require(path.join(root, '.claude/skills/verify/scripts/lean-contract.js'));
+      const { enrollment } = require(path.join(root, 'scripts/static-checks/lean-contract.js'));
       const problems = enrollment(root, registry, registry.discoverPlugins({ projectRoot: root })).problems.map((p) => `${p.relPath} — ${p.reason}`);
       assert.equal(problems.length, 4, problems.join('\n'));
       const prefix = 'Not enrolled in the Lean path: ';
       assert.deepEqual(failed.filter((r) => r.message.startsWith(prefix)).map((r) => `${r.file} — ${r.message.slice(prefix.length)}`).sort(), [...problems].sort());
-      const cli = spawnSync(process.execPath, [path.join(root, '.claude/skills/verify/scripts/lean-contract.js'), 'generate', root], { encoding: 'utf-8' });
+      const cli = spawnSync(process.execPath, [path.join(root, 'scripts/static-checks/lean-contract.js'), 'generate', root], { encoding: 'utf-8' });
       assert.equal(cli.status, 1);
       const printed = cli.stderr.split('\n');
       for (const problem of problems) assert.ok(printed.includes(`not enrolled: ${problem}`), `expected the command to print: ${problem}\n${cli.stderr}`);
@@ -598,7 +598,7 @@ describe('lean bridge: the standalone lean-contract.js command enrolls every pro
       for (const file of ['.claude-plugin']) {
         if (existsSync(path.join(projectRoot, file))) cpSync(path.join(projectRoot, file), path.join(root, file), { recursive: true });
       }
-      const cli = path.join(projectRoot, '.claude/skills/verify/scripts/lean-contract.js');
+      const cli = path.join(projectRoot, 'scripts/static-checks/lean-contract.js');
       const generate = () => spawnSync(process.execPath, [cli, 'generate', root], { encoding: 'utf-8' });
       assert.equal(generate().status, 0, 'precondition: the copied tree enrolls every protocol');
 
@@ -629,7 +629,7 @@ describe('lean bridge: the standalone lean-contract.js command enrolls the liste
       };
       const registry = readFileSync(path.join(root, REGISTRY), 'utf-8');
       const enroll = (dirs) => put(REGISTRY, listUtilities(registry, dirs));
-      const cli = path.join(projectRoot, '.claude/skills/verify/scripts/lean-contract.js');
+      const cli = path.join(projectRoot, 'scripts/static-checks/lean-contract.js');
       const generate = () => spawnSync(process.execPath, [cli, 'generate', root], { encoding: 'utf-8' });
       const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const enrolled = `${utilitySkill('enrolled')}/SKILL.md`;
@@ -692,7 +692,7 @@ describe('lean bridge: the standalone lean-contract.js command enrolls the liste
       };
       const registry = readFileSync(path.join(root, REGISTRY), 'utf-8');
       const enroll = (dirs) => put(REGISTRY, listContributors(registry, dirs));
-      const cli = path.join(projectRoot, '.claude/skills/verify/scripts/lean-contract.js');
+      const cli = path.join(projectRoot, 'scripts/static-checks/lean-contract.js');
       const generate = () => spawnSync(process.execPath, [cli, 'generate', root], { encoding: 'utf-8' });
       const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const enrolled = `${contributorSkill('enrolled')}/SKILL.md`;
@@ -737,7 +737,7 @@ describe('lean bridge: the standalone lean-contract.js command enrolls the liste
 });
 
 describe('prose surface: artifact-self-containment path rules', () => {
-  const { checkSurfaceLeaks } = require(path.join(projectRoot, '.claude/skills/verify/scripts/artifact-self-containment.js'));
+  const { checkSurfaceLeaks } = require(path.join(projectRoot, 'scripts/static-checks/artifact-self-containment.js'));
   const leaks = (text) => {
     const bucket = { pass: [], fail: [], warn: [] };
     checkSurfaceLeaks(text, 'fixture:SKILL.md', 'artifact-self-containment', bucket);

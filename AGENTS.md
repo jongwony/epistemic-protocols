@@ -58,7 +58,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 
 - Keep this file focused on high-risk decisions and commands needed before search.
 - Do not mirror long protocol descriptions, utility-skill internals, CI workflow details, or full architecture trees here when a linked source is authoritative.
-- Use `README.md`, `docs/`, `.claude/rules/`, `.claude/principles/`, `.claude/skills/verify/`, and per-skill `SKILL.md` files as the next layer of detail.
+- Use `README.md`, `docs/`, `.claude/rules/`, `.claude/principles/`, and per-skill `SKILL.md` files as the next layer of detail.
 - When adding guidance, first ask whether `rg`, `find`, or a linked doc would recover it cheaply at the point of need. If yes, add a pointer rather than copying the content.
 
 ## Design Placement
@@ -74,31 +74,31 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 - Node.js 22+ is required; CI pins Node 22.
 - Plugin code uses Node.js standard library only.
 - Static checks: see `## Verification` below for the command.
-- Tests: `node --test $(git ls-files '*.test.js' '*.test.mjs' | grep -v '^.claude/skills/verify/scripts/static-checks.test.mjs$')`
-  - `.claude/skills/verify/scripts/static-checks.test.mjs` runs the verifier over the live tree, so it takes its own `node --test` invocation for the same reason `/verify` does — see the concurrency note under `## Verification`.
+- Tests: `node --test $(git ls-files '*.test.js' '*.test.mjs' | grep -v '^scripts/static-checks/static-checks.test.mjs$')`
+  - `scripts/static-checks/static-checks.test.mjs` runs the verifier over the live tree, so it takes its own `node --test` invocation — see the concurrency note under `## Verification`.
 - Packaging: `node scripts/package.js [--dry-run]`
 - Changelog: `node scripts/generate-changelog.js`
 - Installer: `scripts/install.sh`; `README.md` is the source of truth for the install set.
 
 ## Verification
 
-Run `/verify` before commits. The decisive static verification command is:
+Run the static checks before commits:
 
 ```bash
-node .claude/skills/verify/scripts/static-checks.js .
+node scripts/static-checks/static-checks.js .
 ```
 
 Do not run `scripts/package.test.js` concurrently with static protocol verification when liveness tests may mutate live `SKILL.md` files.
 
 After protocol predicate refactors, run a lexical sweep for stale vocabulary using the verification guidance rather than hardcoding predicate inventories here.
 
-Details: `.claude/skills/verify/references/verification.md`.
+Details: `docs/verification.md`.
 
 ## Editing Conventions
 
 - Git and editing rules are auto-loaded via `.claude/rules/editing-conventions.md`.
-- Any protocol change requires the relevant `plugin.json` version bump plus `/verify`.
-- Co-change patterns are tracked in `.claude/skills/verify/references/co-change.md`.
+- Any protocol change requires the relevant `plugin.json` version bump plus a static-check run (`## Verification`).
+- Co-change patterns are tracked in `docs/co-change.md`.
 - When editing protocol prose, prefer positive predicates over negated anchoring, preserve composability while making morphism completion explicit, and verify the runtime contract view rather than source prose alone.
 - For protocol edits, run a semantic-closure sweep whenever changing terminal conditions, state transitions, or result types. Align TYPES, PHASE TRANSITIONS, LOOP, CONVERGENCE, TOOL GROUNDING, and Rules so every new condition has a type, guard, state update, termination path, and result equation. Static checks do not prove this; manually verify before commit.
 - A `paths`-scoped file under `.claude/rules/` opens by stating the moment it binds, so that a reader arriving without it auto-loaded can tell when it fires; write that opening when authoring one. Read the ones scoped to protocol `SKILL.md` before editing a protocol, and `.claude/rules/instruction-surface-revision.md` before changing this file or a rule. A host that loads them on the matching path delivers them without this bullet; a host that does not is why the bullet is here.

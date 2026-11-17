@@ -16,13 +16,11 @@ Protocols draw their `Definition` code block from this structure:
 ── FLOW ──              Protocol path formula (multi-line for multi-mode protocols)
 ── MORPHISM ──          (if applicable) Essential type transition skeleton: requires/deficit/preserves/invariant
 ── TYPES ──             Symbol definitions with type signatures and comments
-── *-BINDING ──         (if applicable) Input binding resolution rules (R-BINDING, A-BINDING, U-BINDING, SCOPE-BINDING, V-BINDING, WP-BINDING)
+── *-BINDING ──         (if applicable) Input binding resolution rules (R-BINDING, A-BINDING, U-BINDING, V-BINDING, WP-BINDING)
 ── PHASE TRANSITIONS ── Phase-by-phase state transitions; [Tool] suffix marks external operations
-── LOOP ──              Post-phase control flow (J values → next phase or terminal)
+── LOOP ──              Post-phase control flow
 ── CONVERGENCE ──       (if applicable) Terminal predicates making LOOP's termination claims true
-── BOUNDARY ──          (if applicable) Purpose annotations for key operations
-── TOOL GROUNDING ──    Symbol → the capability or internal operation that realizes it; `(constitution)`/`(extension)` interaction kind annotation; conditional Constitution-to-Extension specialization recorded as separate `(extension)` entries within the same phase
-── CATEGORICAL NOTE ──  (if applicable) Mathematical notation definitions
+── TOOL GROUNDING ──    Symbol → the capability or internal operation that realizes it; `(constitution)`/`(extension)` interaction kind annotation
 ── MODE STATE ──        Runtime state type (Λ) with nested state types
 ── COMPOSITION ──       (if applicable) Protocol composition operator definitions (product: D₁ × D₂ → R₁ × R₂)
 ```
@@ -38,17 +36,17 @@ New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GRO
 
 ### Lean Notation
 
-A protocol's Definition block is authored either in the DSL above (a bare fence) or in core Lean 4 (a `lean` fence). The Lean form elaborates: a reference that does not resolve, a proposition stated without proof, or a type that does not check is an error rather than a reading a reviewer has to catch. Its anatomy keeps the DSL's section names and changes what each section is made of.
+A protocol's Definition block is authored in core Lean 4 (a `lean` fence). It elaborates: a reference that does not resolve, a proposition stated without proof, or a type that does not check is an error rather than a reading a reviewer has to catch. Its anatomy keeps the section names above and changes what each section is made of.
 
 - **Section markers.** Each section opens a module doc comment carrying the same marker, `/-! ── NAME ──`, closed on that line (` -/`) when the section is code only. Lean requires a declaration before its use, so the order is FLOW, MORPHISM, GROUND, TYPES, any `*-BINDING`, MODE STATE, PHASE TRANSITIONS, LOOP, CONVERGENCE, TOOL GROUNDING, COMPOSITION. A short module doc before FLOW tells the runtime reader how to read the block.
 - **Doc-text sections.** FLOW, MORPHISM, `*-BINDING`, LOOP, and COMPOSITION are doc text, and CONVERGENCE opens with its trace obligation as doc text. MORPHISM keeps its source object, its `→` chain ending in the resolution, and its `requires:` / `deficit:` / `preserves:` / `invariant:` lines at line start — the protocol router and the static checks read that line shape. Doc text avoids fence lines and the comment tokens `/-` and `-/`, which would close or nest the comment.
 - **GROUND.** The session primitive every Lean block reads, identical across blocks and to the canonical module `lean/EpistemicProtocols/Ground.lean`: a `Turn` carries its origin and content; a `Context` is the list of turns; `fuse` appends one utterance, a turn a person sent; a `Grounding` is an origin that may ground — never the assistant, injected text, or an unknown origin; a `Cite` points at one turn with that origin; a `Coord` names which origins it admits and leaves support to the model; `Occ` is an open coordinate, optionally with a candidate citation, or a filled one with its citation, admission, and support. Admission reads only who sent a turn, because that is the one fact the harness supplies. What the turn does — a statement, a request, an instruction, a report of what was observed — is text the model reads, so it lives in `supports`: a coordinate that admits only the person is filled by any turn of theirs whose content settles it, and a coordinate that must not rest on bare assent says so in its `supports`.
 - **Code sections.** TYPES, MODE STATE, PHASE TRANSITIONS, and CONVERGENCE are declarations. MODE STATE is the fused context; a field that is a projection of the context is read from it and not declared beside it. A transition is a constructor of a relation or an arm of a structural recursion over the user's utterances, and a CONVERGENCE claim the contract makes is a guarantee in its Theorems module where it can be proved.
-- **Guarantees live beside the block, stated and proved together.** A proof is verification rather than contract, and a statement the model already reads off the definitions tells it nothing new, so the block states no theorem. Each contract's guarantees are named theorems in `lean/EpistemicProtocols/<Namespace>/Theorems.lean`, the repository's Lake package (`lakefile.toml` at the root; contributor-side, never packaged), each declared once with its statement and its proof as Lean practice has it — Lean elaborates a theorem's header before its body, so the statement stands on its own. The module (`module` header) imports only its contract and the shared sections, so under Lean's module system its proofs stay private to it while its theorems are public. Every public theorem there is a guarantee and its statement is about the contract; an argument too long to read inline goes to a `private` helper, which is not a guarantee. The contract module it imports, `Contract.<Namespace>`, is generated from the SKILL.md block by `.claude/skills/verify/scripts/lean-contract.js` into the gitignored `lean/.contract/`, with the block's GROUND section replaced by the canonical `EpistemicProtocols.Ground` and the vocabulary opening its TOOL GROUNDING section by the canonical `EpistemicProtocols.ToolGrounding`; the SKILL.md block stays the one source and nothing generated is edited by hand. Each shared section's own guarantees are stated and proved the same way, in `lean/EpistemicProtocols/Ground/Theorems.lean` and `lean/EpistemicProtocols/ToolGrounding/Theorems.lean`; the text every block copies carries none.
+- **Guarantees live beside the block, stated and proved together.** A proof is verification rather than contract, and a statement the model already reads off the definitions tells it nothing new, so the block states no theorem. Each contract's guarantees are named theorems in `lean/EpistemicProtocols/<Namespace>/Theorems.lean`, the repository's Lake package (`lakefile.toml` at the root; contributor-side, never packaged), each declared once with its statement and its proof as Lean practice has it — Lean elaborates a theorem's header before its body, so the statement stands on its own. The module (`module` header) imports only its contract and the shared sections, so under Lean's module system its proofs stay private to it while its theorems are public. Every public theorem there is a guarantee and its statement is about the contract; an argument too long to read inline goes to a `private` helper, which is not a guarantee. The contract module it imports, `Contract.<Namespace>`, is generated from the SKILL.md block by `scripts/static-checks/lean-contract.js` into the gitignored `lean/.contract/`, with the block's GROUND section replaced by the canonical `EpistemicProtocols.Ground` and the vocabulary opening its TOOL GROUNDING section by the canonical `EpistemicProtocols.ToolGrounding`; the SKILL.md block stays the one source and nothing generated is edited by hand. Each shared section's own guarantees are stated and proved the same way, in `lean/EpistemicProtocols/Ground/Theorems.lean` and `lean/EpistemicProtocols/ToolGrounding/Theorems.lean`; the text every block copies carries none.
 - **Judgments.** The model reading the block is the one party the contract leaves open: it settles, by inference over the context, each element the block does not fix. Such a judgment is declared as an `axiom` with a doc comment saying what is judged — a black box to the contract, so that `#print axioms` names the judgments each theorem rests on — or, in a block that has not taken that form, as an `opaque`. The block does not narrow a judgment with finer types than the contract needs, and it adds no `sorry` and no other `axiom`. An axiom judgment's type is shown inhabited by a `Nonempty` instance in the Theorems module, so no judgment can assume what nothing inhabits, and the witness itself assumes nothing: it may name a judgment that forms a type or a predicate, never use a judgment's value. Only core Lean is used (no Std, no Mathlib). An addition made only because elaboration requires it — an `Inhabited` witness for an `opaque`, a `deriving` clause — must add no meaning and is marked with an `-- elab:` comment.
 - **TOOL GROUNDING.** The section opens with the vocabulary every Lean block carries verbatim, identical to the canonical module `lean/EpistemicProtocols/ToolGrounding.lean`: `Interaction` is the two interaction kinds, `Interaction.realization` maps each to its `Continuation` — every interaction presents its text, and a Constitution then stops for the person's turn while an Extension proceeds — and `Annot` is the annotation vocabulary below, an interaction carrying its kind. The protocol's own part follows: `Op` has one constructor per operation, and `grounding : Op → Annot × String` one arm per entry, `| .op => (.annotation, "Tool: description")`, an interaction written `.interaction .constitution` or `.interaction .extension` with a description that leaves the realization to its kind. A `dispatch` operation is also named by the declaration that decides when it hands off — an outcome, a spec, a tier — so the hand-off is part of the contract rather than only listed beside it. An operation new to PHASE TRANSITIONS is a constructor of `Op` with its arm.
 
-Elaboration runs in two places, with the toolchain pinned by the repository's `lean-toolchain`. The block is elaborated standalone, as a runtime reader loads it. The package runs through one driver, `node .claude/skills/verify/scripts/lean-contract.js check .`: it generates the contract modules, builds with `lake build --wfail`, and runs the checked-in audit (`lean/Audit/`) as `lake lint`, which reads the elaborated environment rather than the text — each block's axioms are documented judgments; no contract module proves a theorem; a Theorems module declares no axiom and no public definition, and its public theorems are the guarantees; every declaration's transitive axioms (`Lean.collectAxioms`) lie within `propext`, `Classical.choice`, `Quot.sound`, and the block's own judgments; each judgment's type has a `Nonempty` witness that assumes nothing; `unsafe`, `implemented_by`, and `extern` are read from the environment; and `grounding`, reduced at each operation, annotates with the shared vocabulary, grounds `.converge` as an interaction, leaves every realization to the interaction's kind, and has each `dispatch` operation named by another contract declaration. `lake test` runs the audit against fixtures (`lean/Tests/`) that break each rule. What is text stays with the static check: extracting the block, GROUND and the TOOL GROUNDING vocabulary identical to their canonical files, no theorem stated in a block doc comment, a Theorems module for every block and imports limited to its contract and the shared sections, an unaccounted `.lean` file under `lean/` failing, and a token preflight rejecting `sorry`, `admit`, `set_option`, `native_decide`, `implemented_by`, `extern`, `unsafe`, and metaprogramming commands before any build. The static check runs the whole sequence locally when `lean` and `lake` are reachable and in CI (`.github/workflows/lean.yml`).
+Elaboration runs in two places, with the toolchain pinned by the repository's `lean-toolchain`. The block is elaborated standalone, as a runtime reader loads it. The package runs through one driver, `node scripts/static-checks/lean-contract.js check .`: it generates the contract modules, builds with `lake build --wfail`, and runs the checked-in audit (`lean/Audit/`) as `lake lint`, which reads the elaborated environment rather than the text — each block's axioms are documented judgments; no contract module proves a theorem; a Theorems module declares no axiom and no public definition, and its public theorems are the guarantees; every declaration's transitive axioms (`Lean.collectAxioms`) lie within `propext`, `Classical.choice`, `Quot.sound`, and the block's own judgments; each judgment's type has a `Nonempty` witness that assumes nothing; `unsafe`, `implemented_by`, and `extern` are read from the environment; and `grounding`, reduced at each operation, annotates with the shared vocabulary, grounds `.converge` as an interaction, leaves every realization to the interaction's kind, and has each `dispatch` operation named by another contract declaration. `lake test` runs the audit against fixtures (`lean/Tests/`) that break each rule. What is text stays with the static check: extracting the block, GROUND and the TOOL GROUNDING vocabulary identical to their canonical files, no theorem stated in a block doc comment, a Theorems module for every block and imports limited to its contract and the shared sections, an unaccounted `.lean` file under `lean/` failing, and a token preflight rejecting `sorry`, `admit`, `set_option`, `native_decide`, `implemented_by`, `extern`, `unsafe`, and metaprogramming commands before any build. The static check runs the whole sequence locally when `lean` and `lake` are reachable and in CI (`.github/workflows/lean.yml`).
 
 ### TOOL GROUNDING Annotation Vocabulary
 
@@ -63,7 +61,7 @@ Every TOOL GROUNDING line carries a parenthetical annotation classifying the ope
 | `(constitution)` | User-facing interaction where a constitutive user judgment is required | Present the text, then stop for the user's turn |
 | `(extension)` | Presentation that settles no judgment for the user, as the TOOL GROUNDING vocabulary in `lean/EpistemicProtocols/ToolGrounding.lean` defines it | Present the text, then proceed |
 
-`(constitution)` / `(extension)` are the sole TOOL GROUNDING interaction annotations. `Qc` and `Qs` name gate shapes; they do not replace the annotation class. In a Lean block they are `.interaction .constitution` and `.interaction .extension`, and the realization column is `Interaction.realization` in the shared vocabulary; a DSL block states it in a `-- Realization:` header line.
+`(constitution)` / `(extension)` are the sole TOOL GROUNDING interaction annotations.  In a Lean block they are `.interaction .constitution` and `.interaction .extension`, and the realization column is `Interaction.realization` in the shared vocabulary.
 
 **Operation annotations** (tool-facing):
 
@@ -80,24 +78,6 @@ Every TOOL GROUNDING line carries a parenthetical annotation classifying the ope
 - `(sense)` vs `(track)`: "Does the operation mutate Λ (mode state)?" State updates → `(track)`, pure analysis → `(sense)`
 - `(observe)` vs `(transform)`: "Is the operation read-only?" Read-only → `(observe)`, file mutation → `(transform)`
 
-**Consistency rules**:
-- `(sense)` subsumes former `(detect)`, `(infer)`, `(assess)`, `(internal)`, `(synthesis)` — use `(sense)` for all internal operations without tool dispatch
-- `(observe)` subsumes former `(collect)`, `(gather)`, `(construct)` and `(detect)` entries with tool dispatch — use `(observe)` for all read-only tool operations
-- `(track)` subsumes former `(state)`, `(adjust)` — use `(track)` for all state management
-- `(dispatch)` subsumes former `(extern)` — use `(dispatch)` for all boundary-crossing operations
-- `(transform)` subsumes former `(modify)` — use `(transform)` for all artifact mutations
-- `(enrich)` removed — compound pattern decomposed as `(transform)` with cleanup noted in description
-- `(parallel)` and `(conditional)` describe execution topology, not operation type — use the underlying operation annotation (e.g., `(dispatch)` for a peer-set creation) with topology noted in the description
-
-**Topology modifiers**:
-
-| Modifier | Meaning | Execution effect |
-|----------|---------|-----------------|
-| `parallel` | Concurrent execution of multiple instances | isolated executors started with independent contexts |
-| `conditional` | Execution gated on runtime predicate | Operation skipped when predicate is false |
-
-**Topology notation convention**: Topology is encoded in the TOOL GROUNDING description text, not in the annotation parenthetical. Pattern: `(operation_type) → Tool (topology_modifier topology: description...)`. This keeps the annotation slot reserved for the operation-type annotations while preserving topology information for runtime orchestration and static analysis (Grep-searchable via `topology:`).
-
 ### FLOW-MORPHISM Relationship
 
 MORPHISM is the image of FLOW under a forgetful functor that discards computational detail and tool annotations, retaining only the essential type transition skeleton (source object → transformation steps → target object) with structural annotations (requires/deficit/preserves/invariant).
@@ -112,73 +92,9 @@ Separate rules manage the load a user-facing round places on its reader. Their t
 
 Round composition folds what were three separate rules — placement (context laid out before a gate, not folded inside it), vocabulary (the reader's own words, held across the session), and per-round adjacency (the judgment bundled beside its nearest evidence and the implication bearing on the next move, so the reader is not left to reassemble it) — into one inline rule, because each governs the same act from a different angle: composing a round the reader can act on without reassembling it. Folding them removes the seam where a protocol could satisfy the placement and vocabulary constraints while still scattering adjacent evidence across distant paragraphs or mixing unrelated findings into one decision round; there is no longer a second rule left to close that gap after the fact. The occasion-bound detail behind each angle — when a rendering must hold or wording must be carried through unchanged, what in view belongs to a later round or a trace, where a protocol's own phases put a sentence relative to a gate — moved to each skill's own `references/round-composition.md`, read only when that occasion arises. Form feedback stays a separate rule rather than folding in: it does not shape a round's default composition, it corrects composition in response to an explicit signal about form, and that is a different trigger from anything Round composition governs on its own.
 
-## Gate Runtime Semantics
-
-**Qc/Qs runtime distinction**: The Qc/Qs classification is a definition-time property of the gate — Qs expects constitutive response, Qc expects classificatory response. At runtime with Text+Stop realization, this distinction blurs: Qc gate responses can carry constitutive surplus (new meaning beyond the classification). The formal answer type (closed coproduct) captures the classification; the protocol's response interpretation accounts for any additional meaning. Pure interpretation is a `(sense)` operation, while an integration that writes mode state is `(track)`. The protocol's own TOOL GROUNDING fixes that boundary. A non-obvious interpretive contribution may be surfaced through the Output Style `Basis:` marker under `premise/recognition-and-authority.md` §Detection with Authority.
-
-**ConstitutionSurface<T>** names the typed pre-gate surface on which a Constitution interaction becomes meaningful:
-
-```
-ConstitutionSurface<T> = {
-  current_object: T,
-  pressure_map: Option(ProtocolNativeMap),
-  evidence: Set(Evidence),
-  residual_unknowns: Set(ResidualUnknown),
-  move_space: UserMoveCoproduct,
-  repair_paths: Set(RepairPath)
-}
-```
-
-Relationship to existing terms:
-
-- `Constitution` and `Extension` are TOOL GROUNDING interaction kinds.
-- `Qc` and `Qs` are gate shapes: classificatory vs constitutive response expectations.
-- `ConstitutionSurface<T>` is the structured user-facing surface placed before a `Qc` or `Qs` gate; it does not replace the gate, the interaction kind, or the user's move.
-- A pressure map belongs in this surface only when it is protocol-native and changes the next user judgment. Discovery pressure is bounded to residual unknowns that can materially alter that judgment, not general horizon exploration.
-
-**Interpretive transparency architecture**: `Basis:` is a discretionary session-level annotation — it fires when AI interpretation transcends mechanical derivation, unlike the former `integrate-echo` which was a mandatory structural relay. The semantic boundary shifts from a deducibility test (augmentation not derivable from {input, context_structure}) to an observability criterion (cite specific evidence grounding the interpretation). This relocation from protocol-owned TOOL GROUNDING to the session-level observation layer follows the Session-level observer exception (Audience Reach) — the same architectural pattern governing nudge.
-
-The `Qs` gate's formal correspondence to Horizontverschmelzung (horizon fusion) and the cycle's structural pattern are catalogued in `.claude/principles/hermeneutic-cycle.md`. This correspondence is descriptive, not a guarantee that a gate or `ConstitutionSurface<T>` completes horizon fusion.
-
 ## Resolution Meta-Contract
 
 **Resolution type and solution sentence.** The resolution type is the codomain: the Lean type occupying the right-hand position of a protocol's Type line. It records the result a run yields without fixing what that result means — two resolutions can share a carrier and an admission while the person recognizes different things at each. That meaning is stated by the solution sentence, the first statement of the protocol's epistemic solution as `/rederive` derives it (`.claude/skills/rederive/SKILL.md`, the `derive` operation): one sentence of what the person can then say or recognize, whether or not completion takes a closing turn of theirs. In the contract the sentence opens the doc comment of the resolution type (where a judgment supports the resolution, that judgment's doc comment states how it is established), with no Lean structure added for it; a discovery surface — plugin description, README, route — carries the sentence itself rather than the term.
-
-Canonical protocol resolution names remain protocol-native: `MappingAssessment`, `DefinedBoundary`, `CrystallizedAbstraction`, `ResolvedEndpoint`, and peer names are not renamed to a generic terminal type. `DeficitResolved<D, R>` is a meta-contract that those canonical resolution types should satisfy when their formal surface is edited:
-
-```
-DeficitResolved<D, R> =
-  R where
-    morphism_completed(D → R)
-    ∧ completion_trace_declared(D → phase_operations → R)
-    ∧ residual_unknown_disposition_declared
-```
-
-Reference shapes:
-
-```
-ResidualDisposition ∈ {None, Declared, Deferred, Dismissed, Routed, Bounded}
-  -- closed disposition signal; each constructor has distinct downstream handling semantics
-
-ResidualUnknown = {
-  item: String,
-  status: ResidualDisposition,
-  reason: String,
-  downstream?: Reference
-}
-
-MorphismCompletionTrace<D, R> =
-  List(D instance → PhaseOperation → ResolutionEvidence)
-
--- Carrier shape for materializing the predicate contract above.
-DeficitResolved<D, R> = {
-  result: R,
-  trace: MorphismCompletionTrace<D, R>,
-  residual: Map(ResidualUnknown.item, ResidualDisposition)
-}
-```
-
-`residual = ∅` is valid only when emptiness is declared. Silent absence of residuals is not equivalent to `None`. Resolution means morphism completion is traceable and residual unknown disposition is visible; it does not mean all unknowns are eliminated. Residual disposition is not a new user gate by default.
 
 ## Type Naming and Artifact Observability
 
@@ -192,38 +108,3 @@ This boundary informs type naming: `Prospect` (forward-looking, unrealized), `Re
 ## Intra-Protocol Context Separation
 
 **Context bifurcation** (intra-protocol context separation): Within a single protocol, context collected for different purposes must not be conflated. Context gathered at the meta level — to decide how the work is split or which perspectives it needs — is not passed as-is to the executors that carry out the object-level work; each executor collects its own object-scope evidence. Passing meta-context to object-level executors biases their investigation toward the lead agent's framing, undermining the epistemic value of independent analysis.
-
-## Cross-Session Tertiary Pattern
-
-**Tertiary pattern** (cross-session, both halves operative): Anamnesis hypomnesis store persists session recall indices → next session's protocol Phase 0/1 detection is enriched by accumulated domain knowledge → better protocol execution produces richer insights → hypomnesis store deepens → spiral deepening. The storage half (Anamnesis hypomnesis write) and the consumption half (each consuming protocol's Phase 0/1 reading stored knowledge) together complete the cross-session pattern. Unlike Primary/Secondary which operate within a single session, Tertiary operates across session boundaries with persistent knowledge as the medium. Two consumption patterns coexist, and the asymmetry between them is intentional. A protocol whose consumption runs through an evidence-source channel can tag what it reads (`source: "memory:{path}"`) and guard it for staleness, under the reachable-and-sufficient-ground test in `premise/recognition-and-authority.md` §Detection with Authority. A protocol whose Phase 0/1 merely biases toward accumulated domain patterns has no such channel and relies on protocol-specific pollution resistance (halt characteristics, gate judgment) per `.claude/principles/architectural-principles.md` Cross-Session Knowledge Composition Pollution caveat. Applying evidence-source machinery uniformly would present operations whose basis is AI inference as relays of determined ground — which is the reason for the split, not an accident of who implemented what. Which protocol sits on which side is read from its own SKILL.md; a roster here would have nothing re-running it. Operational-fidelity monitoring (whether enrichment improves Phase 0/1 detection vs. surfaces pollution) is the ongoing observation focus.
-
-## Extension Classification Audit Trail
-
-When a TOOL GROUNDING entry is classified as `(extension)` because its result is determined, and auto-resolved, the justification should be traceable to the relay indicators the premise layer already defines: the fixed-result, reachable-and-sufficient-ground, within-scope tests and basis presentation in `premise/recognition-and-authority.md` §Detection with Authority, plus the option-set relay test in `premise/interaction-factorization.md` §Interaction Kind Factorization. This is not a new principle but an audit format surfacing those existing indicators. An `(extension)` that instead carries reversible work on the AI's stated judgment is traced by that judgment's basis and its attribution to the AI, not by this format.
-
-### Extension Justification Format
-
-```
-[Extension] {Protocol} Phase {N} {Entry Label}
-  ├─ deterministic:    {yes/no} — {evidence}
-  ├─ citable:          {yes/no} — {source}
-  ├─ within-boundary:  {yes/no} — {scope}
-  ├─ entropy→0:        {yes/no} — {evidence}
-  └─ basis-cited:      {yes/no} — {mechanism}
-  verdict: Extension ({N}/5)
-```
-
-Relationship to historical 3-axis elidability model (pre-unification): prior analysis used three axes; the post-unification single TOOL GROUNDING axis subsumes the prior model — `(extension)` classifies what proceeds without the user's turn, `(constitution)` classifies Constitution requirement, with conditional specialization absorbed as separate `(extension)` entries.
-
-## Split-Entry Naming Convention
-
-When a phase contains a conditional gate (some runtime conditions resolve to Extension while others require Constitution), the gate is split into separate TOOL GROUNDING entries within the same phase. Naming pattern:
-
-- **Extension half**: `Phase N {gate_label}_{condition} (extension)` — descriptive condition suffix indicating when this entry fires (e.g., `_from_arg`, `_auto`, `_resume`, `_unique_match`, `_no_match`).
-- **Constitution half**: `Phase N {gate_label} (constitution)` or `Phase N {gate_label}_{purpose} (constitution)` — the canonical gate label, with an optional purpose suffix when ambiguity persists. This entry fires on the default branch (when the Extension condition is not met).
-
-The Extension entry's condition suffix records the predicate inline. Both halves point to the same underlying phase operation; the split is realization, not phase duplication.
-
-To see the convention in force, grep the TOOL GROUNDING blocks for a condition suffix (`_from_arg`, `_auto`, `_resume`) — a roster of which protocols currently split would go stale the next time one is added or collapsed, and nothing re-runs a roster.
-
-Non-split (canonical) form remains the default: when no conditional specialization exists, the entry stays as the canonical label (`Phase N Qc (constitution)` or `Phase N {label} (extension)`). Split applies only when one runtime branch is genuinely Extension-eligible.

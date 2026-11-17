@@ -9,7 +9,7 @@
  */
 
 const path = require('path');
-const { buildRuntimeContractViews } = require(path.resolve(__dirname, '../../../../scripts/package.js'));
+const { buildRuntimeContractViews } = require(path.resolve(__dirname, '../package.js'));
 
 function stripFencedCode(text) {
   return text.replace(/```[\s\S]*?```/g, '');
