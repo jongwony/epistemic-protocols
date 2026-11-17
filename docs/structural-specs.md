@@ -94,7 +94,7 @@ Round composition folds what were three separate rules — placement (context la
 
 ## Interpretive Transparency
 
-**Interpretive transparency architecture**: `Basis:` is a discretionary session-level annotation — it fires when AI interpretation transcends mechanical derivation, citing specific evidence grounding the interpretation. It lives in the session-level observation layer rather than in protocol-owned TOOL GROUNDING, following the Session-level observer exception (Audience Reach).
+**Interpretive transparency architecture**: `Basis:` is a discretionary session-level annotation — it fires when AI interpretation transcends mechanical derivation, citing specific evidence grounding the interpretation. It lives in the session-level observation layer rather than in protocol-owned TOOL GROUNDING.
 
 ## Resolution Meta-Contract
 

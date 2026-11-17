@@ -15,7 +15,7 @@ This section is the canonical statement of the load mechanism in this repository
 
 - **`architectural-principles.md`** — Tier Factorization, Epistemic Cost Topology, Unix Philosophy Homomorphism, Session Text Composition, Task Externalization Boundary, Reference over Copy, Inter-Protocol Guidance, Coexistence over Mirroring, Termination, Plugin Encapsulation, Utility Skills delegation.
 - **`hermeneutic-cycle.md`** — Pattern over Vocabulary, reinterpretation across protocol/version/agent boundaries, and correction-channel evidence.
-- **`safeguards.md`** — Actionable revision criterion, Literature Application Discipline, Rule Classification Framework, Adversarial Anticipation, White Bear Avoidance. All are authoring/audit/verify-time; the runtime-critical Gate Integrity guards are carried by `premise/gate-design.md` instead.
+- **`safeguards.md`** — Actionable revision criterion, Literature Application Discipline, Adversarial Anticipation, White Bear Avoidance. All are authoring/audit/verify-time; the runtime-critical Gate Integrity guards are carried by `premise/gate-design.md` instead.
 - **`project-profile-calibration.md`** — Profile Variables and Calibration Rule, Scope Boundary. Authoring/calibration-time reference, not per-turn.
 - **`outcome-equivalence.md`** — Outcome Equivalence (whole section). Derived tier, runtime-inert argument chain.
 
