@@ -22,7 +22,7 @@ The bridge that hands the block to Lean is text, and lives in `lean-bridge.js`: 
 
 ### Review and `/realize`
 
-What depends on context and meaning is judged by a reader: correspondence between prose and formal block, the fit of categorical and type-theoretic vocabulary, whether activation is unambiguous and supersession non-conflicting, whether a gate is realized as the right user-facing interaction under the accumulated context, and instruction design. `/verify` Phase 2 carries the review perspectives (`review-checklists.md`); runtime realization is `/realize`'s. A static check may confirm that such a channel is wired and fails closed; it does not stand in for the judgment.
+What depends on context and meaning is judged by a reader: correspondence between prose and formal block, the fit of categorical and type-theoretic vocabulary, whether activation is unambiguous and supersession non-conflicting, whether a gate is realized as the right user-facing interaction under the accumulated context, and instruction design. `/verify` gives no verdict on these: they are judged in review of the change, and runtime realization is `/realize`'s. A static check may confirm that such a channel is wired and fails closed; it does not stand in for the judgment.
 
 ## Severity
 
@@ -32,38 +32,15 @@ What depends on context and meaning is judged by a reader: correspondence betwee
 | **Concern** | May cause confusion or inconsistency | Surface for user review |
 | **Note** | Informational, stylistic, or optimization | Log for awareness |
 
-Severity is assigned by what a finding would break, whichever channel produced it:
+Severity is assigned by what a finding would break:
 
 | Source | Severity |
 |--------|----------|
 | A static `fail`, from any layer | Critical |
 | A static `warn` that a verdict was not obtained | Concern — obtain the verdict before relying on its absence |
 | Any other static `warn` | Concern where it touches structure, Note where it touches style |
-| A review finding | The severity the reviewer assigns (`critical` / `concern` / `note`) |
 
 A `warn` blocks nothing by itself. Which results block in CI is read from `.github/workflows/lean.yml`.
-
-## Review Criteria
-
-What review reads for, by severity. Each is a judgment; none is a static predicate.
-
-**Critical**
-
-- **State machine totality against the prose**: every situation the prose describes has a transition in the formal block, and every transition the block admits is one the prose intends.
-- **Supersession non-conflict**: different protocols supersede different domains.
-- **Activation determinism**: trigger conditions are unambiguous.
-- **Gate realization**: a user-facing gate is realized as structured presentation plus turn yield under the context it fires in, not bypassed as unstructured text.
-
-**Concern**
-
-- **Categorical terminology**: limit, colimit and the like are used for the semantics intended.
-- **Formula and diagram coherence**: quoted formulas match their definitions, and referenced diagrams have defined structure.
-- **Description form**: skill descriptions are third person and say when to use the skill; instructions are verb-first.
-
-**Note**
-
-- **Hand-maintained mirrors**: `README.md` and `README_ko.md`, and other surfaces no check compares, move together.
-- **Clarity and disclosure**: complex logic carries its reason, examples are runnable, and material is placed by how often it is needed.
 
 ## User Override Policy
 
