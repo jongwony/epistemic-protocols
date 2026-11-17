@@ -84,22 +84,20 @@ An instance is the engine plus one principle, given as a triple:
 
 | Instance | Home | Tier | Principle parameter |
 |---|---|---|---|
-| `white-bear` | `epistemic-cooperative/skills/white-bear/` | Published (portable) | Necessary-path attention over unnecessary competing-target mentions |
-| `zero-shot` | `epistemic-cooperative/skills/zero-shot/` | Published (portable) | Principle statement over anchoring few-shot examples |
+| `white-bear` | `.claude/skills/white-bear/` | Project-local (not shipped) | Necessary-path attention over unnecessary competing-target mentions |
+| `zero-shot` | `.claude/skills/zero-shot/` | Project-local (not shipped) | Principle statement over anchoring few-shot examples |
 | `encapsulation` | `.claude/skills/encapsulation/` | Project-local (not shipped) | This repo's runtime-contract self-containment: no contributor-knowledge assumption, no rephrasing that bypasses the deterministic BANNED-pattern check |
 
-**How each instance relates to this engine.** Published instances must be self-contained
-(the project's packaged runtime-contract surface is verified to carry no references to
-contributor files), so `white-bear` and `zero-shot` inline the engine scaffolding as
-**compiled copies** — the same realization the project already uses for its runtime emit-load
-disciplines. The project-local `encapsulation` instance is not part of the packaged surface,
-so it **references this document** directly rather than copying it, and its principle stays
+**How each instance relates to this engine.** `white-bear` and `zero-shot` inline the engine
+scaffolding as **compiled copies** — the same realization the project already uses for its
+runtime emit-load disciplines. The `encapsulation` instance **references this document**
+directly rather than copying it, and its principle stays
 coupled to this repo's deterministic check and contributor model (it is not decouplable, by
 design).
 
 **Sync obligation.** When the engine scaffolding here changes (scope shape, output schema,
-severity calibration, self-application clause), update the compiled copies in the two
-published instances to match. `encapsulation` references this document for the shared
+severity calibration, self-application clause), update the compiled copies in `white-bear`
+and `zero-shot` to match. `encapsulation` references this document for the shared
 mechanism prose and needs no copy edit for that, but it embeds its own **extended copy** of
 the output schema (the base plus its `by_signal`/`signal` failure-kind dimension) and a
 specialized severity-calibration table — so a change to the engine's base output schema or
