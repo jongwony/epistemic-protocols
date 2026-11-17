@@ -13,7 +13,7 @@ that other routes are unnecessary. The scope is deliberately wider than the rule
 that should have received this and did not is the failure worth avoiding, while a file that
 receives it and has nothing to apply costs only the reading. The anatomy of the formal blocks
 around it — what each block is for, how FLOW and MORPHISM relate — is contributor material and
-stays in `.claude/skills/verify/references/formal-blocks.md`.
+stays in `docs/formal-blocks.md`.
 
 # Type Category Convention
 

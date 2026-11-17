@@ -83,7 +83,6 @@ const protocolMap = {
   "/route": ["route", "route"],
   "/clarify": ["clarify", null], "/goal": ["goal", null],
   "/reflect": ["reflect", null], "/write": ["write", null],
-  "/verify": ["verify", null],
 };
 
 const MAX_ALL_CHARS = 80_000;

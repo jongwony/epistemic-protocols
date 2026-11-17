@@ -38,6 +38,6 @@ the moment it is made.
 **The order the obligations bind in.** Read the premise sections above, and the record the
 branch points at. Audit the surface as opened, and write down the subtraction
 candidates with the obligations each carries. Only then settle what the change adds, letting
-the audit shape it. Route each sentence as it is written. Run `/verify` before the commit, put
+the audit shape it. Route each sentence as it is written. Run the static checks (`AGENTS.md` §Verification) before the commit, put
 the audit's outcome in the commit message, and leave the unit's record saying what the change
 is still being built toward.
