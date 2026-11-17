@@ -13,8 +13,6 @@ The hermeneutic cycle pattern is already structurally encoded in formal blocks â
 | `LOOP` | Hermeneutischer Zirkel (hermeneutic circle) | Part-whole reinterpretation via backward flow |
 | `CONVERGENCE` | Horizontverschmelzung (horizon fusion condition) | Convergence condition for achieved understanding. Productive termination of the circle |
 
-The `Basis:` interpretive transparency annotation lives in `docs/structural-specs.md`; this file holds the cycle's structural definition and surface catalog.
-
 ## Observed surfaces
 
 Each surface operationalizes the same structural pattern at a different scale. Cross-references point to where the cycle is invoked in the codebase; this file is the single home for the *concept*, not its runtime invocation.
