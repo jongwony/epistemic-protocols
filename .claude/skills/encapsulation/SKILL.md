@@ -30,7 +30,7 @@ The engine's scope shape applies, specialized to the runtime contract surface th
 
 **Out of scope**:
 - Files under `docs/`, `CLAUDE.md`, `README*.md`, `*/references/*.md` — contributor documentation, where contributor-knowledge prose is appropriate by purpose.
-- Files under `.claude/rules/` and `.claude/principles/` — rule prose authored for contributors.
+- Files under `.claude/rules/` — rule prose authored for contributors.
 - `.claude/skills/*/SKILL.md` — project-local contributor tooling, not part of the marketplace runtime contract surface (this skill is itself in this category).
 - Files under `.insights/`, `memory/` — session and context substrates outside this skill's audit surface.
 
@@ -40,7 +40,7 @@ The engine's scope shape applies, specialized to the runtime contract surface th
 
 Two signal types — this instance extends the engine's single-failure-kind shape with a failure-kind dimension:
 
-**`contributor_assumption`** — a prose passage that assumes contributor documentation knowledge to be intelligible at the runtime contract surface. The reader of the runtime contract is the LLM agent acting on the protocol, plus the user invoking the skill — neither has read `.claude/rules/`, `.claude/principles/`, or `docs/`. Test: "Does this sentence remain intelligible when read with only the SKILL.md itself and standard background knowledge?" If a sentence references a project-internal concept by name without inline definition, and the concept is not defined elsewhere in the same SKILL.md, the sentence is a finding.
+**`contributor_assumption`** — a prose passage that assumes contributor documentation knowledge to be intelligible at the runtime contract surface. The reader of the runtime contract is the LLM agent acting on the protocol, plus the user invoking the skill — neither has read `.claude/rules/` or `docs/`. Test: "Does this sentence remain intelligible when read with only the SKILL.md itself and standard background knowledge?" If a sentence references a project-internal concept by name without inline definition, and the concept is not defined elsewhere in the same SKILL.md, the sentence is a finding.
 
 **`bypass_rephrasing`** — a prose passage that conveys a banned reference's content without using its banned token. The deterministic check passes; the encapsulation invariant fails. Test: "Would the deterministic check have flagged this if the original token had remained?" If yes, it is a bypass-rephrasing finding.
 

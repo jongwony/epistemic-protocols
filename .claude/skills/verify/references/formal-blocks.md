@@ -25,7 +25,7 @@ Protocols draw their `Definition` code block from this structure:
 - Shape: a file carrying this block opens it with the operator line `*: product — (D₁ × D₂) → (R₁ × R₂).` followed by the protocol's own resolution-emergence sentence; protocol-specific composition rationale may follow
 - `*` denotes the composition operator (categorical product on deficit/resolution): `D₁ × D₂` is the composite domain and `R₁ × R₂` the composite codomain
 - The operator fixes the composite domain and codomain and nothing between them. Each participating protocol's own formal blocks supply its runtime-normative deficit-to-resolution contract during composition
-- `<X> resolution emergent via session context`: dimension interaction (shared codomain discovery, cross-resolution) occurs through Session Text Composition, not prescribed by the operator
+- `<X> resolution emergent via session context`: dimension interaction (shared codomain discovery, cross-resolution) occurs through Session Text Composition (archived as #1140), not prescribed by the operator
 - `*` names the deficits composed in the current session; a pre-declared protocol chain instead specifies a sequence of invocations
 
 New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with the capability or internal operation that realizes it (Lean notation: §Lean Notation below). Which parts of this anatomy a static check actually enforces is read from the check itself rather than asserted here — an enforcement-coverage claim on this surface has nothing that re-runs it, so it keeps asserting an earlier reading with present authority.

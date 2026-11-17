@@ -4,4 +4,4 @@
 
 **Boundary.** These are contributor surfaces, never runtime dependencies: a packaged `SKILL.md` makes sense without them, and a user of the protocols does not need them.
 
-**Next.** `intent-record.md` for the record a branch or pull request carries.
+**Next.** `intent-record.md` for the record a branch or pull request carries; `termination.md` for how a protocol run ends and who closes it; `structural-specs.md` for what a protocol's resolution type records and the solution sentence that opens it.
