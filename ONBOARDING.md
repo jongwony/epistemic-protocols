@@ -18,7 +18,7 @@ Contributors are expected to dogfood the protocols they edit — §Protocols to 
 - [ ] **Claude Code** installed with this repo added via `/add-dir`
 - [ ] **`epistemic-cooperative`** plugin installed if you want `/onboard` — the default installer includes it; otherwise `claude plugin install epistemic-cooperative@epistemic-protocols`
 - [ ] Understand that plugin code uses only the **Node.js standard library** — no runtime dependencies
-- [ ] **Lean verification** — For local verification of Definition blocks written in Lean 4, install the toolchain pinned in `lean-toolchain` and make both `lean` and `lake` available. `/verify` checks these blocks and their proofs when the tools are reachable; otherwise it warns that Lean verification was skipped. CI requires these checks to pass. See [Lean Notation](docs/structural-specs.md#lean-notation).
+- [ ] **Lean verification** — For local verification of Definition blocks written in Lean 4, install the toolchain pinned in `lean-toolchain` and make both `lean` and `lake` available. `/verify` checks these blocks and their proofs when the tools are reachable; otherwise it warns that Lean verification was skipped. CI requires these checks to pass. See [Lean Notation](.claude/skills/verify/references/formal-blocks.md#lean-notation).
 
 ### Repository
 - [ ] Clone `https://github.com/jongwony/epistemic-protocols`
@@ -33,7 +33,7 @@ Contributors are expected to dogfood the protocols they edit — §Protocols to 
 - [ ] `premise/tiering-and-scope.md` — the tier vocabulary plus the architectural principles that hold without presupposing a protocol layer, including the Epistemic Completeness Boundary that marks where epistemic judgment ends and substrate enforcement begins; the ones that do presuppose protocols, and this repo's own instances of the portable ones, live in `.claude/principles/architectural-principles.md` (T2-T3, lazy-load)
 - [ ] `.claude/principles/safeguards.md` — Safeguard-tier principles (LESS important as models improve); demoted from `.claude/rules/` (authoring/verify-time, not per-turn) (~5 min)
 - [ ] `.claude/principles/AGENTS.md` — demotion zone overview, index of current principle files
-- [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
+- [ ] `.claude/skills/verify/references/formal-blocks.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
 - [ ] `.claude/skills/verify/references/verification.md` — why the non-obvious checks exist and what to do when one fires (the check inventory itself is `static-checks.js`)
 - [ ] `.claude/skills/verify/references/co-change.md` — ripple patterns (protocol change → plugin.json version bump → /verify)
 
@@ -80,7 +80,7 @@ Two principles to internalize before your first PR:
 2. Read `CLAUDE.md` end-to-end
 3. Read `premise/README.md`, then `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, and `premise/gate-design.md` (the axiom and gate-design premises live here)
 4. Run `/verify` to confirm your environment
-5. Pick a protocol whose `SKILL.md` interests you and read it alongside `docs/structural-specs.md`
+5. Pick a protocol whose `SKILL.md` interests you and read it alongside `.claude/skills/verify/references/formal-blocks.md`
 6. Browse recent merged PRs to see the actual pattern of contribution
 
 <!-- INSTRUCTION FOR CLAUDE: A new contributor to epistemic-protocols just
