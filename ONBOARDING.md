@@ -16,7 +16,7 @@ Contributors are expected to dogfood the protocols they edit — §Protocols to 
 - [ ] **Node.js 22+** — CI pins Node 22; `zlib.crc32` is used in packaging
 - [ ] **gh CLI** authenticated — required for PR, CI, and release workflows
 - [ ] **Claude Code** installed with this repo added via `/add-dir`
-- [ ] **`epistemic-cooperative`** plugin installed if you want `/onboard` — the default installer includes it; otherwise `claude plugin install epistemic-cooperative@epistemic-protocols`
+- [ ] **`/onboard`** is a project skill at `.claude/skills/onboard/`, available when Claude Code runs in this checkout
 - [ ] Understand that plugin code uses only the **Node.js standard library** — no runtime dependencies
 - [ ] **Lean verification** — For local verification of Definition blocks written in Lean 4, install the toolchain pinned in `lean-toolchain` and make both `lean` and `lake` available. `/verify` checks these blocks and their proofs when the tools are reachable; otherwise it warns that Lean verification was skipped. CI requires these checks to pass. See [Lean Notation](docs/structural-specs.md#lean-notation).
 
@@ -99,7 +99,7 @@ current situation, route them to the matching protocol, then resume the
 standard flow afterwards:
 
 - First encounter with these protocols, no prior context → `/onboard`
-  (epistemic-cooperative) for a quick recommendation plus scenario-trial-quiz
+  (project skill) for a quick recommendation plus scenario-trial-quiz
   walkthrough
 - Wants comprehension of the project itself verified → `/grasp` (katalepsis)
   over `CLAUDE.md` or a specific `SKILL.md` they just read
@@ -107,7 +107,6 @@ standard flow afterwards:
   onto it → `/ground` (analogia), with their existing usage as the concrete
   domain and this project's protocols, read as evidence, as the abstract domain; audit the conclusions that comparison supports
 - Needs a fast when-to-use-which-protocol reference → the protocol table in `README.md`, or the `route` plugin's session-start table
-  (epistemic-cooperative)
 - Prefers to go straight to environment setup → skip routing, proceed to
   Setup Checklist
 

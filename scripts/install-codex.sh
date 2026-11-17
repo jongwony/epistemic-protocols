@@ -33,4 +33,4 @@ else
   echo "Added marketplace. Skipped manifest summary because the manifest could not be fetched."
 fi
 
-echo "Run /onboard to get started."
+echo "Choose a protocol to start from in the README's Protocols table: https://github.com/$REPO#protocols"
