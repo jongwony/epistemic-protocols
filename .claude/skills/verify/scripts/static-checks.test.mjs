@@ -422,7 +422,7 @@ describe('fail closed: a missing required input fails under each check that requ
       remove(missing);
       write(nonLean, read(nonLean).replace('```lean\n', '```\n'));
       remove('CLAUDE.md');
-      remove('epistemic-cooperative/skills/onboard/references/scenarios.md');
+      remove('.claude/skills/onboard/references/scenarios.md');
 
       // The label moves out of Rules rather than vanishing: a whole-file search
       // still finds it, and only a search confined to Rules does not.

@@ -36,22 +36,10 @@ function checkCrossReference(ctx) {
   const fileRefs = claudeMd.matchAll(/`(references\/[^`]+)`/g);
   for (const ref of fileRefs) {
     const refPath = ref[1];
-    // Check in likely locations
-    // Single canonical location after reflexion removal and write consolidation
-    // into epistemic-cooperative. Array form retained to accommodate future
-    // references-hosting plugins without restructuring the resolver.
-    const locations = [
-      path.join(projectRoot, 'epistemic-cooperative/skills/write', refPath),
-    ];
-
-    let exists = locations.some(loc => fs.existsSync(loc));
-
-    // Fallback: search project tree for matching filename
-    if (!exists) {
-      const basename = path.basename(refPath);
-      const fallbackFiles = walkFiles(projectRoot, e => e.name === basename, null);
-      exists = fallbackFiles.some(f => f.endsWith(refPath));
-    }
+    // Search the project tree for a file ending in the referenced path.
+    const basename = path.basename(refPath);
+    const exists = walkFiles(projectRoot, e => e.name === basename, null)
+      .some(f => f.endsWith(refPath));
 
     if (!exists && !refPath.includes('example')) {
       results.warn.push({
@@ -721,11 +709,11 @@ function checkCrossRefScan(ctx) {
 // ============================================================
 function checkOnboardSync(ctx) {
   const { projectRoot, results, PROTOCOL_FILES } = ctx;
-  const onboardSkillPath = path.join(projectRoot, 'epistemic-cooperative/skills/onboard/SKILL.md');
+  const onboardSkillPath = path.join(projectRoot, '.claude/skills/onboard/SKILL.md');
   if (!fs.existsSync(onboardSkillPath)) {
     results.fail.push({
       check: 'onboard-sync',
-      file: 'epistemic-cooperative/skills/onboard/SKILL.md',
+      file: '.claude/skills/onboard/SKILL.md',
       message: 'Onboard SKILL.md not found — the protocol coverage it must carry has no source to check'
     });
     return;
@@ -750,7 +738,7 @@ function checkOnboardSync(ctx) {
     if (!onboardContent.includes(pattern)) {
       results.fail.push({
         check: 'onboard-sync',
-        file: 'epistemic-cooperative/skills/onboard/SKILL.md',
+        file: '.claude/skills/onboard/SKILL.md',
         message: `Data Sources table missing protocol row: ${pattern}`
       });
       subCheckFailed = true;
@@ -758,7 +746,7 @@ function checkOnboardSync(ctx) {
   }
 
   // Sub-check 2: scenarios.md — every protocol must have a scenario block
-  const scenariosPath = path.join(projectRoot, 'epistemic-cooperative/skills/onboard/references/scenarios.md');
+  const scenariosPath = path.join(projectRoot, '.claude/skills/onboard/references/scenarios.md');
   if (fs.existsSync(scenariosPath)) {
     const scenariosContent = fs.readFileSync(scenariosPath, 'utf8');
     for (const { name, command } of protocols) {
@@ -766,7 +754,7 @@ function checkOnboardSync(ctx) {
       if (!scenariosContent.includes(heading)) {
         results.fail.push({
           check: 'onboard-sync',
-          file: 'epistemic-cooperative/skills/onboard/references/scenarios.md',
+          file: '.claude/skills/onboard/references/scenarios.md',
           message: `Missing scenario block: ${heading}`
         });
         subCheckFailed = true;
@@ -775,7 +763,7 @@ function checkOnboardSync(ctx) {
   } else {
     results.fail.push({
       check: 'onboard-sync',
-      file: 'epistemic-cooperative/skills/onboard/references/scenarios.md',
+      file: '.claude/skills/onboard/references/scenarios.md',
       message: 'scenarios.md not found — every protocol\'s scenario block has no source to check'
     });
     subCheckFailed = true;
@@ -784,7 +772,7 @@ function checkOnboardSync(ctx) {
   if (!subCheckFailed) {
     results.pass.push({
       check: 'onboard-sync',
-      file: 'epistemic-cooperative/',
+      file: '.claude/skills/onboard/',
       message: `Onboard sync — Data Sources and scenarios verified for ${protocols.length} protocols`
     });
   }
@@ -875,8 +863,8 @@ function checkCodexManifestSync(ctx) {
 //
 // Design (generic, not pinned to any one plugin):
 //  - Opt-in by STRUCTURAL ANCHOR: an agent is contract-bearing iff its body
-//    carries a verdict `### Realization:` enumeration line. Utility scanner
-//    agents (epistemic-cooperative) lack it and are skipped — no false sync.
+//    carries a verdict `### Realization:` enumeration line. Agents that lack
+//    it are skipped — no false sync.
 //  - Pairing: the contract-bearing agent pairs with a SKILL.md in its OWN
 //    plugin whose TYPES block carries the matching enumerations.
 //  - Comparison is SYMMETRIC (drift = mismatch between the two surfaces), not

@@ -178,7 +178,7 @@ test("resolveSkillProtocol honours the plugin namespace", () => {
 // than silently dropping the protocol from every hypomnesis record.
 test("protocolMap covers every protocol plugin command on disk", () => {
   const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-  const skipDirs = new Set(["epistemic-cooperative", "node_modules", "scripts", "docs"]);
+  const skipDirs = new Set(["node_modules", "scripts", "docs"]);
   const commands = [];
   for (const plugin of fs.readdirSync(repoRoot, { withFileTypes: true })) {
     if (!plugin.isDirectory() || plugin.name.startsWith(".") || skipDirs.has(plugin.name)) continue;
