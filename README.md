@@ -111,7 +111,7 @@ Start with [ONBOARDING.md](./ONBOARDING.md). Paste the full file into a fresh Cl
 
 For architecture, read [CLAUDE.md](./CLAUDE.md). For the underlying collaboration principles, explore [premise/](./premise/).
 
-When editing the project's public description, follow the guidance in [Mission Bridge](./docs/mission-bridge.md).
+When editing the project's public description, follow the Mission/vision wording change row in [co-change.md](./docs/co-change.md).
 
 <details>
 <summary>Greek Codex</summary>

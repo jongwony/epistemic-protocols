@@ -111,7 +111,7 @@ Claude Code용 유틸리티 플러그인 설치 방법은 [빠른 시작](#claud
 
 아키텍처는 [CLAUDE.md](./CLAUDE.md), 협업의 바탕이 되는 원칙은 [premise/](./premise/)에서 살펴보세요.
 
-프로젝트를 소개하는 공개 문구를 고칠 때는 [Mission Bridge](./docs/mission-bridge.md)의 작성 기준을 따르세요.
+프로젝트를 소개하는 공개 문구를 고칠 때는 [co-change.md](./docs/co-change.md)의 Mission/vision wording change 행을 따르세요.
 
 <details>
 <summary>Greek Codex</summary>

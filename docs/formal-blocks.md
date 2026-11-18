@@ -1,12 +1,6 @@
-# Structural Specifications
+# Formal Block Anatomy
 
-Implementation-level specifications for SKILL.md formal blocks. These are descriptive references for protocol editing, not prescriptive principles.
-
-## Formal Blocks Are Runtime-Normative, Not Contributor Spec
-
-The `Definition` code blocks — FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, CONVERGENCE, and their peers — are **LLM-facing and runtime-normative**, and they are **constitutive of protocol identity**: they *type* the prose, fixing what each phase, gate, transition, and resolution means. A runtime model reads them to execute the protocol; they are part of the normative `SKILL.md` contract (per `CLAUDE.md` Runtime Contract: "`SKILL.md` carries the normative user contract"). That the `Definition` blocks are LLM-facing is asserted here and in `CLAUDE.md`, on this project's own authority — it is a fact about this repository's artifacts, so no general principle grounds it.
-
-The contributor-facing *prescriptive* surface is `.claude/rules/` plus `CLAUDE.md` (and exposition under `docs/`) — **never the formal blocks**. This document is the one contributor-facing artifact *about* the formal blocks: it documents their anatomy and editing conventions. Keep the two layers distinct — the anatomy guide is contributor-facing; the blocks it describes are runtime-normative. Do not classify a formal block as "contributor-facing spec" and drop or thin it when producing a reduced or single-shot realization of a protocol: removing a formal block removes the type that constitutes the protocol. The block governs *what* the protocol is; how its symbols are *rendered* to a user is a separate emit-layer concern (see §User-Facing Emit Load Disciplines below, and the Output Style's Vocabulary rendering).
+The anatomy of a protocol's `Definition` block and the conventions for editing one. The blocks themselves are runtime-normative contract (`AGENTS.md` §Runtime Contract); this reference describes them for whoever edits a block. [verification.md](verification.md) carries why the `lean-definition` check exists.
 
 ## SKILL.md Formal Block Anatomy
 
@@ -86,25 +80,6 @@ MORPHISM is the image of FLOW under a forgetful functor that discards computatio
 
 The convention governing what a TYPES entry may carry is in `.claude/rules/type-category-convention.md`. Read it before creating a TYPES block or changing what one carries.
 
-## User-Facing Emit Load Disciplines
-
-Separate rules manage the load a user-facing round places on its reader. Their text lives in each protocol's `## Rules`, and a static check holds that each label is there. What this section adds is why they do not collapse into one another — restating the rules here would answer to no guard and would drift away from the copies that do.
-
-Round composition folds what were three separate rules — placement (context laid out before a gate, not folded inside it), vocabulary (the reader's own words, held across the session), and per-round adjacency (the judgment bundled beside its nearest evidence and the implication bearing on the next move, so the reader is not left to reassemble it) — into one inline rule, because each governs the same act from a different angle: composing a round the reader can act on without reassembling it. Folding them removes the seam where a protocol could satisfy the placement and vocabulary constraints while still scattering adjacent evidence across distant paragraphs or mixing unrelated findings into one decision round; there is no longer a second rule left to close that gap after the fact. The occasion-bound detail behind each angle — when a rendering must hold or wording must be carried through unchanged, what in view belongs to a later round or a trace, where a protocol's own phases put a sentence relative to a gate — moved to each skill's own `references/round-composition.md`, read only when that occasion arises. Form feedback stays a separate rule rather than folding in: it does not shape a round's default composition, it corrects composition in response to an explicit signal about form, and that is a different trigger from anything Round composition governs on its own.
-
 ## Resolution Meta-Contract
 
 **Resolution type and solution sentence.** The resolution type is the codomain: the Lean type occupying the right-hand position of a protocol's Type line. It records the result a run yields without fixing what that result means — two resolutions can share a carrier and an admission while the person recognizes different things at each. That meaning is stated by the solution sentence, the first statement of the protocol's epistemic solution as `/rederive` derives it (`.claude/skills/rederive/SKILL.md`, the `derive` operation): one sentence of what the person can then say or recognize, whether or not completion takes a closing turn of theirs. In the contract the sentence opens the doc comment of the resolution type (where a judgment supports the resolution, that judgment's doc comment states how it is established), with no Lean structure added for it; a discovery surface — plugin description, README, route — carries the sentence itself rather than the term.
-
-## Type Naming and Artifact Observability
-
-**Artifact-observability boundary** (type naming principle): Protocol input type names encode their temporal relationship to observable artifacts — the dividing line being Read/Grep observability:
-- **Aitesis** (Prospect): Pre-artifact. Context sufficiency is assessed before artifacts are produced. X cannot yet be Read/Grep'd.
-- **Epharmoge** (Result): Post-artifact. Applicability is evaluated after the result exists. An artifact result is Read/Grep-observable; a result that lives in the conversation is read from the context.
-- **Analogia** (Text): Time-independent. Analogical-inference auditing operates on a mapping being relied on, reading any account it can reach as evidence; evidence about an artifact's behavior requires observing that behavior.
-
-This boundary informs type naming: `Prospect` (forward-looking, unrealized), `Result` (completed work product), `Text` (abstract structure carrier). The temporal encoding in type names provides protocol discrimination signal at SKILL.md load time, per Semantic Autonomy (`premise/interaction-factorization.md`).
-
-## Intra-Protocol Context Separation
-
-**Context bifurcation** (intra-protocol context separation): Within a single protocol, context collected for different purposes must not be conflated. Context gathered at the meta level — to decide how the work is split or which perspectives it needs — is not passed as-is to the executors that carry out the object-level work; each executor collects its own object-scope evidence. Passing meta-context to object-level executors biases their investigation toward the lead agent's framing, undermining the epistemic value of independent analysis.

@@ -11,7 +11,7 @@ const path = require('path');
 const leanContract = require('./lean-contract');
 
 // A Definition block is authored in one of two notations: the DSL (a bare
-// ``` fence) or Lean 4 (a ```lean fence, see docs/structural-specs.md). Both
+// ``` fence) or Lean 4 (a ```lean fence, see docs/formal-blocks.md). Both
 // carry the same section markers; in Lean the marker opens a module doc
 // comment (`/-! ── NAME ──`), optionally closed on the same line (` -/`).
 // A bare `-/` line only closes such a comment and is not section content.

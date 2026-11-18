@@ -18,7 +18,7 @@ Contributors are expected to dogfood the protocols they edit — §Protocols to 
 - [ ] **Claude Code** installed with this repo added via `/add-dir`
 - [ ] **`/onboard`** is a project skill at `.claude/skills/onboard/`, available when Claude Code runs in this checkout
 - [ ] Understand that plugin code uses only the **Node.js standard library** — no runtime dependencies
-- [ ] **Lean verification** — For local verification of Definition blocks written in Lean 4, install the toolchain pinned in `lean-toolchain` and make both `lean` and `lake` available. The static checks cover these blocks and their proofs when the tools are reachable; otherwise they warn that Lean verification was skipped. CI requires these checks to pass. See [Lean Notation](docs/structural-specs.md#lean-notation).
+- [ ] **Lean verification** — For local verification of Definition blocks written in Lean 4, install the toolchain pinned in `lean-toolchain` and make both `lean` and `lake` available. The static checks cover these blocks and their proofs when the tools are reachable; otherwise they warn that Lean verification was skipped. CI requires these checks to pass. See [Lean Notation](docs/formal-blocks.md#lean-notation).
 
 ### Repository
 - [ ] Clone `https://github.com/jongwony/epistemic-protocols`
@@ -30,10 +30,8 @@ Contributors are expected to dogfood the protocols they edit — §Protocols to 
 - [ ] `premise/README.md` — how the premise layer is adopted and verified; each document and the moment that calls for it is indexed in `route/scripts/route-premise.mjs` (~2 min)
 - [ ] `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, `premise/gate-design.md` — the foundational principles and Gate Integrity, in their portable form; these are the source of truth, with no in-repo restatement (~10 min)
 - [ ] `premise/instruction-authoring.md` — the derived principles governing how instructions and durable records are written
-- [ ] `premise/tiering-and-scope.md` — the tier vocabulary plus the architectural principles that hold without presupposing a protocol layer, including the Epistemic Completeness Boundary that marks where epistemic judgment ends and substrate enforcement begins; the ones that do presuppose protocols, and this repo's own instances of the portable ones, live in `.claude/principles/architectural-principles.md` (T2-T3, lazy-load)
-- [ ] `.claude/principles/safeguards.md` — Safeguard-tier principles (LESS important as models improve); demoted from `.claude/rules/` (authoring/verify-time, not per-turn) (~5 min)
-- [ ] `.claude/principles/AGENTS.md` — demotion zone overview, index of current principle files
-- [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
+- [ ] `premise/tiering-and-scope.md` — the tier vocabulary plus the architectural principles that hold without presupposing a protocol layer, including the Epistemic Completeness Boundary that marks where epistemic judgment ends and substrate enforcement begins
+- [ ] `docs/formal-blocks.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
 - [ ] `docs/verification.md` — why the non-obvious checks exist and what to do when one fires (the check inventory itself is `static-checks.js`)
 - [ ] `docs/co-change.md` — ripple patterns (protocol change → plugin.json version bump → static checks)
 
@@ -70,7 +68,7 @@ Contributors are expected to dogfood the protocols they edit — §Protocols to 
 
 Two principles to internalize before your first PR:
 
-- **Plugin Encapsulation** — Each `SKILL.md` is self-contained, and runtime protocol behavior must be inscribed in it. Documenting something in `CLAUDE.md` or `.claude/rules/` alone does not affect user-facing behavior (`premise/instruction-authoring.md` §Audience Reach states the general form; `.claude/principles/architectural-principles.md` §Plugin Encapsulation carries this repo's binding).
+- **Plugin Encapsulation** — Each `SKILL.md` is self-contained, and runtime protocol behavior must be inscribed in it. Documenting something in `CLAUDE.md` or `.claude/rules/` alone does not affect user-facing behavior (`premise/instruction-authoring.md` §Audience Reach states the general form; `CLAUDE.md` §Runtime Contract carries this repo's binding).
 - **Direction over Accumulated Workload** — Contributor authoring labor converges toward zero under AI-assisted editing; structural misalignment accumulates and pollutes all downstream work. When a refactor is theoretically justified, prior commits are not protection from invalidation. Verification labor remains bounded and must be budgeted explicitly (`premise/instruction-authoring.md` §Direction over Accumulated Workload).
 
 ## Get Started
@@ -79,7 +77,7 @@ Two principles to internalize before your first PR:
 2. Read `CLAUDE.md` end-to-end
 3. Read `premise/README.md`, then `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, and `premise/gate-design.md` (the axiom and gate-design premises live here)
 4. Run `node scripts/static-checks/static-checks.js .` to confirm your environment
-5. Pick a protocol whose `SKILL.md` interests you and read it alongside `docs/structural-specs.md`
+5. Pick a protocol whose `SKILL.md` interests you and read it alongside `docs/formal-blocks.md`
 6. Browse recent merged PRs to see the actual pattern of contribution
 
 <!-- INSTRUCTION FOR CLAUDE: A new contributor to epistemic-protocols just
