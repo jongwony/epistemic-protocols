@@ -40,9 +40,9 @@ claude plugin install horismos@epistemic-protocols
 - [Repository verification](../AGENTS.md#verification) gives the contributor workflow. For this plugin's Lean contract, static, and packaging checks, run these from the repository root, sequentially:
 
 ```bash
-node .claude/skills/verify/scripts/lean-contract.js check .
-node .claude/skills/verify/scripts/static-checks.js .
-node --test .claude/skills/verify/scripts/static-checks.test.mjs
+node scripts/static-checks/lean-contract.js check .
+node scripts/static-checks/static-checks.js .
+node --test scripts/static-checks/static-checks.test.mjs
 node --test scripts/package.test.js
 ```
 

@@ -101,7 +101,7 @@ Different mechanisms check different things, and it helps to know where each one
 
 - **Lean proofs** — a protocol's contract is also written as a Lean model inside its `SKILL.md`. Lean checks that the properties stated about that model hold, under the assumptions the model declares; the judgments the model leaves open are among those assumptions, not things it proves. A protocol's [`lean/EpistemicProtocols/<Protocol>/Theorems.lean`](./lean/EpistemicProtocols) holds what is stated and proved about its model.
 - **Runtime evidence** — the contributor skill [`/realize`](./.claude/skills/realize/SKILL.md) runs a protocol in a real session and collects evidence that the steps it declares actually happen, through automatic checks plus a review of the transcript.
-- **Static checks** — [`/verify`](./.claude/skills/verify/SKILL.md) checks the files' structure: required sections, consistent names and references, matching versions.
+- **Static checks** — [`static-checks.js`](./scripts/static-checks/static-checks.js) checks the files' structure: required sections, consistent names and references, matching versions.
 
 None of these measures what happens downstream of a protocol, such as whether it reduces rework, and that is deliberate: how much a protocol helps depends on what each person does not yet know, and on the model, which keeps improving. What a run can show is which decisions entered the conversation because the AI asked or presented them rather than because they were written up front. The contributor skill [`/outcome`](./.claude/skills/outcome/SKILL.md) runs the same request with and without a protocol and lists those decisions with the passages they came from.
 
@@ -111,7 +111,7 @@ Start with [ONBOARDING.md](./ONBOARDING.md). Paste the full file into a fresh Cl
 
 For architecture, read [CLAUDE.md](./CLAUDE.md). For the underlying collaboration principles, explore [premise/](./premise/).
 
-When editing the project's public description, follow the Mission/vision wording change row in [co-change.md](./.claude/skills/verify/references/co-change.md).
+When editing the project's public description, follow the Mission/vision wording change row in [co-change.md](./docs/co-change.md).
 
 <details>
 <summary>Greek Codex</summary>

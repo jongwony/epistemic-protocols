@@ -37,8 +37,8 @@ const {
   createZip,
   generateReleaseNotes
 } = require('./package');
-const { runArtifactSelfContainmentCheck } = require('../.claude/skills/verify/scripts/artifact-self-containment');
-const { runLanguagePurityCheck } = require('../.claude/skills/verify/scripts/language-purity');
+const { runArtifactSelfContainmentCheck } = require('../scripts/static-checks/artifact-self-containment');
+const { runLanguagePurityCheck } = require('../scripts/static-checks/language-purity');
 const { discoverPlugins } = require('./load-protocols');
 
 function writeFixtureFile(root, relativePath, content = 'fixture\n') {
@@ -392,7 +392,7 @@ function runStaticChecksSubprocess(projectRoot) {
   // Defaults to this repo; a caller may pass a throwaway fixture root instead.
   const targetRoot = projectRoot || REPO_ROOT;
   const scriptPath = path.join(
-    REPO_ROOT, '.claude', 'skills', 'verify', 'scripts', 'static-checks.js'
+    REPO_ROOT, 'scripts', 'static-checks', 'static-checks.js'
   );
   try {
     const stdout = execFileSync(process.execPath, [scriptPath, targetRoot], {

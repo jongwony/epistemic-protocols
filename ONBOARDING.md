@@ -18,11 +18,11 @@ Contributors are expected to dogfood the protocols they edit — §Protocols to 
 - [ ] **Claude Code** installed with this repo added via `/add-dir`
 - [ ] **`/onboard`** is a project skill at `.claude/skills/onboard/`, available when Claude Code runs in this checkout
 - [ ] Understand that plugin code uses only the **Node.js standard library** — no runtime dependencies
-- [ ] **Lean verification** — For local verification of Definition blocks written in Lean 4, install the toolchain pinned in `lean-toolchain` and make both `lean` and `lake` available. `/verify` checks these blocks and their proofs when the tools are reachable; otherwise it warns that Lean verification was skipped. CI requires these checks to pass. See [Lean Notation](.claude/skills/verify/references/formal-blocks.md#lean-notation).
+- [ ] **Lean verification** — For local verification of Definition blocks written in Lean 4, install the toolchain pinned in `lean-toolchain` and make both `lean` and `lake` available. The static checks cover these blocks and their proofs when the tools are reachable; otherwise they warn that Lean verification was skipped. CI requires these checks to pass. See [Lean Notation](docs/formal-blocks.md#lean-notation).
 
 ### Repository
 - [ ] Clone `https://github.com/jongwony/epistemic-protocols`
-- [ ] Run `node .claude/skills/verify/scripts/static-checks.js .` to confirm your environment passes
+- [ ] Run `node scripts/static-checks/static-checks.js .` to confirm your environment passes
 - [ ] Run `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs` to confirm the tests pass
 
 ### Core Docs to Read (in order)
@@ -32,12 +32,11 @@ Contributors are expected to dogfood the protocols they edit — §Protocols to 
 - [ ] `premise/instruction-authoring.md` — the derived principles governing how instructions and durable records are written
 - [ ] `premise/tiering-and-scope.md` — the tier vocabulary plus the architectural principles that hold without presupposing a protocol layer, including the Epistemic Completeness Boundary that marks where epistemic judgment ends and substrate enforcement begins
 - [ ] [Principles discussions](https://github.com/jongwony/epistemic-protocols/discussions/categories/principles) — principles this repository no longer loads, kept as history, one locked discussion per named principle (browse as needed)
-- [ ] `.claude/skills/verify/references/formal-blocks.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
-- [ ] `.claude/skills/verify/references/verification.md` — why the non-obvious checks exist and what to do when one fires (the check inventory itself is `static-checks.js`)
-- [ ] `.claude/skills/verify/references/co-change.md` — ripple patterns: what else moves when a protocol, plugin, skill, or principle changes
+- [ ] `docs/formal-blocks.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
+- [ ] `docs/verification.md` — why the non-obvious checks exist and what to do when one fires (the check inventory itself is `static-checks.js`)
+- [ ] `docs/co-change.md` — ripple patterns: what else moves when a protocol, plugin, skill, or principle changes
 
 ### Protocols to Use While Contributing
-- [ ] `/verify` — run before every commit; the checks it runs are defined in `static-checks.js`
 - [ ] `/aitesis:inquire` — when a redesign feels under-specified
 - [ ] `/euporia:elicit` — elicit the important design dimensions together before locking in a direction
 - [ ] `/horismos:bound` — define epistemic boundaries for multi-domain refactors
@@ -50,7 +49,7 @@ Contributors are expected to dogfood the protocols they edit — §Protocols to 
 1. **Scope** — read the premise document(s) for the area you're touching (the index in `route/scripts/route-premise.mjs` routes by moment), plus `.claude/rules/editing-conventions.md` for this repo's own bindings; run `/horismos:bound` if multiple domains are in play
 2. **Design** — `/aitesis:inquire` at the point of locking in a direction, so what the decision rests on is checked first — its assumptions and missing facts, not whether every alternative or trade-off was considered, which stays yours to raise
 3. **Edit** — `skills/<protocol>/SKILL.md` is the source of truth; bump version in `.claude-plugin/plugin.json` on any change (`CLAUDE.md` §Editing Conventions)
-4. **Verify** — `/verify` must pass all static checks
+4. **Verify** — `node scripts/static-checks/static-checks.js .` must report no `fail`
 5. **Test** — `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`
 6. **Commit** — `type(scope): Korean description` (types: feat / fix / refactor / style; scope = plugin name)
 7. **Ship** — `git push -u origin <branch>` then `gh pr create`; PR body language is Korean
@@ -78,8 +77,8 @@ Two principles to internalize before your first PR:
 1. Clone the repo and open it in Claude Code
 2. Read `CLAUDE.md` end-to-end
 3. Read `premise/README.md`, then `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, and `premise/gate-design.md` (the axiom and gate-design premises live here)
-4. Run `/verify` to confirm your environment
-5. Pick a protocol whose `SKILL.md` interests you and read it alongside `.claude/skills/verify/references/formal-blocks.md`
+4. Run `node scripts/static-checks/static-checks.js .` to confirm your environment
+5. Pick a protocol whose `SKILL.md` interests you and read it alongside `docs/formal-blocks.md`
 6. Browse recent merged PRs to see the actual pattern of contribution
 
 <!-- INSTRUCTION FOR CLAUDE: A new contributor to epistemic-protocols just

@@ -40,7 +40,7 @@ jobs:
       - name: Static checks
         run: |
           set +e
-          node .claude/skills/verify/scripts/static-checks.js . > static-checks.json
+          node scripts/static-checks/static-checks.js . > static-checks.json
           set -e
           node -e '
             const r = require("./static-checks.json");
@@ -55,8 +55,8 @@ jobs:
       # verifier over the tree itself, so it takes its own invocation.
       - name: Tests
         if: ${{ !cancelled() }}
-        run: node --test $(git ls-files '*.test.js' '*.test.mjs' | grep -v '^.claude/skills/verify/scripts/static-checks.test.mjs$')
+        run: node --test $(git ls-files '*.test.js' '*.test.mjs' | grep -v '^scripts/static-checks/static-checks.test.mjs$')
 
       - name: Static check tests
         if: ${{ !cancelled() }}
-        run: node --test .claude/skills/verify/scripts/static-checks.test.mjs
+        run: node --test scripts/static-checks/static-checks.test.mjs

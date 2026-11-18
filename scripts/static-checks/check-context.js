@@ -16,7 +16,7 @@ const {
   LEAN_CONTRACT_CONTRIBUTOR_SKILLS,
   discoverPlugins,
   protocolFiles,
-} = require(path.resolve(__dirname, '../../../../scripts/load-protocols.js'));
+} = require(path.resolve(__dirname, '../load-protocols.js'));
 
 function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
