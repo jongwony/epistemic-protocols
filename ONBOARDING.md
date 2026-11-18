@@ -31,7 +31,6 @@ Contributors are expected to dogfood the protocols they edit — §Protocols to 
 - [ ] `premise/recognition-and-authority.md`, `premise/interaction-factorization.md`, `premise/gate-design.md` — the foundational principles and Gate Integrity, in their portable form; these are the source of truth, with no in-repo restatement (~10 min)
 - [ ] `premise/instruction-authoring.md` — the derived principles governing how instructions and durable records are written
 - [ ] `premise/tiering-and-scope.md` — the tier vocabulary plus the architectural principles that hold without presupposing a protocol layer, including the Epistemic Completeness Boundary that marks where epistemic judgment ends and substrate enforcement begins
-- [ ] [Principles discussions](https://github.com/jongwony/epistemic-protocols/discussions/categories/principles) — principles this repository no longer loads, kept as history, one locked discussion per named principle (browse as needed)
 - [ ] `docs/formal-blocks.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
 - [ ] `docs/verification.md` — why the non-obvious checks exist and what to do when one fires (the check inventory itself is `static-checks.js`)
 - [ ] `docs/co-change.md` — ripple patterns (protocol change → plugin.json version bump → static checks)
