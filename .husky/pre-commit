@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Runtime-contract pre-commit hook (managed by husky).
-# Replaces .github/workflows/verify-runtime-contract.yml.
-# Scope: per-protocol SKILL.md, plugin.json, references/, verify scripts, package scripts.
+# Scope: per-protocol SKILL.md, plugin.json, references/, static checks, package scripts.
 # Activated automatically via `npm install` (husky prepare script).
 set -euo pipefail
 

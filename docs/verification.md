@@ -14,7 +14,7 @@ What this page carries instead is the part the script does not: why a check exis
 
 ### Why certain checks exist
 
-- **codex-manifest-sync** — `version-staleness` reads only the Claude manifest's version, and no other check parses the Codex manifest. Without this check the Codex manifest has no parse or version guard at all, which is how the "version bump missed codex-plugin" drift kept recurring.
+- **codex-manifest-sync** — `version-staleness` reads only the Claude manifest's version, so a Codex manifest left at the old version passes it; that miss is how the "version bump missed codex-plugin" drift kept recurring.
 - **framing-readout-enforcement** — protocol surfacing is a framing readout of the work in play, not a progress meter, and a progress-bar glyph in a core protocol `SKILL.md` is the mechanical trace of that drift. Utility skills may draw bars and are out of scope.
 - **routing-index-contract** — enforces the routing contract (structure plus pointers) rather than mirrored content, so protocol drift is caught without re-creating the co-change chain that mirroring the protocol table into an instruction file would impose.
 - **emit-load-discipline** — a packaged `SKILL.md` cannot reach an output style at runtime, so a protocol's round-composition and form-feedback rules must be inscribed in its own `## Rules` section. The check guards that the labels `REQUIRED_RULES` names exist there; whether the wording is still right is review's, and the audit is the "Round composition / Form feedback wording change" row in [co-change.md](co-change.md).
