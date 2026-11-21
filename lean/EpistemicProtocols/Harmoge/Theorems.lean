@@ -150,7 +150,7 @@ theorem fused_record_is_what_the_taking_met (respond relay session : Context P â
 
 /-- Where `taken` holds on a context ending in an utterance, the closure is filled, its own
     citation points at that utterance, and that turn is a person's. -/
-theorem taken_cites_the_fused_turn (c : Context P) (u : Utterance P)
+theorem taken_cites_the_latest_turn (c : Context P) (u : Utterance P)
     (h : taken (fuse c u) = true) :
     âˆƒ (s : Cite (fuse c u)) (ok : (closureCoord (P := P)).admits s.src)
       (sup : ClosureSupported (fuse c u) ((fuse c u)[s.idx]'s.lt) ()),
