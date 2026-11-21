@@ -1,15 +1,15 @@
 ---
 name: fit
-description: "Use when the user wants a direction, a design or an implementation brought to what they intend through concrete cases — its solution space cannot be settled from description alone, and its boundaries show only where they meet a case; not where what they intend is itself unclear. The user can then see the space as it now stands — the cases they settled, what the target does on every case gathered so far, the boundaries still open — and move it until it is where they want it."
+description: "Use when the user holds an intent they can judge a case against and wants a direction, a design or an implementation brought to it through concrete cases — its solution space cannot be settled from description alone, and its boundaries show only where they meet a case. The user can then see the space as it now stands — the cases they settled, what the target does on every case gathered so far, the boundaries still open — and judge when it is enough for their purpose."
 ---
 
 # Harmoge Protocol
 
-Bring a target — a direction, a design, an implementation — to what the person intends by interviewing them through concrete cases, carrying each answer into the target and replaying every case gathered so far, until the person takes the solution space shown as where they want it. Type: `(SolutionSpaceUnfused, User, FIT, Target) → FittedSolutionSpace`.
+Bring a target — a direction, a design, an implementation — to what the person intends by interviewing them through concrete cases, carrying each answer into the target and replaying every case gathered so far, until the person takes the solution space shown. Type: `(SolutionSpaceUnfused, User, FUSE, Target) → FusedSolutionSpace`.
 
 ## Definition
 
-**Harmoge** (ἁρμογή): a fitting together, a joining of parts into a whole. A dialogical act for the moment when the solution space a target opens for the person's purpose cannot be fused with what they intend from its description alone: its boundaries show only where they meet a concrete case. The roles are those of an interview turned around — the AI interviews, and the person holds the Northstar and the purpose, gives or corrects them, and judges the cases. Each round shows the solution space as it now stands, what the AI read from the last answer and on which turn each reading rests, what it carried into the target and what the target now does on every case gathered since the call, and then the next question: only what the person alone holds, as concrete cases. The person answers in their own words; an answer binds as far as those words reach, and a reason or an example of their own can open a further case or move the space. The run closes when the person takes the space a round showed as where they want it, and its record is that space — the cases they settled, the boundaries still open, the premises and the domain — with the target as its realization and what it did on each case. What the target does on a case is a result of the run only as far as a run of it returned; where nothing ran, it is the AI's reading of the target, said as one.
+**Harmoge** (ἁρμογή): a fitting together, a joining of parts into a whole. A dialogical act for the moment when the solution space a target opens for the person's purpose cannot be fused with what they intend from its description alone: its boundaries show only where they meet a concrete case. The roles are those of an interview turned around — the AI interviews, and the person holds the Northstar and the purpose, gives or corrects them, and judges the cases. Each round shows the solution space as it now stands, what the AI read from the last answer and on which turn each reading rests, what it carried into the target and what the target now does on every case gathered since the call, and then the next question: only what the person alone holds, as concrete cases. The person answers in their own words; an answer binds as far as those words reach, and a reason or an example of their own can open a further case or move the space. The run closes when the person takes the space a round showed, and its record is that space — the cases they settled, the trade-offs they took, the boundaries still open, the premises and the domain — with the target as its realization and what it did on each case. What the target does on a case is a result of the run only as far as a run of it returned; where nothing ran, it is the AI's reading of the target, said as one.
 
 ```lean
 /-!
@@ -22,15 +22,15 @@ block decides it for you. Every `def`, `inductive`, and `structure` is fixed by 
 
 /-! ── FLOW ──
 Harmoge(R) → start(c) → fit(c, utterances), where c is the fused session context:
-  advance(c): what bears on the target is read; the latest answer is carried into the target;
-    where a run of the target is in reach (`RunInReach`), the cases gathered so far are run on it
+  advance(c): what bears on the target is read; what `applied` carries goes into the target;
+    where a run of the target is in reach (`RunInReach`), the run returns what `ran` records
   round(c): the space, the read-back, what was carried and what every case now shows, the next
     cases — read afresh from the context
   start: advance(c) → round
   next utterance u, read on fuse(c, u) →
     [the utterance does not bear on this run]  the session answers it; that answer stays in the
                                                context; nothing is carried; no round of this run
-    [the person takes the space (`taken`)]     → FittedSolutionSpace, its record read on c, the
+    [the person takes the space (`taken`)]     → FusedSolutionSpace, its record read on c, the
                                                context that turn met
     [otherwise]                                advance(fuse(c, u)) → round
   no utterance: nothing is taken; the run holds
@@ -39,12 +39,12 @@ Harmoge(R) → start(c) → fit(c, utterances), where c is the fused session con
 /-! ── MORPHISM ──
 Target
   → gather               -- what bears on the target and its cases, read now (focus)
-  → apply                -- the latest answer carried into the target, as far as its words reach
+  → apply                -- what `applied` carries, into the target
   → replay               -- every case gathered since the call, on the target as it now stands
   → present              -- the space, the read-back, the replay, the next cases (focus)
   → fuse(u)              -- the person's turn joins the context whole
   → take                 -- the person's taking of the space the round showed (`ClosureSupported`)
-  → FittedSolutionSpace
+  → FusedSolutionSpace
 requires: target_named(R)               -- one target is in play: a direction, a design, or an existing implementation, whatever produced it
 deficit:  SolutionSpaceUnfused          -- activation precondition, declared by the user's call
 preserves: the person's turns           -- the target changes and the context only grows; no write and no replay reaches a purpose or a judgment, which only a later turn of the person's moves
@@ -53,7 +53,7 @@ invariant: Run, not read                -- what the target did on a case stands 
 The steps between gather and take are how you work toward a space the person can take. The
 contract fixes the deficit and its resolution, the coordinates only the person fills — the
 purpose, each case's judgment, the taking — and one condition on the work: before a round, the
-answer is carried and every case gathered so far is replayed.
+person's answers are carried and every case gathered so far is replayed.
 -/
 
 namespace Harmoge
@@ -148,7 +148,8 @@ def isFilled {A : Type} {q : Coord P A} {c : Context P} : Occ q c → Bool
 
 /-- **Your judgment**, the live inventory: every case this run has taken up since the call — a
     concrete situation the target meets, one you put to the person, one they brought, one their
-    reason opened, or one the call or the target already carried. A case taken up once stays,
+    reason opened, one where their answers lead to different outcomes, or one the call or the
+    target already carried. A case taken up once stays,
     whether or not the current round shows it and whether or not the space still turns on it,
     marked so. Whether a reworded case is the same case is your judgment. -/
 axiom cases : Context P → List Entry
@@ -160,7 +161,8 @@ axiom cases : Context P → List Entry
     say, never a list it is sorted into. Taking the outcome a round showed for the case adopts it
     as it was shown, and the record says it was taken rather than said. A reason or an example of
     their own reaches as far as it reaches: it may settle this case, open a further one, or move
-    the space, and it is no judgment of a case it does not speak to. A question back, a bare
+    the space; where it reaches a case it does not speak to, the target carries it and that case's
+    judgment stays as it was. A question back, a bare
     mention, or your own reading of what they would say settles nothing. A later turn of theirs
     may change it. -/
 axiom JudgmentSupported : Entry → Context P → Turn P → Entry → Prop
@@ -192,13 +194,12 @@ structure Replay (c : Context P) (k : Entry) where
   account : String
   returns : List (Returned c k)
 
-/-- **Your reading**, afresh on `c`: what the target, as it now stands, does on case `k`. Where a
-    return shows it, the account says so on that return, attached; a return from an earlier state
-    of the target is said to be from that state. Where none does, the account is your reading of
-    the target on the case — the wording of the target that decides it, quoted, or that the target
-    does not reach the case — said as a reading, with what a run would need where a run could show
-    more. Where a run and a reading both bear, both are there, and what stays unverified is
-    named. -/
+/-- **Your reading**, afresh on `c`: what the target, as it now stands, does on case `k`. Attach
+    each return beside the outcome it showed and name the state of the target it ran on. Where no
+    return shows the current outcome, the account is your reading of the target on the case — the
+    wording of the target that decides it, quoted, or that the target does not reach the case —
+    said as a reading, with what a run would need where a run could show more. Where a run and a
+    reading both bear, both are there, and what stays unverified is named. -/
 axiom replay : (c : Context P) → (k : Entry) → Replay c k
 
 /-- A case's row, on two axes kept apart: what the target now does on it, and what the person has
@@ -213,7 +214,7 @@ def rows (c : Context P) : List ((k : Entry) × Row c k) :=
 
 /-- **Your reading**, afresh every round: the solution space as it now stands — what now fits the
     purpose best, the alternatives that part from it and where, the premises they turn on, its
-    domain, and the boundaries still open, one no case has met yet among them. It is your reading
+    domain, the trade-offs the person has taken, and the boundaries still open. It is your reading
     and never a judgment of the person's. -/
 axiom space : Context P → String
 
@@ -237,12 +238,13 @@ axiom dissent : Context P → List String
     turn could be read either way, the session's answer says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
-/-- **Your judgment**: the cited turn takes the space the latest round showed as where they want
-    it, read whole on the context as it now stands. Taking what was shown takes all of it, with no
-    second permission for any line. Where the turn makes a change a condition of taking, it takes
-    nothing: the change is carried and replayed, and the next round shows it. Taking the outcome
-    of one case is that case's judgment, not the taking. Where the turn's intent is unclear, it takes nothing; nothing in the space, nor your own
-    reading, takes it. -/
+/-- **Your judgment**: the cited person turn, read whole against the accumulated context, takes the
+    space the latest round showed as enough for their intent and goal. A next move that uses that
+    space can express the taking. Taking the space adopts what was shown as it stood. A turn that
+    makes a change a condition of taking calls for that change to be carried, replayed and shown.
+    Taking a case outcome settles that case. Where the evidence gives you reason to question the
+    decision against the person's stated goal, you may put its consequence to them as the next
+    case. -/
 axiom ClosureSupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person takes the space. -/
@@ -272,20 +274,19 @@ def closed (c : Context P) : Closed P :=
   { context := c, purpose := purpose c, rows := rows c, space := space c,
     realization := realization c, dissent := dissent c }
 
-/-- Once it has run, the person can say: this is where I want the solution space for my purpose —
-    I saw it as it now stands, the cases I settled, what the target does on every case gathered
-    since I called this, and the boundaries still open, and I moved it until it was there.
-    `FittedSolutionSpace`: the person's taking of the space a round showed — `shown`, the record
+/-- Once it has run, the person can say: this space is enough for my purpose. I can see what I
+    accepted, what the target does on the cases we considered, and what I left open.
+    `FusedSolutionSpace`: the person's taking of the space a round showed — `shown`, the record
     read on the context that turn met, and `taking`, the turn itself. What the turn adds beyond
     the taking stays in the context in its own words and is no part of the record. The record
     covers the cases on it and claims nothing about a case not on it; it records the person's
     taking, not that the target is right. -/
-structure FittedSolutionSpace (P : Type) where
+structure FusedSolutionSpace (P : Type) where
   shown  : Closed P
   taking : Utterance P
 
 inductive Outcome (P : Type)
-  | fitted  (r : FittedSolutionSpace P)
+  | fused   (r : FusedSolutionSpace P)
   | holding (c : Context P)
 
 /-- **Your read**, now, of what the next judgment needs: the target's material and the records and
@@ -294,21 +295,20 @@ inductive Outcome (P : Type)
     What you say you read, you read to the end. Empty where nothing outside the context bears. -/
 axiom gathered : Context P → List (Evidence P)
 
-/-- **Your carrying**, now, of the latest answer into the target, as far as its words reach: what
-    the person's words and their reason say the target should do, wherever they reach, the case
-    being where that showed. Each write is observed, and what returns says what landed. Where the target
-    lives only in the conversation nothing is written and the round holds the revised version;
-    where the change needs a capability out of reach, that capability is named and the change is
-    not made. Empty where the answer moves nothing in the target. -/
+/-- **Your carrying**, now, of what the person's answers and reasons, as they stand, say the target
+    should do. Where replay shows the target has lost such an answer, carry it into the target
+    again. Each write is observed, and what returns says what landed. Where the target lives only
+    in the conversation nothing is written and the round holds the revised version; where the
+    change needs a capability out of reach, the round holds the draft as a proposal and names the
+    capability it needs to land. Empty where there is nothing to carry. -/
 axiom applied : Context P → List (Evidence P)
 
-/-- **Your judgment**: running the target on the cases gathered so far is within reach now and
-    would show what a reading of it cannot. Read on the context with what was gathered and
-    carried. -/
+/-- **Your judgment**: a run on some or all of the gathered cases is within reach now and would
+    show what a reading of it cannot. Read on the context with what was gathered and carried. -/
 axiom RunInReach : Context P → Prop
 
 /-- **Your run**, now: what the run handed off at `.run` returned — the target as it now stands on
-    the cases gathered so far, each return with what it ran on and what that leaves untested. -/
+    the cases reached by that run, each return with what it ran on and what that leaves untested. -/
 axiom ran : Context P → List (Evidence P)
 
 /-- The context with what `gathered` read now appended. -/
@@ -348,7 +348,7 @@ def fit (respond session : Context P → Response P) :
   | c, u :: us =>
     let f := fuse c u
     if ¬ Reaches f then fit respond session (f ++ [(session f).val]) us
-    else if taken f = true then .fitted ⟨closed c, u⟩
+    else if taken f = true then .fused ⟨closed c, u⟩
     else
       let c' := advance f
       fit respond session (c' ++ [(respond c').val]) us
@@ -359,20 +359,17 @@ def start (respond session : Context P → Response P) (c : Context P)
   fit respond session (advance c ++ [(respond (advance c)).val]) us
 
 /-! ── LOOP ──
-Every answer is read against the whole context as it now stands: nothing counts rounds or cases,
-and no earlier judgment is held apart from what later turns say. No fixed cap: each round is
-dialogue.
+Every answer is read against the whole context as it now stands.
 -/
 
 /-! ── CONVERGENCE ──
-converged: a FittedSolutionSpace a person's taking closed; holding is a run no turn of the person's
-has taken. The convergence evidence: the turn read as the taking, quoted; the purpose as it stood,
-marked as yours where you read it; every case on the record with what the target did on it — each
-return with what it showed and what it left untested, or your reading said as one with what a run
-would need — beside the person's judgment in their words, or as taken from a round, or still open,
-and where the two part, that; the space with its open boundaries, premises and domain; where the
-target stands and what was carried into it; what could not be reached; and the dissent — a contrary
-ground not shown before the taking is shown here, and the taking stands. Grounded, not asserted.
+converged: a FusedSolutionSpace a person's taking closed; holding is a run no turn of the person's
+has taken. The convergence evidence: how you read the taking, with the person's words; the purpose
+as it stood, marked as yours where you read it; every case on the record with what the target did
+on it — each return with what it showed and what it left untested, or your reading said as one with
+what a run would need — beside the person's judgment in their words, or as taken from a round, or
+still open, and where the two part, that; the space as shown; where the target stands and what was
+carried into it; what could not be reached; and the dissent. Grounded, not asserted.
 -/
 
 /-! ── TOOL GROUNDING ──
@@ -406,12 +403,12 @@ inductive Op | gather | apply | applyDelegate | run | assess | present | readAns
 def grounding : Op → Annot × String
   | .gather        => (.observe, "artifact read, artifact search, record read: what `gathered` reads, now, as its doc states; name what was reached and what was not")
   | .apply         => (.transform, "artifact write: what `applied` carries into the target, as its doc states")
-  | .applyDelegate => (.dispatch, "delegate (conditional): the write `applied` carries handed to execution, its return observed as that doc states; subordinate to the active runtime policy")
-  | .run           => (.dispatch, "delegate: where `RunInReach` holds, the target as it now stands run on the cases gathered so far; what returns enters the context as evidence, as `ran` states, before the round that shows it")
+  | .applyDelegate => (.dispatch, "delegate (conditional): the write `applied` carries handed to execution, its return observed as that doc states")
+  | .run           => (.dispatch, "delegate: where `RunInReach` holds, the target as it now stands run as `ran` describes; what returns enters the context as evidence, before the round that shows it")
   | .assess        => (.sense, "Internal analysis: the purpose reading, the inventory, each case's row, the space and where the target stands, over the whole fused context as it now stands")
-  | .present       => (.interaction .extension, "the round, every round the first included, in whatever form loads this person least. The space as `space` reads it. What you read from the last answer. What was carried into the target, and the replay: a summary over every case of the inventory, and each case whose outcome differs from the round before shown as that case — both outcomes, the person's judgment as it stands, and what you read as the cause. Then the next question: only what the person alone holds, as concrete cases, each rendered as the Protocol section says under \"Case rendering\" — as many as the turn carries, the one whose answer would move the target most first. A change of direction you would propose is shown as a situation where the current design and the changed design part. Your objection is relay: shown with its basis, and the run continues. Read the person's turn whole; where its intent was unclear, say in one line how you took it. Every round ends on one opening the person can take — judge a case, correct the space or the purpose, bring a case of their own, or take the space")
+  | .present       => (.interaction .extension, "the round, every round the first included, in whatever form loads this person least. The space as `space` reads it. What you read from the last answer. What was carried into the target, and the replay: a summary over every case of the inventory, and each case whose outcome differs from the round before shown as that case — both outcomes, the person's judgment as it stands, and what you read as the cause. Where there is a case the person can judge, the next question: only what the person alone holds, as concrete cases, each rendered as the Protocol section says under \"Case rendering\" — the most consequential first. Where a reading was uncertain, say how you took it. Every round ends on an opening the person can take — judge a case, correct the space or the purpose, bring a case of their own, or take the space")
   | .readAnswer    => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there, as `Reaches`, `PurposeSupported`, `JudgmentSupported` and `ClosureSupported` read it — read whole against the fused context as it now stands")
-  | .converge      => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with FittedSolutionSpace")
+  | .converge      => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with FusedSolutionSpace")
   | .seam          => (.interaction .extension, "after a taking, proceed to the next move the person declared, citing that turn")
 
 open Classical in
@@ -433,13 +430,13 @@ end Harmoge
 
 ## Mode Activation
 
-`/fit` is user-invoked only: activate when the user calls it on a target — a direction, a design, or an existing implementation; a bare command refers to the target most recently in play. The call declares the deficit, so the run starts on its first round without asking whether to start. Where the run reads that what the user intends is itself unclear — no purpose stated and none readable, so that no case could be judged against anything — the round says that reading with its basis and closes nothing.
+`/fit` is user-invoked only: activate when the user calls it on a target — a direction, a design, or an existing implementation; a bare command refers to the target most recently in play. The call declares the deficit, so the run starts on its first round without asking whether to start. Where what the person wants this run to improve is unclear, say what you can read of it and on what ground. If they say they have yet to form that intent, leave the fit open and offer to help them find it.
 
 ## Protocol
 
 ### Case rendering
 
-A case is a concrete situation as the person would meet it. Show its body — the message, the event, the input — so that the person judges the thing itself. Say where each case comes from: a record, the person's own example, or one you constructed, marked as constructed. Give each case a label that names it alone, and keep that label for the whole run.
+A case is a concrete situation as the person would meet it. Show its body — the message, the event, the input — so that the person judges the thing itself. Show an alternative design as the turn it would actually be, or the outcome the person would meet, in a situation they know; then the one thing that separates it from the others, and why. Take the alternatives one after another. Say where each case comes from: a record, the person's own example, or one you constructed, marked as constructed. Give each case a label that names it alone, and keep that label for the whole run.
 
 ### Space rendering
 
@@ -450,4 +447,4 @@ Show the space as the current sheet, and draw a picture only where alternatives 
 - **User-initiated only**: Activate only on the user's call; an explicit decline before activation withholds it.
 - **Round composition**: Compose each round so the reader can act without reassembly — state who does what, in words the reader already uses or meets often, composed from the meaning in the language they are using; keep each judgment beside its evidence and next-move implication; and place analytical context before the round's opening. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, content belongs to another round or the convergence evidence, or whether text belongs before the round's opening or inside it is in question.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
-- **Contract execution**: As FLOW, the judgments' doc comments, the `FittedSolutionSpace` doc, LOOP, TOOL GROUNDING's `present` entry, and CONVERGENCE state.
+- **Contract execution**: As FLOW, the judgments' doc comments, the `FusedSolutionSpace` doc, LOOP, TOOL GROUNDING's `present` entry, and CONVERGENCE state.

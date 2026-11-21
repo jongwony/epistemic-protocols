@@ -38,11 +38,11 @@ theorem unrelated_adds_no_round (respond session : Context P → Response P) (c 
       fit respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
   simp [fit, h]
 
-/-- A taking fits, and the record is read on the context the taking turn met. -/
-theorem taking_fits (respond session : Context P → Response P) (c : Context P)
+/-- A taking fuses, and the record is read on the context the taking turn met. -/
+theorem taking_fuses (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
     (ht : taken (fuse c u) = true) :
-    fit respond session c (u :: us) = .fitted ⟨closed c, u⟩ := by
+    fit respond session c (u :: us) = .fused ⟨closed c, u⟩ := by
   simp [fit, hre, ht]
 
 /-- A turn that bears on the run and takes nothing is answered by the work before a round, and
@@ -55,11 +55,11 @@ theorem untaken_advances_again (respond session : Context P → Response P) (c :
         (advance (fuse c u) ++ [(respond (advance (fuse c u))).val]) us := by
   simp [fit, hre, ht]
 
-theorem each_step_continues_or_fits (respond session : Context P → Response P) (c : Context P)
+theorem each_step_continues_or_fuses (respond session : Context P → Response P) (c : Context P)
     (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
     (h : fit respond session c (u :: us) = o) :
     (∃ c', fit respond session c' us = o) ∨
-    (Reaches (fuse c u) ∧ taken (fuse c u) = true ∧ o = .fitted ⟨closed c, u⟩) := by
+    (Reaches (fuse c u) ∧ taken (fuse c u) = true ∧ o = .fused ⟨closed c, u⟩) := by
   simp only [fit] at h
   split at h
   · exact .inl ⟨_, h⟩
@@ -67,30 +67,30 @@ theorem each_step_continues_or_fits (respond session : Context P → Response P)
     · exact .inr ⟨Classical.not_not.mp (by assumption), by assumption, h.symm⟩
     · exact .inl ⟨_, h⟩
 
-/-! Provenance of a fitted run. -/
+/-! Provenance of a fused run. -/
 
-/-- A run ends fitted only on a person's utterance that bears on it and takes the space, and its
+/-- A run ends fused only on a person's utterance that bears on it and takes the space, and its
     record is the readings of the context that utterance met. -/
-theorem fitted_by_person_taking (respond session : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : FittedSolutionSpace P)
-    (h : fit respond session c us = .fitted r) :
+theorem fused_by_person_taking (respond session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : FusedSolutionSpace P)
+    (h : fit respond session c us = .fused r) :
     ∃ (c₀ : Context P) (u : Utterance P),
       Reaches (fuse c₀ u) ∧ taken (fuse c₀ u) = true ∧ r = ⟨closed c₀, u⟩ := by
   induction us generalizing c with
   | nil => simp [fit] at h
   | cons u us ih =>
-    rcases each_step_continues_or_fits respond session c u us _ h with ⟨c', h'⟩ | ⟨hre, ht, h'⟩
+    rcases each_step_continues_or_fuses respond session c u us _ h with ⟨c', h'⟩ | ⟨hre, ht, h'⟩
     · exact ih c' h'
     · cases h'
       exact ⟨c, u, hre, ht, rfl⟩
 
-/-- The record of a fitted run is read on the context its taking turn met: fusing that turn onto
+/-- The record of a fused run is read on the context its taking turn met: fusing that turn onto
     the record's context gives the context on which the taking was read. -/
-theorem fitted_record_is_what_the_taking_met (respond session : Context P → Response P)
-    (c : Context P) (us : List (Utterance P)) (r : FittedSolutionSpace P)
-    (h : fit respond session c us = .fitted r) :
+theorem fused_record_is_what_the_taking_met (respond session : Context P → Response P)
+    (c : Context P) (us : List (Utterance P)) (r : FusedSolutionSpace P)
+    (h : fit respond session c us = .fused r) :
     r.shown = closed r.shown.context ∧ taken (fuse r.shown.context r.taking) = true := by
-  rcases fitted_by_person_taking respond session c us r h with ⟨c₀, u, _, ht, rfl⟩
+  rcases fused_by_person_taking respond session c us r h with ⟨c₀, u, _, ht, rfl⟩
   exact ⟨rfl, ht⟩
 
 /-- Where `taken` holds on a context ending in an utterance, the closure is filled, its own
