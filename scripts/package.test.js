@@ -1126,6 +1126,7 @@ describe('package.js CLI', () => {
         'contextualize.zip',
         'elicit.zip',
         'epistemic-protocols-bundle.zip',
+        'fit.zip',
         'grasp.zip',
         'ground.zip',
         'ideate.zip',

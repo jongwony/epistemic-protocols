@@ -121,6 +121,7 @@ const CODEX_SUBMIT_PLUGINS = Object.freeze([
   { dir: 'periagoge', skill: 'induce' },
   { dir: 'proplasma', skill: 'preview' },
   { dir: 'hypotyposis', skill: 'sketch' },
+  { dir: 'harmoge', skill: 'fit' },
   { dir: 'merismos', skill: 'apportion' },
 ]);
 const CODEX_SUBMIT_EXCLUDED = new Set(['anamnesis']);

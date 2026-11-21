@@ -161,6 +161,18 @@
       "category": "Productivity"
     },
     {
+      "name": "harmoge",
+      "source": {
+        "source": "local",
+        "path": "./harmoge"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
       "name": "heuresis",
       "source": {
         "source": "local",

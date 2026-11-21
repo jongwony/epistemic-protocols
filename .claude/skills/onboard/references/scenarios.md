@@ -140,6 +140,23 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Philosophy**: ὑποτύπωσις (outline, sketch) — the first drawing of a position, made before it can be stated. Core principle: **Recognition over Description**. Workflow position: after `/preview` (which commits to a direction and discards its probes) and before execution; `/sketch` keeps the version you recognized. Game feel: "I'd know it when I see it" → a rough version appears → you mark it → it comes back changed → you recognize the one that fits.
 
+## Harmoge `/fit`
+
+**Situation**: You have a rule, a design, or a piece of code, and you know what it is for. Reading it, everything looks right — and then one concrete message or event shows it doing something you would never accept. Asked in the abstract ("should group requests count?"), you can't answer; shown the actual message, you answer at once.
+
+**Intervention**: `/fit` turns the interview around: you hold the purpose and judge cases, the AI asks. Each round shows the solution space as it now stands — what fits best, the alternatives, the premises, the domain, the boundaries still open — then what it read from your last answer and on which turn each reading rests, what it carried into the target, and what the target now does on every case gathered since you called it, with any case whose outcome changed shown as that case. Then it asks the next concrete cases, bodies shown, most consequential first. Your answer binds as far as your words reach, and your judgment of a case changes only when you change it. Where nothing can be run — a design in prose — what the target "does" on a case is Claude's reading of it, said as a reading. It closes when you take the space shown as enough for your purpose; you can stop at any time, and stopping takes nothing — what was already carried into the target stays there.
+
+**Trial prompt**: "Let's practice: name a rule, a design, or a piece of code you'd call 'mostly right' — I'll show how /fit finds where it parts from what you intend by putting concrete cases in front of you"
+
+**Quiz Q (situation)**: Your notification rule says "surface anything waiting on me." It reads fine. Then someone asks: does a request to your whole team count? You can't say in general — but shown the actual Slack message, you'd know immediately.
+- A) Euporia `/elicit` — B) Harmoge `/fit` — C) Periagoge `/induce` — D) Hypotyposis `/sketch`
+- Answer: B
+
+**Quiz Q (design)**: The user knows their purpose but cannot state the rule in advance. How do you bring the target to their intent without making them judge abstractions, and without quietly breaking what they settled earlier?
+- Hint: Ask concrete cases instead of readings, carry each answer into the target as what it says the target should do rather than as an exception for one case, and replay every case gathered so far so a changed outcome comes back to them as that case — their judgment standing.
+
+**Philosophy**: ἁρμογή (fitting together, joining) — the mason's joint: two parts brought to meet, checked where they touch. Core principle: **Cases over Descriptions**. Workflow position: once the intent is held (after `/elicit` where it was unclear) and a target exists or is being made; the mirror of `/grasp`, which brings understanding to a target that stays put. Game feel: "it depends on the case" → a concrete case appears → you judge it → the target changes → every earlier case is run again → the space is enough for your purpose.
+
 ## Heuresis `/ideate`
 
 **Situation**: You've got a topic to write about — or maybe just a couple of scattered fragments jotted down — and what you need isn't a decision between two known options, and it isn't analytical lenses on a question you've already fixed. You just need more raw material. Right now you have one idea, or none, and you keep circling back to the same one or two instead of getting anywhere new.
