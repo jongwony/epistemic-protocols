@@ -74,6 +74,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Heuresis](./heuresis) | `/ideate` | You have no candidates yet, the ones you have narrowed too early, or the field is thin — widen it before choosing any, or pick up a field you widened before | You can look over one map of your idea field — each frame and the branches dug under it, every candidate with where it came from, what stays unexplored, and what you set out of scope or aside — and take that field forward, with nothing in it chosen or ranked; choosing among it is a separate act |
 | [Proplasma](./proplasma) | `/preview` | You're about to commit to one of several directions, but you can't judge them from their descriptions — you'd have to see them first | You can say what each direction means for your purpose, whether that rests on a probe you saw, a description, your own account, or evidence, and which one you take |
 | [Hypotyposis](./hypotyposis) | `/sketch` | You have to make something and can't say what it should be, but you'd recognize it on sight | You can point at a version as you met it and say "this is the form, for this purpose", and see where it and the passed-over versions are |
+| [Harmoge](./harmoge) | `/fit` | You know what you are after, and a direction, a design or an implementation has to be brought to it — no description tells you where it stops matching, only concrete cases do | You can see the solution space as it now stands — the cases you settled, what the target does on every case gathered so far, the boundaries still open — and say it is where you want it |
 | [Analogia](./analogia) | `/ground` | You're carrying a framework, an analogy, or an earlier design over to a case, or checking an abstraction against its own cases, and it isn't clear what that comparison actually supports | You can say what carries each conclusion, what was checked and found, what would break it, and whether it holds, is blocked, or remains undetermined |
 | [Periagoge](./periagoge) | `/induce` | Several concrete cases seem to share something no one has named yet, or that a name in use no longer says — pin down what they have in common | You can name what your cases share, say which cases it takes in and which it leaves out, and recognize it as serving your goal |
 | [Merismos](./merismos) | `/apportion` | You're about to hand one goal to an autonomous run — cut it into units that each fit one stretch of the run and carry their own conditions for when they are done | You can call the plan yours — units with their checks, accepted gaps, and held judgments; what needed you before the run is settled, and the rest comes back to you once at the end |
@@ -130,6 +131,7 @@ When editing the project's public description, follow the Mission/vision wording
 | Hyphegesis | ὑφήγησις | Leading the way, guiding from ahead |
 | Proplasma | πρόπλασμα | Preliminary model, first mold |
 | Hypotyposis | ὑποτύπωσις | Outline, first sketch |
+| Harmoge | ἁρμογή | Fitting together, joining |
 | Heuresis | εὕρεσις | Finding, discovery |
 
 </details>

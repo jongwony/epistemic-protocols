@@ -80,6 +80,7 @@ const protocolMap = {
   "/grasp": ["grasp", "katalepsis"], "/apportion": ["apportion", "merismos"],
   "/induce": ["induce", "periagoge"], "/preview": ["preview", "proplasma"],
   "/sketch": ["sketch", "hypotyposis"],
+  "/fit": ["fit", "harmoge"],
   "/route": ["route", "route"],
   "/clarify": ["clarify", null], "/goal": ["goal", null],
   "/reflect": ["reflect", null], "/write": ["write", null],
