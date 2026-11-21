@@ -9,7 +9,7 @@ Bring a target — a direction, a design, an implementation — to what the pers
 
 ## Definition
 
-**Harmoge** (ἁρμογή): a fitting together, a joining of parts into a whole. A dialogical act for the moment when the solution space a target opens for the person's purpose cannot be fused with what they intend from its description alone: its boundaries show only where they meet a concrete case. The roles are those of an interview turned around — the AI interviews, and the person holds the Northstar and the purpose, gives or corrects them, and judges the cases. Each round shows the solution space as it now stands, what the AI read from the last answer and on which turn each reading rests, what it carried into the target and what the target now does on every case gathered since the call, and then the next question: only what the person alone holds, as concrete cases. The person answers in their own words; an answer binds as far as those words reach, and a reason or an example of their own can open a further case or move the space. The run closes when the person takes the space a round showed, and its record is that space — the cases they settled, the trade-offs they took, the boundaries still open, the premises and the domain — with the target as its realization and what it did on each case. What the target does on a case is a result of the run only as far as a run of it returned; where nothing ran, it is the AI's reading of the target, said as one.
+**Harmoge** (ἁρμογή): a fitting together, a joining of parts into a whole. A dialogical act for the moment when the solution space a target opens for the person's purpose cannot be fused with what they intend from its description alone: its boundaries show only where they meet a concrete case. The roles are those of an interview turned around — the AI interviews, and the person holds the Northstar and the purpose, gives or corrects them, and judges the cases. Each round shows the solution space as it now stands, what the AI read from the last answer and on which turn each reading rests, what it carried into the target and what the target now does on every case gathered since the call, and then the next question: only what the person alone holds, as concrete cases. The person answers in their own words; an answer binds as far as those words reach, and a reason or an example of their own can open a further case or move the space. The run's result is the person's taking of the space a round showed, as it stands when their turns end: a later turn of theirs can withdraw it or take the space again. Its record is that space — the cases they settled, the trade-offs they took, the boundaries still open, the premises and the domain — with the target as its realization and what it did on each case. What the target does on a case is a result of the run only as far as a run of it returned; where nothing ran, it is the AI's reading of the target, said as one.
 
 ```lean
 /-!
@@ -26,14 +26,18 @@ Harmoge(R) → start(c) → fit(c, utterances), where c is the fused session con
     where a run of the target is in reach (`RunInReach`), the run returns what `ran` records
   round(c): the space, the read-back, what was carried and what every case now shows, the next
     cases — read afresh from the context
-  start: advance(c) → round
-  next utterance u, read on fuse(c, u) →
+  start: advance(c) → round; nothing is taken
+  next utterance u, read on fuse(c, u), with the taking that stands →
     [the utterance does not bear on this run]  the session answers it; that answer stays in the
-                                               context; nothing is carried; no round of this run
-    [the person takes the space (`taken`)]     → FusedSolutionSpace, its record read on c, the
-                                               context that turn met
-    [otherwise]                                advance(fuse(c, u)) → round
-  no utterance: nothing is taken; the run holds
+                                               context; nothing is carried; no round of this run;
+                                               the taking that stands stays as it was
+    [the person takes the space (`taken`)]     advance(fuse(c, u)) → relay: how the turn was taken
+                                               and what it carried; this taking now stands, its
+                                               record read on c, the context that turn met
+    [otherwise]                                advance(fuse(c, u)) → round; no taking stands, an
+                                               earlier one included
+  no further utterance: the taking that stands is the FusedSolutionSpace; where none stands, the
+    run holds
 -/
 
 /-! ── MORPHISM ──
@@ -44,10 +48,11 @@ Target
   → present              -- the space, the read-back, the replay, the next cases (focus)
   → fuse(u)              -- the person's turn joins the context whole
   → take                 -- the person's taking of the space the round showed (`ClosureSupported`)
-  → FusedSolutionSpace
+  → relay                -- how the turn was taken and what it carried; the person's later turns are read on it
+  → FusedSolutionSpace   -- the taking that stands when their turns end
 requires: target_named(R)               -- one target is in play: a direction, a design, or an existing implementation, whatever produced it
 deficit:  SolutionSpaceUnfused          -- activation precondition, declared by the user's call
-preserves: the person's turns           -- the target changes and the context only grows; no write and no replay reaches a purpose or a judgment, which only a later turn of the person's moves
+preserves: the person's turns           -- the target changes and the context only grows; no write and no replay reaches a purpose, a judgment or a taking, which only a later turn of the person's moves
 invariant: Grounded, not asserted       -- every claim a round makes says the turn it rests on: the person's, a cited return, or marked as your inference
 invariant: Run, not read                -- what the target did on a case stands as observed only on a cited return, as `replay` states
 The steps between gather and take are how you work toward a space the person can take. The
@@ -218,7 +223,7 @@ def rows (c : Context P) : List ((k : Entry) × Row c k) :=
     and never a judgment of the person's. -/
 axiom space : Context P → String
 
-/-- **Your reading**: where the target now stands — its location, or the round whose text holds it
+/-- **Your reading**: where the target now stands — its location, or the reply whose text holds it
     where it lives only in the conversation — and what this run carried into it, as observed. -/
 axiom realization : Context P → String
 
@@ -234,28 +239,34 @@ axiom dissent : Context P → List String
     context, and no round is drawn. Words that end the run without taking the space do not bear on
     it, whatever else the turn says, and what else it says stands in its own words in the context:
     the session answers them, no round is drawn, the run holds, and later turns bear on it only
-    where they come back to it; your own reading that the person is done ends nothing. Where a
-    turn could be read either way, the session's answer says briefly how it took it. -/
+    where they come back to it; your own reading that the person is done ends nothing. Once a
+    taking stands, a turn bears where it moves what was taken — withdraws it, changes a judgment
+    or the purpose, brings a case — or takes the space again, whatever else it says; a question
+    about the taken space is answered by the session, and the taking stands. Where a turn could be
+    read either way, the session's answer says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your judgment**: the cited person turn, read whole against the accumulated context, takes the
     space the latest round showed as enough for their intent and goal. A next move that uses that
     space can express the taking. Taking the space adopts what was shown as it stood. A turn that
     makes a change a condition of taking calls for that change to be carried, replayed and shown.
-    Taking a case outcome settles that case. Where the evidence gives you reason to question the
-    decision against the person's stated goal, you may put its consequence to them as the next
-    case. -/
+    Taking a case outcome settles that case. Where the turn rests on a premise the evidence in the
+    context contradicts, or goes against the goal the person stated, and no round has yet shown
+    them what follows, read the taking as still open: the next round puts that consequence to them
+    as a case, with its ground. Once they have seen it, a turn that takes the space takes it with
+    that trade-off, and `dissent` carries the ground. -/
 axiom ClosureSupported : Context P → Turn P → Unit → Prop
 
 /-- Only the person takes the space. -/
 def closureCoord : Coord P Unit :=
   { admits := (·.val = .person), supports := ClosureSupported }
 
-/-- **Your reading**: the person's taking; `open_` until one reaches it. -/
+/-- **Your reading**: the person's taking as it stands in `c`, citing the turn that made it;
+    `open_` where none stands. -/
 axiom closure : (c : Context P) → Occ (closureCoord (P := P)) c
 
-/-- The taking the run acts on: the closure filled on the latest turn of `f`. A turn before it
-    takes nothing now. -/
+/-- Whether the latest turn of `f` takes the space: the closure filled on that turn. Which taking
+    stands across the person's turns is `fit`'s. -/
 def taken (f : Context P) : Bool :=
   match closure f with
   | .open_ _         => false
@@ -278,9 +289,9 @@ def closed (c : Context P) : Closed P :=
     accepted, what the target does on the cases we considered, and what I left open.
     `FusedSolutionSpace`: the person's taking of the space a round showed — `shown`, the record
     read on the context that turn met, and `taking`, the turn itself. What the turn adds beyond
-    the taking stays in the context in its own words and is no part of the record. The record
-    covers the cases on it and claims nothing about a case not on it; it records the person's
-    taking, not that the target is right. -/
+    the taking is carried as any turn of theirs is, and the relay shows it beside the record. The
+    record covers the cases on it and claims nothing about a case not on it; it records the
+    person's taking, not that the target is right. -/
 structure FusedSolutionSpace (P : Type) where
   shown  : Closed P
   taking : Utterance P
@@ -298,8 +309,8 @@ axiom gathered : Context P → List (Evidence P)
 /-- **Your carrying**, now, of what the person's answers and reasons, as they stand, say the target
     should do. Where replay shows the target has lost such an answer, carry it into the target
     again. Each write is observed, and what returns says what landed. Where the target lives only
-    in the conversation nothing is written and the round holds the revised version; where the
-    change needs a capability out of reach, the round holds the draft as a proposal and names the
+    in the conversation nothing is written and the reply holds the revised version; where the
+    change needs a capability out of reach, the reply holds the draft as a proposal and names the
     capability it needs to land. Empty where there is nothing to carry. -/
 axiom applied : Context P → List (Evidence P)
 
@@ -318,8 +329,9 @@ def consulted (c : Context P) : Context P := c ++ (gathered c).map (·.val)
 def carried (c : Context P) : Context P := c ++ (applied c).map (·.val)
 
 open Classical in
-/-- The work before a round, in order: what bears, gathered; the answer, carried; and, where
-    `RunInReach` holds on the context that leaves, the cases run, as `advanceOps` hands it off. -/
+/-- The work before a round or a relay, in order: what bears, gathered; the answer, carried; and,
+    where `RunInReach` holds on the context that leaves, the cases run, as `advanceOps` hands it
+    off. -/
 def advance (c : Context P) : Context P :=
   let c₁ := carried (consulted c)
   if RunInReach c₁ then c₁ ++ (ran c₁).map (·.val) else c₁
@@ -335,36 +347,42 @@ inventory.
 -/
 
 /-! ── PHASE TRANSITIONS ──
-A step is one arm of a structural recursion over the person's utterances. `respond` is the round,
-as TOOL GROUNDING's `present` entry names it; `session` is the session's own answer to an utterance
-that does not bear on the run, which stays in the context without being a round of this run. The
-work before a round appends what `advance` returns [Tool].
+A step is one arm of a structural recursion over the person's utterances, carrying the taking the
+run now stands on. `respond` is the round, as TOOL GROUNDING's `present` entry names it; `relay`
+is the answer to a taking, as its `converge` entry names it; `session` is the session's own answer
+to an utterance that does not bear on the run, which stays in the context without being a round of
+this run. The work before a round or a relay appends what `advance` returns [Tool].
 -/
 
 open Classical in
-def fit (respond session : Context P → Response P) :
-    Context P → List (Utterance P) → Outcome P
-  | c, []      => .holding c
-  | c, u :: us =>
+/-- `standing` is the taking the run now stands on: `none` until a turn of the person's takes the
+    space, and again after a later turn of theirs bears on the run without taking it. -/
+def fit (respond relay session : Context P → Response P) :
+    Context P → Option (FusedSolutionSpace P) → List (Utterance P) → Outcome P
+  | c, none,   []      => .holding c
+  | _, some r, []      => .fused r
+  | c, standing, u :: us =>
     let f := fuse c u
-    if ¬ Reaches f then fit respond session (f ++ [(session f).val]) us
-    else if taken f = true then .fused ⟨closed c, u⟩
+    if ¬ Reaches f then fit respond relay session (f ++ [(session f).val]) standing us
     else
       let c' := advance f
-      fit respond session (c' ++ [(respond c').val]) us
+      if taken f = true then
+        fit respond relay session (c' ++ [(relay c').val]) (some ⟨closed c, u⟩) us
+      else fit respond relay session (c' ++ [(respond c').val]) none us
 
-/-- The run opens on the work before a round, and its first round. -/
-def start (respond session : Context P → Response P) (c : Context P)
+/-- The run opens on the work before a round, and its first round, with nothing taken. -/
+def start (respond relay session : Context P → Response P) (c : Context P)
     (us : List (Utterance P)) : Outcome P :=
-  fit respond session (advance c ++ [(respond (advance c)).val]) us
+  fit respond relay session (advance c ++ [(respond (advance c)).val]) none us
 
 /-! ── LOOP ──
-Every answer is read against the whole context as it now stands.
+Every answer is read against the whole context as it now stands, a turn after a taking among them.
 -/
 
 /-! ── CONVERGENCE ──
-converged: a FusedSolutionSpace a person's taking closed; holding is a run no turn of the person's
-has taken. The convergence evidence: how you read the taking, with the person's words; the purpose
+converged: the FusedSolutionSpace of the latest taking, which no later turn of the person's has
+moved; holding is a run on which no taking stands. The convergence evidence, relayed on the taking
+turn: how you read the taking, with the person's words; the purpose
 as it stood, marked as yours where you read it; every case on the record with what the target did
 on it — each return with what it showed and what it left untested, or your reading said as one with
 what a run would need — beside the person's judgment in their words, or as taken from a round, or
@@ -404,11 +422,11 @@ def grounding : Op → Annot × String
   | .gather        => (.observe, "artifact read, artifact search, record read: what `gathered` reads, now, as its doc states; name what was reached and what was not")
   | .apply         => (.transform, "artifact write: what `applied` carries into the target, as its doc states")
   | .applyDelegate => (.dispatch, "delegate (conditional): the write `applied` carries handed to execution, its return observed as that doc states")
-  | .run           => (.dispatch, "delegate: where `RunInReach` holds, the target as it now stands run as `ran` describes; what returns enters the context as evidence, before the round that shows it")
+  | .run           => (.dispatch, "delegate: where `RunInReach` holds, the target as it now stands run as `ran` describes; what returns enters the context as evidence, before the reply that shows it")
   | .assess        => (.sense, "Internal analysis: the purpose reading, the inventory, each case's row, the space and where the target stands, over the whole fused context as it now stands")
   | .present       => (.interaction .extension, "the round, every round the first included, in whatever form loads this person least. The space as `space` reads it. What you read from the last answer. What was carried into the target, and the replay: a summary over every case of the inventory, and each case whose outcome differs from the round before shown as that case — both outcomes, the person's judgment as it stands, and what you read as the cause. Where there is a case the person can judge, the next question: only what the person alone holds, as concrete cases, each rendered as the Protocol section says under \"Case rendering\" — the most consequential first. Where a reading was uncertain, say how you took it. Every round ends on an opening the person can take — judge a case, correct the space or the purpose, bring a case of their own, or take the space")
   | .readAnswer    => (.sense, "Internal analysis: whether the latest utterance bears on this run and what it does there, as `Reaches`, `PurposeSupported`, `JudgmentSupported` and `ClosureSupported` read it — read whole against the fused context as it now stands")
-  | .converge      => (.interaction .extension, "the convergence evidence CONVERGENCE names; proceed with FusedSolutionSpace")
+  | .converge      => (.interaction .extension, "the convergence evidence CONVERGENCE names, with what the taking turn carried; proceed with FusedSolutionSpace, and read the person's later turns on it")
   | .seam          => (.interaction .extension, "after a taking, proceed to the next move the person declared, citing that turn")
 
 open Classical in
@@ -436,7 +454,7 @@ end Harmoge
 
 ### Case rendering
 
-A case is a concrete situation as the person would meet it. Show its body — the message, the event, the input — so that the person judges the thing itself. Show an alternative design as the turn it would actually be, or the outcome the person would meet, in a situation they know; then the one thing that separates it from the others, and why. Take the alternatives one after another. Say where each case comes from: a record, the person's own example, or one you constructed, marked as constructed. Give each case a label that names it alone, and keep that label for the whole run.
+A case is a concrete situation as the person would meet it. Show its body — the message, the event, the input — so that the person judges the thing itself. An alternative is shown as what would actually be said or met in that situation — the turn someone would say, the reply, the outcome — quoted as it would be, and under it one line: what it gains and what it costs against the way the target goes now, and why that is the axis to decide on. Each alternative stands as its own such unit, one after another; a design gets a name only once it has been shown this way. Say where each case comes from: a record, the person's own example, or one you constructed, marked as constructed. Give each case a label that names it alone, and keep that label for the whole run.
 
 ### Space rendering
 
@@ -447,4 +465,4 @@ Show the space as the current sheet, and draw a picture only where alternatives 
 - **User-initiated only**: Activate only on the user's call; an explicit decline before activation withholds it.
 - **Round composition**: Compose each round so the reader can act without reassembly — state who does what, in words the reader already uses or meets often, composed from the meaning in the language they are using; keep each judgment beside its evidence and next-move implication; and place analytical context before the round's opening. Read `references/round-composition.md` before composing when terminology must remain stable, wording must be carried unchanged, content belongs to another round or the convergence evidence, or whether text belongs before the round's opening or inside it is in question.
 - **Form feedback**: Derive each round's density from the current request; carry an explicit form instruction until countermanded. Change form directly. Elements fixed elsewhere remain fixed; state what changed and, where the instruction overlaps a fixed element, what stays and why.
-- **Contract execution**: As FLOW, the judgments' doc comments, the `FusedSolutionSpace` doc, LOOP, TOOL GROUNDING's `present` entry, and CONVERGENCE state.
+- **Contract execution**: As FLOW, the judgments' doc comments, the `FusedSolutionSpace` doc, LOOP, TOOL GROUNDING's `present` and `converge` entries, and CONVERGENCE state.

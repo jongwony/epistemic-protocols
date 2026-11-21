@@ -23,74 +23,129 @@ instance {c : Context P} {k : Entry} : Nonempty (Replay c k) := ⟨⟨"", []⟩�
 
 /-! The recursion, arm by arm. -/
 
-theorem silence (respond session : Context P → Response P) (c : Context P) :
-    fit respond session c [] = .holding c := by
+theorem silence (respond relay session : Context P → Response P) (c : Context P) :
+    fit respond relay session c none [] = .holding c := by
   simp [fit]
 
-theorem start_advances_first (respond session : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) :
-    start respond session c us =
-      fit respond session (advance c ++ [(respond (advance c)).val]) us := rfl
+/-- Where the person's last turn that bore on the run took the space, the run ends on that
+    taking. -/
+theorem silence_after_taking (respond relay session : Context P → Response P) (c : Context P)
+    (r : FusedSolutionSpace P) :
+    fit respond relay session c (some r) [] = .fused r := by
+  simp [fit]
 
-theorem unrelated_adds_no_round (respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (h : ¬ Reaches (fuse c u)) :
-    fit respond session c (u :: us) =
-      fit respond session (fuse c u ++ [(session (fuse c u)).val]) us := by
+theorem start_advances_first (respond relay session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) :
+    start respond relay session c us =
+      fit respond relay session (advance c ++ [(respond (advance c)).val]) none us := rfl
+
+/-- An utterance about other work is answered by the session and leaves the standing taking as
+    it was. -/
+theorem unrelated_adds_no_round (respond relay session : Context P → Response P) (c : Context P)
+    (r : Option (FusedSolutionSpace P)) (u : Utterance P) (us : List (Utterance P))
+    (h : ¬ Reaches (fuse c u)) :
+    fit respond relay session c r (u :: us) =
+      fit respond relay session (fuse c u ++ [(session (fuse c u)).val]) r us := by
   simp [fit, h]
 
-/-- A taking fuses, and the record is read on the context the taking turn met. -/
-theorem taking_fuses (respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
-    (ht : taken (fuse c u) = true) :
-    fit respond session c (u :: us) = .fused ⟨closed c, u⟩ := by
+/-- A taking is carried like any bearing turn, relayed, and stands, its record read on the
+    context the taking turn met; the run goes on reading the person's later turns. -/
+theorem taking_fuses (respond relay session : Context P → Response P) (c : Context P)
+    (r : Option (FusedSolutionSpace P)) (u : Utterance P) (us : List (Utterance P))
+    (hre : Reaches (fuse c u)) (ht : taken (fuse c u) = true) :
+    fit respond relay session c r (u :: us) =
+      fit respond relay session
+        (advance (fuse c u) ++ [(relay (advance (fuse c u))).val]) (some ⟨closed c, u⟩) us := by
   simp [fit, hre, ht]
 
-/-- A turn that bears on the run and takes nothing is answered by the work before a round, and
-    then the round. -/
-theorem untaken_advances_again (respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (hre : Reaches (fuse c u))
-    (ht : taken (fuse c u) = false) :
-    fit respond session c (u :: us) =
-      fit respond session
-        (advance (fuse c u) ++ [(respond (advance (fuse c u))).val]) us := by
+/-- A turn that bears on the run and takes nothing is answered by the work before a round and the
+    round, and no taking stands after it, an earlier one included. -/
+theorem untaken_advances_again (respond relay session : Context P → Response P) (c : Context P)
+    (r : Option (FusedSolutionSpace P)) (u : Utterance P) (us : List (Utterance P))
+    (hre : Reaches (fuse c u)) (ht : taken (fuse c u) = false) :
+    fit respond relay session c r (u :: us) =
+      fit respond relay session
+        (advance (fuse c u) ++ [(respond (advance (fuse c u))).val]) none us := by
   simp [fit, hre, ht]
 
-theorem each_step_continues_or_fuses (respond session : Context P → Response P) (c : Context P)
-    (u : Utterance P) (us : List (Utterance P)) (o : Outcome P)
-    (h : fit respond session c (u :: us) = o) :
-    (∃ c', fit respond session c' us = o) ∨
-    (Reaches (fuse c u) ∧ taken (fuse c u) = true ∧ o = .fused ⟨closed c, u⟩) := by
-  simp only [fit] at h
-  split at h
-  · exact .inl ⟨_, h⟩
-  · split at h
-    · exact .inr ⟨Classical.not_not.mp (by assumption), by assumption, h.symm⟩
-    · exact .inl ⟨_, h⟩
+/-- Every step goes on to the next utterance, and the taking it leaves standing is the one before
+    it, none, or the person's taking on that turn. -/
+theorem each_step_continues (respond relay session : Context P → Response P) (c : Context P)
+    (r : Option (FusedSolutionSpace P)) (u : Utterance P) (us : List (Utterance P)) :
+    ∃ c' r', fit respond relay session c r (u :: us) = fit respond relay session c' r' us ∧
+      (r' = r ∨ r' = none ∨
+        (Reaches (fuse c u) ∧ taken (fuse c u) = true ∧ r' = some ⟨closed c, u⟩)) := by
+  by_cases hre : Reaches (fuse c u)
+  · by_cases ht : taken (fuse c u) = true
+    · exact ⟨_, _, taking_fuses respond relay session c r u us hre ht,
+        .inr (.inr ⟨hre, ht, rfl⟩)⟩
+    · exact ⟨_, _, untaken_advances_again respond relay session c r u us hre
+        (Bool.eq_false_iff.mpr ht), .inr (.inl rfl)⟩
+  · exact ⟨_, _, unrelated_adds_no_round respond relay session c r u us hre, .inl rfl⟩
+
+/-- A later turn of the person's that bears on the run and takes nothing leaves the run holding,
+    whatever taking stood before it. -/
+theorem later_untaken_turn_holds (respond relay session : Context P → Response P) (c : Context P)
+    (r : Option (FusedSolutionSpace P)) (u : Utterance P)
+    (hre : Reaches (fuse c u)) (ht : taken (fuse c u) = false) :
+    ∃ c', fit respond relay session c r [u] = .holding c' := by
+  rw [untaken_advances_again respond relay session c r u [] hre ht]
+  exact ⟨_, silence respond relay session _⟩
+
+/-- The run ends on the taking of the latest turn that bore on it: where that turn took the space,
+    that taking is the result, an earlier one replaced. -/
+theorem latest_taking_is_the_result (respond relay session : Context P → Response P)
+    (c : Context P) (r : Option (FusedSolutionSpace P)) (u : Utterance P)
+    (hre : Reaches (fuse c u)) (ht : taken (fuse c u) = true) :
+    fit respond relay session c r [u] = .fused ⟨closed c, u⟩ := by
+  rw [taking_fuses respond relay session c r u [] hre ht]
+  exact silence_after_taking respond relay session _ _
 
 /-! Provenance of a fused run. -/
 
-/-- A run ends fused only on a person's utterance that bears on it and takes the space, and its
-    record is the readings of the context that utterance met. -/
-theorem fused_by_person_taking (respond session : Context P → Response P) (c : Context P)
-    (us : List (Utterance P)) (r : FusedSolutionSpace P)
-    (h : fit respond session c us = .fused r) :
-    ∃ (c₀ : Context P) (u : Utterance P),
-      Reaches (fuse c₀ u) ∧ taken (fuse c₀ u) = true ∧ r = ⟨closed c₀, u⟩ := by
-  induction us generalizing c with
-  | nil => simp [fit] at h
+/-- Wherever every standing taking was made by a person's utterance that bore on the run and took
+    the space, so was the taking a fused run ends on. -/
+private theorem fused_keeps_by_taking (respond relay session : Context P → Response P)
+    (us : List (Utterance P)) :
+    ∀ (c : Context P) (s : Option (FusedSolutionSpace P)) (r : FusedSolutionSpace P),
+      (∀ x, s = some x → ∃ (c₀ : Context P) (u : Utterance P),
+        Reaches (fuse c₀ u) ∧ taken (fuse c₀ u) = true ∧ x = ⟨closed c₀, u⟩) →
+      fit respond relay session c s us = .fused r →
+      ∃ (c₀ : Context P) (u : Utterance P),
+        Reaches (fuse c₀ u) ∧ taken (fuse c₀ u) = true ∧ r = ⟨closed c₀, u⟩ := by
+  induction us with
+  | nil =>
+    intro c s r hs h
+    cases s with
+    | none => simp [fit] at h
+    | some x => simp [fit] at h; subst h; exact hs x rfl
   | cons u us ih =>
-    rcases each_step_continues_or_fuses respond session c u us _ h with ⟨c', h'⟩ | ⟨hre, ht, h'⟩
-    · exact ih c' h'
-    · cases h'
-      exact ⟨c, u, hre, ht, rfl⟩
+    intro c s r hs h
+    obtain ⟨c', r', heq, hr'⟩ := each_step_continues respond relay session c s u us
+    rw [heq] at h
+    refine ih c' r' r ?_ h
+    intro x hx
+    rcases hr' with rfl | rfl | ⟨hre, ht, rfl⟩
+    · exact hs x hx
+    · cases hx
+    · cases hx; exact ⟨c, u, hre, ht, rfl⟩
+
+/-- A run ends fused only on a person's utterance that bore on it and took the space, and its
+    record is the readings of the context that utterance met. -/
+theorem fused_by_person_taking (respond relay session : Context P → Response P) (c : Context P)
+    (us : List (Utterance P)) (r : FusedSolutionSpace P)
+    (h : start respond relay session c us = .fused r) :
+    ∃ (c₀ : Context P) (u : Utterance P),
+      Reaches (fuse c₀ u) ∧ taken (fuse c₀ u) = true ∧ r = ⟨closed c₀, u⟩ :=
+  fused_keeps_by_taking respond relay session us _ none r (by intro x hx; cases hx) h
 
 /-- The record of a fused run is read on the context its taking turn met: fusing that turn onto
     the record's context gives the context on which the taking was read. -/
-theorem fused_record_is_what_the_taking_met (respond session : Context P → Response P)
+theorem fused_record_is_what_the_taking_met (respond relay session : Context P → Response P)
     (c : Context P) (us : List (Utterance P)) (r : FusedSolutionSpace P)
-    (h : fit respond session c us = .fused r) :
+    (h : start respond relay session c us = .fused r) :
     r.shown = closed r.shown.context ∧ taken (fuse r.shown.context r.taking) = true := by
-  rcases fused_by_person_taking respond session c us r h with ⟨c₀, u, _, ht, rfl⟩
+  rcases fused_by_person_taking respond relay session c us r h with ⟨c₀, u, _, ht, rfl⟩
   exact ⟨rfl, ht⟩
 
 /-- Where `taken` holds on a context ending in an utterance, the closure is filled, its own
