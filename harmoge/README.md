@@ -71,7 +71,7 @@ claude plugin install harmoge@epistemic-protocols
 /fit [the target — a direction, a design, or an implementation — and what it is for]
 ```
 
-Harmoge reads what bears on the target, shows the solution space as it stands, and asks its first cases. Each round you answer in your own words — judge a case, correct the space or the purpose, bring a case of your own — and the next round shows what your answer changed in the target and what the target now does on every case so far. It closes when you take the space shown as enough for your purpose. You can stop at any time; stopping takes nothing, what was settled up to then stays in the conversation, and what was already carried into the target stays there.
+Harmoge reads what bears on the target, shows the solution space as it stands, and asks its first cases. Each round you answer in your own words — judge a case, correct the space or the purpose, bring a case of your own — and the next round shows what your answer changed in the target and what the target now does on every case so far. It closes when you take the space shown as enough for your purpose. You can stop at any time; stopping takes nothing, what was settled up to then stays in the conversation, and what was already carried into the target is not undone.
 
 ## Author
 
