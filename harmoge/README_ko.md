@@ -52,7 +52,7 @@
 설계가 기대는 문헌과, 이 프로토콜의 조사에서 각 출처를 확인한 강도(*verified*: 원문 확인; *derived*: 확인된 정의에서 도출):
 
 - Mayer, M. 등 (2015). FlashProg, conversational clarification (*UIST*) — *verified*. 후보 프로그램들이 서로 다른 결과를 내는 입력을 사용자의 실제 데이터에서 골라 묻습니다. 다음 사례는 답이 대상을 움직이는 사례라는 점을 정합니다.
-- Lahiri, S. 등. TiCoder (arXiv 2404.10100) — *verified*. 후보 코드를 실행해 물을 테스트를 고릅니다. 최고 순위 사례가 참조 구현의 전제를 어겨 아무것도 줄이지 못할 수 있고(§VIII-D), 잘못된 판정 하나가 유효한 후보 전부를 걸러 낼 수 있습니다(§VI-A). 사례는 사용자가 실제로 만날 사건이어야 하고, 답은 그 말이 닿는 데까지만 묶는다는 점을 정합니다.
+- TiCoder — *LLM-Based Test-Driven Interactive Code Generation: User Study and Empirical Evaluation* (arXiv 2404.10100, 2024) — *verified*. 후보 코드를 실행해 물을 테스트를 고릅니다. 최고 순위 사례가 참조 구현의 전제를 어겨 아무것도 줄이지 못할 수 있고(§VIII-D), 잘못된 판정 하나가 유효한 후보 전부를 걸러 낼 수 있습니다(§VI-A). 사례는 사용자가 실제로 만날 사건이어야 하고, 답은 그 말이 닿는 데까지만 묶는다는 점을 정합니다.
 - Smith, E. 등 (2015). Is the cure worse than the disease? Overfitting in automated program repair (*FSE*) — *verified*. 수리에 쓴 테스트를 통과한 패치가 따로 둔 테스트에서 실패합니다. 답은 그 사례만을 위한 예외가 아니라 대상이 해야 할 일로 반영하고, 다시 돌리기는 쌓인 사례를 덮을 뿐 새 사례는 따로 주장한다는 점을 정합니다.
 - Mitchell, T. *Machine Learning*, 버전 공간 — *derived*. 후보 집합과 앞선 판정을 고정하면 새 판정은 집합을 넓히지 않습니다. **가장 약한 연결**: "후보가 줄어든다"에서 "사람의 설계가 닫힌다"로 넘어가는 단계 — 실제 설계에서는 판단 기준 자체가 움직일 수 있으므로, 여기서 진전은 열린 질문 수가 줄어드는 것이 아니라 판정이 보존되는 것으로 읽습니다.
 
