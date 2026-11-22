@@ -3,17 +3,19 @@
 
 > [한국어](./README_ko.md)
 
-## What it is
+## What is /conduct?
+
+### Definition
 <a name="what-is-hyphegesis"></a>
 
 Hyphegesis (ὑφήγησις) means leading the way or guiding from just ahead. It is a protocol that drafts one map of how multi-part work will run — its lines of work, their order, how they combine, when they stop, and where their results go — so you can adjust or accept the method before the work is carried out.
 
-## The problem
+### The problem
 <a name="the-core-problem"></a>
 
 Your goal is clear, but the work has several parts and it is not obvious how to run them: which lines of work to run in sequence or side by side, whether they should see each other's results before combining, how those results combine, when to stop, or where the results go next. Started without settling the method, multi-step work drifts — steps run in the wrong order, independent perspectives mix too early, or work continues with no clear stopping point.
 
-## The result
+### The result
 
 When you accept the method, the AI shows the map once more with what that turn changed — or, if your opening request already settled the method, shows the map once — and hands it off immediately in that same turn to carry out the work. `/conduct` itself designs and hands off the method rather than running the work. You can say how the lines order, combine, and stop, where their results go, and which decisions you entrusted versus kept.
 

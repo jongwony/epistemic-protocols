@@ -3,17 +3,19 @@
 
 > [한국어](./README_ko.md)
 
+## What is /preview?
+
 <a name="what-is-proplasma"></a>
-## What it is
+### Definition
 
 Proplasma comes from the Greek πρόπλασμα, the preliminary clay model shaped before committing to marble. Before you commit to a direction, it builds cheap, isolated placeholder previews that contrast your candidate directions and lays them out on a map so you can see what each one looks like for your purpose before deciding.
 
 <a name="the-core-problem"></a>
-## The problem
+### The problem
 
 Right before a direction commitment, two or more candidate options may be well-defined on paper, yet you cannot tell from descriptions alone what taking each one would actually look like. Instead of recognizing the right choice, you end up guessing consequences in your head, deferring to a general principle, reworking the option list instead of choosing, or stalling with "I'd have to see it."
 
-## The result
+### The result
 
 Once you settle a direction, the AI removes the temporary previews. The AI reports which previews it removed and what still needs cleaning up. You keep the direction decision, the map cells that decided it — showing whether each rests on a preview you saw, a description alone, your own account, or real evidence — and the open unknowns with what would settle each.
 

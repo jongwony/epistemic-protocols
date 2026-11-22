@@ -3,15 +3,17 @@
 
 > [한국어](./README_ko.md)
 
-## What it is
+## What is /bound?
+
+### Definition
 
 Horismos (Greek ὁρισμός, "a bounding") is a protocol for mapping the decisions a task rests on before work proceeds. It shows what is already settled and by whose judgment, and fills in every open item with the AI's choice where you entrusted discretion or with a marked AI proposal.
 
-## The problem
+### The problem
 
 Often the urge to delegate comes before a fixed goal or knowledge of the decisions involved. Without a visible map of those decisions, you cannot easily tell which parts already have a source-defined answer, which open questions have thin ground, or which choices to keep versus entrust to the AI. Reach for `/bound` when you want to see and adjust that decision boundary at the depth you choose.
 
-## The result
+### The result
 
 You get the current map, at the depth you chose:
 

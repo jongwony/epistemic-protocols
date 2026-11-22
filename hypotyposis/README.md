@@ -3,17 +3,19 @@
 
 > [한국어](./README_ko.md)
 
-## What it is
+## What is /sketch?
+
+### Definition
 <a name="what-is-hypotyposis"></a>
 
 Hypotyposis (ὑποτύπωσις) means an outline or first sketch, drawn before a position can be stated in full. It is a protocol that makes concrete versions for you to react to in your own words and revises them from your reactions until you can point at one version you met and recognize it as the form for your purpose.
 
-## The problem
+### The problem
 <a name="the-core-problem"></a>
 
 You have something to make and cannot describe in advance what it should look or read like, yet you will know it when you see it. When you try to specify it up front, the first draft never arrives, or you edit the description for the fourth time because what you actually want only surfaces once something concrete sits in front of you. Reach for `/sketch` when pointing at what does not fit in a real draft is much easier than describing the right form from scratch.
 
-## The result
+### The result
 
 The run closes when you point at a version you met and take it as the form for your purpose, with its location shown in that round or named in your answer. Passed-over versions stay where they are unless you ask otherwise. You finish with the chosen version in place and a record of every version, where it lives, and anything you asked done to it that is not yet done (with why), the choices set by your words versus accepted from the AI's proposals, what was checked and against which reference, any qualities the medium could not show that remain open, and any objection the AI raised with your answer to it.
 

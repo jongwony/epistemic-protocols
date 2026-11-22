@@ -3,16 +3,18 @@
 
 > [한국어](./README_ko.md)
 
-## What it is
+## What is /apportion?
+
+### Definition
 
 Merismos comes from the Greek μερισμός, meaning apportionment or dividing into parts. Before an autonomous run begins, it splits your goal into units on a single plan sheet — each with its completion checks, accepted gaps, and items held for your judgment — and shows the permissions the unattended run will reach.
 
 <a name="when-it-activates"></a>
-## The problem
+### The problem
 
 When you hand a goal straight to an autonomous run without breaking it down first, a stretch of work can overflow a single run, a passing check can hide a judgment that still needed you, or an original requirement can fall through the cracks. Reach for `/apportion` when you are about to hand a goal to an autonomous run, or want it planned for one, and no plan yet says which units the work runs in or when each unit is done.
 
-## The result
+### The result
 
 Once you take the plan, it is saved to a durable location with a pointer block and handed to the autonomous run (such as `/goal` in Claude Code, or via the pointer block if you start the run yourself or arrange the units first with `/conduct`). Accepting the plan authorizes the permissions shown. You leave with a plan you can call yours: what needed your decision before the run is settled, and the plan tells the runner to run work that does not depend on you without waiting and return all unit results together at the end alongside anything held back for your judgment.
 
