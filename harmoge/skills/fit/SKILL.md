@@ -238,15 +238,15 @@ axiom dissent : Context P → List String
     other work leaves the run as it stands: the session answers it, that answer stays in the
     context, and no round is drawn. Where the person turns to forming the intent itself, the
     session answers them — it says the fit stays open and offers help finding it — and a later
-    turn that brings the work back to this target reaches the same fit. Words that end the run
-    without taking the space do not bear on it, whatever else the turn says, and what else it says
-    stands in its own words in the context: the session answers them, no round is drawn, the run
-    holds, and later turns bear on it only where they come back to it; your own reading that the
-    person is done ends nothing. Once a taking stands, a turn bears where it moves what was taken
-    — withdraws it, changes a judgment or the purpose, brings a case — or takes the space again,
-    whatever else it says; a question about the taken space is answered by the session, and the
-    taking stands. Where a turn could be read either way, the session's answer says briefly how it
-    took it. -/
+    turn that brings the work back to this target reaches the same fit. While no taking stands,
+    words that end the run without taking the space do not bear on it, whatever else the turn
+    says, and what else it says stands in its own words in the context: the session answers them,
+    no round is drawn, the run holds, and later turns bear on it only where they come back to it;
+    your own reading that the person is done ends nothing. Once a taking stands, a turn bears
+    where it moves what was taken — withdraws it, changes a judgment or the purpose, brings a
+    case — or takes the space again; a question about the taken space is answered by the
+    session, and the taking stands. Where a turn could be read either way, the session's answer
+    says briefly how it took it. -/
 axiom Reaches : Context P → Prop
 
 /-- **Your judgment**: the cited person turn, read whole against the accumulated context, takes the
