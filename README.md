@@ -31,12 +31,12 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 `route` gives the agent the information it needs to choose a protocol for your conversation and find relevant collaboration principles when needed. It is experimental; its wording and hooks can change between releases. To disable it, run `claude plugin disable route@epistemic-protocols` after installing — every protocol stays installed. You can always type a command yourself, such as `/inquire` before handing off work or `/bound` when you are unsure which decisions are yours.
 
-Not sure which protocol to start with? Clone this repository, open Claude Code inside it, and type `/onboard`. It recommends a protocol from your recent sessions, and can go on to teach the protocols through a scenario, a trial and a quiz.
+Not sure which protocol to start with? Clone this repository and start `/onboard` from inside it. It recommends a protocol from your recent sessions, and can go on to teach the protocols through a scenario, a trial and a quiz.
 
 ```bash
 git clone https://github.com/jongwony/epistemic-protocols.git
 cd epistemic-protocols
-claude
+claude /onboard
 ```
 
 ### Codex
