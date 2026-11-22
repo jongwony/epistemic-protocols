@@ -314,13 +314,11 @@ axiom gathered : Context P → List (Evidence P)
 /-- **Your carrying**, now, of what the person's answers and reasons, as they stand, say the target
     should do. Where what was gathered shows the target has lost such an answer, carry it into the
     target again, and the round shows that case on the target as found beside the target carried —
-    from a run on that state where one is in reach, otherwise as a reading of it. Where carrying
-    one answer undoes another, the target keeps the later, and the case where they part is put to
-    the person. Each write is observed, and what returns says what landed. Where the target lives
-    only in the conversation nothing is written: the revised version is what a run is handed, and
-    the reply holds it; where the change needs a capability out of reach, the reply holds the
-    draft as a proposal and names the capability it needs to land. Empty where there is nothing to
-    carry. -/
+    from a run on that state where one is in reach, otherwise as a reading of it. Each write is
+    observed, and what returns says what landed. Where the target lives only in the conversation
+    nothing is written and the reply holds the revised version; where the change needs a capability
+    out of reach, the reply holds the draft as a proposal and names the capability it needs to
+    land. Empty where there is nothing to carry. -/
 axiom applied : Context P → List (Evidence P)
 
 /-- **Your judgment**: a run on some or all of the gathered cases is within reach now and would
