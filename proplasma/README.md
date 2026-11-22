@@ -1,20 +1,40 @@
-# Proplasma — /preview (πρόπλασμα)
-
-See what taking each candidate direction means for your purpose and on what ground, then settle the one you take (πρόπλασμα: the preliminary clay model shaped before committing to marble)
+# /preview — Proplasma (πρόπλασμα)
+<a name="proplasma--preview-πρόπλασμα"></a>
 
 > [한국어](./README_ko.md)
 
-## What is Proplasma?
+Use `/preview` right before you commit to a direction, when two or more candidate options are on the table but you cannot judge how they differ from descriptions alone — when you find yourself deferring to a general principle, reworking the options instead of choosing, or thinking "I'd have to see it."
 
-A modern reinterpretation of Greek πρόπλασμα (preliminary model) — a protocol for the moment **right before a direction commitment, when the candidate directions cannot be judged from their descriptions and you feel you would have to see them to decide**. It materializes cheap placeholder probes that diverge on axes the AI drafts and relays with their basis, shows a map of the directions in which every cell says what it rests on, and lets you constitute the direction decision on the futures you have seen — or on one no probe showed, the record saying so — then discards every probe.
+<a name="usage"></a>
+Type:
 
-### The Core Problem
+```
+/preview [the direction decision you are about to commit to]
+```
 
-Some direction choices are unrecognizable from words (`DirectionUnrecognizable`): the gate options are well-formed, but their differential futures cannot be carried by descriptions, so you end up mentally simulating consequences instead of recognizing them. The observable symptoms: delegating the choice to a principle ("go with whatever fits the northstar"), reworking the option set instead of choosing, or stalling with "I'd have to see it."
+Before building anything, the AI checks that your choice has two or more candidates whose differences a placeholder preview can show (if not, it tells you why and what would settle the decision instead). It then states its reading of your purpose and what will differ between the examples and which details will be stand-ins (the axes where the candidates diverge for your purpose and the placeholder policy), each with its basis. Next, it builds cheap, isolated placeholder probes — text vignettes or temporary mockups that take different values on those axes — and shows them alongside a direction map.
 
-### The Solution
+In the map, every cell shows what a direction's future looks like on an axis and what that rests on: a probe you saw, a description alone, your own account, or real evidence from a source or observation. What you expected is laid beside what the probes show so you can see where they agree and where they part. In your own words, with no numbered menu required, you can:
+- Ask about an existing preview, or ask to see a revised spec, a combination of probes, or a candidate that was left out (the AI relays the spec again and builds new probes).
+- Ask to check something real without changing it (the result enters the map as evidence, never as a probe).
+- Stop at any time, leaving the run and its probes as they stand until you decide.
+- Settle on a probe-shown direction, a combination, or even a direction no probe showed (marked as never materialized).
 
-**Contrast over Simulation**: draft the divergence axes — the ones your purpose turns on, with the AI's reading of that purpose marked as its own until you say it — and the placeholder policy, and relay them with their basis before anything is generated; then generate probes that commit different values on those axes (text vignettes, or real temp-isolated mockups) and show them with the map: per axis, what each direction's future looks like and what that rests on — a probe you saw, a description alone, your own account, or evidence, from a source or from something real observed (**Grounded, not asserted**). What you say you expect of a future is laid beside what the probes show, where the two agree and where they part. You settle a direction on recognition — or ask to see something no probe has materialized yet (a revised spec, a combination, a candidate left out), and the AI fans over that, relaying the whole spec again; or ask to see something real observed — read or run without changing it — and what comes back sits in its cell as evidence, never as a probe. When the AI finds the contrast insufficient, it says so with its basis and either builds the revision on its stated judgment — relaying the spec again before it builds and saying why in the round — or proposes it; when it reads that the futures are already recognizable, it says so with its basis and proposes; only you close the run. Probes are discard-committed instruments: overtly synthetic, never evidence for any claim, and discarded after harvest with each probe's disposition declared (a failed destruction is declared with a cleanup handoff, never silent) — only the direction decision, the cells that decided it, and the open unknowns survive.
+Once you settle a direction, the AI removes the temporary previews. The AI reports which previews it removed and what still needs cleaning up. You keep the direction decision, the map cells that decided it, and the open unknowns with what would settle each.
+
+<a name="what-is-proplasma"></a>
+<a name="the-core-problem"></a>
+<a name="the-solution"></a>
+<a name="difference-from-other-protocols"></a>
+<a name="three-breach-conditions"></a>
+<details>
+<summary>How probes work, how this compares to other protocols, and safety guards</summary>
+
+### Name, Problem, and Solution
+
+**Proplasma** reinterprets Greek πρόπλασμα (the preliminary clay model a sculptor shapes before committing to marble). When a direction choice is unrecognizable from words (`DirectionUnrecognizable`), well-formed options still leave you mentally simulating consequences instead of recognizing them.
+
+**Contrast over Simulation** and **Grounded, not asserted**: the AI drafts the divergence axes your purpose turns on (marking its reading of your purpose as its own until you state it) and the placeholder policy, relays them with their basis before generating anything, and materializes probes that commit different values on those axes. If the AI finds the contrast insufficient, it says so with its basis and either builds a revision (relaying the spec again) or proposes one; if it reads that the futures are already recognizable, it says so and proposes closing; only you close the run. Probes are overtly synthetic, never evidence for any claim, and discarded after harvest with each probe's disposition declared (any failed destruction is declared with a cleanup handoff, never silent).
 
 ### Difference from Other Protocols
 
@@ -28,11 +48,11 @@ Some direction choices are unrecognizable from words (`DirectionUnrecognizable`)
 
 **The trichotomy**: understanding lacking → `/grasp` (verify that I understood); boundary lacking → `/bound` (settle how far); **future unrecognizable → `/preview` (see the directions, then judge)**.
 
-**When it does not activate**: before anything is built, the AI reads whether this is the protocol's case — two or more candidates, a commitment at hand, futures a placeholder depiction can carry — and where it is not (the futures already read from their descriptions, a question about what one option means, a choice that turns on whether an analogy or account already in play licenses its inferences rather than on how each future would look, a decision only real evidence can settle, a field too thin to compare), it says so with its basis and what would settle the need.
+**When it does not activate**: when futures are already clear from descriptions, when you are asking what one option means, when the choice turns on whether an analogy or account licenses its inferences (`/ground`), when only real evidence can settle the decision, or when the candidate field is too thin to compare.
 
-## Three Breach Conditions
+### Three Breach Conditions
 
-The protocol's legitimacy lives in a survival chain — spec relay → probe generation → the map → your closing → cleanup verification. Each breach below would break that chain, and each has its guard:
+The protocol's legitimacy lives in a survival chain: spec relay → probe generation → the map → your closing → cleanup verification.
 
 | Breach | Guard |
 |--------|-------|
@@ -40,21 +60,18 @@ The protocol's legitimacy lives in a survival chain — spec relay → probe gen
 | A write to a permanent project file | Temp isolation + cleanup registered at creation |
 | A probe treated as evidence for any claim | A probe stays evidence for no claim in the harvest and in every remnant; evidence comes from what is read or run for real, never from a probe |
 
-## Install
+</details>
+
+<a name="install"></a>
+<a name="author"></a>
+<details>
+<summary>Install and author</summary>
 
 ```
 claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
 claude plugin install proplasma@epistemic-protocols
 ```
 
-## Usage
+Author: Jongwon Choi (https://github.com/jongwony)
 
-```
-/preview [the direction decision you are about to commit to]
-```
-
-Proplasma derives the axes on which your candidates genuinely diverge for your purpose, relays the axes and the placeholder policy with their basis, builds probes that commit different values on the drafted axes, and shows them with the map. You then settle a probe-exposed direction, settle a combination of the probes or ask to see it first, send any part of the drafted spec back, name a candidate to be probed, ask about a probe, or ask to check something before deciding — in your own words, no numbered menu required; you can also settle a direction no probe showed, with the closing saying its future was never materialized. You can stop at any time; stopping leaves the run as it stood, its probes where they are until a direction is settled. Harvest precedes discard: the direction, the cells that decided it, and the open unknowns — each with what would settle it — survive; the probes do not.
-
-## Author
-
-Jongwon Choi (https://github.com/jongwony)
+</details>

@@ -1,21 +1,34 @@
-# Hypotyposis — /sketch (ὑποτύπωσις)
-
-React to concrete versions until you can point at one you met and say: this is the form, for this purpose (ὑποτύπωσις: an outline — the first sketch of a position, drawn before it can be stated)
+# /sketch — Hypotyposis (ὑποτύπωσις)
 
 > [한국어](./README_ko.md)
 
-## What is Hypotyposis?
+<a name="hypotyposis--sketch-ὑποτύπωσις"></a>
+<a name="what-is-hypotyposis"></a>
+<a name="the-core-problem"></a>
+You have something to make and cannot describe in advance what it should look or read like, yet you will know it when you see it. When you try to specify it up front, the first draft never arrives, or you edit the description for the fourth time because what you actually want only surfaces once something concrete sits in front of you. Reach for `/sketch` when pointing at what does not fit in a real draft is much easier than describing the right form from scratch.
 
-A modern reinterpretation of Greek ὑποτύπωσις (outline, sketch) — a protocol for the moment **when a form has to be made and you cannot yet say what it should be, but you would recognize it on sight**. It makes concrete versions — after relaying what they will try, with its basis — in a medium where the qualities you are judging can be met, takes your reactions to them in your own words (what does not fit, what to keep, what to change), makes the versions those words call for — revising the ones they point to, starting fresh, or combining them — and may also make versions the AI would propose, until you recognize one version you met as the form for your purpose; you can stop at any time, and stopping leaves the run as it stood, with what you ask done to the versions as you stop carried out.
+## How to start
 
-### The Core Problem
+<a name="usage"></a>
+<a name="the-solution"></a>
+```
+/sketch [what you are about to make, and anything already settled about it]
+```
 
-Some forms cannot be specified before they are seen (`FitUnrecognized`): the plan stalls at its first draft, the description gets rewritten instead of made, and what you actually want only surfaces once something is in front of you. Good fit has no positive description of its own; each misfit can be pointed at. The observable symptoms: "I'd know it when I see it", a first draft that never arrives, a description edited for the fourth time.
+Before making anything, the AI tells you what the first versions will try, how many it will make, the medium each will be shown in (along with what that medium can and cannot show), and where each version will live, together with its basis. Then it makes them and shows the concrete versions first. Where a quality has an objective right or wrong answer (such as whether a character glyph is accurate), the AI checks the versions against a reference before showing them. If the reference is unavailable, you decide whether to see the version with that quality marked unchecked.
 
-### The Solution
+Each round, you react in your own words: point out what does not fit, say what to keep or change, ask to combine versions or try another medium, or ask a question about a version. The AI makes the next versions according to your words — revising the retained versions you pointed to into new versions (never regenerating them from an abstract summary), starting fresh, or combining versions — and may also add a version it proposes. You can stop at any time; stopping leaves the run as it stood and carries out whatever cleanup or handling you ask for the versions made so far.
 
-**Recognition over Description**: you need not specify the form first. Before anything is made, the AI relays what the next versions will try, which versions they revise, how many, the medium each is shown in and what that medium can and cannot show, and where each will be, each with its basis, and then makes them. Each round shows the new versions first, as you will meet them, then where the run stands: what your words set and on which version, which of the AI's proposals you took, what rests on a check against a reference, and what stays unestablished. Where a quality has a right answer — a glyph that is right or wrong — the versions are checked against a reference before you see them, or, where it cannot be reached and you choose to go on without it, shown with that quality unchecked; your preference never stands in for that check. You react in your own words, and the next versions are what your words call for — a revision of the ones they point to, a fresh start, or a combination; a revision is always a new version made from retained versions, never regenerated from a description, and the AI may also make versions it would propose. The run closes when you take one version you met as the form — its home shown in that round or named in your answer, with no separate placement step; you can stop at any time, and stopping leaves the run as it stood, with what you ask done to the versions as you stop carried out. The versions you passed over stay where they are unless you say otherwise. The recognition covers what the version's medium showed: a quality it did not show stays open on the record.
+## What you have once it has run
 
+The run closes when you point at a version you met and take it as the form for your purpose, with its location shown in that round or named in your answer. Passed-over versions stay where they are unless you ask otherwise. You finish with the chosen version in place and a record of every version, where it lives, and anything you asked done to it that is not yet done (with why), the choices set by your words versus accepted from the AI's proposals, what was checked and against which reference, any qualities the medium could not show that remain open, and any objection the AI raised with your answer to it.
+
+<details>
+<summary>Comparison with other protocols and Greek name</summary>
+
+**Hypotyposis** (ὑποτύπωσις, outline / first sketch) turns an unrecognized fit (`FitUnrecognized`) into a recognized form (`RecognizedForm`) by having you react to concrete versions rather than specify the form up front.
+
+<a name="difference-from-other-protocols"></a>
 ### Difference from Other Protocols
 
 | Protocol | Initiator | Type Signature |
@@ -28,7 +41,13 @@ Some forms cannot be specified before they are seen (`FitUnrecognized`): the pla
 
 **What decides between the neighbors** is the transformation the moment needs: named alternatives whose futures you cannot judge from words → `/preview` (contrast, commit to a direction, discard the probes); intent that turns on decisions you have not named → `/elicit` (trace them from your words and material); a finished result checked against everywhere it lands and the intents it was meant to carry → `/contextualize` (carry out the fixes you settle); an empty field of ideas → `/ideate` (widen it); **a form to make, intent underdetermined, and you would know it on sight → `/sketch`** (make, mark, revise, recognize — and keep the version you recognized).
 
-## Three Breach Conditions
+</details>
+
+<details>
+<summary>Breach conditions and literature grounding</summary>
+
+<a name="three-breach-conditions"></a>
+### Three Breach Conditions
 
 The protocol's legitimacy lives in a chain — intent relay → production → the round → your recognition → the record. Violating any of these dissolves it:
 
@@ -38,7 +57,8 @@ The protocol's legitimacy lives in a chain — intent relay → production → t
 | An AI reading of your words, or an AI proposal, treated as your commitment | A value stands only on your turn — one that said it, or one that took it after it was shown as the AI's — and the record says which |
 | A recognition taken to cover what was never shown | A recognition reaches what the version's medium showed and never a revision not yet shown; what went unshown stays unestablished |
 
-## Grounding
+<a name="grounding"></a>
+### Grounding
 
 Literature the design rests on, with the strength at which the primary source was checked (*verified*: primary text read; *mostly*: core claim checked, surrounding detail synthesized):
 
@@ -48,21 +68,22 @@ Literature the design rests on, with the strength at which the primary source wa
 - Dow, S. et al. (2010). Parallel prototyping leads to better design results, more divergence, and increased self-efficacy. *ACM TOCHI* 17(4) — *verified*. Alternatives built before feedback improve the result and the maker's stake. Decides that alternatives are relayed with each production and can be sent back at the next round, not fixed to a round schedule.
 - Wadinambiarachchi, S. et al. (2024). The effects of generative AI on design fixation and divergent thinking. *CHI 2024* — *verified*. Early concrete material narrows what people go on to imagine. Decides that the production intent is relayed with its basis before anything is made, so what narrowed the versions is visible, and that a reaction the intent did not ask about still counts.
 
-## Install
+</details>
+
+<details>
+<summary>Install and author</summary>
+
+<a name="install"></a>
+### Install
 
 ```
 claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
 claude plugin install hypotyposis@epistemic-protocols
 ```
 
-## Usage
-
-```
-/sketch [what you are about to make, and anything already settled about it]
-```
-
-Hypotyposis gathers what bears on the form, relays what the first versions will try with its basis, makes them, and shows them before where the run stands. Each round you react in your own words — mark what does not fit, keep what does, ask for a change, a combination, or another medium, or ask about a version — and the next versions are what your words call for — a revision made from retained versions, a fresh start, or a combination — and the AI may also make versions it would propose. It closes when you take one version you met as the form for your purpose, its home shown or named in that turn. The record carries every version with where it is and anything you asked done to it that was not yet done, with why, the values you hold with who proposed each and whether your words set it or your turn took it, what was checked and against what, what stays open, and any contrary ground the AI held with your answer to it — a witness of what you recognized, not a specification of what to build. You can stop at any time, and stopping leaves the run as it stood, with what you ask done to the versions as you stop carried out.
-
-## Author
+<a name="author"></a>
+### Author
 
 Jongwon Choi (https://github.com/jongwony)
+
+</details>

@@ -1,6 +1,5 @@
-# Aitesis — /inquire (αἴτησις)
-
-Recognize what the work rests on — what was settled and from where, what rests on weak or unreached ground, what only you decide (αἴτησις: a requesting)
+# /inquire — Aitesis (αἴτησις)
+<a name="aitesis--inquire-αἴτησις"></a>
 
 > [한국어](./README_ko.md)
 
@@ -8,30 +7,53 @@ Recognize what the work rests on — what was settled and from where, what rests
 
 <sub>`/inquire` in use (click for the video). Values in the clip are illustrative, not a run result.</sub>
 
-## What is Aitesis?
+<a name="when-to-use"></a>
+<a name="the-core-problem"></a>
+## When to use it
 
-A modern reinterpretation of Greek αἴτησις (a requesting) — a protocol that **collects context to the limit of what the AI can reach on its own, writes down for each uncertainty what that reached and what it could not reach, and hands what only the user can settle — or what no source it reached settles — back to the user as their own unknown**.
+Before relying on an unchecked fact, run `/inquire`. The AI shows what the records establish and flags choices it thinks are yours. You can correct that reading. People often stop looking once a plausible story forms, and AI often fills the gaps with silent guesses; `/inquire` makes the AI check every source it can reach first, then show you what it found and what remains unknown.
 
-### The Core Problem
+<a name="usage"></a>
+<a name="the-solution"></a>
+## How to start
 
-AI systems often proceed despite insufficient context (`ContextInsufficient`) — required domain knowledge is missing, implicit requirements go unverified, environmental dependencies are assumed, or scope remains ambiguous. Silent assumptions lead to wasted effort and compounding errors. And people are poor at seeing their own unknowns: once a plausible account forms, the search stops.
+```
+/inquire [your current task or context]
+```
 
-### The Solution
+After you run `/inquire`, the AI lists what your task leaves uncertain and checks every file, record, or read-only check it can run on its own without changing existing state. If it creates a scratch copy or temp file just to look, it removes it afterwards. Anything that would change existing state or needs someone's permission is not run; instead, the AI names it and tells you what it needs.
 
-**Evidence over Inference over Detection**: AI infers what the prospect leaves uncertain rather than detecting via a fixed taxonomy (Inference > Detection), then pushes each uncertainty through every source it can read or run on its own without changing existing state — what it creates only to look, such as a scratch copy or a temp file, it removes afterwards — and gathers evidence rather than substituting inference (Evidence > Inference). An observation that would need to change existing state, someone's permission, or another's authority is named with what it needs and handed off rather than run. Where to look is the AI's judgment, and collection goes to the limit of its reach. Each uncertainty then stands one of three ways: **settled** — a cited source or the user's own words fix it; **ground short** — a finding whose shortfall the AI declares; **unreached** — nothing it could reach settles it. For each open one the AI names the sources it tried and those it could not reach, with what they need, so the user can point at one it missed; a finding that answers no uncertainty raised is shown on its own line. Once everything reachable is reached, what remains open is handed back as the user's own unknown: where collected material conflicts, the AI names what conflicts with what; where a decision blocks further collection, it names which collection waits on it. Which open uncertainty is the user's is the AI's reading, shown for the user to recognize or correct; a decision the work rests on that the user holds stays open until their own words give it. The run completes when collection ends and proceeds without holding the turn; what is open does not block completion and is not settled by it. The run keeps reading later messages — an answer, a correction, a new source, or a dismissal that bears on it reopens collection and a new completion — and silence leaves the last completion standing. A decision of the user's that a record relays — a commit, a recorded decision — is cited as the fact that it was made. The beneficiary is the user's epistemic state; the AI's collection is the instrument.
+<a name="what-is-aitesis"></a>
+## What you get
 
-### Difference from Other Protocols
+You get a clear breakdown of what your task rests on, ordered by what an answer would change most:
 
-| Protocol | Mode | Type Signature |
-|----------|------|---------------|
-| **Aitesis** | **INQUIRE** | **`ContextInsufficient → SufficientContext`** |
-| Proplasma | PREVIEW | `DirectionUnrecognizable → DirectionalContrast` |
+- **Settled** — facts fixed by a cited source or your own words. A commit or recorded decision is cited as the fact that the decision was made, while a choice you still hold stays open until your own words settle it.
+- **Evidence is incomplete** — findings where the evidence falls short, with the gap stated.
+- **Unreached** — unknowns nothing reachable could settle, with the sources tried and those that could not be reached.
+- **Unasked-for findings** — anything relevant discovered along the way that answers none of the raised uncertainties, shown on its own line.
 
-**Key distinction**: Aitesis collects what the AI lacks and names what only the user holds — the AI reaches for context on its own and hands back what it cannot reach (heterocognitive: "what can I reach, and what is yours?").
+Where sources conflict, the AI names what conflicts with what. Where a decision blocks further checking, it names what waits on that decision. The run finishes its pass and continues without locking your turn: you can answer, correct a reading, point to a missed source, or dismiss an item to trigger another pass, or say nothing and leave the current breakdown standing.
 
-Proplasma (`/preview`) is the neighbor on the direction axis: Aitesis supplies missing facts and names the user's unknowns; Proplasma materializes direction futures as discard-committed placeholder contrast when the candidates are already known but unrecognizable from descriptions.
+<details>
+<summary>Examples of uncertainties</summary>
 
-## Protocol Flow
+<a name="uncertainty-identification"></a>
+Uncertainties are identified per task rather than from a fixed list:
+
+| What the work rests on | Example |
+|------------------------|---------|
+| A fact the AI can look up | "Which database schema version does this service run against?" — read from the migrations |
+| A fact only the user holds | "Is the staging cluster still shared with the other team?" |
+| A decision further collection waits on | "Which payment provider will this service use? The AI has read provider A's public docs and the existing client; provider B's sandbox behaviour is visible only from an account that exists once you choose B." |
+
+</details>
+
+<details>
+<summary>How it works and compares to other protocols</summary>
+
+<a name="protocol-flow"></a>
+### Protocol Flow
 
 ```
 Collection   → Push each uncertainty through every source the AI can reach on its own; name what it tried and what it could not reach
@@ -40,49 +62,41 @@ Relay        → Hand back what is open — findings with their shortfalls, conf
 Answer       → Read whole: settle, correct, point to a source, "I don't know either", or dismiss — one that bears on the run reopens collection and a new completion
 ```
 
-## Uncertainty Identification
+**Evidence over Inference over Detection**: From Greek αἴτησις (a requesting), Aitesis infers what the prospect leaves uncertain rather than detecting via a fixed taxonomy (`Inference > Detection`), then pushes each uncertainty through every reachable source to gather evidence rather than substituting inference (`Evidence > Inference`). The beneficiary is the user's epistemic state, and the AI's collection is its instrument.
 
-Uncertainties are identified dynamically per task — no fixed taxonomy. What an answer would change most is shown first. For example:
+<a name="difference-from-other-protocols"></a>
+### Difference from Other Protocols
 
-| What the work rests on | Example |
-|------------------------|---------|
-| A fact the AI can look up | "Which database schema version does this service run against?" — read from the migrations |
-| A fact only the user holds | "Is the staging cluster still shared with the other team?" |
-| A decision further collection waits on | "Which payment provider will this service use? The AI has read provider A's public docs and the existing client; provider B's sandbox behaviour is visible only from an account that exists once you choose B." |
+| Protocol | Mode | Type Signature |
+|----------|------|---------------|
+| **Aitesis** | **INQUIRE** | **`ContextInsufficient → SufficientContext`** |
+| Proplasma | PREVIEW | `DirectionUnrecognizable → DirectionalContrast` |
 
-## Protocol Precedence
+Aitesis collects what the AI lacks and names what only the user holds (heterocognitive: "what can I reach, and what is yours?"). Proplasma (`/preview`) is the neighbor on the direction axis: Aitesis supplies missing facts and names the user's unknowns, while Proplasma materializes direction futures as discard-committed placeholder contrast when candidates are known but unrecognizable from descriptions.
+
+<a name="protocol-precedence"></a>
+### Protocol Precedence
 
 ```
 Aitesis → Analogia → Katalepsis
 ```
 
-Aitesis runs early: it exhausts what the AI can collect for the work ahead. Analogia, later in the order, collects what its own audit rests on.
+Aitesis runs early to exhaust what the AI can collect for the work ahead. Analogia, later in the order, collects what its own audit rests on.
 
-## When to Use
+When the context is already fully specified or you ask to proceed without verification, AI-guided activation skips Aitesis; invoking `/inquire` directly always runs collection.
 
-**Use**:
-- Before complex tasks where AI may lack domain context
-- When task has implicit requirements or environmental dependencies
-- When scope is ambiguous and AI cannot determine intended approach from available context
-- When entering a novel domain not previously discussed in session
+</details>
 
-**Skip**:
-- When the context is fully specified (AI-guided activation only; invoking `/inquire` always collects)
-- When you ask to proceed without context verification, or there is no prospect to verify (AI-guided activation only)
+<details>
+<summary>Install and author</summary>
 
-## Install
-
+<a name="install"></a>
 ```
 claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
 claude plugin install aitesis@epistemic-protocols
 ```
 
-## Usage
+<a name="author"></a>
+Author: Jongwon Choi (https://github.com/jongwony)
 
-```
-/inquire [your current task or context]
-```
-
-## Author
-
-Jongwon Choi (https://github.com/jongwony)
+</details>

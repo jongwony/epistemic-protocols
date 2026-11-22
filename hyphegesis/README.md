@@ -1,49 +1,37 @@
-# Hyphegesis — /conduct (ὑφήγησις)
-
-Take as yours how several lines of work run — order, combination, stopping points, where results go, what you entrusted and kept (ὑφήγησις: a leading-the-way)
+# /conduct — Hyphegesis (ὑφήγησις)
 
 > [한국어](./README_ko.md)
 
-## What is Hyphegesis?
+<a name="hyphegesis--conduct-ὑφήγησις"></a>
+<a name="what-is-hyphegesis"></a>
+<a name="the-core-problem"></a>
+Your goal is clear, but the work has several parts and it is not obvious how to run them: which lines of work to run in sequence or side by side, whether they should see each other's results before combining, how those results combine, when to stop, or where the results go next. Started without settling the method, multi-step work drifts — steps run in the wrong order, independent perspectives mix too early, or work continues with no clear stopping point.
 
-A modern reinterpretation of Greek ὑφήγησις (leading from just ahead) — a protocol that **conducts how a session's epistemic work will be carried out** when the method is underdetermined, producing a ConductedMethod (the method handed off with what it carries: the user's own decisions, the deferred ones, its lifetime, and what it needs from whoever runs it).
+## How to start
 
-### The Core Problem
-
-The goal is clear, but *how to conduct the work* is not (`MethodUnderdetermined`): which lines of thinking to run, in what order or side by side, whether they see each other before their results combine, how those results combine, when to stop, and where each result goes. Started without a conducted method, multi-move work drifts — wrong order, perspectives contaminated before synthesis, no stopping criterion.
-
-### The Solution
-
-**Conduction over Substrate**: Hyphegesis drafts the whole method as one map — the lines of work and how they relate, who runs each and where, inferred from the tools the running environment describes — and draws it only as precisely as reaching the goal is worth: where trying is cheap and can be undone, a coarse map run once and checked may be the method. The user keeps only what is theirs: when to stop, how lines combine, where results go, the constraints in force, and the authority they entrust and its limits, given as a broad direction. After every answer that bears on the run and does not take the method, the map is drawn again. The method is taken on the user's word — or relayed at the start where the user's own words already settle it — and in that same turn the AI shows the map as a relay — after a taking, once more, with what that turn changed — then hands the method off with what that map showed, without waiting; then the run ends. A decision whose evidence arrives later is deferred: the map shows it as covered where a recorded grant of the user's reaches it, and otherwise it comes back to the user. A need only the user can supply (a secret to set, a deployment handed to runtime) always comes back to the user. Hyphegesis does not execute the work, and whether a capability is there is read from what the environment returns, never from a description.
-
-### Difference from Other Protocols
-
-| Protocol | Initiator | Type Signature |
-|----------|-----------|---------------|
-| Horismos | AI-guided | `BoundaryUndefined → DefinedBoundary` |
-| **Hyphegesis** | **Hybrid** | **`MethodUnderdetermined → ConductedMethod`** |
-| Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
-
-## Install
-
-```
-claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
-claude plugin install hyphegesis@epistemic-protocols
-```
-
-## Usage
-
-Invoke `/conduct` at the start of (or partway into) a multi-move work prospect:
-
+<a name="usage"></a>
+<a name="the-solution"></a>
 ```
 /conduct migrate this service from framework v2 to v3
 ```
 
-Unless the invocation's own words already settle the method, Hyphegesis lays out one map of the whole method before asking anything: what the work is for, the lines of work drawn as a graph (an indented outline where no graph renders), who runs each line and where — the AI's inference, marked as such — how the lines combine, when they stop, and where their results go, what the method needs from whoever runs it and whether each was observed, the decisions deferred until their evidence exists, and the AI's contrary grounds, including where it reads that the work needs no conducting. The user corrects any part of it or takes it; after every answer that bears on the run and does not take the method, the map is drawn again, so a correction upstream re-fills what depends on it while every value the user set stays theirs. Where the user will not be present while the method runs, the map shows, before they leave, the authority the method will need and separates what must be decided before they leave from what can wait for them. Before taking the method the user can stop at any time, and stopping leaves the run as it stood.
+Type `/conduct` at the start of — or partway into — multi-part work. Unless your words already settle the method, the AI lays out one map of the whole method before asking anything: the lines of work, who runs each and where, how they combine and stop, where results go, what the method needs from the runtime environment and whether each capability was actually observed, deferred decisions, and any reason the work needs no conducting. It draws the map only as detailed as the goal is worth: where trying is cheap and reversible, a rough map run once and checked may be the method.
 
-## What a method settles
+You keep the decisions that are yours — when to stop, how results combine, where they go, constraints on the work, and the authority you entrust and its limits — and correct any part of the map or accept it as shown. Each time you change part of the map before accepting, the AI redraws it so downstream steps update while every choice you set stays yours. If you will be away while the work runs, the map separates what you must decide before leaving from what can wait. You can stop at any time before accepting the method, leaving the conversation as it stood.
 
-These are the questions the map answers from the work in front of it — guidance for drawing it. The rows marked the user's stand only by the user's words:
+## What you have once it has run
+
+When you accept the method, the AI shows the map once more with what that turn changed — or, if your opening request already settled the method, shows the map once — and hands it off immediately in that same turn to carry out the work. `/conduct` itself designs and hands off the method rather than running the work. You can say how the lines order, combine, and stop, where their results go, and which decisions you entrusted versus kept.
+
+<details>
+<summary>What a method settles</summary>
+
+<a name="what-a-method-settles"></a>
+### What a method settles
+
+Before asking anything, the initial map lays out: what the work is for, the lines of work drawn as a graph (an indented outline where no graph renders), who runs each line and where (marked as the AI's inference from the tools the environment describes), how the lines combine, when they stop, where their results go, what capabilities the method needs from whoever runs it and whether each was actually observed from what the environment returns (never assumed from a description), the decisions deferred until their evidence exists, and the AI's contrary grounds (including where it reads that the work needs no conducting).
+
+These are the questions the map answers from the work in front of it. The rows marked the user's stand only by your words:
 
 | Question | What it decides |
 |----------|-----------------|
@@ -56,4 +44,35 @@ These are the questions the map answers from the work in front of it — guidanc
 | Constraints | What is in force on the work — a direction for who runs it, whether the user will be present, a horizon among them (the user's to decide) |
 | Authority | What the user entrusts and its limits, given as a broad direction (the user's to decide) |
 
-A result that must cross into a later session (after `/compact`, `/clear`, or in a new session) is written to a record by whoever runs the method, and the later session is pointed at that record. `/conduct` stays single-session in its own reasoning; only the result crosses.
+A decision whose evidence arrives later is deferred: covered where a recorded grant of yours reaches it, and otherwise returned to you. Needs only you can supply (such as a secret to set or a deployment handed to runtime) always come back to you. A result that must cross into a later session (after `/compact`, `/clear`, or in a new session) is written to a record by whoever runs the method, and the later session is pointed at that record. `/conduct` stays single-session in its own reasoning; only the recorded result crosses sessions.
+
+</details>
+
+<details>
+<summary>Comparison with other protocols and Greek name</summary>
+
+**Hyphegesis** (ὑφήγησις, leading the way / guiding from just ahead) conducts how a session's epistemic work will be carried out when the method is underdetermined (`MethodUnderdetermined`), producing a `ConductedMethod` handed off with the user's decisions, deferred decisions, lifetime, and required capabilities.
+
+<a name="difference-from-other-protocols"></a>
+### Difference from Other Protocols
+
+| Protocol | Initiator | Type Signature |
+|----------|-----------|---------------|
+| Horismos | AI-guided | `BoundaryUndefined → DefinedBoundary` |
+| **Hyphegesis** | **Hybrid** | **`MethodUnderdetermined → ConductedMethod`** |
+| Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
+
+</details>
+
+<details>
+<summary>Install</summary>
+
+<a name="install"></a>
+### Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install hyphegesis@epistemic-protocols
+```
+
+</details>

@@ -1,35 +1,63 @@
-# Euporia (εὐπορία)
+# /elicit — Euporia (εὐπορία)
+<a name="euporia-εὐπορία"></a>
 
-Reach an intent you can call yours, aligned enough — each recorded value on your own words, what you left open carried — `/elicit`.
+> [한국어](./README_ko.md)
 
 <a href="../media/elicit.en.mp4"><img src="../media/elicit.en.gif" alt="Side by side: a request handed off in one line, where three sub-agents fill the blanks differently, versus the same request started with /elicit, where the intent is read back with its open decisions before handing off" width="720"></a>
 
 <sub>`/elicit` in use (click for the video). Values in the clip are illustrative, not a run result.</sub>
 
-## Overview
+<a name="when-to-invoke"></a>
+## When to use it
 
-Euporia opens a way through abstract aporia — you hold a direction but cannot yet name the decisions it turns on. It traces those decision coordinates from your own material (codebase, rules, past sessions), from your words, and from the decision structure of the domain the intent sits in, and surfaces each with where it comes from and what leaving it open changes. Every answer joins the conversation whole — including a coordinate you name beyond the listed ones, or an axis you reject — and the next round traces from all of it. A round may carry the work further on a judgment the AI states, and then comes back with an account of how your words were read, what was judged on what basis, and how far it went; anything that cannot be undone waits for the authorization it needs. The AI is bound to leave a value you gave standing until your own words change it — an obligation on its reading; what the Lean contract proves is that turns without a word of yours are never the source of a recorded value. The read-back of the intent marks each value with who proposed it: your words, or the AI's proposal. Each round returns the intent as it stands and owes no answer; that the intent is aligned enough is yours to say, at any point — every coordinate need not be filled. What is still open is carried as residual, never closed by default. You can stop at any time; stopping leaves the run as it stood. A proposal of the AI's enters the record as adopted only where it was shown as the AI's before your answer took it. Turning to other work mid-run leaves the last return standing.
+Use `/elicit` when your request gives a direction but leaves the intended result unclear. If the AI suggests `/elicit`, you can accept or decline. Instead of guessing what you meant and charging ahead, the AI reads your words, your files, rules, past sessions, and the decision structure of the subject area itself to surface the decisions that actually shape the result.
 
-The protocol stands in directional dual relation to Periagoge (`/induce`) — Periagoge ascends from concrete instances to abstraction (bottom-up direction), Euporia descends from intent to the coordinates it turns on (top-down direction). The two compose as orthogonal directions of the same dialectic. The pairing is informal direction-orthogonality, not a formal categorical limit/colimit duality.
+## How to start
 
-## Type
+Type `/elicit` with your request.
+
+On the first response, the AI reads back your intent as it understands it, cites where each part came from, and surfaces the open decisions along with what leaving each one open would change. When the AI suggests `/elicit` on its own, that first response is a proposal you can confirm or decline. You can reply in your own words, pick from what the AI showed, add a new decision point, reject one that does not belong, or say right away that the intent is aligned enough.
+
+The AI may also take reversible steps forward based on a stated judgment, telling you how it read your words, what it decided on what basis, and how far it went; anything that cannot be undone waits for your approval.
+
+<a name="overview"></a>
+## What you get
+
+Each round hands back your current intent without holding your turn:
+
+- **Your words vs. AI proposals** — every recorded choice is marked with whether it came from your own words or an AI proposal. A choice you gave stays put until your own words change it, and an AI proposal counts as adopted only after it was shown to you as a proposal and you took it.
+- **Unsettled items carried forward** — you do not need to answer every question. Whatever you leave open stays explicitly open rather than closing to a silent default.
+
+You decide when the intent is aligned enough. Even before that, you can stop or move on to other work at any time; the last read-back stays standing as your intent.
+
+<details>
+<summary>Name, type, and relation to other protocols</summary>
+
+<a name="name"></a>
+### Name
+
+Greek εὐπορία — literally "good passage" (εὖ "well" + πόρος "way") — names the resourcefulness toward resolution that emerges from aporia (ἀπορία, "no way through"). Plato's later dialectic threads aporia and euporia as paired moments of inquiry; the protocol borrows the resolving-passage structure.
+
+<a name="type"></a>
+### Type
 
 ```
 (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed)
   → ResolvedEndpoint
 ```
 
-## Name
+What the Lean contract proves is that turns without a word of yours are never the source of a recorded value.
 
-Greek εὐπορία — literally "good passage" (εὖ "well" + πόρος "way") — names the resourcefulness toward resolution that emerges from aporia (ἀπορία, "no way through"). Plato's later dialectic threads aporia and euporia as paired moments of inquiry; the protocol borrows the resolving-passage structure.
+### Relation to other protocols
 
-## When to invoke
+Euporia stands in directional dual relation to Periagoge (`/induce`): Periagoge ascends from concrete instances to a shared abstraction (bottom-up), while Euporia descends from an intent to the decision coordinates it turns on (top-down). The two compose as orthogonal directions of the same dialectic (informal direction-orthogonality, not a formal categorical limit/colimit duality).
 
-Invoke it when your intent is articulated but turns on decisions you have not named — they may show in your words, your material, or the decision structure of the domain the intent sits in. Invoking `/elicit` is your declaration of that: the first surface shows the intent as the AI understands it, with its sources, and you may say at once that it is aligned enough. When the AI raises it on its own, the first surface is a proposal you confirm or decline.
+An intent whose axis is already fixed may be better served by an axis-specific protocol, and a set of cases whose shared abstraction you are forming or reconsidering, by Periagoge (`/induce`).
 
-An intent whose axis is already fixed may be better served by an axis-specific protocol, and a set of cases whose shared abstraction you are forming or reconsidering, by Periagoge. Which to run is yours to choose; once a run is active, a value stands in it only by your own words.
-
-## Components
+<a name="components"></a>
+### Components
 
 - `skills/elicit/SKILL.md` — protocol definition (a Lean 4 formal block that elaborates, prose, rules)
 - `.claude-plugin/plugin.json` — plugin manifest
+
+</details>
