@@ -27,8 +27,7 @@ theorem silence (respond relay session : Context P → Response P) (c : Context 
     fit respond relay session c none [] = .holding c := by
   simp [fit]
 
-/-- Where the person's last turn that bore on the run took the space, the run ends on that
-    taking. -/
+/-- With no further utterance, a run on which a taking stands ends on that taking. -/
 theorem silence_after_taking (respond relay session : Context P → Response P) (c : Context P)
     (r : FusedSolutionSpace P) :
     fit respond relay session c (some r) [] = .fused r := by
@@ -83,7 +82,7 @@ theorem each_step_continues (respond relay session : Context P → Response P) (
         (Bool.eq_false_iff.mpr ht), .inr (.inl rfl)⟩
   · exact ⟨_, _, unrelated_adds_no_round respond relay session c r u us hre, .inl rfl⟩
 
-/-- A later turn of the person's that bears on the run and takes nothing leaves the run holding,
+/-- Where the person's last turn bears on the run and takes nothing, the run ends holding,
     whatever taking stood before it. -/
 theorem later_untaken_turn_holds (respond relay session : Context P → Response P) (c : Context P)
     (r : Option (FusedSolutionSpace P)) (u : Utterance P)
@@ -92,8 +91,8 @@ theorem later_untaken_turn_holds (respond relay session : Context P → Response
   rw [untaken_advances_again respond relay session c r u [] hre ht]
   exact ⟨_, silence respond relay session _⟩
 
-/-- The run ends on the taking of the latest turn that bore on it: where that turn took the space,
-    that taking is the result, an earlier one replaced. -/
+/-- Where the person's last turn bears on the run and takes the space, the run ends on that
+    taking, an earlier one replaced. -/
 theorem latest_taking_is_the_result (respond relay session : Context P → Response P)
     (c : Context P) (r : Option (FusedSolutionSpace P)) (u : Utterance P)
     (hre : Reaches (fuse c u)) (ht : taken (fuse c u) = true) :
