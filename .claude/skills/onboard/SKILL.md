@@ -118,9 +118,13 @@ Build a User Context Profile from the person's own opening turns in their recent
 
 **Step 1: Collect recent opening turns**
 
-- **Records**: Glob `{config_dir}/projects/*/*.jsonl` — a session record sits directly inside a project partition; anything nested deeper is a subordinate capture and is excluded by depth. Exclude partitions whose name contains `-worktrees-`, which hold delegated work rather than the person's own sessions. Take the ~10 most recently modified records.
+- **Records**: Glob `{config_dir}/projects/*/*.jsonl` — a session record sits directly inside a project partition; anything nested deeper is a subordinate capture and is excluded by depth. Exclude partitions whose name contains `-worktrees-`, which hold delegated work rather than the person's own sessions.
+- **Spawned sessions**: exclude a record whose head carries a line of `type` `derived-from` — another session spawned it, and its opening is that session's brief rather than the person's request.
+- **Selection**: after these exclusions, take the ~10 most recently modified records that remain.
 - **Bounded head read**: read only the first 256 KB of each record (a byte-bounded read such as `head -c 262144 <record>`), never the whole file. Skip a line that does not parse — the last one may be cut by the bound.
 - **Person turns only**: a line is the person's turn when its `type` is `user`, `isMeta` and `isCompactSummary` are both absent, and its text (`message.content` as a string, or the `text` parts of a content list — tool results are not text parts) neither opens with `<` nor is a bare control marker such as `[Request interrupted by user]`. Hook output, command wrappers, and injected envelopes arrive in the same `user` stream and are excluded by this rule.
+- **Human origin**: where a line carries `origin.kind` or `turnOrigin`, it is the person's turn only when that value is `human`; a headless run (`sdk`) or a channel delivery (`channel`) is not.
+- **Copied turns**: a line carrying `forkedFrom` is a turn a fork or resume copied from the session it names, and counts once, in that session — skip it.
 - From each record keep its first 2-3 person turns. A record whose head holds none contributes nothing.
 
 **Step 2: Infer User Context Profile**
@@ -416,7 +420,7 @@ Quick path targets 3-4 calls. Targeted path targets 6-12 calls.
 6. **Trial authenticity**: Trial phase must execute the actual protocol, not simulate it. The user invokes the real slash command.
 7. **Immediate feedback**: Quiz answers get instant feedback. For incorrect answers, reasoning inquiry precedes correction (per Feedback section). Never batch quiz results.
 8. **No auto-install**: Guide installation but never install plugins automatically.
-9. **Session record access**: Read a conversation record only through a byte-bounded head read, never the whole file, and keep only the person's turns as Phase 1 defines them. Assistant turns, tool output, and injected text are not read into the profile.
+9. **Session record access**: Read a conversation record only through a byte-bounded head read, never the whole file, and keep only the person's turns as Phase 1 defines them. Assistant turns, tool output, injected text, copied turns, and the openings of spawned sessions are not read into the profile.
 10. **Preset as safety net**: `references/scenarios.md` ensures every user gets a complete experience regardless of session history availability.
 11. **Single session**: The entire onboarding completes in one session. No cross-session state required.
 
