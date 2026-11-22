@@ -3,12 +3,30 @@
 
 > [한국어](./README_ko.md)
 
+## What it is
+
+Periagoge (Greek περιαγωγή, "turning-around") is a protocol for naming what several concrete cases share and shaping it into a clear concept and rule. It lays out a working candidate alongside every live reading of the cases and your goal, so you can see which cases each reading includes or leaves out.
+
 <a name="when-to-invoke"></a>
-## When to use it
+## The problem
 
-Reach for `/induce` when you have two or more concrete cases that seem to share something, and either nobody has named it yet or the old name no longer fits what the cases show. You are trying to form or rethink a shared concept and its rule from real examples, not apply an already fixed rule to a disputed case.
+You have two or more concrete cases that seem to share something, and either nobody has named it yet or the old name no longer fits what the cases show. Without a way to test candidates against the cases and your goal side by side, a shared concept stays vague or silently drops cases that do not fit cleanly. Reach for `/induce` when you are forming or rethinking a shared concept from examples, not when you are applying an already fixed rule to a disputed case.
 
-## How to start
+<a name="overview"></a>
+## The result
+
+Only you close the run. Once you recognize a candidate, you have:
+
+- **A named concept and rule** that you recognize as serving your goal.
+- **The boundary across your cases** — which cases it takes in, which it leaves out, what each case shows, and any remaining doubts the AI recorded.
+
+If an unseen case would decide against the candidate you are about to settle on, the AI shows you that case and asks again before closing. You can also stop at any time, leaving the sheet as it stood.
+
+## Install
+
+See the root [README](../README.md) for installation.
+
+## Usage
 
 Type `/induce` with the cases you are looking at.
 
@@ -21,16 +39,6 @@ Each round, the AI returns a sheet that puts the pieces side by side so you can 
 Along with the sheet, the AI may run reversible work based on a stated judgment and report how it read your words, what it judged on what basis (including alternatives it passed over that you might prefer), and how far it went. If that work turns up a case that goes against the candidate, the AI shows it with how it sorts rather than hiding it to keep the candidate clean.
 
 You reply in your own words — shift the goal or the candidate, adopt something the AI showed, set a reading aside, or say you recognize the candidate as the one that fits — and each reply changes only what your words address.
-
-<a name="overview"></a>
-## What you get
-
-Only you close the run. Once you recognize a candidate, you have:
-
-- **A named concept and rule** that you recognize as serving your goal.
-- **The boundary across your cases** — which cases it takes in, which it leaves out, what each case shows, and any remaining doubts the AI recorded.
-
-If an unseen case would decide against the candidate you are about to settle on, the AI shows you that case and asks again before closing. You can also stop at any time, leaving the sheet as it stood.
 
 <details>
 <summary>Name, type, and relation to other protocols</summary>

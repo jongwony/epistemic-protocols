@@ -3,9 +3,31 @@
 
 > [한국어](./README_ko.md)
 
-Use `/preview` right before you commit to a direction, when two or more candidate options are on the table but you cannot judge how they differ from descriptions alone — when you find yourself deferring to a general principle, reworking the options instead of choosing, or thinking "I'd have to see it."
+<a name="what-is-proplasma"></a>
+## What it is
+
+Proplasma comes from the Greek πρόπλασμα, the preliminary clay model shaped before committing to marble. Before you commit to a direction, it builds cheap, isolated placeholder previews that contrast your candidate directions and lays them out on a map so you can see what each one looks like for your purpose before deciding.
+
+<a name="the-core-problem"></a>
+## The problem
+
+Right before a direction commitment, two or more candidate options may be well-defined on paper, yet you cannot tell from descriptions alone what taking each one would actually look like. Instead of recognizing the right choice, you end up guessing consequences in your head, deferring to a general principle, reworking the option list instead of choosing, or stalling with "I'd have to see it."
+
+## The result
+
+Once you settle a direction, the AI removes the temporary previews. The AI reports which previews it removed and what still needs cleaning up. You keep the direction decision, the map cells that decided it — showing whether each rests on a preview you saw, a description alone, your own account, or real evidence — and the open unknowns with what would settle each.
+
+<a name="install"></a>
+## Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install proplasma@epistemic-protocols
+```
 
 <a name="usage"></a>
+## Usage
+
 Type:
 
 ```
@@ -20,17 +42,13 @@ In the map, every cell shows what a direction's future looks like on an axis and
 - Stop at any time, leaving the run and its probes as they stand until you decide.
 - Settle on a probe-shown direction, a combination, or even a direction no probe showed (marked as never materialized).
 
-Once you settle a direction, the AI removes the temporary previews. The AI reports which previews it removed and what still needs cleaning up. You keep the direction decision, the map cells that decided it, and the open unknowns with what would settle each.
-
-<a name="what-is-proplasma"></a>
-<a name="the-core-problem"></a>
 <a name="the-solution"></a>
 <a name="difference-from-other-protocols"></a>
 <a name="three-breach-conditions"></a>
 <details>
 <summary>How probes work, how this compares to other protocols, and safety guards</summary>
 
-### Name, Problem, and Solution
+### Background and Solution
 
 **Proplasma** reinterprets Greek πρόπλασμα (the preliminary clay model a sculptor shapes before committing to marble). When a direction choice is unrecognizable from words (`DirectionUnrecognizable`), well-formed options still leave you mentally simulating consequences instead of recognizing them.
 
@@ -62,16 +80,7 @@ The protocol's legitimacy lives in a survival chain: spec relay → probe genera
 
 </details>
 
-<a name="install"></a>
 <a name="author"></a>
-<details>
-<summary>Install and author</summary>
+## Author
 
-```
-claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
-claude plugin install proplasma@epistemic-protocols
-```
-
-Author: Jongwon Choi (https://github.com/jongwony)
-
-</details>
+Jongwon Choi (https://github.com/jongwony)

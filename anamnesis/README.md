@@ -1,17 +1,56 @@
 # /recollect — Anamnesis (ἀνάμνησις)
 
+<a name="anamnesis--recollect-ἀνάμνησις"></a>
+
 > [한국어](./README_ko.md)
 
-<a name="anamnesis--recollect-ἀνάμνησις"></a>
+<a name="what-is-anamnesis"></a>
+## What it is
+
+Anamnesis comes from the Greek word for recollection. It searches the records your past work left — conversations, changed files and their history, and recorded decisions — against a vague clue, opens the original records where your clue points, and tells their story with sources attached so you can recognize the past you meant.
+
 <a name="the-core-problem"></a>
 <a name="when-to-use"></a>
-## When to use it
+## The problem
 
 You vaguely remember that something was discussed or decided before — in an earlier conversation, or across several sessions — but you cannot name where it happened or what it was called. Keyword searches return either too much or nothing useful because you only have a fragment ("that time we talked about…", a vague timeframe, or an episode). Reach for `/recollect` when your next step depends on finding that earlier discussion, line of work, topic, or settled concept.
 
+## The result
+
+You get a story built from the original passages, with each candidate identified by its runtime and storage location, and each excerpt carrying a reference to reopen the record. You can reopen the passages and decide whether they match — showing what actually took place then, while keeping clear that a past record does not by itself mean the decision still holds today. If the search ends without a match, you see where the AI looked.
+
+<a name="install"></a>
+## Install
+
+Claude Code:
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install anamnesis@epistemic-protocols
+```
+
+Codex:
+
+```
+codex plugin marketplace add https://github.com/jongwony/epistemic-protocols.git
+codex plugin add anamnesis@epistemic-protocols
+```
+
+Then review and trust the plugin's hooks — installing a plugin does not trust
+them, and Codex skips a plugin-bundled hook until its current definition is
+trusted, so capture stays off until this step is done:
+
+```
+/hooks
+```
+
+Codex records trust against the hook definition's hash, so this recurs whenever
+the plugin's hooks change. Codex prints a startup warning when hooks are waiting
+for review.
+
 <a name="usage"></a>
 <a name="the-solution"></a>
-## How to start
+## Usage
 
 ```
 /recollect [vague hook — keywords, fragment, or description]
@@ -19,15 +58,8 @@ You vaguely remember that something was discussed or decided before — in an ea
 
 After you type `/recollect`, the AI reads your clue — a timeframe, a person, a file path, an issue or commit number, a coined term, or a rough description — and searches past session records, changed files, change history, and recorded decisions in Claude Code and Codex (whichever are available). Instead of handing you keyword hits or an index summary, it opens the leading candidate's original records at the span your clue points to and tells the story in the records' own words, keeping who said what alongside each excerpt's source and a reference to reopen it. You can confirm that it is the past you meant, or add another detail in your own words to run the search again.
 
-## What you have once it has run
-
-You get a story built from the original passages, with each candidate identified by its runtime and storage location, and each excerpt carrying a reference to reopen the record. You can reopen the passages and decide whether they match — showing what actually took place then, while keeping clear that a past record does not by itself mean the decision still holds today. If the search ends without a match, you see where the AI looked.
-
 <details>
 <summary>How the protocol runs and follows clues</summary>
-
-<a name="what-is-anamnesis"></a>
-**Name**: Platonic ἀνάμνησις (recollection) — searching past conversations, artifacts, change history, and decisions against a vague hook, opening each candidate's own record, and telling what those records carry so you can recognize the right prior context.
 
 **Source-grounded recognition**: An index's gist is a cue that wakes recall, never evidence of it; the opened record is the evidence, and the identification is yours. Claude Code and Codex records are searched together when both are available, starting from the current configuration's root and checking older roots when the clue points there.
 
@@ -102,37 +134,7 @@ node --test anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomn
 
 </details>
 
-<details>
-<summary>Install & author</summary>
-
-<a name="install"></a>
-### Install
-
-Claude Code:
-
-```
-claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
-claude plugin install anamnesis@epistemic-protocols
-```
-
-Codex:
-
-```
-codex plugin marketplace add https://github.com/jongwony/epistemic-protocols.git
-codex plugin add anamnesis@epistemic-protocols
-```
-
-Then review and trust the plugin's hooks — installing a plugin does not trust them, and Codex skips a plugin-bundled hook until its current definition is trusted, so capture stays off until this step is done:
-
-```
-/hooks
-```
-
-Codex records trust against the hook definition's hash, so this recurs whenever the plugin's hooks change. Codex prints a startup warning when hooks are waiting for review.
-
 <a name="author"></a>
-### Author
+## Author
 
 Jongwon Choi (https://github.com/jongwony)
-
-</details>

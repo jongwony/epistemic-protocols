@@ -1,16 +1,34 @@
 # /conduct — Hyphegesis (ὑφήγησις)
+<a name="hyphegesis--conduct-ὑφήγησις"></a>
 
 > [한국어](./README_ko.md)
 
-<a name="hyphegesis--conduct-ὑφήγησις"></a>
+## What it is
 <a name="what-is-hyphegesis"></a>
+
+Hyphegesis (ὑφήγησις) means leading the way or guiding from just ahead. It is a protocol that drafts one map of how multi-part work will run — its lines of work, their order, how they combine, when they stop, and where their results go — so you can adjust or accept the method before the work is carried out.
+
+## The problem
 <a name="the-core-problem"></a>
+
 Your goal is clear, but the work has several parts and it is not obvious how to run them: which lines of work to run in sequence or side by side, whether they should see each other's results before combining, how those results combine, when to stop, or where the results go next. Started without settling the method, multi-step work drifts — steps run in the wrong order, independent perspectives mix too early, or work continues with no clear stopping point.
 
-## How to start
+## The result
 
+When you accept the method, the AI shows the map once more with what that turn changed — or, if your opening request already settled the method, shows the map once — and hands it off immediately in that same turn to carry out the work. `/conduct` itself designs and hands off the method rather than running the work. You can say how the lines order, combine, and stop, where their results go, and which decisions you entrusted versus kept.
+
+## Install
+<a name="install"></a>
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install hyphegesis@epistemic-protocols
+```
+
+## Usage
 <a name="usage"></a>
 <a name="the-solution"></a>
+
 ```
 /conduct migrate this service from framework v2 to v3
 ```
@@ -18,10 +36,6 @@ Your goal is clear, but the work has several parts and it is not obvious how to 
 Type `/conduct` at the start of — or partway into — multi-part work. Unless your words already settle the method, the AI lays out one map of the whole method before asking anything: the lines of work, who runs each and where, how they combine and stop, where results go, what the method needs from the runtime environment and whether each capability was actually observed, deferred decisions, and any reason the work needs no conducting. It draws the map only as detailed as the goal is worth: where trying is cheap and reversible, a rough map run once and checked may be the method.
 
 You keep the decisions that are yours — when to stop, how results combine, where they go, constraints on the work, and the authority you entrust and its limits — and correct any part of the map or accept it as shown. Each time you change part of the map before accepting, the AI redraws it so downstream steps update while every choice you set stays yours. If you will be away while the work runs, the map separates what you must decide before leaving from what can wait. You can stop at any time before accepting the method, leaving the conversation as it stood.
-
-## What you have once it has run
-
-When you accept the method, the AI shows the map once more with what that turn changed — or, if your opening request already settled the method, shows the map once — and hands it off immediately in that same turn to carry out the work. `/conduct` itself designs and hands off the method rather than running the work. You can say how the lines order, combine, and stop, where their results go, and which decisions you entrusted versus kept.
 
 <details>
 <summary>What a method settles</summary>
@@ -49,7 +63,7 @@ A decision whose evidence arrives later is deferred: covered where a recorded gr
 </details>
 
 <details>
-<summary>Comparison with other protocols and Greek name</summary>
+<summary>Comparison with other protocols</summary>
 
 **Hyphegesis** (ὑφήγησις, leading the way / guiding from just ahead) conducts how a session's epistemic work will be carried out when the method is underdetermined (`MethodUnderdetermined`), producing a `ConductedMethod` handed off with the user's decisions, deferred decisions, lifetime, and required capabilities.
 
@@ -61,18 +75,5 @@ A decision whose evidence arrives later is deferred: covered where a recorded gr
 | Horismos | AI-guided | `BoundaryUndefined → DefinedBoundary` |
 | **Hyphegesis** | **Hybrid** | **`MethodUnderdetermined → ConductedMethod`** |
 | Katalepsis | User-initiated | `TargetUngrasped → VerifiedUnderstanding` |
-
-</details>
-
-<details>
-<summary>Install</summary>
-
-<a name="install"></a>
-### Install
-
-```
-claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
-claude plugin install hyphegesis@epistemic-protocols
-```
 
 </details>

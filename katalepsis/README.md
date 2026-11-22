@@ -3,9 +3,32 @@
 
 > [한국어](./README_ko.md)
 
-Use `/grasp` when something in front of you — a large change, code someone else wrote, a dense document, or a result done for you — is hard to follow, or you find yourself nodding along without being sure. Skip it for a trivial formatting change, when you already understand the material, or when you do not want an explanation.
+<a name="what-is-katalepsis"></a>
+## What it is
+
+Katalepsis comes from the Greek κατάληψις, meaning a firm grasp or certain comprehension. It helps you follow along and build a checked understanding of something in front of you — code, a document, or a result, whoever produced it — on a map built around your purpose.
+
+<a name="the-core-problem"></a>
+<a name="when-to-use"></a>
+## The problem
+
+When something in front of you — a large change, code someone else wrote, a dense document, or a result done for you — is complex, it is easy to lose the thread, feel overwhelmed without a clear entry point, or nod along without being sure you understand it. Reach for `/grasp` when you cannot follow it yet or want to verify your understanding; skip it for a trivial formatting change, when you already understand the material, or when you do not want an explanation.
+
+## The result
+
+Once it closes, you have a map of the material built around your purpose. The map records what the target does and the evidence for it, what you explained in your own words, and which AI explanations you accepted, along with what still needs checking and how, and any AI doubt.
+
+<a name="install"></a>
+## Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install katalepsis@epistemic-protocols
+```
 
 <a name="usage"></a>
+## Usage
+
 Type:
 
 ```
@@ -19,19 +42,16 @@ The AI reads the target and the sources around it, then shows a map built around
 - Say "I'd need to see it" to run a check and look at the result together.
 - Say "that seems off" to see the facts that bear on your reading — or, if none do, what would settle it.
 
-When what you understand serves your purpose, you say so to close. The map records what the target does and the evidence for it, what you explained in your own words, and which AI explanations you accepted, along with what still needs checking and how, and any AI doubt.
+When what you understand serves your purpose, you say so to close.
 
-<a name="what-is-katalepsis"></a>
-<a name="the-core-problem"></a>
 <a name="the-solution"></a>
 <a name="difference-from-simple-explanation"></a>
 <a name="protocol-flow"></a>
-<a name="when-to-use"></a>
 <a name="what-the-map-carries"></a>
 <details>
 <summary>How the map works and how it differs from a simple explanation</summary>
 
-### Name and Problem
+### Background and Solution
 
 **Katalepsis** reinterprets Stoic κατάληψις (firm grasp, certain comprehension) so you can follow along and reach verified understanding of a target in context, whoever produced it. When a target is complex, you may not grasp it in full (`TargetUngrasped`) — thinking you understand, or feeling overwhelmed without an entry point.
 
@@ -71,16 +91,7 @@ Close    → The user says what they understand now serves their purpose; the
 
 </details>
 
-<a name="install"></a>
 <a name="author"></a>
-<details>
-<summary>Install and author</summary>
+## Author
 
-```
-claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
-claude plugin install katalepsis@epistemic-protocols
-```
-
-Author: Jongwon Choi (https://github.com/jongwony)
-
-</details>
+Jongwon Choi (https://github.com/jongwony)

@@ -7,24 +7,18 @@
 
 <sub>`/inquire` in use (click for the video). Values in the clip are illustrative, not a run result.</sub>
 
+<a name="what-is-aitesis"></a>
+## What it is
+
+Aitesis (Greek αἴτησις, "a requesting") is a protocol for checking the facts and open choices a task rests on. It makes the AI gather everything it can reach on its own, state what it reached and what it could not reach for each uncertainty, and hand back what only you can settle.
+
 <a name="when-to-use"></a>
 <a name="the-core-problem"></a>
-## When to use it
+## The problem
 
-Before relying on an unchecked fact, run `/inquire`. The AI shows what the records establish and flags choices it thinks are yours. You can correct that reading. People often stop looking once a plausible story forms, and AI often fills the gaps with silent guesses; `/inquire` makes the AI check every source it can reach first, then show you what it found and what remains unknown.
+People often stop looking once a plausible story forms, and AI often proceeds on silent guesses when domain context is missing, requirements go unchecked, or setup details are assumed. Before relying on an unchecked fact, run `/inquire`. The AI shows what the records establish and flags choices it thinks are yours. You can correct that reading.
 
-<a name="usage"></a>
-<a name="the-solution"></a>
-## How to start
-
-```
-/inquire [your current task or context]
-```
-
-After you run `/inquire`, the AI lists what your task leaves uncertain and checks every file, record, or read-only check it can run on its own without changing existing state. If it creates a scratch copy or temp file just to look, it removes it afterwards. Anything that would change existing state or needs someone's permission is not run; instead, the AI names it and tells you what it needs.
-
-<a name="what-is-aitesis"></a>
-## What you get
+## The result
 
 You get a clear breakdown of what your task rests on, ordered by what an answer would change most:
 
@@ -34,6 +28,24 @@ You get a clear breakdown of what your task rests on, ordered by what an answer 
 - **Unasked-for findings** — anything relevant discovered along the way that answers none of the raised uncertainties, shown on its own line.
 
 Where sources conflict, the AI names what conflicts with what. Where a decision blocks further checking, it names what waits on that decision. The run finishes its pass and continues without locking your turn: you can answer, correct a reading, point to a missed source, or dismiss an item to trigger another pass, or say nothing and leave the current breakdown standing.
+
+<a name="install"></a>
+## Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install aitesis@epistemic-protocols
+```
+
+<a name="usage"></a>
+<a name="the-solution"></a>
+## Usage
+
+```
+/inquire [your current task or context]
+```
+
+After you run `/inquire`, the AI lists what your task leaves uncertain and checks every file, record, or read-only check it can run on its own without changing existing state. If it creates a scratch copy or temp file just to look, it removes it afterwards. Anything that would change existing state or needs someone's permission is not run; instead, the AI names it and tells you what it needs.
 
 <details>
 <summary>Examples of uncertainties</summary>
@@ -87,16 +99,7 @@ When the context is already fully specified or you ask to proceed without verifi
 
 </details>
 
-<details>
-<summary>Install and author</summary>
-
-<a name="install"></a>
-```
-claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
-claude plugin install aitesis@epistemic-protocols
-```
-
 <a name="author"></a>
-Author: Jongwon Choi (https://github.com/jongwony)
+## Author
 
-</details>
+Jongwon Choi (https://github.com/jongwony)

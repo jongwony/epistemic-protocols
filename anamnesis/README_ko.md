@@ -1,17 +1,56 @@
 # /recollect — Anamnesis (ἀνάμνησις)
 
+<a name="anamnesis--recollect-ἀνάμνησις"></a>
+
 > [English](./README.md)
 
-<a name="anamnesis--recollect-ἀνάμνησις"></a>
+<a name="anamnesis란"></a>
+## 정의
+
+Anamnesis는 상기나 회상을 뜻하는 그리스어에서 왔습니다. 지난 작업이 남긴 대화와 산출물 변경 이력, 결정 기록을 모호한 단서와 대조해 원본 기록에서 단서가 닿는 구간을 열고, 그 내용을 출처와 함께 이야기로 들려주어 찾던 과거 맥락을 직접 알아보게 하는 프로토콜입니다.
+
 <a name="핵심-문제"></a>
 <a name="사용-시점"></a>
-## 언제 쓰나요
+## 문제
 
 예전 대화나 여러 세션에 걸친 작업 중에서 무언가 논의하거나 결정했던 기억은 나는데, 정확히 어디서 다루었는지나 무엇이라 불렀는지 짚을 수 없을 때가 있습니다. 단서가 모호하다 보니("그때 얘기했던 그거…", 대략적인 시점, 단편적인 기억) 키워드 검색을 해도 결과가 너무 많이 나오거나 아예 나오지 않습니다. 다음 작업을 이어 가기 위해 예전 대화나 작업 흐름, 주제, 이미 정해 두었던 개념을 다시 찾아야 할 때 `/recollect`를 씁니다.
 
+## 결과
+
+원본 기록의 구절들로 엮은 이야기가 남으며, 후보마다 어느 도구와 저장 위치에서 왔는지 표시되고 발췌한 구절마다 원본을 다시 열 수 있는 참조가 붙습니다. 해당 구절을 직접 다시 열어 찾던 과거가 맞는지 결정할 수 있고, 과거에 실제로 있었던 논의라는 사실과 그 내용이 지금도 그대로 유효한지는 구분해서 파악할 수 있습니다. 만약 끝내 일치하는 기록을 찾지 못하면 AI가 어디까지 찾아보았는지 확인할 수 있습니다.
+
+<a name="설치"></a>
+## 설치
+
+Claude Code:
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install anamnesis@epistemic-protocols
+```
+
+Codex:
+
+```
+codex plugin marketplace add https://github.com/jongwony/epistemic-protocols.git
+codex plugin add anamnesis@epistemic-protocols
+```
+
+Then review and trust the plugin's hooks — installing a plugin does not trust
+them, and Codex skips a plugin-bundled hook until its current definition is
+trusted, so capture stays off until this step is done:
+
+```
+/hooks
+```
+
+Codex records trust against the hook definition's hash, so this recurs whenever
+the plugin's hooks change. Codex prints a startup warning when hooks are waiting
+for review.
+
 <a name="사용법"></a>
 <a name="해결책"></a>
-## 시작하기
+## 사용법
 
 ```
 /recollect [모호한 단서 — 키워드, 단편, 또는 설명]
@@ -19,15 +58,8 @@
 
 `/recollect`와 함께 기억나는 단서(시점, 사람, 파일 경로, 이슈·커밋 번호, 만들어 쓴 용어, 대략적인 상황)를 입력하면, AI가 사용할 수 있는 Claude Code와 Codex 기록에서 지난 대화와 변경 이력, 결정 기록을 찾아봅니다. 단순한 키워드 검색 결과나 색인 요약을 돌려주는 대신, 유력한 후보의 원본 기록에서 단서가 닿는 구간을 직접 열어 누가 무슨 말을 했는지 기록의 표현 그대로 출처 및 다시 열어 볼 수 있는 참조와 함께 들려줍니다. 이야기를 보고 찾던 과거가 맞는지 확인하거나, 떠오른 단서를 덧붙여 다시 검색할 수 있습니다.
 
-## 끝나면 무엇이 남나요
-
-원본 기록의 구절들로 엮은 이야기가 남으며, 후보마다 어느 도구와 저장 위치에서 왔는지 표시되고 발췌한 구절마다 원본을 다시 열 수 있는 참조가 붙습니다. 해당 구절을 직접 다시 열어 찾던 과거가 맞는지 결정할 수 있고, 과거에 실제로 있었던 논의라는 사실과 그 내용이 지금도 그대로 유효한지는 구분해서 파악할 수 있습니다. 만약 끝내 일치하는 기록을 찾지 못하면 AI가 어디까지 찾아보았는지 확인할 수 있습니다.
-
 <details>
 <summary>프로토콜 흐름과 단서 추적 방식</summary>
-
-<a name="anamnesis란"></a>
-**이름**: 플라톤의 ἀνάμνησις(상기) — 지난 작업이 남긴 대화, 산출물과 변경 이력, 결정 기록을 모호한 단서와 대조해 원기록의 해당 구간을 열고, 출처와 함께 이야기로 들려주어 올바른 과거 맥락을 직접 알아보게 하는 프로토콜입니다.
 
 **출처로 근거 지어진 인지(Source-grounded recognition)**: 색인의 요약은 기억을 깨우는 단서일 뿐 증거가 아니며, 증거는 열린 원본 기록이고 식별은 사용자의 몫입니다. Claude Code와 Codex 기록이 모두 있으면 현재 설정 디렉터리 뿌리부터 함께 검색하고, 단서가 가리키면 이전 설정 뿌리까지 찾아봅니다.
 
@@ -102,37 +134,7 @@ node --test anamnesis/scripts/hypomnesis-write.test.mjs anamnesis/scripts/hypomn
 
 </details>
 
-<details>
-<summary>설치 및 저자</summary>
-
-<a name="설치"></a>
-### 설치
-
-Claude Code:
-
-```
-claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
-claude plugin install anamnesis@epistemic-protocols
-```
-
-Codex:
-
-```
-codex plugin marketplace add https://github.com/jongwony/epistemic-protocols.git
-codex plugin add anamnesis@epistemic-protocols
-```
-
-플러그인을 설치한 뒤에는 훅을 검토하고 신뢰(trust)해야 합니다. 설치만으로는 훅이 자동 신뢰되지 않으며, 현재 훅 정의를 신뢰하기 전까지 Codex가 캡처 훅을 건너뜁니다:
-
-```
-/hooks
-```
-
-Codex는 훅 정의의 해시를 기준으로 신뢰 여부를 기록하므로 플러그인 훅이 바뀔 때마다 이 과정이 다시 필요합니다. 검토 대기 중인 훅이 있으면 시작할 때 경고가 표시됩니다.
-
 <a name="저자"></a>
-### 저자
+## 저자
 
 Jongwon Choi (https://github.com/jongwony)
-
-</details>

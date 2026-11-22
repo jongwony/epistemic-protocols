@@ -7,21 +7,17 @@
 
 <sub>`/elicit` in use (click for the video). Values in the clip are illustrative, not a run result.</sub>
 
+## What it is
+
+Euporia (Greek εὐπορία, "good passage") is a protocol for turning a rough direction into an intent you can recognize as yours. It surfaces the open decisions your request turns on — drawn from your words, your files, rules, past sessions, and the subject area itself — and records only what your own words settle.
+
 <a name="when-to-invoke"></a>
-## When to use it
+## The problem
 
-Use `/elicit` when your request gives a direction but leaves the intended result unclear. If the AI suggests `/elicit`, you can accept or decline. Instead of guessing what you meant and charging ahead, the AI reads your words, your files, rules, past sessions, and the decision structure of the subject area itself to surface the decisions that actually shape the result.
-
-## How to start
-
-Type `/elicit` with your request.
-
-On the first response, the AI reads back your intent as it understands it, cites where each part came from, and surfaces the open decisions along with what leaving each one open would change. When the AI suggests `/elicit` on its own, that first response is a proposal you can confirm or decline. You can reply in your own words, pick from what the AI showed, add a new decision point, reject one that does not belong, or say right away that the intent is aligned enough.
-
-The AI may also take reversible steps forward based on a stated judgment, telling you how it read your words, what it decided on what basis, and how far it went; anything that cannot be undone waits for your approval.
+Without it, a request that gives a direction but leaves the intended result unclear forces the AI to guess what should change and fill in the blanks on its own. Use `/elicit` when your request gives a direction but leaves the intended result unclear. If the AI suggests `/elicit`, you can accept or decline.
 
 <a name="overview"></a>
-## What you get
+## The result
 
 Each round hands back your current intent without holding your turn:
 
@@ -29,6 +25,18 @@ Each round hands back your current intent without holding your turn:
 - **Unsettled items carried forward** — you do not need to answer every question. Whatever you leave open stays explicitly open rather than closing to a silent default.
 
 You decide when the intent is aligned enough. Even before that, you can stop or move on to other work at any time; the last read-back stays standing as your intent.
+
+## Install
+
+See the root [README](../README.md) for installation.
+
+## Usage
+
+Type `/elicit` with your request.
+
+On the first response, the AI reads back your intent as it understands it, cites where each part came from, and surfaces the open decisions along with what leaving each one open would change. When the AI suggests `/elicit` on its own, that first response is a proposal you can confirm or decline. You can reply in your own words, pick from what the AI showed, add a new decision point, reject one that does not belong, or say right away that the intent is aligned enough.
+
+The AI may also take reversible steps forward based on a stated judgment, telling you how it read your words, what it decided on what basis, and how far it went; anything that cannot be undone waits for your approval.
 
 <details>
 <summary>Name, type, and relation to other protocols</summary>

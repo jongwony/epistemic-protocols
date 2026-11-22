@@ -1,17 +1,35 @@
 # /ground — Analogia (ἀναλογία)
 
+<a name="analogia--ground-ἀναλογία"></a>
+
 > [한국어](./README_ko.md)
 
-<a name="analogia--ground-ἀναλογία"></a>
+<a name="what-is-analogia"></a>
+## What it is
+
+Analogia comes from the Greek word for proportion or analogy. It checks what a pattern, framework, analogy, or earlier design actually supports when you apply it to the case in front of you, and how far that comparison holds.
+
 <a name="the-core-problem"></a>
 <a name="when-to-use"></a>
-## When to use it
+## The problem
 
 You are carrying a pattern, an earlier design, or a sibling job's shape over to your codebase, or checking a general claim against its examples. The comparison sounds right — like applying the Strangler Fig migration pattern to a monolith — but you do not yet know if it holds where services share a single database. Reach for `/ground` when you want to see which conclusions the comparison actually supports, which ones break, and which ones still need evidence before you build on them.
 
+## The result
+
+You get an audit of each conclusion at stake, unless checking the material leaves no conclusion to assess (in which case you receive no verdict, only the drafted question). For every conclusion assessed, you can see what relation carries it, what the AI checked and found, where it could not reach, what conflicts in the gathered material, and what difference in your target would break the claim. Each conclusion comes back marked as holding (with its limits), blocked, or still undetermined (with what is missing and who can check it).
+
+<a name="install"></a>
+## Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install analogia@epistemic-protocols
+```
+
 <a name="usage"></a>
 <a name="the-solution"></a>
-## How to start
+## Usage
 
 ```
 /ground [mapping and intended conclusions to audit]
@@ -19,15 +37,8 @@ You are carrying a pattern, an earlier design, or a sibling job's shape over to 
 
 After you type `/ground`, the AI reads your question: what the comparison is for, the conclusions at stake, and the source and target being compared. If your words leave part of that question open, it drafts the question from context — when several questions fit, it shows what prompted each and what each would test — so you can take, correct, or replace it, and notes if it checked a draft first. It then checks the files and sources it can reach, maps how the two sides line up — checking whole chains of relations, not just isolated parts — and tests what evidence supports each link without asking you to rubber-stamp the match.
 
-## What you have once it has run
-
-You get an audit of each conclusion at stake, unless checking the material leaves no conclusion to assess (in which case you receive no verdict, only the drafted question). For every conclusion assessed, you can see what relation carries it, what the AI checked and found, where it could not reach, what conflicts in the gathered material, and what difference in your target would break the claim. Each conclusion comes back marked as holding (with its limits), blocked, or still undetermined (with what is missing and who can check it).
-
 <details>
 <summary>How the protocol runs and handles follow-up turns</summary>
-
-<a name="what-is-analogia"></a>
-**Name**: Greek ἀναλογία (proportion, analogy) — auditing what an abstract framework licenses you to conclude about the case in front of you, and how far.
 
 **Warrant tracks cited evidence, never assent**: Your agreement is not evidence about your codebase. What moves the assessment is a fact, a source, a counterexample, or the result of running something.
 
@@ -94,20 +105,7 @@ Where the purpose is to carry a structure over — a port, a migration, a siblin
 
 </details>
 
-<details>
-<summary>Install & author</summary>
-
-<a name="install"></a>
-### Install
-
-```
-claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
-claude plugin install analogia@epistemic-protocols
-```
-
 <a name="author"></a>
-### Author
+## Author
 
 Jongwon Choi (https://github.com/jongwony)
-
-</details>

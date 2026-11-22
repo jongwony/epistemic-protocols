@@ -1,30 +1,44 @@
 # /fit — Harmoge (ἁρμογή)
+<a name="harmoge--fit-ἁρμογή"></a>
 
 > [한국어](./README_ko.md)
 
-<a name="harmoge--fit-ἁρμογή"></a>
+## What it is
 <a name="what-is-harmoge"></a>
+
+Harmoge (ἁρμογή) means fitting together or joining parts into a whole. It is a protocol where the AI interviews you through concrete cases to bring a direction, design, or implementation to what you intend, carrying each answer into the target and replaying every case gathered so far.
+
+## The problem
 <a name="the-core-problem"></a>
+
 You know what you want, and a direction, design, or implementation already stands in front of you (or is about to be made), yet no general description tells you where it stops matching what you intend. A rule sounds fine until one concrete message arrives that it handles in a way you would never accept, or two readings of a clause both sound reasonable until one real event sits between them. Reach for `/fit` when the boundaries of your design only show up against concrete cases.
 
-## How to start
+## The result
 
+When the solution space shown in a round is enough for your purpose, you take it — and a later turn of yours can still revise a judgment or replace that taking. If your acceptance rests on an assumption that conflicts with evidence or goes against your stated goal, and no round has yet shown you what follows, the AI keeps the acceptance open and shows that consequence as the next concrete case; once you have seen it, you decide whether to take the space with that trade-off. You finish with the solution space as it stands: the cases you settled, the trade-offs you accepted, the boundaries still open, the target updated to match, and what the target does on every case gathered along the way.
+
+## Install
+<a name="install"></a>
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install harmoge@epistemic-protocols
+```
+
+## Usage
 <a name="usage"></a>
 <a name="the-solution"></a>
+
 ```
 /fit [the target — a direction, a design, or an implementation — and what it is for]
 ```
 
-The AI interviews you through concrete cases. It reads what bears on your target, shows the solution space as it now stands — what fits best so far, the alternatives and trade-offs, and the boundaries still open — and asks you to judge concrete cases with their actual content shown, starting with the most consequential one.
+The AI reads what bears on your target, shows the solution space as it now stands — what fits best so far, the alternatives and trade-offs, and the boundaries still open — and asks you to judge concrete cases with their actual content shown, starting with the most consequential one.
 
 You answer in your own words: required, permitted, ruled out, "I don't know", or a reason or example of your own. Each round, the AI shows what it read from your last answer (citing which turn or tool output it rests on), carries your answer into the target, and replays every case gathered so far so you can see if a new change quietly broke an earlier judgment. Where nothing can be executed directly (such as a prose design or a direction), the AI marks the outcome as its reading of the target rather than an observed run. You can stop at any time; what was settled stays in the conversation and what was already carried into the target is not undone.
 
-## What you have once it has run
-
-When the solution space shown in a round is enough for your purpose, you take it — and a later turn of yours can still revise a judgment or replace that taking. If your acceptance rests on an assumption that conflicts with evidence or goes against your stated goal, and no round has yet shown you what follows, the AI keeps the acceptance open and shows that consequence as the next concrete case; once you have seen it, you decide whether to take the space with that trade-off. You finish with the solution space as it stands: the cases you settled, the trade-offs you accepted, the boundaries still open, the target updated to match, and what the target does on every case gathered along the way.
-
 <details>
-<summary>Comparison with other protocols and Greek name</summary>
+<summary>Comparison with other protocols</summary>
 
 **Harmoge** (ἁρμογή, fitting together / joining of parts into a whole) fuses an unfused solution space with your intent through concrete cases. The record of the space also carries the premises the alternatives turn on and the domain of the space alongside the settled cases, trade-offs, open boundaries, and the target's behavior on each case.
 
@@ -71,20 +85,7 @@ No study was found that compares this interview against a plain request for edge
 
 </details>
 
-<details>
-<summary>Install and author</summary>
-
-<a name="install"></a>
-### Install
-
-```
-claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
-claude plugin install harmoge@epistemic-protocols
-```
-
+## Author
 <a name="author"></a>
-### Author
 
 Jongwon Choi (https://github.com/jongwony)
-
-</details>

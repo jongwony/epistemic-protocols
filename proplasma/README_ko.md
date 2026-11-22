@@ -3,9 +3,31 @@
 
 > [English](./README.md)
 
-방향을 확정하기 직전에 후보가 둘 이상 있지만 말로만 들어서는 각 방향이 어떻게 다를지 판단이 서지 않을 때 — 일반적인 원칙에 결정을 미루거나, 고르는 대신 선택지를 다시 짜거나, "직접 봐야 알 것 같다"는 생각이 들 때 — `/preview`를 씁니다.
+<a name="proplasma란"></a>
+## 정의
+
+Proplasma는 대리석에 조각하기 전에 먼저 빚어 보는 예비 점토 모형을 뜻하는 그리스어 πρόπλασμα에서 이름을 가져왔습니다. 방향을 확정하기 직전에 후보 방향들의 차이를 보여 주는 가벼운 임시 시제품(probe)을 만들어 지도 위에 나란히 놓아 줌으로써, 각 방향이 내 목적에 실제로 어떤 모습일지 눈으로 보고 결정하게 돕는 프로토콜입니다.
+
+<a name="핵심-문제"></a>
+## 문제
+
+방향을 결정하기 직전에 후보가 둘 이상 잘 정리되어 있어도, 말로만 들어서는 각 방향을 택했을 때 어떤 모습이 될지 판단이 서지 않을 때가 있습니다. 결과를 눈으로 보고 고르는 대신 머릿속으로만 짐작해 보게 되어, 일반적인 원칙에 결정을 미루거나 고르는 대신 선택지를 다시 짜거나 "직접 봐야 알 것 같다"며 멈추게 됩니다.
+
+## 결과
+
+방향을 확정하면 AI는 임시 시제품을 폐기하며, 어떤 시제품을 지웠고 무엇을 더 정리해야 하는지 보고합니다. 최종적으로 선택한 방향, 그 결정을 가른 지도 칸들(직접 본 시제품, 설명뿐, 여러분의 말, 출처나 실제 관찰에서 온 증거 중 무엇에 기대는지 포함), 그리고 아직 열린 물음과 그것을 해결할 방법만 남습니다.
+
+<a name="설치"></a>
+## 설치
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install proplasma@epistemic-protocols
+```
 
 <a name="사용법"></a>
+## 사용법
+
 다음과 같이 입력합니다:
 
 ```
@@ -20,17 +42,13 @@
 - 언제든 멈출 수 있으며, 멈추면 방향을 정할 때까지 실행과 시제품이 그대로 유지됩니다.
 - 시제품으로 본 방향이나 조합을 택하거나, 어떤 시제품도 보여 주지 않은 방향을 택해 닫습니다(이 경우 만들어 본 적 없는 미래라는 사실이 함께 기록됩니다).
 
-방향을 확정하면 AI는 임시 시제품을 폐기하며, 어떤 시제품을 지웠고 무엇을 더 정리해야 하는지 보고합니다. 최종적으로 선택한 방향, 그 결정을 가른 지도 칸들, 그리고 아직 열린 물음과 그것을 해결할 방법만 남습니다.
-
-<a name="proplasma란"></a>
-<a name="핵심-문제"></a>
 <a name="해법"></a>
 <a name="다른-프로토콜과의-차이"></a>
 <a name="파탄-조건-3종"></a>
 <details>
 <summary>시제품 작동 방식, 다른 프로토콜과의 비교, 안전장치</summary>
 
-### 이름, 핵심 문제, 해법
+### 배경과 해법
 
 **Proplasma**는 그리스어 πρόπλασμα(대리석에 조각하기 전에 먼저 빚어 보는 예비 점토 모형)를 재해석한 프로토콜입니다. 말로만 봐서는 방향을 알아볼 수 없을 때(`DirectionUnrecognizable`), 선택지가 아무리 잘 정리되어 있어도 결과를 눈으로 알아보는 대신 머릿속으로만 시뮬레이션하게 됩니다.
 
@@ -62,16 +80,7 @@
 
 </details>
 
-<a name="설치"></a>
 <a name="author"></a>
-<details>
-<summary>설치 및 저자</summary>
+## Author
 
-```
-claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
-claude plugin install proplasma@epistemic-protocols
-```
-
-Author: Jongwon Choi (https://github.com/jongwony)
-
-</details>
+Jongwon Choi (https://github.com/jongwony)

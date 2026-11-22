@@ -1,16 +1,34 @@
 # /sketch — Hypotyposis (ὑποτύπωσις)
+<a name="hypotyposis--sketch-ὑποτύπωσις"></a>
 
 > [한국어](./README_ko.md)
 
-<a name="hypotyposis--sketch-ὑποτύπωσις"></a>
+## What it is
 <a name="what-is-hypotyposis"></a>
+
+Hypotyposis (ὑποτύπωσις) means an outline or first sketch, drawn before a position can be stated in full. It is a protocol that makes concrete versions for you to react to in your own words and revises them from your reactions until you can point at one version you met and recognize it as the form for your purpose.
+
+## The problem
 <a name="the-core-problem"></a>
+
 You have something to make and cannot describe in advance what it should look or read like, yet you will know it when you see it. When you try to specify it up front, the first draft never arrives, or you edit the description for the fourth time because what you actually want only surfaces once something concrete sits in front of you. Reach for `/sketch` when pointing at what does not fit in a real draft is much easier than describing the right form from scratch.
 
-## How to start
+## The result
 
+The run closes when you point at a version you met and take it as the form for your purpose, with its location shown in that round or named in your answer. Passed-over versions stay where they are unless you ask otherwise. You finish with the chosen version in place and a record of every version, where it lives, and anything you asked done to it that is not yet done (with why), the choices set by your words versus accepted from the AI's proposals, what was checked and against which reference, any qualities the medium could not show that remain open, and any objection the AI raised with your answer to it.
+
+## Install
+<a name="install"></a>
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install hypotyposis@epistemic-protocols
+```
+
+## Usage
 <a name="usage"></a>
 <a name="the-solution"></a>
+
 ```
 /sketch [what you are about to make, and anything already settled about it]
 ```
@@ -19,12 +37,8 @@ Before making anything, the AI tells you what the first versions will try, how m
 
 Each round, you react in your own words: point out what does not fit, say what to keep or change, ask to combine versions or try another medium, or ask a question about a version. The AI makes the next versions according to your words — revising the retained versions you pointed to into new versions (never regenerating them from an abstract summary), starting fresh, or combining versions — and may also add a version it proposes. You can stop at any time; stopping leaves the run as it stood and carries out whatever cleanup or handling you ask for the versions made so far.
 
-## What you have once it has run
-
-The run closes when you point at a version you met and take it as the form for your purpose, with its location shown in that round or named in your answer. Passed-over versions stay where they are unless you ask otherwise. You finish with the chosen version in place and a record of every version, where it lives, and anything you asked done to it that is not yet done (with why), the choices set by your words versus accepted from the AI's proposals, what was checked and against which reference, any qualities the medium could not show that remain open, and any objection the AI raised with your answer to it.
-
 <details>
-<summary>Comparison with other protocols and Greek name</summary>
+<summary>Comparison with other protocols</summary>
 
 **Hypotyposis** (ὑποτύπωσις, outline / first sketch) turns an unrecognized fit (`FitUnrecognized`) into a recognized form (`RecognizedForm`) by having you react to concrete versions rather than specify the form up front.
 
@@ -70,20 +84,7 @@ Literature the design rests on, with the strength at which the primary source wa
 
 </details>
 
-<details>
-<summary>Install and author</summary>
-
-<a name="install"></a>
-### Install
-
-```
-claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
-claude plugin install hypotyposis@epistemic-protocols
-```
-
+## Author
 <a name="author"></a>
-### Author
 
 Jongwon Choi (https://github.com/jongwony)
-
-</details>
