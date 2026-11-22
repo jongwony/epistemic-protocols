@@ -3,17 +3,19 @@
 
 > [한국어](./README_ko.md)
 
-## What it is
+## What is /induce?
+
+### Definition
 
 Periagoge (Greek περιαγωγή, "turning-around") is a protocol for naming what several concrete cases share and shaping it into a clear concept and rule. It lays out a working candidate alongside every live reading of the cases and your goal, so you can see which cases each reading includes or leaves out.
 
 <a name="when-to-invoke"></a>
-## The problem
+### The problem
 
 You have two or more concrete cases that seem to share something, and either nobody has named it yet or the old name no longer fits what the cases show. Without a way to test candidates against the cases and your goal side by side, a shared concept stays vague or silently drops cases that do not fit cleanly. Reach for `/induce` when you are forming or rethinking a shared concept from examples, not when you are applying an already fixed rule to a disputed case.
 
 <a name="overview"></a>
-## The result
+### The result
 
 Only you close the run. Once you recognize a candidate, you have:
 

@@ -4,17 +4,19 @@
 
 > [한국어](./README_ko.md)
 
+## What is /ideate?
+
 <a name="what-is-heuresis"></a>
-## What it is
+### Definition
 
 Heuresis comes from the Greek word for finding, discovery, or invention. It widens a thin or empty list of options before you make any choice, generating ideas in parallel across multiple angles without eliminating, ranking, or picking among them.
 
 <a name="the-core-problem"></a>
-## The problem
+### The problem
 
 Your goal is clear enough, but your list of options is empty, thin, or narrowed down to a single idea too soon. Generating options and judging them at the same time keeps the list narrow, and seeing a concrete example too early can lock your thinking onto that one path. Reach for `/ideate` before choosing a direction, when you want to widen the field of candidates or return to ideas you explored earlier.
 
-## The result
+### The result
 
 You get a single map of your idea field: every frame and the branches dug under it, every candidate tagged with where it came from (you, the AI, or a source you named), the frames still unexplored, and anything you set out of scope or parked for later. Nothing is ranked or eliminated. You take the field whenever it serves you — and carry it into `/preview`, your own choice, an issue tracker, or whatever evaluation comes next.
 

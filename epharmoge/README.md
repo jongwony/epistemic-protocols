@@ -3,18 +3,20 @@
 
 > [한국어](./README_ko.md)
 
-## What it is
+## What is /contextualize?
+
+### Definition
 <a name="what-is-epharmoge"></a>
 
 Epharmoge (ἐφαρμογή) means application or fitting. It is a protocol that checks a result against everything you said and settled along the way and every place the result is used, fixes what an earlier decision or rule already settles, and hands back what only you can judge. The result can be this session's output or an artifact from elsewhere — another session's work, a document, or a plan.
 
-## The problem
+### The problem
 <a name="the-core-problem"></a>
 <a name="when-to-use"></a>
 
 When your focus moves between several things, a conversation grows long, or work comes back from another session, agent, review, or merge, part of what you said and decided can fall away from the result. A rule went unread, a decision never carried over, or the result assumes an environment or convention that does not match where it lands. The AI that produced the result tends to treat "done" as "fits", and you cannot recall everything you said or every place the result lands. Skip `/contextualize` when the result follows one explicit specification with nothing else said around it, or when the change is mechanical (formatting, typo fixes).
 
-## The result
+### The result
 
 Each pass returns one sheet showing what was fixed and what settled it, what is yours to judge with a proposed action, what already fits, and what could not be reached. You owe no reply, and no closing "done" is asked. If you answer — in your own words or with "as proposed" — the next pass carries it out and returns a new sheet.
 

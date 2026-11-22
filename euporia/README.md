@@ -3,21 +3,19 @@
 
 > [한국어](./README_ko.md)
 
-<a href="../media/elicit.en.mp4"><img src="../media/elicit.en.gif" alt="Side by side: a request handed off in one line, where three sub-agents fill the blanks differently, versus the same request started with /elicit, where the intent is read back with its open decisions before handing off" width="720"></a>
+## What is /elicit?
 
-<sub>`/elicit` in use (click for the video). Values in the clip are illustrative, not a run result.</sub>
-
-## What it is
+### Definition
 
 Euporia (Greek εὐπορία, "good passage") is a protocol for turning a rough direction into an intent you can recognize as yours. It surfaces the open decisions your request turns on — drawn from your words, your files, rules, past sessions, and the subject area itself — and records only what your own words settle.
 
 <a name="when-to-invoke"></a>
-## The problem
+### The problem
 
 Without it, a request that gives a direction but leaves the intended result unclear forces the AI to guess what should change and fill in the blanks on its own. Use `/elicit` when your request gives a direction but leaves the intended result unclear. If the AI suggests `/elicit`, you can accept or decline.
 
 <a name="overview"></a>
-## The result
+### The result
 
 Each round hands back your current intent without holding your turn:
 
@@ -25,6 +23,10 @@ Each round hands back your current intent without holding your turn:
 - **Unsettled items carried forward** — you do not need to answer every question. Whatever you leave open stays explicitly open rather than closing to a silent default.
 
 You decide when the intent is aligned enough. Even before that, you can stop or move on to other work at any time; the last read-back stays standing as your intent.
+
+<a href="../media/elicit.en.mp4"><img src="../media/elicit.en.gif" alt="Side by side: a request handed off in one line, where three sub-agents fill the blanks differently, versus the same request started with /elicit, where the intent is read back with its open decisions before handing off" width="720"></a>
+
+<sub>`/elicit` in use (click for the video). Values in the clip are illustrative, not a run result.</sub>
 
 ## Install
 

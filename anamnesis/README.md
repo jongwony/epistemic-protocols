@@ -4,18 +4,20 @@
 
 > [한국어](./README_ko.md)
 
+## What is /recollect?
+
 <a name="what-is-anamnesis"></a>
-## What it is
+### Definition
 
 Anamnesis comes from the Greek word for recollection. It searches the records your past work left — conversations, changed files and their history, and recorded decisions — against a vague clue, opens the original records where your clue points, and tells their story with sources attached so you can recognize the past you meant.
 
 <a name="the-core-problem"></a>
 <a name="when-to-use"></a>
-## The problem
+### The problem
 
 You vaguely remember that something was discussed or decided before — in an earlier conversation, or across several sessions — but you cannot name where it happened or what it was called. Keyword searches return either too much or nothing useful because you only have a fragment ("that time we talked about…", a vague timeframe, or an episode). Reach for `/recollect` when your next step depends on finding that earlier discussion, line of work, topic, or settled concept.
 
-## The result
+### The result
 
 You get a story built from the original passages, with each candidate identified by its runtime and storage location, and each excerpt carrying a reference to reopen the record. You can reopen the passages and decide whether they match — showing what actually took place then, while keeping clear that a past record does not by itself mean the decision still holds today. If the search ends without a match, you see where the AI looked.
 

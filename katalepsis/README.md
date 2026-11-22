@@ -3,18 +3,20 @@
 
 > [한국어](./README_ko.md)
 
+## What is /grasp?
+
 <a name="what-is-katalepsis"></a>
-## What it is
+### Definition
 
 Katalepsis comes from the Greek κατάληψις, meaning a firm grasp or certain comprehension. It helps you follow along and build a checked understanding of something in front of you — code, a document, or a result, whoever produced it — on a map built around your purpose.
 
 <a name="the-core-problem"></a>
 <a name="when-to-use"></a>
-## The problem
+### The problem
 
 When something in front of you — a large change, code someone else wrote, a dense document, or a result done for you — is complex, it is easy to lose the thread, feel overwhelmed without a clear entry point, or nod along without being sure you understand it. Reach for `/grasp` when you cannot follow it yet or want to verify your understanding; skip it for a trivial formatting change, when you already understand the material, or when you do not want an explanation.
 
-## The result
+### The result
 
 Once it closes, you have a map of the material built around your purpose. The map records what the target does and the evidence for it, what you explained in your own words, and which AI explanations you accepted, along with what still needs checking and how, and any AI doubt.
 

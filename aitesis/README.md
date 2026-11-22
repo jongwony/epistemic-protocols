@@ -3,22 +3,20 @@
 
 > [한국어](./README_ko.md)
 
-<a href="../media/inquire.en.mp4"><img src="../media/inquire.en.gif" alt="Side by side: a request to make a meeting deck built at once from one file, versus /inquire on what the person is preparing, where the AI looks as far as it can reach and hands back what it confirmed, what conflicts, what it could not reach, and a finding nobody asked about" width="720"></a>
-
-<sub>`/inquire` in use (click for the video). Values in the clip are illustrative, not a run result.</sub>
+## What is /inquire?
 
 <a name="what-is-aitesis"></a>
-## What it is
+### Definition
 
 Aitesis (Greek αἴτησις, "a requesting") is a protocol for checking the facts and open choices a task rests on. It makes the AI gather everything it can reach on its own, state what it reached and what it could not reach for each uncertainty, and hand back what only you can settle.
 
 <a name="when-to-use"></a>
 <a name="the-core-problem"></a>
-## The problem
+### The problem
 
 People often stop looking once a plausible story forms, and AI often proceeds on silent guesses when domain context is missing, requirements go unchecked, or setup details are assumed. Before relying on an unchecked fact, run `/inquire`. The AI shows what the records establish and flags choices it thinks are yours. You can correct that reading.
 
-## The result
+### The result
 
 You get a clear breakdown of what your task rests on, ordered by what an answer would change most:
 
@@ -28,6 +26,10 @@ You get a clear breakdown of what your task rests on, ordered by what an answer 
 - **Unasked-for findings** — anything relevant discovered along the way that answers none of the raised uncertainties, shown on its own line.
 
 Where sources conflict, the AI names what conflicts with what. Where a decision blocks further checking, it names what waits on that decision. The run finishes its pass and continues without locking your turn: you can answer, correct a reading, point to a missed source, or dismiss an item to trigger another pass, or say nothing and leave the current breakdown standing.
+
+<a href="../media/inquire.en.mp4"><img src="../media/inquire.en.gif" alt="Side by side: a request to make a meeting deck built at once from one file, versus /inquire on what the person is preparing, where the AI looks as far as it can reach and hands back what it confirmed, what conflicts, what it could not reach, and a finding nobody asked about" width="720"></a>
+
+<sub>`/inquire` in use (click for the video). Values in the clip are illustrative, not a run result.</sub>
 
 <a name="install"></a>
 ## Install

@@ -4,18 +4,20 @@
 
 > [한국어](./README_ko.md)
 
+## What is /ground?
+
 <a name="what-is-analogia"></a>
-## What it is
+### Definition
 
 Analogia comes from the Greek word for proportion or analogy. It checks what a pattern, framework, analogy, or earlier design actually supports when you apply it to the case in front of you, and how far that comparison holds.
 
 <a name="the-core-problem"></a>
 <a name="when-to-use"></a>
-## The problem
+### The problem
 
 You are carrying a pattern, an earlier design, or a sibling job's shape over to your codebase, or checking a general claim against its examples. The comparison sounds right — like applying the Strangler Fig migration pattern to a monolith — but you do not yet know if it holds where services share a single database. Reach for `/ground` when you want to see which conclusions the comparison actually supports, which ones break, and which ones still need evidence before you build on them.
 
-## The result
+### The result
 
 You get an audit of each conclusion at stake, unless checking the material leaves no conclusion to assess (in which case you receive no verdict, only the drafted question). For every conclusion assessed, you can see what relation carries it, what the AI checked and found, where it could not reach, what conflicts in the gathered material, and what difference in your target would break the claim. Each conclusion comes back marked as holding (with its limits), blocked, or still undetermined (with what is missing and who can check it).
 
