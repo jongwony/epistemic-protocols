@@ -33,7 +33,7 @@ const DEFAULT_PROJECT_ROOT = path.resolve(__dirname, '..');
 // (structurally last).
 const CANONICAL_PRECEDENCE = [
   'Horismos', 'Aitesis',
-  'Analogia', 'Periagoge', 'Euporia', 'Heuresis', 'Proplasma', 'Hypotyposis',
+  'Analogia', 'Periagoge', 'Euporia', 'Heuresis', 'Proplasma', 'Hypotyposis', 'Harmoge',
   'Merismos', 'Epharmoge', 'Hyphegesis',
 ];
 
