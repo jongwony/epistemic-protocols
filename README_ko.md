@@ -31,6 +31,14 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 `route`는 에이전트가 대화 맥락에 맞는 프로토콜을 고르고 필요한 시점에 협업 원칙을 참고할 수 있도록 정보를 제공합니다. 아직 실험 단계라 릴리스마다 문구나 훅 구성이 바뀔 수 있으며, 끄고 싶다면 설치 후 `claude plugin disable route@epistemic-protocols`를 실행하면 됩니다. `route`를 꺼도 모든 프로토콜은 그대로 설치되어 있으므로, 작업을 넘기기 전에 `/inquire`를 치거나 어떤 결정을 직접 내려야 할지 막막할 때 `/bound`를 치는 식으로 언제든 명령어를 직접 입력해 쓸 수 있습니다.
 
+어떤 프로토콜부터 써야 할지 모르겠다면 이 저장소를 클론해 그 안에서 Claude Code를 열고 `/onboard`를 입력하세요. 최근 세션을 보고 맞는 프로토콜을 추천해 주고, 원하면 시나리오·직접 해 보기·퀴즈로 프로토콜을 익히게 해 줍니다.
+
+```bash
+git clone https://github.com/jongwony/epistemic-protocols.git
+cd epistemic-protocols
+claude
+```
+
 ### Codex
 
 GitHub에서 추가할 때:
