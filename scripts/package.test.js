@@ -1325,3 +1325,59 @@ it('ships an executable standalone capture-outcome reader with recollect', () =>
     assert.deepEqual(result.artifacts, []);
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
+
+describe('antigravity artifact profile', () => {
+  const {
+    ANTIGRAVITY_SKILL_BODY_LIMIT,
+    buildAntigravityArtifact,
+    runAntigravity,
+  } = require('./package.js');
+
+  it('wraps each protocol with a thin SKILL.md under the 24KB cap and preserves CONTRACT.md byte-for-byte', () => {
+    const plugin = { dir: 'merismos', skill: 'apportion' };
+    const { artifact, zipEntries } = buildAntigravityArtifact(plugin);
+    const byName = new Map(zipEntries.map((e) => [e.name, e.data.toString('utf8')]));
+
+    assert.ok(byName.has('plugin.json'), 'root plugin.json must exist');
+    const manifest = JSON.parse(byName.get('plugin.json'));
+    assert.equal(manifest.name, 'merismos');
+    assert.equal(manifest.version, artifact.version);
+
+    const wrapper = byName.get('skills/apportion/SKILL.md');
+    const contract = byName.get('skills/apportion/CONTRACT.md');
+    assert.ok(wrapper, 'thin SKILL.md entrypoint must exist');
+    assert.ok(contract, 'full CONTRACT.md must exist');
+    assert.ok(
+      Buffer.byteLength(wrapper, 'utf8') < ANTIGRAVITY_SKILL_BODY_LIMIT,
+      'wrapper must stay strictly below Antigravity 24KB loader cap'
+    );
+    assert.match(wrapper, /CONTRACT\.md/);
+
+    const source = fs.readFileSync(path.join(__dirname, '..', 'merismos', 'skills', 'apportion', 'SKILL.md'), 'utf8');
+    assert.equal(contract, transformSkillMd(source), 'CONTRACT.md must preserve the transformed normative contract');
+  });
+
+  it('writes ZIPs and a sha256-verified marketplace.json without touching source files', () => {
+    const outDir = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'antigravity-profile-'));
+    try {
+      const dry = runAntigravity({ dryRun: true, outputDir: outDir, tag: 'v9.9.9' });
+      assert.equal(dry.profile, 'antigravity');
+      assert.equal(dry.results.length, PLUGINS.length);
+      assert.equal(dry.marketplace.plugins.length, PLUGINS.length);
+      assert.ok(!fs.existsSync(path.join(outDir, 'marketplace.json')));
+
+      const built = runAntigravity({ dryRun: false, outputDir: outDir, tag: 'v9.9.9' });
+      const mp = JSON.parse(fs.readFileSync(path.join(outDir, 'marketplace.json'), 'utf8'));
+      assert.equal(mp.name, 'epistemic-protocols');
+      assert.equal(mp.plugins.length, built.results.length);
+      for (const entry of mp.plugins) {
+        assert.match(entry.source.url, /\/releases\/download\/v9\.9\.9\/.*-antigravity-v.*\.zip$/);
+        assert.match(entry.source.sha256, /^[0-9a-f]{64}$/);
+        const zipPath = path.join(outDir, path.basename(entry.source.url));
+        assert.ok(fs.existsSync(zipPath), `missing built ZIP ${zipPath}`);
+      }
+    } finally {
+      fs.rmSync(outDir, { recursive: true, force: true });
+    }
+  });
+});

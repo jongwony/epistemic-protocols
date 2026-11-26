@@ -109,6 +109,10 @@ const LINE_GUIDELINE = 510;
 const DIST_DIR = path.join(projectRoot, 'dist');
 const BUNDLE_NAME = 'epistemic-protocols-bundle';
 const CODEX_SUBMIT_DIST_DIR = path.join(DIST_DIR, 'codex-submit');
+const ANTIGRAVITY_DIST_DIR = path.join(DIST_DIR, 'antigravity');
+const ANTIGRAVITY_SKILL_BODY_LIMIT = 24000;
+const ANTIGRAVITY_REPO_URL = 'https://github.com/jongwony/epistemic-protocols';
+const ANTIGRAVITY_DEFAULT_BASE_URL = `${ANTIGRAVITY_REPO_URL}/releases/latest/download`;
 const CODEX_SUBMIT_PLUGINS = Object.freeze([
   { dir: 'aitesis', skill: 'inquire' },
   { dir: 'analogia', skill: 'ground' },
@@ -826,6 +830,147 @@ function runCodexSubmit({ dryRun, root = projectRoot, outputDir = CODEX_SUBMIT_D
   return { warnings: [], results: index.artifacts, dryRun: Boolean(dryRun), profile: 'codex-submit', index };
 }
 
+function buildAntigravityWrapperSkillMd(plugin, contractSkillMd) {
+  const { fields } = parseFrontmatter(contractSkillMd);
+  const protocolName = plugin.dir.charAt(0).toUpperCase() + plugin.dir.slice(1);
+  const frontmatter = serializeFrontmatter(fields);
+  const body = [
+    `# ${protocolName} (\`/${plugin.skill}\`)`,
+    '',
+    `The full normative contract for \`/${plugin.skill}\` — including its Lean formal definition, phase transitions, tool grounding, and rules — lives in [\`CONTRACT.md\`](./CONTRACT.md) in this skill directory.`,
+    '',
+    'Before acting on this skill, read [`CONTRACT.md`](./CONTRACT.md) completely from start to end (continuing with `StartLine` or `ByteOffset` if the read output is truncated) and follow it as the complete skill contract. All relative paths referenced inside [`CONTRACT.md`](./CONTRACT.md) (such as `references/` or `scripts/`) resolve relative to this skill directory.',
+    '',
+  ].join('\n');
+  const wrapper = `${frontmatter}\n\n${body}`;
+  const bodyBytes = Buffer.byteLength(body, 'utf8');
+  if (bodyBytes >= ANTIGRAVITY_SKILL_BODY_LIMIT) {
+    throw new Error(
+      `antigravity wrapper for ${plugin.dir}/${plugin.skill} exceeds ${ANTIGRAVITY_SKILL_BODY_LIMIT} bytes (${bodyBytes})`
+    );
+  }
+  return wrapper;
+}
+
+function buildAntigravityArtifact(plugin, { root = projectRoot } = {}) {
+  const version = readCodexManifestVersion(plugin, { root });
+  const claudeManifestPath = path.join(root, plugin.dir, '.claude-plugin', 'plugin.json');
+  const claudeManifest = JSON.parse(fs.readFileSync(claudeManifestPath, 'utf8'));
+  const pluginManifest = {
+    name: claudeManifest.name || plugin.dir,
+    version,
+    description: claudeManifest.description || '',
+    author: claudeManifest.author || { name: 'Jongwon Choi', url: 'https://github.com/jongwony' },
+    homepage: ANTIGRAVITY_REPO_URL,
+    repository: ANTIGRAVITY_REPO_URL,
+  };
+
+  const files = collectReleaseFiles(plugin, { root });
+  const zipEntries = [
+    {
+      name: 'plugin.json',
+      data: Buffer.from(`${JSON.stringify(pluginManifest, null, 2)}\n`, 'utf8'),
+    },
+  ];
+
+  let contractSeen = false;
+  for (const file of files) {
+    if (file.isSkillMd) {
+      const transformed = transformSkillMd(fs.readFileSync(file.sourcePath, 'utf8'));
+      const wrapper = buildAntigravityWrapperSkillMd(plugin, transformed);
+      zipEntries.push({
+        name: `skills/${plugin.skill}/SKILL.md`,
+        data: Buffer.from(wrapper, 'utf8'),
+      });
+      zipEntries.push({
+        name: `skills/${plugin.skill}/CONTRACT.md`,
+        data: Buffer.from(transformed, 'utf8'),
+      });
+      contractSeen = true;
+    } else {
+      zipEntries.push({
+        name: `skills/${file.zipPath}`,
+        data: fs.readFileSync(file.sourcePath),
+      });
+    }
+  }
+
+  if (!contractSeen) {
+    throw new Error(`antigravity build missing SKILL.md for ${plugin.dir}/${plugin.skill}`);
+  }
+
+  zipEntries.sort((a, b) => compareCodexPaths(a.name, b.name));
+  const zipBuffer = createZip(zipEntries, { deterministic: true });
+  const filename = `${plugin.dir}-antigravity-v${version}.zip`;
+  const artifact = {
+    plugin: plugin.dir,
+    skill: plugin.skill,
+    version,
+    filename,
+    bytes: zipBuffer.length,
+    sha256: crypto.createHash('sha256').update(zipBuffer).digest('hex'),
+    entries: zipEntries.map(entry => entry.name),
+  };
+  return { artifact, zipBuffer, zipEntries, manifest: pluginManifest };
+}
+
+function buildAntigravityArtifacts({ root = projectRoot } = {}) {
+  const protocolRecords = discoverPlugins({ projectRoot: root }).filter(r => r.isProtocol);
+  const selected = protocolRecords.map(r => ({ dir: r.dir, skill: r.skill }));
+  const builds = selected.map(plugin => buildAntigravityArtifact(plugin, { root }));
+  for (const build of builds) assertArtifactMatchesIndex(build.artifact, build.zipBuffer);
+  return builds;
+}
+
+function runAntigravity({
+  dryRun,
+  root = projectRoot,
+  outputDir = ANTIGRAVITY_DIST_DIR,
+  tag = process.env.TAG_NAME || null,
+  baseUrl = null,
+} = {}) {
+  const builds = buildAntigravityArtifacts({ root });
+  const downloadBaseUrl = (
+    baseUrl || (tag ? `${ANTIGRAVITY_REPO_URL}/releases/download/${tag}` : ANTIGRAVITY_DEFAULT_BASE_URL)
+  ).replace(/\/+$/, '');
+
+  const marketplace = {
+    name: 'epistemic-protocols',
+    plugins: builds.map(({ artifact, manifest }) => ({
+      name: manifest.name,
+      version: artifact.version,
+      description: manifest.description,
+      source: {
+        url: `${downloadBaseUrl}/${artifact.filename}`,
+        sha256: artifact.sha256,
+      },
+    })),
+  };
+
+  if (!dryRun) {
+    fs.rmSync(outputDir, { recursive: true, force: true });
+    fs.mkdirSync(outputDir, { recursive: true });
+    for (const build of builds) {
+      const outputPath = path.join(outputDir, build.artifact.filename);
+      fs.writeFileSync(outputPath, build.zipBuffer);
+      assertArtifactMatchesIndex(build.artifact, fs.readFileSync(outputPath));
+    }
+    fs.writeFileSync(
+      path.join(outputDir, 'marketplace.json'),
+      `${JSON.stringify(marketplace, null, 2)}\n`,
+      'utf8'
+    );
+  }
+
+  return {
+    warnings: [],
+    results: builds.map(b => b.artifact),
+    dryRun: Boolean(dryRun),
+    profile: 'antigravity',
+    marketplace,
+  };
+}
+
 function buildRuntimeContractView(plugin) {
   const pluginJson = JSON.parse(fs.readFileSync(
     path.join(projectRoot, plugin.dir, '.codex-plugin', 'plugin.json'),
@@ -1036,11 +1181,15 @@ function main() {
   if (profileFlag !== -1 && !profile) {
     throw new Error('--profile requires a value');
   }
-  if (profile && profile !== 'codex-submit') {
+  if (profile && profile !== 'codex-submit' && profile !== 'antigravity') {
     throw new Error(`unknown packaging profile: ${profile}`);
   }
   if (profile === 'codex-submit') {
     console.log(JSON.stringify(runCodexSubmit({ dryRun }), null, 2));
+    return;
+  }
+  if (profile === 'antigravity') {
+    console.log(JSON.stringify(runAntigravity({ dryRun }), null, 2));
     return;
   }
   const release = runRelease({ dryRun });
@@ -1059,9 +1208,13 @@ if (require.main === module) {
 }
 
 module.exports = {
+  ANTIGRAVITY_SKILL_BODY_LIMIT,
   DESCRIPTION_LIMIT,
   PLUGINS,
   CODEX_SUBMIT_PLUGINS,
+  buildAntigravityArtifact,
+  buildAntigravityArtifacts,
+  buildAntigravityWrapperSkillMd,
   buildSkillArtifact,
   buildRuntimeContractView,
   buildRuntimeContractViews,
@@ -1073,6 +1226,7 @@ module.exports = {
   isForbiddenCodexPath,
   parseFrontmatter,
   readCodexManifestVersion,
+  runAntigravity,
   runRelease,
   runCodexSubmit,
   serializeFrontmatter,
