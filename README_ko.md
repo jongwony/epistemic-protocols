@@ -55,11 +55,25 @@ codex plugin marketplace add /path/to/epistemic-protocols
 
 각 점검 단계는 무엇을 결정해야 하고 선택에 따라 무엇이 달라지는지 보여 줍니다. 다만 `codex exec` 같은 비대화형 실행에서는 작업이 이미 시작된 뒤에 이 질문이 표시될 수 있습니다.
 
+### Antigravity (`agy`)
+
+GitHub Releases에서 모든 핵심 프로토콜 플러그인을 설치합니다 (`route`는 제외되며, 각 프로토콜은 `node scripts/package.js --profile antigravity`로 빌드된 Antigravity 네이티브 플러그인 ZIP으로 설치됩니다):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install-agy.sh | bash
+```
+
+로컬 저장소 경로에서 빌드 후 바로 설치할 때 (`dist/antigravity/*.zip`):
+
+```bash
+./scripts/install-agy.sh /path/to/epistemic-protocols
+```
+
 <a name="기타-에이전트-도구"></a>
 <details>
 <summary>기타 에이전트 도구</summary>
 
-Codex marketplace 설정은 [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json)에 있으며, 각 플러그인은 Claude manifest 옆인 `<plugin>/.codex-plugin/plugin.json`에 Codex manifest를 둡니다.
+Codex marketplace 설정은 [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json)에 있으며, 각 플러그인은 Claude manifest 옆인 `<plugin>/.codex-plugin/plugin.json`에 Codex manifest를 둡니다. Antigravity용 플러그인 ZIP과 `marketplace.json`은 `node scripts/package.js --profile antigravity`로 생성되며, Antigravity 플러그인 로더의 `SKILL.md` 크기 제한으로 계약이 잘리지 않도록 원본 `SKILL.md` 전문을 `CONTRACT.md`로 두고 얇은 `SKILL.md` 진입점으로 감쌉니다.
 
 프로토콜 스킬 원본은 각 플러그인 디렉터리의 `<plugin>/skills/<name>/SKILL.md`에 있습니다. 이 레포지토리는 `.agents/skills/` 심링크 뷰를 미리 만들어 두지 않는데, Codex marketplace 탐색 과정에서 플러그인 manifest와 Agent Skills 심링크를 동시에 읽어 같은 스킬이 중복으로 나타날 수 있기 때문입니다.
 
